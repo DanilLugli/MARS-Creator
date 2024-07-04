@@ -56,6 +56,7 @@ struct HomeView: View {
             }
             .foregroundColor(.white)
             .background(Color.customBackground.ignoresSafeArea())
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
@@ -81,9 +82,6 @@ struct HomeView: View {
                                 //.symbolWeight(self: .heavy)
                                 .symbolRenderingMode(.palette)
                                 .foregroundStyle(.white, .blue, .blue)
-                            
-                            
-                                
                         }
                     }
                 }

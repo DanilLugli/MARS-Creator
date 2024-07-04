@@ -5,7 +5,9 @@
 //  Created by Danil Lugli on 10/06/24.
 //
 
+
 import UIKit
+import SwiftUI
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -14,7 +16,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        let homeview = HomeView()
+
+        // Use a UIHostingController as window root view controller.
+        let window = UIWindow(frame: UIScreen.main.bounds)
+        window.rootViewController = UIHostingController(rootView: homeview)
+        self.window = window
+        window.makeKeyAndVisible()
         return true
     }
 

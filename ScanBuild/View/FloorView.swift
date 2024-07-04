@@ -12,8 +12,8 @@ struct FloorView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                Text(showConnection ? "Connections" : "Floors")
-                    .font(.system(size: 22))
+                Text(showConnection ? "\(buildingsModel.getBuildings()[indexbuilding].name)>Connections" : "\(buildingsModel.getBuildings()[indexbuilding].name)>Floors")
+                    .font(.system(size: 14))
                     .fontWeight(.heavy)
                 Spacer()
                 Spacer()
@@ -61,7 +61,7 @@ struct FloorView: View {
                 }
             }
             
-            ZStack() {
+            //ZStack() {
                 HStack{
                     Button(action: {
                         // Azione del pulsante per impostare showConnection a false
@@ -85,8 +85,7 @@ struct FloorView: View {
                             )
                     }
                     .buttonStyle(PlainButtonStyle())
-                    
-                    
+
                     Button(action: {
                         // Azione del pulsante per impostare showConnection a true
                         showConnection = true
@@ -112,7 +111,7 @@ struct FloorView: View {
                 .background(Color.blue)
                 .cornerRadius(10)
                 .padding([.leading, .trailing], 16)
-            }
+           // }
             
         }
         .foregroundColor(.white)

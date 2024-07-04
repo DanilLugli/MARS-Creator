@@ -1,10 +1,3 @@
-//
-//  ViewController.swift
-//  ScanBuild
-//
-//  Created by Danil Lugli on 10/06/24.
-//
-
 import UIKit
 import Metal
 import MetalKit
@@ -51,7 +44,7 @@ class ViewController: UIViewController, MTKViewDelegate, ARSessionDelegate {
         
         // Create a session configuration
         let configuration = ARWorldTrackingConfiguration()
-
+        
         // Run the view's session
         session.run(configuration)
     }
@@ -106,5 +99,14 @@ class ViewController: UIViewController, MTKViewDelegate, ARSessionDelegate {
     func sessionInterruptionEnded(_ session: ARSession) {
         // Reset tracking and/or remove existing anchors if consistent tracking is required
         
+    }
+    
+    // Forzare l'orientamento verticale
+    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        return .portrait
+    }
+    
+    override var preferredInterfaceOrientationForPresentation: UIInterfaceOrientation {
+        return .portrait
     }
 }
