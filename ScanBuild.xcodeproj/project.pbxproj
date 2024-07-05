@@ -16,7 +16,6 @@
 		AA78F5E82C3300550044F825 /* Connection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA78F5E72C3300540044F825 /* Connection.swift */; };
 		AA78F5EA2C33006F0044F825 /* BuildingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA78F5E92C33006F0044F825 /* BuildingModel.swift */; };
 		AA78F5ED2C3303910044F825 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA78F5EC2C3303910044F825 /* Logger.swift */; };
-		AA78F5F12C3352BC0044F825 /* AddRoomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA78F5F02C3352BC0044F825 /* AddRoomView.swift */; };
 		AA78F5F32C3430C80044F825 /* ServerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA78F5F22C3430C80044F825 /* ServerManager.swift */; };
 		AAA29E6A2C1711AA00CA267C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA29E692C1711AA00CA267C /* AppDelegate.swift */; };
 		AAA29E6C2C1711AA00CA267C /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = AAA29E6B2C1711AA00CA267C /* Shaders.metal */; };
@@ -24,6 +23,14 @@
 		AAA29E712C1711AA00CA267C /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA29E702C1711AA00CA267C /* ViewController.swift */; };
 		AAA29E742C1711AA00CA267C /* Base in Resources */ = {isa = PBXBuildFile; fileRef = AAA29E732C1711AA00CA267C /* Base */; };
 		AAA29E762C1711AC00CA267C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AAA29E752C1711AC00CA267C /* Assets.xcassets */; };
+		AAE57F9E2C3764FC00F0196F /* RoomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE57F9D2C3764FC00F0196F /* RoomView.swift */; };
+		AAE57FA02C376D0D00F0196F /* AddConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE57F9F2C376D0D00F0196F /* AddConnection.swift */; };
+		AAE57FA22C37FB6100F0196F /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE57FA12C37FB6100F0196F /* Color.swift */; };
+		AAE57FA62C382C6D00F0196F /* TransitionZone.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE57FA52C382C6D00F0196F /* TransitionZone.swift */; };
+		AAE57FAB2C384E6400F0196F /* DefaultCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE57FAA2C384E6400F0196F /* DefaultCardView.swift */; };
+		AAE57FAD2C384F4B00F0196F /* ConnectionCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE57FAC2C384F4B00F0196F /* ConnectionCardView.swift */; };
+		AAE57FAF2C385A4C00F0196F /* TransitionZoneCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE57FAE2C385A4C00F0196F /* TransitionZoneCardView.swift */; };
+		AAE57FB12C385D2B00F0196F /* ConnectedDotsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE57FB02C385D2B00F0196F /* ConnectedDotsView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,7 +43,6 @@
 		AA78F5E72C3300540044F825 /* Connection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Connection.swift; sourceTree = "<group>"; };
 		AA78F5E92C33006F0044F825 /* BuildingModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingModel.swift; sourceTree = "<group>"; };
 		AA78F5EC2C3303910044F825 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
-		AA78F5F02C3352BC0044F825 /* AddRoomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddRoomView.swift; sourceTree = "<group>"; };
 		AA78F5F22C3430C80044F825 /* ServerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerManager.swift; sourceTree = "<group>"; };
 		AAA29E662C1711AA00CA267C /* ScanBuild.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ScanBuild.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AAA29E692C1711AA00CA267C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -47,6 +53,14 @@
 		AAA29E732C1711AA00CA267C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		AAA29E752C1711AC00CA267C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AAA29E772C1711AC00CA267C /* ScanBuild-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ScanBuild-Bridging-Header.h"; sourceTree = "<group>"; };
+		AAE57F9D2C3764FC00F0196F /* RoomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomView.swift; sourceTree = "<group>"; };
+		AAE57F9F2C376D0D00F0196F /* AddConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddConnection.swift; sourceTree = "<group>"; };
+		AAE57FA12C37FB6100F0196F /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
+		AAE57FA52C382C6D00F0196F /* TransitionZone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitionZone.swift; sourceTree = "<group>"; };
+		AAE57FAA2C384E6400F0196F /* DefaultCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultCardView.swift; sourceTree = "<group>"; };
+		AAE57FAC2C384F4B00F0196F /* ConnectionCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionCardView.swift; sourceTree = "<group>"; };
+		AAE57FAE2C385A4C00F0196F /* TransitionZoneCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitionZoneCardView.swift; sourceTree = "<group>"; };
+		AAE57FB02C385D2B00F0196F /* ConnectedDotsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectedDotsView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,10 +87,12 @@
 		AA78F5D82C2C77250044F825 /* View */ = {
 			isa = PBXGroup;
 			children = (
+				AAE57FA92C384E4D00F0196F /* Beans */,
 				AA78F5DA2C2C773E0044F825 /* HomeView.swift */,
 				AA78F5DC2C2DB51D0044F825 /* FloorView.swift */,
 				AA78F5E02C2DB6DE0044F825 /* AddBuildingView.swift */,
-				AA78F5F02C3352BC0044F825 /* AddRoomView.swift */,
+				AAE57F9D2C3764FC00F0196F /* RoomView.swift */,
+				AAE57F9F2C376D0D00F0196F /* AddConnection.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -95,6 +111,7 @@
 				AA78F5D32C2C6B570044F825 /* Floor.swift */,
 				AA78F5D52C2C6BAC0044F825 /* Room.swift */,
 				AA78F5E72C3300540044F825 /* Connection.swift */,
+				AAE57FA52C382C6D00F0196F /* TransitionZone.swift */,
 			);
 			path = Beans;
 			sourceTree = "<group>";
@@ -104,6 +121,7 @@
 			children = (
 				AA78F5EC2C3303910044F825 /* Logger.swift */,
 				AA78F5F22C3430C80044F825 /* ServerManager.swift */,
+				AAE57FA12C37FB6100F0196F /* Color.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -140,6 +158,17 @@
 				AAA29E772C1711AC00CA267C /* ScanBuild-Bridging-Header.h */,
 			);
 			path = ScanBuild;
+			sourceTree = "<group>";
+		};
+		AAE57FA92C384E4D00F0196F /* Beans */ = {
+			isa = PBXGroup;
+			children = (
+				AAE57FAA2C384E6400F0196F /* DefaultCardView.swift */,
+				AAE57FAC2C384F4B00F0196F /* ConnectionCardView.swift */,
+				AAE57FAE2C385A4C00F0196F /* TransitionZoneCardView.swift */,
+				AAE57FB02C385D2B00F0196F /* ConnectedDotsView.swift */,
+			);
+			path = Beans;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -213,18 +242,25 @@
 			buildActionMask = 2147483647;
 			files = (
 				AA78F5D22C2C69E90044F825 /* Building.swift in Sources */,
-				AA78F5F12C3352BC0044F825 /* AddRoomView.swift in Sources */,
+				AAE57FAD2C384F4B00F0196F /* ConnectionCardView.swift in Sources */,
 				AA78F5D62C2C6BAC0044F825 /* Room.swift in Sources */,
+				AAE57FAB2C384E6400F0196F /* DefaultCardView.swift in Sources */,
+				AAE57FB12C385D2B00F0196F /* ConnectedDotsView.swift in Sources */,
 				AAA29E6C2C1711AA00CA267C /* Shaders.metal in Sources */,
 				AA78F5D42C2C6B570044F825 /* Floor.swift in Sources */,
+				AAE57FA22C37FB6100F0196F /* Color.swift in Sources */,
 				AAA29E6F2C1711AA00CA267C /* Renderer.swift in Sources */,
 				AA78F5DD2C2DB51D0044F825 /* FloorView.swift in Sources */,
 				AA78F5E12C2DB6DE0044F825 /* AddBuildingView.swift in Sources */,
+				AAE57FA02C376D0D00F0196F /* AddConnection.swift in Sources */,
 				AA78F5E82C3300550044F825 /* Connection.swift in Sources */,
+				AAE57FA62C382C6D00F0196F /* TransitionZone.swift in Sources */,
 				AA78F5DB2C2C773E0044F825 /* HomeView.swift in Sources */,
 				AA78F5F32C3430C80044F825 /* ServerManager.swift in Sources */,
 				AAA29E712C1711AA00CA267C /* ViewController.swift in Sources */,
 				AA78F5ED2C3303910044F825 /* Logger.swift in Sources */,
+				AAE57F9E2C3764FC00F0196F /* RoomView.swift in Sources */,
+				AAE57FAF2C385A4C00F0196F /* TransitionZoneCardView.swift in Sources */,
 				AA78F5EA2C33006F0044F825 /* BuildingModel.swift in Sources */,
 				AAA29E6A2C1711AA00CA267C /* AppDelegate.swift in Sources */,
 			);
@@ -296,6 +332,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
@@ -353,6 +390,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;

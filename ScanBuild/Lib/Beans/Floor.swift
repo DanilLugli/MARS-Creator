@@ -14,14 +14,12 @@ struct Floor: Identifiable, Codable, Hashable{
     var name: String
     var fileURL: URL
     var idBuilding: UUID
-    var rooms: [Room]
     var date: String
     
-    init(name: String, fileURL: URL, idBuilding: UUID, rooms: [Room], date: String) {
+    init(name: String, fileURL: URL, idBuilding: UUID, date: String) {
         self.name = name
         self.fileURL = fileURL
         self.idBuilding = idBuilding
-        self.rooms = rooms
         self.date = date
     }
 }

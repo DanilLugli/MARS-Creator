@@ -10,15 +10,14 @@ import Foundation
 struct Building: Identifiable, Codable, Hashable{
     var id = UUID()
     var name: String
-    var floors: [Floor]
     var date: String
     var fileURL: URL
     var connections = Connection()
     
-    init(name: String, floors: [Floor], date: String, fileURL: URL = URL(fileURLWithPath: "")) {
+    init (name: String, date: String, fileURL: URL, connections: Connection = Connection()) {
         self.name = name
-        self.floors = floors
         self.date = date
         self.fileURL = fileURL
+        self.connections = connections
     }
 }

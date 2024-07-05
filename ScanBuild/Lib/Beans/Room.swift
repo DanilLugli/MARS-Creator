@@ -7,20 +7,20 @@ struct Room: Identifiable, Codable, Hashable, CustomStringConvertible {
     var id = UUID()
     var roomName: String
     var floorName: String
+    var date: String
     var idFloor: UUID
     var fileURL: URL
     var associationMatrix: [[Double]] // Matrice di roto-traslazione
     var referenceMarkers: [ReferenceMarker]
-    var transitionZones: [TransitionZone] = []
 
-    init(roomName: String, floorName: String, idFloor: UUID, fileURL: URL, associationMatrix: [[Double]], referenceMarkers: [ReferenceMarker], transitionZones: [TransitionZone]) {
+    init(roomName: String, floorName: String, date: String, idFloor: UUID, fileURL: URL, associationMatrix: [[Double]], referenceMarkers: [ReferenceMarker]) {
         self.roomName = roomName
         self.floorName = floorName
-        self.fileURL = fileURL
+        self.date = date
         self.idFloor = idFloor
+        self.fileURL = fileURL
         self.associationMatrix = associationMatrix
         self.referenceMarkers = referenceMarkers
-        self.transitionZones = transitionZones
     }
 
     struct ReferenceMarker: Identifiable, Codable, Hashable {
@@ -36,18 +36,4 @@ struct Room: Identifiable, Codable, Hashable, CustomStringConvertible {
         }
     }
 
-    struct TransitionZone: Identifiable, Codable, Hashable {
-        var id = UUID()
-        var xMin: Double
-        var xMax: Double
-        var yMin: Double
-        var yMax: Double
-
-        init(xMin: Double, xMax: Double, yMin: Double, yMax: Double) {
-            self.xMin = xMin
-            self.xMax = xMax
-            self.yMin = yMin
-            self.yMax = yMax
-        }
-    }
 }

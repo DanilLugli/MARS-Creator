@@ -4,16 +4,15 @@ import Foundation
 struct HomeView: View {
     
     @ObservedObject var buildingsModel = BuildingModel.getInstance()
-    
     @State private var searchText = ""
-    @State private var selectedBuilding: Int = 0
+    @State private var selectedBuilding: UUID = UUID()
     @State private var isNavigationActive = false
     
     var body: some View {
         NavigationStack {
             VStack {
                 Spacer()
-                Spacer() 
+                Spacer()
                 TextField("Search", text: $searchText)
                     .padding(7)
                     .background(Color(.systemGray6))
@@ -22,7 +21,7 @@ struct HomeView: View {
                     .frame(width: 180)
                 Spacer()
                 
-                if buildingsModel.buildings.isEmpty {
+                if buildingsModel.getBuildings().isEmpty {
                     VStack {
                         Text("Add Building with + icon")
                             .foregroundColor(.gray)
@@ -33,11 +32,11 @@ struct HomeView: View {
                     .background(Color.customBackground)
                 } else {
                     ZStack {
-                        Color.customBackground.ignoresSafeArea() // Imposta lo sfondo blu
+                        //Color.customBackground.ignoresSafeArea() // Imposta lo sfondo blu
                         List {
-                            ForEach(Array(filteredBuildings.enumerated()), id: \.0) { index,building in
+                            ForEach(Array(filteredBuildings)) { building in
                                 Button(action: {
-                                    selectedBuilding = index
+                                    selectedBuilding = building.id
                                     isNavigationActive = true
                                 }) {
                                     BuildingView(name: building.name, address: building.date)
@@ -47,10 +46,10 @@ struct HomeView: View {
                             .listRowSeparator(.hidden)
                         }
                         .listStyle(PlainListStyle())
-                        NavigationLink(destination: FloorView(indexbuilding: selectedBuilding),
-                                       isActive: $isNavigationActive) {
-                            EmptyView()
-                        }
+                        NavigationLink(destination: FloorView( buildingId:selectedBuilding),
+                                                              isActive: $isNavigationActive) {
+                                                   EmptyView()
+                                               }
                     }
                 }
             }
@@ -71,19 +70,24 @@ struct HomeView: View {
                             Image(systemName: "plus.circle.fill")
                                 .font(.system(size: 26))
                                 .foregroundStyle(.white, .blue, .blue)
-                                
+                            
                         }
-                        Button(action: {
-                            // Azione per il pulsante "info.circle"
-                            print("Info button tapped")
-                        }) {
+                        Menu {
+                            Button(action: {
+                                // Azione per il pulsante "info"
+                                print("Info button tapped")
+                            }) {
+                                Text("Info")
+                                Image(systemName: "info.circle")
+                            }
+                        } label: {
                             Image(systemName: "pencil.circle.fill")
                                 .font(.system(size: 26))
-                                //.symbolWeight(self: .heavy)
                                 .symbolRenderingMode(.palette)
                                 .foregroundStyle(.white, .blue, .blue)
                         }
                     }
+                    
                 }
             }
         }
@@ -91,9 +95,9 @@ struct HomeView: View {
     
     var filteredBuildings: [Building] {
         if searchText.isEmpty {
-            return buildingsModel.buildings
+            return buildingsModel.getBuildings()
         } else {
-            return buildingsModel.buildings.filter { $0.name.lowercased().contains(searchText.lowercased()) }
+            return buildingsModel.getBuildings().filter { $0.name.lowercased().contains(searchText.lowercased()) }
         }
     }
 }
@@ -117,17 +121,20 @@ struct BuildingView: View {
         .background(Color.white)
         .cornerRadius(10)
         .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 2)
-        .padding([.leading, .trailing], 10)
+        .padding([.leading, .trailing], 26)
     }
 }
 
 
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
-        HomeView()
+        let buildingModel = BuildingModel.getInstance()
+        let _ = buildingModel.initTryData()
+        
+        HomeView().environmentObject(buildingModel)
     }
 }
 
-extension Color {
-    static let customBackground = Color(red: 0x1A / 255, green: 0x37 / 255, blue: 0x61 / 255)
-}
+//extension Color {
+//    static let customBackground = Color(red: 0x1A / 255, green: 0x37 / 255, blue: 0x61 / 255)
+//}
