@@ -68,7 +68,7 @@ struct Connection: Codable, Hashable {
         for i in 0..<labels.count {
             for j in i+1..<labels.count {
                 if getConnection(zone1: labels[i], zone2: labels[j]) {
-                    connections.append(FloorBridge(from: labels[i].id, to: labels[j].id))
+                    connections.append(FloorBridge(from: labels[i].name, to: labels[j].name))
                 }
             }
         }
@@ -81,10 +81,10 @@ struct FloorBridge: Identifiable, CustomStringConvertible {
     var description: String { "Connection \(from) - \(to)" }
     
     var id = UUID()
-    var from: UUID
-    var to: UUID
+    var from: String
+    var to: String
     
-    init(id: UUID = UUID(), from: UUID, to: UUID) {
+    init(id: UUID = UUID(), from: String, to: String) {
         self.id = id
         self.from = from
         self.to = to

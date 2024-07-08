@@ -26,7 +26,7 @@ class BuildingModel: ObservableObject {
     
     @Published private var rooms: [UUID : [Room]] = [:]
     
-    @Published private var transitionZone: [UUID : [TransitionZone]] = [:]
+    @Published private var transitionZones: [UUID : [TransitionZone]] = [:]
     
     
     private init() {
@@ -67,12 +67,12 @@ class BuildingModel: ObservableObject {
                     let room = Room(roomName: "Room \(k)>\(i)_\(j)", floorName: floor.name, date: "Date \(k)", idFloor: floor.id, fileURL: URL(fileURLWithPath: ""), associationMatrix: [[]], referenceMarkers: [])
                     
                     self.addRoomToFloor(floorId: floor.id, room: room)
-                    for _ in 1...2 {
+                    for z in 1...2 {
                         let xMin = Double.random(in: 0...10)
                         let xMax = xMin + Double.random(in: 1...5)
                         let yMin = Double.random(in: 0...10)
                         let yMax = yMin + Double.random(in: 1...5)
-                        let transitionZone = TransitionZone(xMin: xMin, xMax: xMax, yMin: yMin, yMax: yMax)
+                        let transitionZone = TransitionZone(name: "Scala \(z)", xMin: xMin, xMax: xMax, yMin: yMin, yMax: yMax)
                         self.addTransitionZone(roomId: room.id, transitionZone: transitionZone)
                     }
                 }
@@ -115,6 +115,15 @@ class BuildingModel: ObservableObject {
         return nil
     }
     
+    func getTransitionZoneById(_ id: UUID) -> TransitionZone? {
+        for (_, transitionZonesArray) in transitionZones {
+            if let transitionZone = transitionZonesArray.first(where: { $0.id == id }) {
+                return transitionZone
+            }
+        }
+        return nil
+    }
+    
     func getFloors(byBuildingId buildingId: UUID) -> [Floor] {
         return Array(floors[buildingId] ?? [])
     }
@@ -124,7 +133,7 @@ class BuildingModel: ObservableObject {
     }
     
     func getTransitionZones(byRoomId roomId: UUID) -> [TransitionZone] {
-        return Array(transitionZone[roomId] ?? [])
+        return Array(transitionZones[roomId] ?? [])
     }
     
     func listConnections(buildingId: UUID) -> [FloorBridge] {
@@ -142,7 +151,7 @@ class BuildingModel: ObservableObject {
         // Rimuovere tutte le stanze e le zone di transizione associate ai piani dell'edificio eliminato
         for floor in floors[id] ?? [] {
             rooms.removeValue(forKey: floor.id)
-            transitionZone.removeValue(forKey: floor.id)
+            transitionZones.removeValue(forKey: floor.id)
         }
         //saveBuildings(buildings)
     }
@@ -159,13 +168,13 @@ class BuildingModel: ObservableObject {
     }
     
     @MainActor func addTransitionZone(roomId: UUID, transitionZone: TransitionZone) {
-        self.transitionZone[roomId, default: []].append(transitionZone)
+        self.transitionZones[roomId, default: []].append(transitionZone)
     }
     
     @MainActor func deleteFloorFromBuilding(buildingId: UUID, floorId: UUID) {
         floors[buildingId]?.removeAll { $0.id == floorId }
         rooms.removeValue(forKey: floorId)
-        transitionZone.removeValue(forKey: floorId)
+        transitionZones.removeValue(forKey: floorId)
         //saveBuildings(buildings)
     }
     

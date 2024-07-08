@@ -44,6 +44,6 @@ struct TransitionZoneCardView: View {
 
 struct TransitionZoneCardView_Previews: PreviewProvider {
     static var previews: some View {
-        TransitionZoneCardView(transitionZone: TransitionZone(xMin: 1.0, xMax: 5.0, yMin: 2.0, yMax: 6.0), rowSize: 3)
+        TransitionZoneCardView(transitionZone: TransitionZone(name:"A", xMin: 1.0, xMax: 5.0, yMin: 2.0, yMax: 6.0), rowSize: 3)
     }
 }

@@ -1,87 +1,104 @@
 import SwiftUI
 import Foundation
 
-struct AddConnection: View {
+struct AddConnectionView: View {
     
     var selectedBuilding: UUID
     @State private var buildingName: String = ""
     @State private var selectedFloor: UUID? = nil
     @State private var selectedRoom: UUID? = nil
+    @State private var fromFloor: UUID? = nil
     @State private var selectedTransitionZone: UUID? = nil
     @State private var fromTransitionZone: UUID? = nil
+    @State private var showAlert: Bool = false
+
+    
     
     @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) private var dismiss
     @ObservedObject var buildingsModel = BuildingModel.getInstance()
+
     
     var body: some View {
         NavigationStack {
-            
             VStack {
-                
                 Text("\(buildingsModel.getBuildingById(selectedBuilding)?.name ?? "Unknown") > New Connection")
                     .font(.system(size: 14))
                     .fontWeight(.heavy)
-                ConnectedDotsView(dotCount: 2, progress: fromTransitionZone == nil ? 1 : 2 )
-                Text("Choice Floor") .font(.system(size: 22))
+                ConnectedDotsView(labels: ["1° T.Z.", "2° T.Z."], progress: fromTransitionZone == nil ? 1 : 2 ).padding()
+                Text("Choose Floor") .font(.system(size: 22))
                     .fontWeight(.heavy)
                 ScrollView(.horizontal, showsIndicators: false){
                     HStack {
-                        ForEach(buildingsModel.getFloors(byBuildingId: selectedBuilding)){ floor in
-                            DefaultCardView(name: floor.name, date: floor.date, rowSize: 2)
-                                .onTapGesture {
-                                    selectedFloor = floor.id
-                                }
+                        ForEach(buildingsModel.getFloors(byBuildingId: selectedBuilding)) { floor in
+                            
+                            if floor.id != fromFloor{
+                                DefaultCardView(name: floor.name, date: floor.date, rowSize: 2)
+                                    .onTapGesture {
+                                        selectedFloor = floor.id
+                                    }
+                            }
                         }
                     }
                 }
                 
                 if let selectedFloorId = selectedFloor {
-                    Divider()
-                    Text("Choice Room") .font(.system(size: 22))
-                        .fontWeight(.heavy)
-                    ScrollView(.horizontal, showsIndicators: false){
-                        HStack {
-                            ForEach(buildingsModel.getRooms(byFloorId: selectedFloorId)) { room in
-                                DefaultCardView(name: room.roomName, date: room.date, rowSize: 2).onTapGesture {
-                                    selectedRoom = room.id
+                    VStack{
+                        Divider()
+                        Text("Choose Room") .font(.system(size: 22))
+                            .fontWeight(.heavy)
+                        ScrollView(.horizontal, showsIndicators: false){
+                            HStack {
+                                ForEach(buildingsModel.getRooms(byFloorId: selectedFloorId)) { room in
+                                    DefaultCardView(name: room.roomName, date: room.date, rowSize: 2).onTapGesture {
+                                        selectedRoom = room.id
+                                    }
                                 }
                             }
                         }
-                    }
+                    }.padding()
+
                 }
                 
                 if let selectedRoomId = selectedRoom {
-                    
-                    Divider()
-                    
-                    Text("Choice Transition Zone") .font(.system(size: 22))
-                        .fontWeight(.heavy)
-                    ScrollView(.horizontal, showsIndicators: false){
-                        HStack {
-                            ForEach(buildingsModel.getTransitionZones(byRoomId: selectedRoomId)) { transitionZone in
-                                TransitionZoneCardView(transitionZone: transitionZone, rowSize: 2).onTapGesture {
-                                    selectedTransitionZone = transitionZone.id
+                    VStack{
+                        Divider()
+                        
+                        Text("Choose Transition Zone") .font(.system(size: 22))
+                            .fontWeight(.heavy)
+                        ScrollView(.horizontal, showsIndicators: false){
+                            HStack {
+                                ForEach(buildingsModel.getTransitionZones(byRoomId: selectedRoomId)) { transitionZone in
+                                    TransitionZoneCardView(transitionZone: transitionZone, rowSize: 2).onTapGesture {
+                                        selectedTransitionZone = transitionZone.id
+                                    }
                                 }
                             }
                         }
-                    }
+                    }.padding()
+                   
                 }
                 
-                if selectedTransitionZone != nil{
+                if selectedTransitionZone != nil {
+                    Spacer()
                     Button(action: {
                         if fromTransitionZone != nil {
-                            buildingsModel.createConnection(buildingId: selectedBuilding, zone1: buildingsModel.getTransitionZones(byRoomId: selectedTransitionZone!).first!, zone2: buildingsModel.getTransitionZones(byRoomId: fromTransitionZone!).first!)
-                            fromTransitionZone = nil
-                            selectedTransitionZone = nil
+                            buildingsModel.createConnection(buildingId: selectedBuilding, zone1: buildingsModel.getTransitionZoneById(selectedTransitionZone!)!, zone2: buildingsModel.getTransitionZoneById(fromTransitionZone!)!)
+                            showAlert = true
+                            dismiss()
                         } else {
                             fromTransitionZone = selectedTransitionZone
-                            selectedTransitionZone = nil
+                            fromFloor = selectedFloor
                         }
+                        
+                        selectedTransitionZone = nil
+                        selectedRoom = nil
+                        selectedFloor = nil
                     }) {
-                        Text("SAVE")
+                        Text(fromTransitionZone == nil ? "SELECT START" : "SAVE")
                             .font(.system(size: 22, weight: .heavy))
                             .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
+                            .frame(maxWidth: .infinity, alignment: .bottom)
                             .padding()
                             .background(Color.blue)
                             .cornerRadius(10)
@@ -89,10 +106,13 @@ struct AddConnection: View {
                     .padding(.horizontal, 20)
                     .padding(.bottom, 20)
                 }
-            }
+            }.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top).background(Color.customBackground).foregroundColor(.white)
+                .alert(isPresented: $showAlert){
+                    Alert(title: Text("Connection Created"), message: Text("Connection created successfully"))
+                }
         }
-        .foregroundColor(.white)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+        
         .toolbar {
             ToolbarItem(placement: .principal) {
                 Text("NEW CONNECTION")
@@ -132,7 +152,6 @@ struct AddConnection_Preview: PreviewProvider {
     static var previews: some View {
         let buildingModel = BuildingModel.getInstance()
         let firstBuildingIndex = buildingModel.initTryData()
-        return AddConnection(selectedBuilding: firstBuildingIndex).environmentObject(buildingModel)
+        return AddConnectionView(selectedBuilding: firstBuildingIndex).environmentObject(buildingModel)
     }
 }
-

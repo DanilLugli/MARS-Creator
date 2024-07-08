@@ -31,6 +31,6 @@ struct ConnectionCardView: View {
 
 struct ConnectionCardView_Previews: PreviewProvider {
     static var previews: some View {
-        ConnectionCardView(floorBridge: FloorBridge(from: UUID(), to: UUID()))
+        ConnectionCardView(floorBridge: FloorBridge(from: "A", to: "B"))
     }
 }

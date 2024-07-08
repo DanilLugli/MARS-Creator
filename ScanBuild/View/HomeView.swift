@@ -28,34 +28,21 @@ struct HomeView: View {
                             .font(.headline)
                             .padding()
                     }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color.customBackground)
                 } else {
-                    ZStack {
+                    VStack(alignment: .center ){
                         //Color.customBackground.ignoresSafeArea() // Imposta lo sfondo blu
-                        List {
-                            ForEach(Array(filteredBuildings)) { building in
-                                Button(action: {
-                                    selectedBuilding = building.id
-                                    isNavigationActive = true
-                                }) {
-                                    BuildingView(name: building.name, address: building.date)
-                                }
-                                .listRowBackground(Color.customBackground) // Imposta lo sfondo blu per ogni riga
+                        ForEach(filteredBuildings) { building in
+                            NavigationLink(destination: FloorView(buildingId: building.id)) {
+                                DefaultCardView(name: building.name, date: building.date)
                             }
-                            .listRowSeparator(.hidden)
-                        }
-                        .listStyle(PlainListStyle())
-                        NavigationLink(destination: FloorView( buildingId:selectedBuilding),
-                                                              isActive: $isNavigationActive) {
-                                                   EmptyView()
-                                               }
+                            
+                        }.frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
                 }
             }
             .foregroundColor(.white)
-            .background(Color.customBackground.ignoresSafeArea())
             .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.customBackground.ignoresSafeArea())
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
@@ -70,24 +57,9 @@ struct HomeView: View {
                             Image(systemName: "plus.circle.fill")
                                 .font(.system(size: 26))
                                 .foregroundStyle(.white, .blue, .blue)
-                            
                         }
-                        Menu {
-                            Button(action: {
-                                // Azione per il pulsante "info"
-                                print("Info button tapped")
-                            }) {
-                                Text("Info")
-                                Image(systemName: "info.circle")
-                            }
-                        } label: {
-                            Image(systemName: "pencil.circle.fill")
-                                .font(.system(size: 26))
-                                .symbolRenderingMode(.palette)
-                                .foregroundStyle(.white, .blue, .blue)
-                        }
+                        
                     }
-                    
                 }
             }
         }
@@ -102,34 +74,11 @@ struct HomeView: View {
     }
 }
 
-struct BuildingView: View {
-    var name: String
-    var address: String
-    
-    var body: some View {
-        VStack(alignment: .leading) {
-            Text(name)
-                .font(.system(size: 20, weight: .bold))
-                .foregroundColor(.black)
-            
-            Text(address)
-                .font(.system(size: 14))
-                .foregroundColor(.gray)
-        }
-        .padding()
-        .frame(width: 330, height: 80)
-        .background(Color.white)
-        .cornerRadius(10)
-        .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 2)
-        .padding([.leading, .trailing], 26)
-    }
-}
-
 
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
         let buildingModel = BuildingModel.getInstance()
-        let _ = buildingModel.initTryData()
+        //let _ = buildingModel.initTryData()
         
         HomeView().environmentObject(buildingModel)
     }

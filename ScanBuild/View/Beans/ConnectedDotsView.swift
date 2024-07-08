@@ -1,52 +1,52 @@
-//
-//  BullettProgressView.swift
-//  ScanBuild
-//
-//  Created by Danil Lugli on 05/07/24.
-//
-
 import Foundation
 import SwiftUI
 
 struct ConnectedDotsView: View {
-    var dotCount: Int
+    var labels: [String]
     var dotSize: CGFloat
-    var rowSize: Int
     var progress: Int
     
-    init(dotCount: Int, dotSize: CGFloat = 14, rowSize: Int = 1, progress: Int = 0) {
-        self.dotCount = dotCount
+    init(labels: [String], dotSize: CGFloat = 14, progress: Int = 1) {
+        self.labels = labels
         self.dotSize = dotSize
-        self.rowSize = rowSize
         self.progress = progress
     }
     
     var body: some View {
-        VStack(alignment: .leading) {
+        VStack {
             HStack {
-                ForEach(0..<dotCount, id: \.self) { index in
-                    Circle()
-                        .stroke(Color.white, lineWidth: 1)
-                        .frame(width: dotSize, height: dotSize)
-                        .background(
+                ForEach(Array(labels.enumerated()), id: \.element) { index, label in
+                    HStack {
+                        VStack {
                             Circle()
-                                .fill(index + 1 <= self.progress ? Color.white : Color.customBackground)
-                                
-                        )
-                    
-                    if index < dotCount - 1 {
-                        Line()
-                            .stroke(Color.white, lineWidth: 2)
-                            .frame(width: dotSize, height: 1)
+                                .stroke(Color.white, lineWidth: 1)
+                                .frame(width: dotSize, height: dotSize)
+                                .background(
+                                    Circle()
+                                        .fill(index + 1 <= self.progress ? Color.white : Color.customBackground)
+                                )
+                            
+                            Text(label)
+                                .foregroundColor(.white)
+                                .font(.system(size: 12))
+                        }.frame(height: 34)
+                        
+                        if index < labels.count - 1 {
+                            VStack(alignment: .leading) {
+                                Line()
+                                    .stroke(Color.white, lineWidth: 2)
+                                    .frame(width: dotSize, height: 1)
+                                    .padding(.top, 8) // Per distanziare la linea dal cerchio
+                                Spacer()
+                            }.frame(height: 34)                        }
                     }
                 }
             }
-            .padding()
-            .frame(width: 330 / CGFloat(rowSize), height: 80)
-            .padding([.leading, .trailing], 10)
-            .background(Color.customBackground.ignoresSafeArea())
-
+            .padding([.top, .bottom], 10)
         }
+        .padding([.leading, .trailing], 10)
+        .frame(maxWidth: .infinity)
+        .background(Color.customBackground.ignoresSafeArea())
     }
 }
 
@@ -61,6 +61,6 @@ struct Line: Shape {
 
 struct ConnectedDotsView_Previews: PreviewProvider {
     static var previews: some View {
-        ConnectedDotsView(dotCount: 5, rowSize: 3, progress: 2)
+        ConnectedDotsView(labels: ["Step 1", "Step 2", "Step 3", "Step 4", "Step 5"], progress: 2)
     }
 }

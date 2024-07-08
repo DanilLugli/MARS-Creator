@@ -1,22 +1,31 @@
-import SwiftUI
-import Foundation
+//
+//  AddFloorView.swift
+//  ScanBuild
+//
+//  Created by Danil Lugli on 07/07/24.
+//
 
-struct AddBuildingView: View {
-    @State private var buildingName: String = ""
+import Foundation
+import SwiftUI
+
+struct AddFloorView: View {
+    @State private var floorName: String = ""
     @Environment(\.presentationMode) var presentationMode
     @ObservedObject var buildingsModel = BuildingModel.getInstance()
-
+    
+    var selectedBuilding: UUID
+    
     var body: some View {
         NavigationStack {
             VStack {
-                Text("Insert the name of new building: ")
+                Text("Insert the name of new floor: ")
                     .font(.system(size: 18))
-                                        .fontWeight(.bold)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .padding(.horizontal, 20)
-                                        .padding(.top, 20)
-                                        .foregroundColor(.white) // Colore bianco
-                TextField("Building Name", text: $buildingName)
+                    .fontWeight(.bold)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 20)
+                    .foregroundColor(.white)
+                TextField("Floor Name", text: $floorName)
                     .padding()
                     .background(Color(.systemGray6))
                     .cornerRadius(8)
@@ -25,16 +34,15 @@ struct AddBuildingView: View {
                 
                 Spacer()
                 
-                // Pulsante di salvataggio
                 Button(action: {
                     let dateFormatter = DateFormatter()
                     dateFormatter.dateStyle = .medium
                     dateFormatter.timeStyle = .none
                     let currentDate = dateFormatter.string(from: Date())
                     
-                    let newBuilding = Building(name: buildingName, date: currentDate, fileURL: URL(fileURLWithPath: "") )
-                    buildingsModel.addBuilding(building: newBuilding)
-                    self.presentationMode.wrappedValue.dismiss() // Torna alla schermata precedente
+                    let newFloor = Floor(name: floorName, fileURL: URL(fileURLWithPath: ""), idBuilding: UUID(), date: currentDate )
+                    buildingsModel.addFloorToBuilding(buildingId: selectedBuilding, floor: newFloor)
+                    self.presentationMode.wrappedValue.dismiss()
                 }) {
                     Text("SAVE")
                         .font(.system(size: 22, weight: .heavy))
@@ -52,14 +60,13 @@ struct AddBuildingView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text("ADD NEW BUILDING")
+                    Text("ADD NEW FLOOR")
                         .font(.system(size: 22, weight: .heavy))
                         .foregroundColor(.white)
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack {
                         Button(action: {
-                            // Azione per il pulsante "info.circle"
                             print("Info button tapped")
                         }) {
                             Image(systemName: "info.circle.fill")
@@ -76,8 +83,10 @@ struct AddBuildingView: View {
     }
 }
 
-struct AddBuildingView_Previews: PreviewProvider {
+struct AddFloorView_Preview: PreviewProvider {
     static var previews: some View {
-        AddBuildingView()
+        let buildingModel = BuildingModel.getInstance()
+        let firstBuildingIndex = buildingModel.initTryData()
+        return AddFloorView(selectedBuilding: firstBuildingIndex).environmentObject(buildingModel)
     }
 }
