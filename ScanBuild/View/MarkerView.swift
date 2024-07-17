@@ -1,29 +1,43 @@
+//
+//  MarkerView.swift
+//  ScanBuild
+//
+//  Created by Danil Lugli on 10/07/24.
+//
+
 import Foundation
 import SwiftUI
 
-struct RoomView: View {
+struct MarkerView: View {
     
     @State var showRooms: Bool = false
     @State var floorId : UUID
     @State var buildingId : UUID
+    @State var roomId : UUID
+    
     @ObservedObject var buildingsModel = BuildingModel.getInstance()
     @State private var searchText: String = ""
     @State private var isRenameSheetPresented = false
     @State private var newBuildingName: String = ""
+    @State private var selectedMarker: ReferenceMarker? = nil
     
     var floorName: String {
-        buildingsModel.getFloorById(floorId)?.name ?? "Unknown"
+        buildingsModel.getFloorById(floorId)?.name ?? "Unknown Floor"
     }
     
     var buildingName: String {
-        buildingsModel.getBuildingById(buildingId)?.name ?? "Unknown"
+        buildingsModel.getBuildingById(buildingId)?.name ?? "Unknown Building"
+    }
+    
+    var roomName: String {
+        buildingsModel.getRoomById(roomId)?.name ?? "Unknown Room"
     }
 
     var body: some View {
         NavigationStack {
             VStack{
                 VStack {
-                    Text(showRooms ? "\(buildingName) > \(floorName) > Rooms" : " \(buildingName)  > \(floorName) > Planimetry")
+                    Text(!showRooms ? "\(buildingName) > \(floorName) > \(roomName)> Planimetry" : " \(buildingName)  > \(floorName) > \(roomName) > Markers")
                         .font(.system(size: 14))
                         .fontWeight(.heavy)
                     Spacer()
@@ -50,9 +64,11 @@ struct RoomView: View {
                                 if !showRooms {
                                     Text("PLANIMETRY").foregroundColor(.white)
                                 } else {
-                                    ForEach(filteredRooms) { room in
-                                        NavigationLink(destination: MarkerView(floorId: floorId, buildingId: buildingId, roomId: room.id)) {
-                                            DefaultCardView(name: room.name, date: room.date)
+                                    ForEach(filteredMarker) { marker in
+                                        Button(action: {
+                                            selectedMarker = marker
+                                        }) {
+                                            DefaultCardView(name: marker.image_name, date: "String")
                                         }
                                     }
                                 }
@@ -65,7 +81,7 @@ struct RoomView: View {
                         Button(action: {
                             showRooms = false
                         }) {
-                            Text("PLANIMETRY")
+                            Text("\(roomName)")
                                 .fontWeight(.heavy)
                                 .font(.system(size: 20))
                                 .frame(maxWidth: .infinity)
@@ -95,7 +111,7 @@ struct RoomView: View {
                             // Azione del pulsante per impostare showConnection a true
                             showRooms = true
                         }) {
-                            Text("ROOMS")
+                            Text("MARKERS")
                                 .fontWeight(.heavy)
                                 .font(.system(size: 20))
                                 .frame(maxWidth: .infinity)
@@ -126,13 +142,20 @@ struct RoomView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Text("ROOM")
-                    .font(.system(size: 26, weight: .heavy))
-                    .foregroundColor(.white)
+                HStack{
+                    Text("\(roomName)")
+                        .font(.system(size: 26, weight: .heavy))
+                        .foregroundColor(.white)
+                }
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 HStack {
                     if !showRooms {
+                        NavigationLink(destination: Text("Add Marker View")) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.system(size: 26))
+                                .foregroundStyle(.white, .blue, .blue)
+                        }
                         Menu {
                             Button(action: {
                                 // Azione per il pulsante "Rename"
@@ -175,7 +198,7 @@ struct RoomView: View {
                             Button(action: {
                                 print("Rename button tapped")
                             }) {
-                                Text("Rename Connection")
+                                Text("Rename")
                                 Image(systemName: "pencil")
                             }
                             Button(action: {
@@ -187,8 +210,8 @@ struct RoomView: View {
                             Button(action: {
                                 print("Delete Building button tapped")
                             }) {
-                                Text("Delete Connection")
-                                Image(systemName: "trash").foregroundColor(.red)
+                                Text("Delete")
+                                Image(systemName: "trash")
                             }
                         } label: {
                             Image(systemName: "pencil.circle.fill")
@@ -200,59 +223,92 @@ struct RoomView: View {
                 }
             }
         }
-        .sheet(isPresented: $isRenameSheetPresented) {
+        .sheet(item: $selectedMarker) { marker in
             VStack {
-                Text("Rename Building")
+                Text("Marker Details")
                     .font(.system(size: 22))
                     .fontWeight(.bold)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 20)
                     .padding(.top, 20)
-                    .foregroundColor(.white) // Colore bianco
-                TextField("New Building Name", text: $newBuildingName)
+                    .foregroundColor(.white)
+                Text("Details for \(marker.image_name)")
+                    .padding()
+                    .background(Color(.systemGray6))
+                    .cornerRadius(8)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 8)
+                Text("Rename Marker")
+                    .font(.system(size: 22))
+                    .fontWeight(.bold)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 20)
+                    .foregroundColor(.white)
+                TextField("New Marker Name", text: $newBuildingName)
                     .padding()
                     .background(Color(.systemGray6))
                     .cornerRadius(8)
                     .padding(.horizontal, 20)
                     .padding(.top, 8)
                 Spacer()
-                Button(action: {
-                    if !newBuildingName.isEmpty {
-                        //
+                HStack {
+                    Button(action: {
+                        if !newBuildingName.isEmpty {
+                            buildingsModel.renameReferenceMarker(roomId: roomId, markerId: marker.id, newName: newBuildingName)
+                            newBuildingName = ""
+                            selectedMarker = nil
+                        }
+                    }) {
+                        Text("SAVE")
+                            .font(.system(size: 22, weight: .heavy))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.blue)
+                            .cornerRadius(10)
                     }
-                }) {
-                    Text("SAVE")
-                        .font(.system(size: 22, weight: .heavy))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .cornerRadius(10)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 20)
+                    
+                    Button(action: {
+                        buildingsModel.deleteReferenceMarker(roomId: roomId, markerId: marker.id)
+                        selectedMarker = nil
+                    }) {
+                        Text("DELETE")
+                            .font(.system(size: 22, weight: .heavy))
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.red)
+                            .cornerRadius(10)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 20)
                 }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 20)
             }
             .padding()
             .background(Color.customBackground.ignoresSafeArea())
         }
     }
     
-    var filteredRooms: [Room] {
+    var filteredMarker: [ReferenceMarker] {
         if searchText.isEmpty {
-            return buildingsModel.getRooms(byFloorId: floorId)
-        } else {
-            return buildingsModel.getRooms(byFloorId: floorId).filter { $0.name.lowercased().contains(searchText.lowercased()) }
+            return buildingsModel.getReferenceMarkers(roomId: roomId)
+        } else{
+            return buildingsModel.getReferenceMarkers(roomId: roomId).filter { $0.image_name.lowercased().contains(searchText.lowercased()) }
         }
     }
 }
 
 
-struct RoomView_Previews: PreviewProvider {
+struct MarkerView_Previews: PreviewProvider {
     static var previews: some View {
         let buildingModel = BuildingModel.getInstance()
         let buildingId = buildingModel.initTryData()
         let floorId = buildingModel.getFloors(byBuildingId: buildingId).first!.id
+        let roomId = buildingModel.getRooms(byFloorId: floorId).first!.id
         
-        return RoomView(floorId: floorId, buildingId: buildingId).environmentObject(buildingModel)
+        return MarkerView(floorId: floorId, buildingId: buildingId, roomId: roomId).environmentObject(buildingModel)
     }
 }

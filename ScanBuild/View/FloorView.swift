@@ -3,8 +3,6 @@ import Foundation
 
 struct FloorView: View {
     
-    
-    @State var showConnection: Bool = false
     @State var buildingId : UUID
     @ObservedObject var buildingsModel = BuildingModel.getInstance()
     @State private var searchText: String = ""
@@ -12,12 +10,10 @@ struct FloorView: View {
     @State private var newBuildingName: String = ""
     
     var body: some View {
-        
-        
         NavigationStack {
-            VStack{
+            VStack {
                 VStack {
-                    Text(showConnection ? "\(buildingsModel.getBuildingById(buildingId)?.name ?? "Unknown") > Connections" : "\( buildingsModel.getBuildingById(buildingId)?.name ?? "Unknown") > Floors")
+                    Text("\($buildingsModel.getBuildingById(buildingId)?.name ?? "Unknown") > Floors")
                         .font(.system(size: 14))
                         .fontWeight(.heavy)
                     Spacer()
@@ -31,7 +27,7 @@ struct FloorView: View {
                     
                     if buildingsModel.getFloors(byBuildingId: buildingId).isEmpty {
                         VStack {
-                            Text("Add Floor to \( buildingsModel.getBuildingById(buildingId)?.name ?? "Unknown") with + icon")
+                            Text("Add Floor to \(buildingsModel.getBuildingById(buildingId)?.name ?? "Unknown") with + icon")
                                 .foregroundColor(.gray)
                                 .font(.headline)
                                 .padding()
@@ -41,17 +37,9 @@ struct FloorView: View {
                     } else {
                         ScrollView {
                             LazyVStack(spacing: 25) {
-                                if !showConnection{
-                                    ForEach(filteredFloors) { floor in
-                                        NavigationLink(destination: RoomView(floorId: floor.id)) {
-                                            DefaultCardView(name: floor.name, date: floor.date)
-                                        }
-                                        
-                                    }
-                                }else{
-                                    ForEach( buildingsModel.listConnections(buildingId: buildingId)){ floorBridge in NavigationLink(destination: AddBuildingView()) {
-                                        ConnectionCardView(floorBridge: floorBridge)
-                                    }
+                                ForEach(filteredFloors, id: \.id) { floor in
+                                    NavigationLink(destination: RoomView(floorId: floor.id, buildingId: buildingId)) {
+                                        DefaultCardView(name: floor.name, date: floor.lastUpdate)
                                     }
                                 }
                             }
@@ -59,13 +47,11 @@ struct FloorView: View {
                         .padding()
                     }
                 }
-                
                 HStack {
-                    
                     Button(action: {
-                        showConnection = false
+                        // Azione del pulsante per aggiungere un piano
                     }) {
-                        Text("FLOORS")
+                        Text("ADD FLOOR")
                             .fontWeight(.heavy)
                             .font(.system(size: 20))
                             .frame(maxWidth: .infinity)
@@ -73,14 +59,6 @@ struct FloorView: View {
                             .background(Color.blue)
                             .foregroundColor(.white)
                             .cornerRadius(10)
-                            .overlay(
-                                Group {
-                                    if !showConnection {
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(Color(red: 0/255, green: 0/255, blue: 100/255, opacity: 1.0), lineWidth: 14)
-                                    }
-                                }
-                            )
                             .shadow(color: Color.white.opacity(0.5), radius: 10, x: 0, y: 0)
                     }
                     .buttonStyle(PlainButtonStyle())
@@ -88,37 +66,11 @@ struct FloorView: View {
                     .background(Color.blue)
                     .cornerRadius(10)
                     .padding([.trailing], 16)
-                    
-                    Button(action: {
-                        // Azione del pulsante per impostare showConnection a true
-                        showConnection = true
-                    }) {
-                        Text("CONNECTION")
-                            .fontWeight(.heavy)
-                            .font(.system(size: 20))
-                            .padding()
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                            .overlay(
-                                Group {
-                                    if showConnection {
-                                        RoundedRectangle(cornerRadius: 10)
-                                            .stroke(Color(red: 0/255, green: 0/255, blue: 100/255, opacity: 1.0), lineWidth: 14)
-                                    }
-                                }
-                            )
-                            .shadow(color: Color.white.opacity(0.5), radius: 10, x: 0, y: 0)
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    .frame(width: 170, height: 60)
-                    .background(Color.blue)
-                    .cornerRadius(10)
-                    .padding([.trailing], 12)
                 }
-            }.background(Color.customBackground).foregroundColor(.white)
+            }
+            .background(Color.customBackground)
+            .foregroundColor(.white)
         }
-
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
@@ -128,75 +80,42 @@ struct FloorView: View {
             }
             ToolbarItem(placement: .navigationBarTrailing) {
                 HStack {
-                    if !showConnection {
-                        NavigationLink(destination: AddFloorView(selectedBuilding: buildingId)) {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.system(size: 26))
-                                .foregroundStyle(.white, .blue, .blue)
+                    NavigationLink(destination: AddFloorView(selectedBuilding: buildingId)) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: 26))
+                            .foregroundStyle(.white, .blue, .blue)
+                    }
+                    Menu {
+                        Button(action: {
+                            // Azione per il pulsante "Rename"
+                            isRenameSheetPresented = true
+                        }) {
+                            Text("Rename")
+                            Image(systemName: "pencil")
                         }
-                        Menu {
-                            Button(action: {
-                                // Azione per il pulsante "Rename"
-                                isRenameSheetPresented = true
-                            }) {
-                                Text("Rename")
-                                Image(systemName: "pencil")
-                            }
-                            Button(action: {
-                                print("Upload Building to Server button tapped")
-                            }) {
-                                Text("Upload Building to Server")
-                                Image(systemName: "icloud.and.arrow.up")
-                            }
-                            Button(action: {
-                                print("Info button tapped")
-                            }) {
-                                Text("Info")
-                                Image(systemName: "info.circle")
-                            }
-                            Button(action: {
-                                print("Delete Building button tapped")
-                            }) {
-                                Text("Delete Building")
-                                Image(systemName: "trash").foregroundColor(.red)
-                            }
-                        } label: {
-                            Image(systemName: "pencil.circle.fill")
-                                .font(.system(size: 26))
-                                .symbolRenderingMode(.palette)
-                                .foregroundStyle(.white, .blue, .blue)
+                        Button(action: {
+                            print("Upload Building to Server button tapped")
+                        }) {
+                            Text("Upload Building to Server")
+                            Image(systemName: "icloud.and.arrow.up")
                         }
-                    } else {
-                        NavigationLink(destination: AddConnectionView(selectedBuilding: buildingId)) {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.system(size: 26))
-                                .foregroundStyle(.white, .blue, .blue)
+                        Button(action: {
+                            print("Info button tapped")
+                        }) {
+                            Text("Info")
+                            Image(systemName: "info.circle")
                         }
-                        Menu {
-                            Button(action: {
-                                print("Rename button tapped")
-                            }) {
-                                Text("Rename Connection")
-                                Image(systemName: "pencil")
-                            }
-                            Button(action: {
-                                print("Info button tapped")
-                            }) {
-                                Text("Info")
-                                Image(systemName: "info.circle")
-                            }
-                            Button(action: {
-                                print("Delete Building button tapped")
-                            }) {
-                                Text("Delete Connection")
-                                Image(systemName: "trash")
-                            }
-                        } label: {
-                            Image(systemName: "pencil.circle.fill")
-                                .font(.system(size: 26))
-                                .symbolRenderingMode(.palette)
-                                .foregroundStyle(.white, .blue, .blue)
-                        }
+                        Button(action: {
+                            print("Delete Building button tapped")
+                        }) {
+                            Text("Delete Building")
+                            Image(systemName: "trash")
+                        }.foregroundColor(.red)
+                    } label: {
+                        Image(systemName: "pencil.circle.fill")
+                            .font(.system(size: 26))
+                            .symbolRenderingMode(.palette)
+                            .foregroundStyle(.white, .blue, .blue)
                     }
                 }
             }
@@ -209,7 +128,7 @@ struct FloorView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 20)
                     .padding(.top, 20)
-                    .foregroundColor(.white) // Colore bianco
+                    .foregroundColor(.white)
                 TextField("New Building Name", text: $newBuildingName)
                     .padding()
                     .background(Color(.systemGray6))
@@ -249,12 +168,11 @@ struct FloorView: View {
     }
 }
 
-
 struct FloorView_Previews: PreviewProvider {
     static var previews: some View {
         let buildingModel = BuildingModel.getInstance()
         let firstBuildingId = buildingModel.initTryData()
         
-        return FloorView(buildingId: firstBuildingId).environmentObject(buildingModel) // Passare l'istanza di buildingModel all'ambiente della vista di anteprima
+        return FloorView(buildingId: firstBuildingId).environmentObject(buildingModel)
     }
 }

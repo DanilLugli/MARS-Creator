@@ -50,7 +50,7 @@ struct AddConnectionView: View {
                         ScrollView(.horizontal, showsIndicators: false){
                             HStack {
                                 ForEach(buildingsModel.getRooms(byFloorId: selectedFloorId)) { room in
-                                    DefaultCardView(name: room.roomName, date: room.date, rowSize: 2).onTapGesture {
+                                    DefaultCardView(name: room.name, date: room.date, rowSize: 2).onTapGesture {
                                         selectedRoom = room.id
                                     }
                                 }

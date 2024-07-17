@@ -1,18 +1,17 @@
 //
-//  ShowConnection.swift
+//  ShowMarkerView.swift
 //  ScanBuild
 //
-//  Created by Danil Lugli on 07/07/24.
+//  Created by Danil Lugli on 11/07/24.
 //
 
 import Foundation
 import SwiftUI
 
-struct ShowConnectionView: View {
+struct ShowMarkerView: View {
     var body: some View {
         NavigationStack{
             //
         }
     }
 }
-

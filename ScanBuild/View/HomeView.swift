@@ -18,10 +18,11 @@ struct HomeView: View {
                     .background(Color(.systemGray6))
                     .cornerRadius(8)
                     .padding(.horizontal, 10)
+                    .padding(.top, 90)
                     .frame(width: 180)
                 Spacer()
                 
-                if buildingsModel.getBuildings().isEmpty {
+                if buildingsModel.buildings.isEmpty {
                     VStack {
                         Text("Add Building with + icon")
                             .foregroundColor(.gray)
@@ -29,20 +30,21 @@ struct HomeView: View {
                             .padding()
                     }
                 } else {
-                    VStack(alignment: .center ){
-                        //Color.customBackground.ignoresSafeArea() // Imposta lo sfondo blu
-                        ForEach(filteredBuildings) { building in
-                            NavigationLink(destination: FloorView(buildingId: building.id)) {
-                                DefaultCardView(name: building.name, date: building.date)
+                    ScrollView {
+                        LazyVStack(spacing: 25) {
+                            ForEach(filteredBuildings, id: \.id) { building in
+                                NavigationLink(destination: FloorView(buildingId: building.id)) {
+                                    DefaultCardView(name: building.name, date: building.lastUpdate)
+                                }
                             }
-                            
-                        }.frame(maxWidth: .infinity, maxHeight: .infinity)
-                    }
+                        }
+                    }.padding(.top, 30)
                 }
             }
             .foregroundColor(.white)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.customBackground.ignoresSafeArea())
+            .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
+            .background(Color.customBackground)
+            .edgesIgnoringSafeArea(.all)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
@@ -58,7 +60,6 @@ struct HomeView: View {
                                 .font(.system(size: 26))
                                 .foregroundStyle(.white, .blue, .blue)
                         }
-                        
                     }
                 }
             }
@@ -67,23 +68,17 @@ struct HomeView: View {
     
     var filteredBuildings: [Building] {
         if searchText.isEmpty {
-            return buildingsModel.getBuildings()
+            return buildingsModel.buildings
         } else {
-            return buildingsModel.getBuildings().filter { $0.name.lowercased().contains(searchText.lowercased()) }
+            return buildingsModel.buildings.filter { $0.name.lowercased().contains(searchText.lowercased()) }
         }
     }
 }
 
-
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
         let buildingModel = BuildingModel.getInstance()
-        //let _ = buildingModel.initTryData()
         
-        HomeView().environmentObject(buildingModel)
+        return HomeView().environmentObject(buildingModel)
     }
 }
-
-//extension Color {
-//    static let customBackground = Color(red: 0x1A / 255, green: 0x37 / 255, blue: 0x61 / 255)
-//}
