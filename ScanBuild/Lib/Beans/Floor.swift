@@ -1,29 +1,22 @@
-//
-//  Floor.swift
-//  ScanBuild
-//
-//  Created by Danil Lugli on 26/06/24.
-//
 import Foundation
 import SceneKit
 import simd
 import SwiftUI
 
-class Floor: Codable {
+class Floor: Encodable {
     
-    private var _id: UUID
+    private var _id = UUID()
     private var _name: String
     private var _lastUpdate: Date
     private var _planimetry: Image
-    private var _associationMatrix: [RotoTraslationMatrix]
+    private var _associationMatrix: [String : RotoTraslationMatrix]
     private var _rooms: [Room]
     private var _sceneObjects: [SCNNode]?
     private var _scene: SCNScene?
     private var _sceneConfiguration: SCNScene?
     private var _floorURL: URL
     
-    init(id: UUID, name: String, lastUpdate: Date, planimetry: Image, associationMatrix: [RotoTraslationMatrix], rooms: [Room], sceneObjects: [SCNNode]?, scene: SCNScene?, sceneConfiguration: SCNScene?, floorURL: URL) {
-        self._id = id
+    init(name: String, lastUpdate: Date, planimetry: Image, associationMatrix: [String : RotoTraslationMatrix], rooms: [Room], sceneObjects: [SCNNode]?, scene: SCNScene?, sceneConfiguration: SCNScene?, floorURL: URL) {
         self._name = name
         self._lastUpdate = lastUpdate
         self._planimetry = planimetry
@@ -56,16 +49,16 @@ class Floor: Codable {
         return _planimetry
     }
     
-    var associationMatrix: [RotoTraslationMatrix] {
+    var associationMatrix: [String : RotoTraslationMatrix] {
         return _associationMatrix
     }
     
     var rooms: [Room] {
-        return _rooms
+        return Array(_rooms)
     }
     
     var sceneObjects: [SCNNode]? {
-        return _sceneObjects
+        return Array(_sceneObjects ?? [])
     }
     
     var scene: SCNScene? {
@@ -80,11 +73,11 @@ class Floor: Codable {
         return _floorURL
     }
     
-    // Implementazione personalizzata di Codable
+    // Implementazione personalizzata di Encodable
     private enum CodingKeys: String, CodingKey {
         case name
         case lastUpdate
-        case roomsCount
+        case rooms
         case associationMatrix
     }
     
@@ -92,40 +85,8 @@ class Floor: Codable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(_name, forKey: .name)
         try container.encode(_lastUpdate, forKey: .lastUpdate)
-        try container.encode(_rooms.count, forKey: .roomsCount)
+        try container.encode(_rooms, forKey: .rooms)
         try container.encode(_associationMatrix, forKey: .associationMatrix)
-    }
-    
-    required init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        _name = try container.decode(String.self, forKey: .name)
-        _lastUpdate = try container.decode(Date.self, forKey: .lastUpdate)
-        let roomsCount = try container.decode(Int.self, forKey: .roomsCount)
-        _associationMatrix = try container.decode([RotoTraslationMatrix].self, forKey: .associationMatrix)
-        
-        // Placeholder values for properties not included in the Codable conformance
-        _id = UUID()
-        _planimetry = Image("")
-        _rooms = Array(repeating: Room(id: UUID(), name: "", lastUpdate: Date(), referenceMarkers: [], transitionZones: [], sceneObjects: [], scene: nil, worldMap: nil, roomURL: URL(string: "https://example.com")!), count: roomsCount)
-        _sceneObjects = []
-        _scene = nil
-        _sceneConfiguration = nil
-        _floorURL = URL(string: "https://example.com")!
-    }
-    
-    // JSON Serialization using Codable
-    func toJSON() -> String? {
-        if let jsonData = try? JSONEncoder().encode(self) {
-            return String(data: jsonData, encoding: .utf8)
-        }
-        return nil
-    }
-    
-    static func fromJSON(_ jsonString: String) -> Floor? {
-        if let jsonData = jsonString.data(using: .utf8) {
-            return try? JSONDecoder().decode(Floor.self, from: jsonData)
-        }
-        return nil
     }
     
     func addRoom(room: Room) {
@@ -151,21 +112,4 @@ class Floor: Codable {
         return []
     }
     
-    private func loadSceneObjects() {
-        // Implement logic to load scene objects
-    }
-    
-    private func loadSceneConfiguration() {
-        // Implement logic to load scene configuration
-    }
-    
-    private func loadScene() {
-        // Implement logic to load scene
-    }
-    
-    func toFile() {
-        // Implement logic to save to file
-    }
 }
-
-

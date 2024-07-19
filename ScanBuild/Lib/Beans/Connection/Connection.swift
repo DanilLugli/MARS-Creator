@@ -1,11 +1,10 @@
 import Foundation
 
-class Connection: Codable {
-    private var _id: UUID
+class Connection: Codable{
+    private var _id = UUID()
     private var _name: String
     
-    init(id: UUID, name: String) {
-        self._id = id
+    init(name: String) {
         self._name = name
     }
     

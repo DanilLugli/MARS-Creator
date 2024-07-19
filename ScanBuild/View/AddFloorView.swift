@@ -9,11 +9,11 @@ import Foundation
 import SwiftUI
 
 struct AddFloorView: View {
+    
     @State private var floorName: String = ""
     @Environment(\.presentationMode) var presentationMode
-    @ObservedObject var buildingsModel = BuildingModel.getInstance()
-    
-    var selectedBuilding: UUID
+    @State var building: Building
+
     
     var body: some View {
         NavigationStack {
@@ -40,8 +40,10 @@ struct AddFloorView: View {
                     dateFormatter.timeStyle = .none
                     let currentDate = dateFormatter.string(from: Date())
                     
-                    let newFloor = Floor(name: floorName, fileURL: URL(fileURLWithPath: ""), idBuilding: UUID(), date: currentDate )
-                    buildingsModel.addFloorToBuilding(buildingId: selectedBuilding, floor: newFloor)
+                    let newFloor = Floor(name: floorName, lastUpdate: Date(), planimetry: Image(""), associationMatrix: [String : RotoTraslationMatrix](), rooms: [], sceneObjects: nil, scene: nil, sceneConfiguration: nil, floorURL: URL(fileURLWithPath: ""))
+                    
+                    building.addFloor(floor: newFloor)
+                    
                     self.presentationMode.wrappedValue.dismiss()
                 }) {
                     Text("SAVE")
@@ -86,7 +88,7 @@ struct AddFloorView: View {
 struct AddFloorView_Preview: PreviewProvider {
     static var previews: some View {
         let buildingModel = BuildingModel.getInstance()
-        let firstBuildingIndex = buildingModel.initTryData()
-        return AddFloorView(selectedBuilding: firstBuildingIndex).environmentObject(buildingModel)
+        let firstBuilding = buildingModel.initTryData()
+        return AddFloorView(building: firstBuilding)
     }
 }

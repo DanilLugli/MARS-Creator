@@ -19,11 +19,12 @@
 		AA2CA55B2C3F07A500C88C94 /* MarkerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA55A2C3F07A500C88C94 /* MarkerView.swift */; };
 		AA2CA55D2C3FC62400C88C94 /* MatrixView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA55C2C3FC62400C88C94 /* MatrixView.swift */; };
 		AA2CA55F2C3FECAA00C88C94 /* ShowMarkerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA55E2C3FECAA00C88C94 /* ShowMarkerView.swift */; };
-		AA64CC7A2C47F8D0005C883B /* Coordinates.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA64CC792C47F8D0005C883B /* Coordinates.swift */; };
-		AA64CC7C2C47F8EE005C883B /* SomeFloorConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA64CC7B2C47F8EE005C883B /* SomeFloorConnection.swift */; };
+		AA64CC7C2C47F8EE005C883B /* SameFloorConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA64CC7B2C47F8EE005C883B /* SameFloorConnection.swift */; };
 		AA64CC7E2C47F903005C883B /* AdjacentFloorsConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA64CC7D2C47F903005C883B /* AdjacentFloorsConnection.swift */; };
 		AA64CC802C47F91F005C883B /* ElevatorConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA64CC7F2C47F91F005C883B /* ElevatorConnection.swift */; };
 		AA64CC822C47FDA8005C883B /* RotoTraslationMatrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA64CC812C47FDA8005C883B /* RotoTraslationMatrix.swift */; };
+		AA64CC862C495D73005C883B /* Rectangle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA64CC852C495D73005C883B /* Rectangle.swift */; };
+		AA64CC882C495F51005C883B /* Coordinates.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA64CC872C495F51005C883B /* Coordinates.swift */; };
 		AA78F5D22C2C69E90044F825 /* Building.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA78F5D12C2C69E90044F825 /* Building.swift */; };
 		AA78F5D42C2C6B570044F825 /* Floor.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA78F5D32C2C6B570044F825 /* Floor.swift */; };
 		AA78F5D62C2C6BAC0044F825 /* Room.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA78F5D52C2C6BAC0044F825 /* Room.swift */; };
@@ -63,11 +64,12 @@
 		AA2CA55A2C3F07A500C88C94 /* MarkerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkerView.swift; sourceTree = "<group>"; };
 		AA2CA55C2C3FC62400C88C94 /* MatrixView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatrixView.swift; sourceTree = "<group>"; };
 		AA2CA55E2C3FECAA00C88C94 /* ShowMarkerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShowMarkerView.swift; sourceTree = "<group>"; };
-		AA64CC792C47F8D0005C883B /* Coordinates.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Coordinates.swift; sourceTree = "<group>"; };
-		AA64CC7B2C47F8EE005C883B /* SomeFloorConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SomeFloorConnection.swift; sourceTree = "<group>"; };
+		AA64CC7B2C47F8EE005C883B /* SameFloorConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SameFloorConnection.swift; sourceTree = "<group>"; };
 		AA64CC7D2C47F903005C883B /* AdjacentFloorsConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdjacentFloorsConnection.swift; sourceTree = "<group>"; };
 		AA64CC7F2C47F91F005C883B /* ElevatorConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElevatorConnection.swift; sourceTree = "<group>"; };
 		AA64CC812C47FDA8005C883B /* RotoTraslationMatrix.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RotoTraslationMatrix.swift; sourceTree = "<group>"; };
+		AA64CC852C495D73005C883B /* Rectangle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rectangle.swift; sourceTree = "<group>"; };
+		AA64CC872C495F51005C883B /* Coordinates.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Coordinates.swift; sourceTree = "<group>"; };
 		AA78F5D12C2C69E90044F825 /* Building.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Building.swift; sourceTree = "<group>"; };
 		AA78F5D32C2C6B570044F825 /* Floor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Floor.swift; sourceTree = "<group>"; };
 		AA78F5D52C2C6BAC0044F825 /* Room.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Room.swift; sourceTree = "<group>"; };
@@ -119,6 +121,17 @@
 			path = AR;
 			sourceTree = "<group>";
 		};
+		AA64CC832C4957FC005C883B /* Connection */ = {
+			isa = PBXGroup;
+			children = (
+				AA78F5E72C3300540044F825 /* Connection.swift */,
+				AA64CC7B2C47F8EE005C883B /* SameFloorConnection.swift */,
+				AA64CC7D2C47F903005C883B /* AdjacentFloorsConnection.swift */,
+				AA64CC7F2C47F91F005C883B /* ElevatorConnection.swift */,
+			);
+			path = Connection;
+			sourceTree = "<group>";
+		};
 		AA78F5D72C2C77060044F825 /* Lib */ = {
 			isa = PBXGroup;
 			children = (
@@ -150,27 +163,18 @@
 			path = View;
 			sourceTree = "<group>";
 		};
-		AA78F5D92C2C772A0044F825 /* ViewModels */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = ViewModels;
-			sourceTree = "<group>";
-		};
 		AA78F5E62C32FF5E0044F825 /* Beans */ = {
 			isa = PBXGroup;
 			children = (
+				AA64CC832C4957FC005C883B /* Connection */,
 				AA78F5D12C2C69E90044F825 /* Building.swift */,
 				AA78F5D32C2C6B570044F825 /* Floor.swift */,
 				AA78F5D52C2C6BAC0044F825 /* Room.swift */,
-				AA78F5E72C3300540044F825 /* Connection.swift */,
+				AA64CC872C495F51005C883B /* Coordinates.swift */,
 				AAE57FA52C382C6D00F0196F /* TransitionZone.swift */,
 				AA2CA5582C3EF87A00C88C94 /* ReferenceMarker.swift */,
-				AA64CC792C47F8D0005C883B /* Coordinates.swift */,
-				AA64CC7B2C47F8EE005C883B /* SomeFloorConnection.swift */,
-				AA64CC7D2C47F903005C883B /* AdjacentFloorsConnection.swift */,
-				AA64CC7F2C47F91F005C883B /* ElevatorConnection.swift */,
 				AA64CC812C47FDA8005C883B /* RotoTraslationMatrix.swift */,
+				AA64CC852C495D73005C883B /* Rectangle.swift */,
 			);
 			path = Beans;
 			sourceTree = "<group>";
@@ -203,7 +207,6 @@
 		AAA29E682C1711AA00CA267C /* ScanBuild */ = {
 			isa = PBXGroup;
 			children = (
-				AA78F5D92C2C772A0044F825 /* ViewModels */,
 				AA78F5D82C2C77250044F825 /* View */,
 				AA78F5D72C2C77060044F825 /* Lib */,
 				AAA29E692C1711AA00CA267C /* AppDelegate.swift */,
@@ -310,12 +313,12 @@
 				AA64CC802C47F91F005C883B /* ElevatorConnection.swift in Sources */,
 				AAE57FAB2C384E6400F0196F /* DefaultCardView.swift in Sources */,
 				AA2CA55B2C3F07A500C88C94 /* MarkerView.swift in Sources */,
-				AA64CC7A2C47F8D0005C883B /* Coordinates.swift in Sources */,
 				AAE57FB12C385D2B00F0196F /* ConnectedDotsView.swift in Sources */,
 				AA2CA5242C39FC7B00C88C94 /* ShowConnectionView.swift in Sources */,
 				AA2CA55D2C3FC62400C88C94 /* MatrixView.swift in Sources */,
 				AA2CA5512C3DB5F400C88C94 /* RoomCaptureViewContainer.swift in Sources */,
-				AA64CC7C2C47F8EE005C883B /* SomeFloorConnection.swift in Sources */,
+				AA64CC862C495D73005C883B /* Rectangle.swift in Sources */,
+				AA64CC7C2C47F8EE005C883B /* SameFloorConnection.swift in Sources */,
 				AAA29E6C2C1711AA00CA267C /* Shaders.metal in Sources */,
 				AA78F5D42C2C6B570044F825 /* Floor.swift in Sources */,
 				AAE57FA22C37FB6100F0196F /* Color.swift in Sources */,
@@ -339,6 +342,7 @@
 				AA78F5EA2C33006F0044F825 /* BuildingModel.swift in Sources */,
 				AAA29E6A2C1711AA00CA267C /* AppDelegate.swift in Sources */,
 				AA64CC7E2C47F903005C883B /* AdjacentFloorsConnection.swift in Sources */,
+				AA64CC882C495F51005C883B /* Coordinates.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

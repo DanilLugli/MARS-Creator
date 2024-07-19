@@ -22,7 +22,7 @@ struct HomeView: View {
                     .frame(width: 180)
                 Spacer()
                 
-                if buildingsModel.buildings.isEmpty {
+                if buildingsModel.getBuildings().isEmpty {
                     VStack {
                         Text("Add Building with + icon")
                             .foregroundColor(.gray)
@@ -33,7 +33,7 @@ struct HomeView: View {
                     ScrollView {
                         LazyVStack(spacing: 25) {
                             ForEach(filteredBuildings, id: \.id) { building in
-                                NavigationLink(destination: FloorView(buildingId: building.id)) {
+                                NavigationLink(destination: FloorView(building: building)) {
                                     DefaultCardView(name: building.name, date: building.lastUpdate)
                                 }
                             }
@@ -68,9 +68,9 @@ struct HomeView: View {
     
     var filteredBuildings: [Building] {
         if searchText.isEmpty {
-            return buildingsModel.buildings
+            return buildingsModel.getBuildings()
         } else {
-            return buildingsModel.buildings.filter { $0.name.lowercased().contains(searchText.lowercased()) }
+            return buildingsModel.getBuildings().filter { $0.name.lowercased().contains(searchText.lowercased()) }
         }
     }
 }
@@ -78,6 +78,7 @@ struct HomeView: View {
 struct HomeView_Previews: PreviewProvider {
     static var previews: some View {
         let buildingModel = BuildingModel.getInstance()
+        let _ = buildingModel.initTryData()
         
         return HomeView().environmentObject(buildingModel)
     }

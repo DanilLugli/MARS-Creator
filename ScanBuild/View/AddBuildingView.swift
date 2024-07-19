@@ -32,7 +32,7 @@ struct AddBuildingView: View {
                     dateFormatter.timeStyle = .none
                     let currentDate = dateFormatter.string(from: Date())
                     
-                    let newBuilding = Building(name: buildingName, date: currentDate, fileURL: URL(fileURLWithPath: "") )
+                    let newBuilding = Building(name: buildingName, lastUpdate: Date(), floors: [], buildingURL: URL(fileURLWithPath: "") )
                     buildingsModel.addBuilding(building: newBuilding)
                     self.presentationMode.wrappedValue.dismiss() // Torna alla schermata precedente
                 }) {
@@ -78,6 +78,8 @@ struct AddBuildingView: View {
 
 struct AddBuildingView_Previews: PreviewProvider {
     static var previews: some View {
-        AddBuildingView()
+        let buildingModel = BuildingModel.getInstance()
+        let _ = buildingModel.initTryData()
+        AddBuildingView().environmentObject(buildingModel)
     }
 }

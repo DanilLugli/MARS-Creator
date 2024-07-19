@@ -3,8 +3,7 @@ import Foundation
 
 struct FloorView: View {
     
-    @State var buildingId : UUID
-    @ObservedObject var buildingsModel = BuildingModel.getInstance()
+    @State var building : Building
     @State private var searchText: String = ""
     @State private var isRenameSheetPresented = false
     @State private var newBuildingName: String = ""
@@ -13,7 +12,7 @@ struct FloorView: View {
         NavigationStack {
             VStack {
                 VStack {
-                    Text("\($buildingsModel.getBuildingById(buildingId)?.name ?? "Unknown") > Floors")
+                    Text("\(building.name) > Floors")
                         .font(.system(size: 14))
                         .fontWeight(.heavy)
                     Spacer()
@@ -25,9 +24,9 @@ struct FloorView: View {
                         .padding(.horizontal, 10)
                         .frame(width: 180)
                     
-                    if buildingsModel.getFloors(byBuildingId: buildingId).isEmpty {
+                    if building.floors.isEmpty {
                         VStack {
-                            Text("Add Floor to \(buildingsModel.getBuildingById(buildingId)?.name ?? "Unknown") with + icon")
+                            Text("Add Floor to \(building.name) with + icon")
                                 .foregroundColor(.gray)
                                 .font(.headline)
                                 .padding()
@@ -38,7 +37,7 @@ struct FloorView: View {
                         ScrollView {
                             LazyVStack(spacing: 25) {
                                 ForEach(filteredFloors, id: \.id) { floor in
-                                    NavigationLink(destination: RoomView(floorId: floor.id, buildingId: buildingId)) {
+                                    NavigationLink(destination: RoomView( floor: floor, buildingName: building.name)) {
                                         DefaultCardView(name: floor.name, date: floor.lastUpdate)
                                     }
                                 }
@@ -73,14 +72,14 @@ struct FloorView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .principal) {
-                Text("\(buildingsModel.getBuildingById(buildingId)?.name ?? "Unknown")")
-                    .font(.system(size: 26, weight: .heavy))
-                    .foregroundColor(.white)
-            }
+//            ToolbarItem(placement: .principal) {
+//                Text("\(building.name)")
+//                    .font(.system(size: 26, weight: .heavy))
+//                    .foregroundColor(.white)
+//            }
             ToolbarItem(placement: .navigationBarTrailing) {
                 HStack {
-                    NavigationLink(destination: AddFloorView(selectedBuilding: buildingId)) {
+                    NavigationLink(destination: AddFloorView(building: building)) {
                         Image(systemName: "plus.circle.fill")
                             .font(.system(size: 26))
                             .foregroundStyle(.white, .blue, .blue)
@@ -90,27 +89,24 @@ struct FloorView: View {
                             // Azione per il pulsante "Rename"
                             isRenameSheetPresented = true
                         }) {
-                            Text("Rename")
-                            Image(systemName: "pencil")
+                            Label("Rename", systemImage: "pencil")
                         }
                         Button(action: {
                             print("Upload Building to Server button tapped")
                         }) {
-                            Text("Upload Building to Server")
-                            Image(systemName: "icloud.and.arrow.up")
+                            Label("Upload Building to Server", systemImage: "icloud.and.arrow.up")
                         }
                         Button(action: {
                             print("Info button tapped")
                         }) {
-                            Text("Info")
-                            Image(systemName: "info.circle")
+                            Label("Info", systemImage: "info.circle")
                         }
                         Button(action: {
                             print("Delete Building button tapped")
                         }) {
-                            Text("Delete Building")
-                            Image(systemName: "trash")
-                        }.foregroundColor(.red)
+                            Label("Delete Building", systemImage: "trash")
+                                .foregroundColor(.red)
+                        }
                     } label: {
                         Image(systemName: "pencil.circle.fill")
                             .font(.system(size: 26))
@@ -138,7 +134,7 @@ struct FloorView: View {
                 Spacer()
                 Button(action: {
                     if !newBuildingName.isEmpty {
-                        buildingsModel.renameBuilding(id: buildingId, newName: newBuildingName)
+                        building.name = newBuildingName
                         newBuildingName = ""
                         isRenameSheetPresented = false
                     }
@@ -161,9 +157,9 @@ struct FloorView: View {
     
     var filteredFloors: [Floor] {
         if searchText.isEmpty {
-            return buildingsModel.getFloors(byBuildingId: buildingId)
+            return building.floors
         } else {
-            return buildingsModel.getFloors(byBuildingId: buildingId).filter { $0.name.lowercased().contains(searchText.lowercased()) }
+            return building.floors.filter { $0.name.lowercased().contains(searchText.lowercased()) }
         }
     }
 }
@@ -171,8 +167,8 @@ struct FloorView: View {
 struct FloorView_Previews: PreviewProvider {
     static var previews: some View {
         let buildingModel = BuildingModel.getInstance()
-        let firstBuildingId = buildingModel.initTryData()
+        let firstBuilding = buildingModel.initTryData()
         
-        return FloorView(buildingId: firstBuildingId).environmentObject(buildingModel)
+        return FloorView(building: firstBuilding)
     }
 }

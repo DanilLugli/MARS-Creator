@@ -2,8 +2,8 @@ import Foundation
 import ARKit
 import SceneKit
 
-class Room: Codable {
-    private var _id: UUID
+class Room: Encodable {
+    private var _id: UUID = UUID()
     private var _name: String
     private var _lastUpdate: Date
     private var _referenceMarkers: [ReferenceMarker]
@@ -13,8 +13,7 @@ class Room: Codable {
     private var _worldMap: ARWorldMap?
     private var _roomURL: URL
     
-    init(id: UUID, name: String, lastUpdate: Date, referenceMarkers: [ReferenceMarker], transitionZones: [TransitionZone], sceneObjects: [SCNNode], scene: SCNScene?, worldMap: ARWorldMap?, roomURL: URL) {
-        self._id = id
+    init(name: String, lastUpdate: Date, referenceMarkers: [ReferenceMarker], transitionZones: [TransitionZone], sceneObjects: [SCNNode], scene: SCNScene?, worldMap: ARWorldMap?, roomURL: URL) {
         self._name = name
         self._lastUpdate = lastUpdate
         self._referenceMarkers = referenceMarkers
@@ -82,7 +81,7 @@ class Room: Codable {
         }
     }
     
-    // Implementazione personalizzata di Codable
+    // Implementazione personalizzata di Encodable
     private enum CodingKeys: String, CodingKey {
         case name
         case lastUpdate
@@ -100,40 +99,12 @@ class Room: Codable {
         try container.encode(_transitionZones, forKey: .transitionZones)
     }
     
-    required init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        _name = try container.decode(String.self, forKey: .name)
-        _lastUpdate = try container.decode(Date.self, forKey: .lastUpdate)
-        let referenceMarkersCount = try container.decode(Int.self, forKey: .referenceMarkersCount)
-        let transitionZonesCount = try container.decode(Int.self, forKey: .transitionZonesCount)
-        _transitionZones = try container.decode([TransitionZone].self, forKey: .transitionZones)
-        
-        // Placeholder values
-        _id = UUID()
-//        _referenceMarkers = Array(repeating: ReferenceMarker(id: UUID(), image: Image(, imageName: String, coordinates: <#Coordinates#>, rmUML: <#URL#>), count: referenceMarkersCount)
-        _sceneObjects = []
-        _scene = nil
-        _worldMap = nil
-        _roomURL = URL(string: "https://example.com")!
-    }
-    
-    // JSON Serialization using Codable
+    // JSON Serialization using Encodable
     func toJSON() -> String? {
         if let jsonData = try? JSONEncoder().encode(self) {
             return String(data: jsonData, encoding: .utf8)
         }
         return nil
-    }
-    
-    static func fromJSON(_ jsonString: String) -> Room? {
-        if let jsonData = jsonString.data(using: .utf8) {
-            return try? JSONDecoder().decode(Room.self, from: jsonData)
-        }
-        return nil
-    }
-    
-    func loadWorldMap() {
-        // Implement logic to load world map
     }
     
     func addReferenceMarker(referenceMarker: ReferenceMarker) {
@@ -146,17 +117,5 @@ class Room: Codable {
     
     func deleteTransitionZone(transitionZone: TransitionZone) {
         _transitionZones.removeAll { $0.id == transitionZone.id }
-    }
-    
-    func loadSceneObjects() -> [SCNNode] {
-        // Implement logic to load scene objects
-    }
-    
-    func loadScene() -> SCNScene? {
-        // Implement logic to load scene
-    }
-    
-    func toFile() {
-        // Implement logic to save to file
     }
 }

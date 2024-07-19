@@ -8,22 +8,19 @@
 import Foundation
 import SwiftUI
 
-import Foundation
-import SwiftUI
-
 class ReferenceMarker: Codable {
-    private var _id: UUID
-    private var _image: Image
+    private var _id: UUID = UUID()
+    private var _image: Image? = nil
+    private var _imagePath : URL
     private var _imageName: String
     private var _coordinates: Coordinates
     private var _rmUML: URL
     
-    init(id: UUID, image: Image, imageName: String, coordinates: Coordinates, rmUML: URL) {
-        self._id = id
-        self._image = image
-        self._imageName = imageName
-        self._coordinates = coordinates
-        self._rmUML = rmUML
+    init(_imagePath: URL, _imageName: String, _coordinates: Coordinates, _rmUML: URL) {
+        self._imagePath = _imagePath
+        self._imageName = _imageName
+        self._coordinates = _coordinates
+        self._rmUML = _rmUML
     }
     
     var id: UUID {
@@ -31,8 +28,16 @@ class ReferenceMarker: Codable {
     }
     
     var image: Image {
-        return _image
-    }
+            if _image == nil {
+                if let imageData = try? Data(contentsOf: _imagePath),
+                   let uiImage = UIImage(data: imageData) {
+                    _image = Image(uiImage: uiImage)
+                } else {
+                    _image = Image(systemName: "photo") // Placeholder image in case of failure
+                }
+            }
+            return _image!
+        }
     
     var imageName: String {
         return _imageName
@@ -47,49 +52,28 @@ class ReferenceMarker: Codable {
     }
     
     // Implementazione personalizzata di Codable
-    private enum CodingKeys: String, CodingKey {
-        case id
-        case imageName
-        case coordinates
-        case rmUML
-    }
-    
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(_id, forKey: .id)
-        try container.encode(_imageName, forKey: .imageName)
-        try container.encode(_coordinates, forKey: .coordinates)
-        try container.encode(_rmUML, forKey: .rmUML)
-    }
-    
-    required init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        _id = try container.decode(UUID.self, forKey: .id)
-        _imageName = try container.decode(String.self, forKey: .imageName)
-        _coordinates = try container.decode(Coordinates.self, forKey: .coordinates)
-        _rmUML = try container.decode(URL.self, forKey: .rmUML)
+        private enum CodingKeys: String, CodingKey {
+            case id
+            case imageName
+            case coordinates
+            case rmUML
+        }
         
-        // Placeholder value for the image
-        _image = Image("")
-    }
-    
-    // JSON Serialization using Codable
-    func toJSON() -> String? {
-        if let jsonData = try? JSONEncoder().encode(self) {
-            return String(data: jsonData, encoding: .utf8)
+        func encode(to encoder: Encoder) throws {
+            var container = encoder.container(keyedBy: CodingKeys.self)
+            try container.encode(_id, forKey: .id)
+            try container.encode(_imageName, forKey: .imageName)
+            try container.encode(_coordinates, forKey: .coordinates)
+            try container.encode(_rmUML, forKey: .rmUML)
         }
-        return nil
-    }
-    
-    static func fromJSON(_ jsonString: String) -> ReferenceMarker? {
-        if let jsonData = jsonString.data(using: .utf8) {
-            return try? JSONDecoder().decode(ReferenceMarker.self, from: jsonData)
+        
+        required init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            _id = try container.decode(UUID.self, forKey: .id)
+            _imageName = try container.decode(String.self, forKey: .imageName)
+            _coordinates = try container.decode(Coordinates.self, forKey: .coordinates)
+            _rmUML = try container.decode(URL.self, forKey: .rmUML)
+            _imagePath = URL(string: _imageName)!
         }
-        return nil
-    }
 }
 
-//struct Coordinates: Codable {
-//    var x: Double
-//    var y: Double
-//}

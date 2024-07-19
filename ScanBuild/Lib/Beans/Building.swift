@@ -7,15 +7,14 @@
 
 import Foundation
 
-class Building: Codable, ObservableObject {
-    private var _id: UUID
+class Building: Encodable, ObservableObject {
+    private var _id = UUID()
     private var _name: String
     private var _lastUpdate: Date
     private var _floors: [Floor]
     private var _buildingURL: URL
     
-    init(id: UUID, name: String, lastUpdate: Date, floors: [Floor], buildingURL: URL) {
-        self._id = id
+    init(name: String, lastUpdate: Date, floors: [Floor], buildingURL: URL) {
         self._name = name
         self._lastUpdate = lastUpdate
         self._floors = floors
@@ -26,7 +25,6 @@ class Building: Codable, ObservableObject {
         get {
             return _id
         }
-        // Il setter non è necessario poiché `id` è read-only
     }
     
     var name: String {
@@ -42,14 +40,12 @@ class Building: Codable, ObservableObject {
         get {
             return _lastUpdate
         }
-        // Il setter non è necessario poiché `lastUpdate` è read-only
     }
     
     var floors: [Floor] {
         get {
-            return _floors
+            return Array(_floors)
         }
-        // Il setter non è necessario poiché `floors` è read-only
     }
     
     var buildingURL: URL {
@@ -58,23 +54,29 @@ class Building: Codable, ObservableObject {
         }
     }
     
-    static func fromJson(json: String) -> Building {
-        // Implement JSON deserialization logic
-        // Placeholder implementation, replace with actual logic
-        return Building(id: UUID(), name: "", lastUpdate: Date(), floors: [], buildingURL: URL(string: "https://example.com")!)
+    // Implementazione personalizzata di Encodable
+    private enum CodingKeys: String, CodingKey {
+        case name
+        case lastUpdate
+        case floors
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(_name, forKey: .name)
+        try container.encode(_lastUpdate, forKey: .lastUpdate)
+        try container.encode(_floors, forKey: .floors)
     }
     
     func addFloor(floor: Floor) {
-        // Implement logic to add floor
         _floors.append(floor)
     }
     
     func deleteFloorByName(name: String) {
-        // Implement logic to delete floor by name
         _floors.removeAll { $0.name == name }
     }
     
     func createARLFile(fileURL: URL) {
-        // Implement logic to create ARL file
+        // TODO: Implement logic to create ARL file
     }
 }

@@ -4,26 +4,21 @@ import SwiftUI
 struct RoomView: View {
     
     @State var showRooms: Bool = false
-    @State var floorId : UUID
-    @State var buildingId : UUID
-    @ObservedObject var buildingsModel = BuildingModel.getInstance()
+    @State var floor : Floor
+    var buildingName: String
     @State private var searchText: String = ""
     @State private var isRenameSheetPresented = false
     @State private var newBuildingName: String = ""
     
     var floorName: String {
-        buildingsModel.getFloorById(floorId)?.name ?? "Unknown"
+        floor.name
     }
     
-    var buildingName: String {
-        buildingsModel.getBuildingById(buildingId)?.name ?? "Unknown"
-    }
-
     var body: some View {
         NavigationStack {
             VStack{
                 VStack {
-                    Text(showRooms ? "\(buildingName) > \(floorName) > Rooms" : " \(buildingName)  > \(floorName) > Planimetry")
+                    Text(!showRooms ? "\(buildingName) > \(floorName) > Rooms" : " \(buildingName)  > \(floorName) > Planimetry")
                         .font(.system(size: 14))
                         .fontWeight(.heavy)
                     Spacer()
@@ -35,7 +30,7 @@ struct RoomView: View {
                         .padding(.horizontal, 10)
                         .frame(width: 180)
                     
-                    if buildingsModel.getRooms(byFloorId: floorId).isEmpty {
+                    if floor.rooms.isEmpty {
                         VStack {
                             Text("Add Room to \(floorName) with + icon")
                                 .foregroundColor(.gray)
@@ -50,10 +45,11 @@ struct RoomView: View {
                                 if !showRooms {
                                     Text("PLANIMETRY").foregroundColor(.white)
                                 } else {
-                                    ForEach(filteredRooms) { room in
-                                        NavigationLink(destination: MarkerView(floorId: floorId, buildingId: buildingId, roomId: room.id)) {
-                                            DefaultCardView(name: room.name, date: room.date)
-                                        }
+                                    ForEach(filteredRooms, id: \.id) { room in
+//                                        NavigationLink(destination: MarkerView(floorId: floorId, buildingId: buildingId, roomId: room.id))
+                                        
+                                            DefaultCardView(name: room.name, date: room.lastUpdate)
+                                        
                                     }
                                 }
                             }
@@ -239,9 +235,9 @@ struct RoomView: View {
     
     var filteredRooms: [Room] {
         if searchText.isEmpty {
-            return buildingsModel.getRooms(byFloorId: floorId)
+            return floor.rooms
         } else {
-            return buildingsModel.getRooms(byFloorId: floorId).filter { $0.name.lowercased().contains(searchText.lowercased()) }
+            return floor.rooms.filter { $0.name.lowercased().contains(searchText.lowercased()) }
         }
     }
 }
@@ -250,9 +246,9 @@ struct RoomView: View {
 struct RoomView_Previews: PreviewProvider {
     static var previews: some View {
         let buildingModel = BuildingModel.getInstance()
-        let buildingId = buildingModel.initTryData()
-        let floorId = buildingModel.getFloors(byBuildingId: buildingId).first!.id
+        let building = buildingModel.initTryData()
+        let floor = building.floors.first!
         
-        return RoomView(floorId: floorId, buildingId: buildingId).environmentObject(buildingModel)
+        return RoomView( floor: floor, buildingName: building.name)
     }
 }

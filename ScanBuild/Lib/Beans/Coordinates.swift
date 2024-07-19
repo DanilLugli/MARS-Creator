@@ -8,21 +8,21 @@
 import Foundation
 
 class Coordinates: Codable {
-    var x: Double
-    var y: Double
+    var x: Float
+    var y: Float
     
-    init(x: Double, y: Double) {
+    init(x: Float, y: Float) {
         self.x = x
         self.y = y
     }
     
-    var getX: Double {
+    var getX: Float {
         get {
             return x
         }
     }
     
-    var getY: Double {
+    var getY: Float {
         get {
             return y
         }

@@ -13,7 +13,6 @@ struct MatrixView: View {
     
     @Environment(\.presentationMode) var presentationMode
     @Environment(\.dismiss) private var dismiss
-    @ObservedObject var buildingsModel = BuildingModel.getInstance()
     
     // Lista hard coded di oggetti
     let items = ["Muri", "Sedie", "Porte", "Tavoli"]
@@ -118,7 +117,7 @@ struct MatrixView: View {
         static var previews: some View {
             let buildingModel = BuildingModel.getInstance()
             let firstBuildingIndex = buildingModel.initTryData()
-            return MatrixView().environmentObject(buildingModel)
+            return MatrixView()
         }
     }
 }
