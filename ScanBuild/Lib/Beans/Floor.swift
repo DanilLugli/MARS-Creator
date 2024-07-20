@@ -3,7 +3,7 @@ import SceneKit
 import simd
 import SwiftUI
 
-class Floor: Encodable {
+class Floor: Encodable, Identifiable{
     
     private var _id = UUID()
     private var _name: String

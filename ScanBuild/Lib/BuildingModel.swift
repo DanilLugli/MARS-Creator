@@ -43,12 +43,12 @@ class BuildingModel: ObservableObject {
             
             // Aggiungi 5 piani al primo edificio
             for j in 1...5 {
-                let floor = Floor(name: "Floor \(i)_\(j)", lastUpdate: Date(), planimetry: Image(""), associationMatrix: [String : RotoTraslationMatrix](), rooms: [], sceneObjects: nil, scene: nil, sceneConfiguration: nil, floorURL: URL(fileURLWithPath: ""))
+                let floor = Floor(name: "Floor \(i)", lastUpdate: Date(), planimetry: Image(""), associationMatrix: [String : RotoTraslationMatrix](), rooms: [], sceneObjects: nil, scene: nil, sceneConfiguration: nil, floorURL: URL(fileURLWithPath: ""))
                 
                 
                 for k in 1...5 {
                     
-                    let room = Room(name: "Room \(k)>\(i)_\(j)", lastUpdate: Date(), referenceMarkers: [], transitionZones: [], sceneObjects: [], scene: nil, worldMap: nil, roomURL: URL(fileURLWithPath: ""))
+                    let room = Room(name: "Room \(k)", lastUpdate: Date(), referenceMarkers: [], transitionZones: [], sceneObjects: [], scene: nil, worldMap: nil, roomURL: URL(fileURLWithPath: ""))
                     for z in 1...2 {
                         let xMin = Float.random(in: 0...10)
                         let yMin = Float.random(in: 0...10)

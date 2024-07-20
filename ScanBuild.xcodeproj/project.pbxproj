@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		AA2CA5242C39FC7B00C88C94 /* ShowConnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA5232C39FC7B00C88C94 /* ShowConnectionView.swift */; };
 		AA2CA5262C39FF3000C88C94 /* AddFloorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA5252C39FF3000C88C94 /* AddFloorView.swift */; };
 		AA2CA54C2C3D7ABA00C88C94 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA54B2C3D7ABA00C88C94 /* ContentView.swift */; };
 		AA2CA54E2C3DB1BC00C88C94 /* ScanningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA54D2C3DB1BC00C88C94 /* ScanningView.swift */; };
@@ -18,7 +17,6 @@
 		AA2CA5592C3EF87A00C88C94 /* ReferenceMarker.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA5582C3EF87A00C88C94 /* ReferenceMarker.swift */; };
 		AA2CA55B2C3F07A500C88C94 /* MarkerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA55A2C3F07A500C88C94 /* MarkerView.swift */; };
 		AA2CA55D2C3FC62400C88C94 /* MatrixView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA55C2C3FC62400C88C94 /* MatrixView.swift */; };
-		AA2CA55F2C3FECAA00C88C94 /* ShowMarkerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA55E2C3FECAA00C88C94 /* ShowMarkerView.swift */; };
 		AA64CC7C2C47F8EE005C883B /* SameFloorConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA64CC7B2C47F8EE005C883B /* SameFloorConnection.swift */; };
 		AA64CC7E2C47F903005C883B /* AdjacentFloorsConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA64CC7D2C47F903005C883B /* AdjacentFloorsConnection.swift */; };
 		AA64CC802C47F91F005C883B /* ElevatorConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA64CC7F2C47F91F005C883B /* ElevatorConnection.swift */; };
@@ -52,7 +50,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		AA2CA5232C39FC7B00C88C94 /* ShowConnectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShowConnectionView.swift; sourceTree = "<group>"; };
 		AA2CA5252C39FF3000C88C94 /* AddFloorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFloorView.swift; sourceTree = "<group>"; };
 		AA2CA54B2C3D7ABA00C88C94 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		AA2CA54D2C3DB1BC00C88C94 /* ScanningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanningView.swift; sourceTree = "<group>"; };
@@ -63,7 +60,6 @@
 		AA2CA5582C3EF87A00C88C94 /* ReferenceMarker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReferenceMarker.swift; sourceTree = "<group>"; };
 		AA2CA55A2C3F07A500C88C94 /* MarkerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkerView.swift; sourceTree = "<group>"; };
 		AA2CA55C2C3FC62400C88C94 /* MatrixView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatrixView.swift; sourceTree = "<group>"; };
-		AA2CA55E2C3FECAA00C88C94 /* ShowMarkerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShowMarkerView.swift; sourceTree = "<group>"; };
 		AA64CC7B2C47F8EE005C883B /* SameFloorConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SameFloorConnection.swift; sourceTree = "<group>"; };
 		AA64CC7D2C47F903005C883B /* AdjacentFloorsConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdjacentFloorsConnection.swift; sourceTree = "<group>"; };
 		AA64CC7F2C47F91F005C883B /* ElevatorConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElevatorConnection.swift; sourceTree = "<group>"; };
@@ -153,8 +149,6 @@
 				AA2CA55A2C3F07A500C88C94 /* MarkerView.swift */,
 				AA2CA54D2C3DB1BC00C88C94 /* ScanningView.swift */,
 				AA2CA55C2C3FC62400C88C94 /* MatrixView.swift */,
-				AA2CA5232C39FC7B00C88C94 /* ShowConnectionView.swift */,
-				AA2CA55E2C3FECAA00C88C94 /* ShowMarkerView.swift */,
 				AA78F5E02C2DB6DE0044F825 /* AddBuildingView.swift */,
 				AAE57F9F2C376D0D00F0196F /* AddConnectionView.swift */,
 				AA2CA5252C39FF3000C88C94 /* AddFloorView.swift */,
@@ -314,7 +308,6 @@
 				AAE57FAB2C384E6400F0196F /* DefaultCardView.swift in Sources */,
 				AA2CA55B2C3F07A500C88C94 /* MarkerView.swift in Sources */,
 				AAE57FB12C385D2B00F0196F /* ConnectedDotsView.swift in Sources */,
-				AA2CA5242C39FC7B00C88C94 /* ShowConnectionView.swift in Sources */,
 				AA2CA55D2C3FC62400C88C94 /* MatrixView.swift in Sources */,
 				AA2CA5512C3DB5F400C88C94 /* RoomCaptureViewContainer.swift in Sources */,
 				AA64CC862C495D73005C883B /* Rectangle.swift in Sources */,
@@ -334,7 +327,6 @@
 				AA2CA5532C3DB60300C88C94 /* ARSCNViewContainer.swift in Sources */,
 				AA78F5F32C3430C80044F825 /* ServerManager.swift in Sources */,
 				AAA29E712C1711AA00CA267C /* ViewController.swift in Sources */,
-				AA2CA55F2C3FECAA00C88C94 /* ShowMarkerView.swift in Sources */,
 				AA78F5ED2C3303910044F825 /* Logger.swift in Sources */,
 				AA2CA5572C3DB61E00C88C94 /* SCNViewContainer.swift in Sources */,
 				AAE57F9E2C3764FC00F0196F /* RoomView.swift in Sources */,
@@ -496,6 +488,7 @@
 				INFOPLIST_KEY_UIRequiredDeviceCapabilities = "arkit metal";
 				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
+				INFOPLIST_KEY_UIStatusBarStyle = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = UIInterfaceOrientationLandscapeRight;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeRight";
@@ -528,6 +521,7 @@
 				INFOPLIST_KEY_UIRequiredDeviceCapabilities = "arkit metal";
 				INFOPLIST_KEY_UIRequiresFullScreen = YES;
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
+				INFOPLIST_KEY_UIStatusBarStyle = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = UIInterfaceOrientationLandscapeRight;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeRight";

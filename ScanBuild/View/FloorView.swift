@@ -46,37 +46,17 @@ struct FloorView: View {
                         .padding()
                     }
                 }
-                HStack {
-                    Button(action: {
-                        // Azione del pulsante per aggiungere un piano
-                    }) {
-                        Text("ADD FLOOR")
-                            .fontWeight(.heavy)
-                            .font(.system(size: 20))
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                            .shadow(color: Color.white.opacity(0.5), radius: 10, x: 0, y: 0)
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    .frame(width: 170, height: 60)
-                    .background(Color.blue)
-                    .cornerRadius(10)
-                    .padding([.trailing], 16)
-                }
             }
             .background(Color.customBackground)
             .foregroundColor(.white)
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-//            ToolbarItem(placement: .principal) {
-//                Text("\(building.name)")
-//                    .font(.system(size: 26, weight: .heavy))
-//                    .foregroundColor(.white)
-//            }
+            ToolbarItem(placement: .principal) {
+                Text("\(building.name)")
+                    .font(.system(size: 26, weight: .heavy))
+                    .foregroundColor(.white)
+            }
             ToolbarItem(placement: .navigationBarTrailing) {
                 HStack {
                     NavigationLink(destination: AddFloorView(building: building)) {

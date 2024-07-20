@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-class TransitionZone: Codable {
+class TransitionZone: Codable, Identifiable {
     private var _id: UUID = UUID()
     private var _name: String
     private var _connection: Connection?

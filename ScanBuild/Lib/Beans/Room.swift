@@ -2,7 +2,7 @@ import Foundation
 import ARKit
 import SceneKit
 
-class Room: Encodable {
+class Room: Encodable, Identifiable {
     private var _id: UUID = UUID()
     private var _name: String
     private var _lastUpdate: Date
