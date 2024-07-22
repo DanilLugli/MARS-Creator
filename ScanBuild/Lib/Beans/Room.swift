@@ -2,15 +2,15 @@ import Foundation
 import ARKit
 import SceneKit
 
-class Room: Encodable, Identifiable {
+class Room: Encodable, Identifiable, ObservableObject {
     private var _id: UUID = UUID()
-    private var _name: String
+    @Published private var _name: String
     private var _lastUpdate: Date
-    private var _referenceMarkers: [ReferenceMarker]
-    private var _transitionZones: [TransitionZone]
-    private var _sceneObjects: [SCNNode]
-    private var _scene: SCNScene?
-    private var _worldMap: ARWorldMap?
+    @Published private var _referenceMarkers: [ReferenceMarker]
+    @Published private var _transitionZones: [TransitionZone]
+    @Published private var _sceneObjects: [SCNNode]
+    @Published private var _scene: SCNScene?
+    @Published private var _worldMap: ARWorldMap?
     private var _roomURL: URL
     
     init(name: String, lastUpdate: Date, referenceMarkers: [ReferenceMarker], transitionZones: [TransitionZone], sceneObjects: [SCNNode], scene: SCNScene?, worldMap: ARWorldMap?, roomURL: URL) {
@@ -117,5 +117,10 @@ class Room: Encodable, Identifiable {
     
     func deleteTransitionZone(transitionZone: TransitionZone) {
         _transitionZones.removeAll { $0.id == transitionZone.id }
+    }
+
+    // Nuovo metodo per ottenere tutte le connessioni
+    func getConnections() -> [Connection] {
+        return _transitionZones.compactMap { $0.connection }
     }
 }

@@ -9,9 +9,9 @@ import Foundation
 
 class Building: Encodable, ObservableObject {
     private var _id = UUID()
-    private var _name: String
+    @Published private var _name: String
     private var _lastUpdate: Date
-    private var _floors: [Floor]
+    @Published private var _floors: [Floor]
     private var _buildingURL: URL
     
     init(name: String, lastUpdate: Date, floors: [Floor], buildingURL: URL) {
@@ -44,7 +44,7 @@ class Building: Encodable, ObservableObject {
     
     var floors: [Floor] {
         get {
-            return Array(_floors)
+            return _floors
         }
     }
     

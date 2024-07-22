@@ -8,7 +8,7 @@ class BuildingModel: ObservableObject {
     private static var _instance: BuildingModel?
     private static let LOGGER = Logger(tag: String(describing: BuildingModel.self))
     
-    private static var SCANBUILD_ROOT: URL {
+    static var SCANBUILD_ROOT: URL {
         let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
         return documentsDirectory.appendingPathComponent("ScanBuild")
     }
@@ -37,18 +37,20 @@ class BuildingModel: ObservableObject {
             return self.getBuildings()[0]
         }
         
+        //Aggiungi 10 building
         for i in 1...10 {
             let building = Building(name: "Building \(i)", lastUpdate: Date(), floors: [], buildingURL: URL(fileURLWithPath: ""))
-            
-            
+
             // Aggiungi 5 piani al primo edificio
             for j in 1...5 {
-                let floor = Floor(name: "Floor \(i)", lastUpdate: Date(), planimetry: Image(""), associationMatrix: [String : RotoTraslationMatrix](), rooms: [], sceneObjects: nil, scene: nil, sceneConfiguration: nil, floorURL: URL(fileURLWithPath: ""))
+                let floor = Floor(name: "Floor \(j)", lastUpdate: Date(), planimetry: Image(""), associationMatrix: [String : RotoTraslationMatrix](), rooms: [], sceneObjects: nil, scene: nil, sceneConfiguration: nil, floorURL: URL(fileURLWithPath: ""))
                 
                 
                 for k in 1...5 {
-                    
+                    //Aggiungi 5 Room al primo piano
                     let room = Room(name: "Room \(k)", lastUpdate: Date(), referenceMarkers: [], transitionZones: [], sceneObjects: [], scene: nil, worldMap: nil, roomURL: URL(fileURLWithPath: ""))
+                    
+                    //Aggiungi 2 TransitionZone alla Room
                     for z in 1...2 {
                         let xMin = Float.random(in: 0...10)
                         let yMin = Float.random(in: 0...10)
@@ -202,7 +204,7 @@ class BuildingModel: ObservableObject {
     }
     
     func getBuildings() -> [Building] {
-        return Array(buildings)
+        return buildings
     }
     
     func addBuilding(building: Building) {

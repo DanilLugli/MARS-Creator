@@ -8,11 +8,11 @@
 import Foundation
 import SwiftUI
 
-class ReferenceMarker: Codable, Identifiable {
+class ReferenceMarker: Codable, Identifiable, ObservableObject {
     private var _id: UUID = UUID()
-    private var _image: Image? = nil
+    @Published private var _image: Image? = nil
     private var _imagePath : URL
-    private var _imageName: String
+    @Published private var _imageName: String
     private var _coordinates: Coordinates
     private var _rmUML: URL
     
@@ -57,6 +57,7 @@ class ReferenceMarker: Codable, Identifiable {
             case imageName
             case coordinates
             case rmUML
+            case imagePath
         }
         
         func encode(to encoder: Encoder) throws {
@@ -65,6 +66,7 @@ class ReferenceMarker: Codable, Identifiable {
             try container.encode(_imageName, forKey: .imageName)
             try container.encode(_coordinates, forKey: .coordinates)
             try container.encode(_rmUML, forKey: .rmUML)
+            try container.encode(_imagePath, forKey: .imagePath)
         }
         
         required init(from decoder: Decoder) throws {
@@ -73,7 +75,7 @@ class ReferenceMarker: Codable, Identifiable {
             _imageName = try container.decode(String.self, forKey: .imageName)
             _coordinates = try container.decode(Coordinates.self, forKey: .coordinates)
             _rmUML = try container.decode(URL.self, forKey: .rmUML)
-            _imagePath = URL(string: _imageName)!
+            _imagePath = try container.decode(URL.self, forKey: .imagePath)
         }
 }
 

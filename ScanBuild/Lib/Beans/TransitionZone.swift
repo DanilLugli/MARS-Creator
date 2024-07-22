@@ -8,6 +8,7 @@ class TransitionZone: Codable, Identifiable {
     private var _transitionArea: Coordinates
     private var _tzJsonURL: URL
     
+
     init(name: String, connection: Connection?, transitionArea: Coordinates, tzJsonURL: URL) {
         self._name = name
         self._connection = connection
@@ -33,6 +34,8 @@ class TransitionZone: Codable, Identifiable {
     var connection: Connection? {
         get {
             return _connection
+        }set{
+            _connection = newValue
         }
     }
     

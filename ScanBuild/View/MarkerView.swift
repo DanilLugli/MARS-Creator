@@ -4,8 +4,8 @@ import Foundation
 struct MarkerView: View {
     
     @State var room: Room
-    var buildingName: String
-    var floorName: String
+    var building: Building
+    var floor: Floor
     @State private var searchText: String = ""
     @State private var isRenameSheetPresented = false
     @State private var newBuildingName: String = ""
@@ -16,7 +16,7 @@ struct MarkerView: View {
         NavigationStack {
             VStack {
                 VStack {
-                    Text("\(buildingName) > \(floorName) > \(room.name) > \(tabTitle)")
+                    Text("\(building.name) > \(floor.name) > \(room.name) > \(tabTitle)")
                         .font(.system(size: 14))
                         .fontWeight(.heavy)
                     Spacer()
@@ -36,7 +36,6 @@ struct MarkerView: View {
                         .background(Color.customBackground)
                         .tabItem {
                             Label("Planimetry", systemImage: "map")
-                                .foregroundColor(selectedTab == 0 ? .white : .blue)
                         }
                         .tag(0)
                         
@@ -69,7 +68,6 @@ struct MarkerView: View {
                         .background(Color.customBackground)
                         .tabItem {
                             Label("Marker", systemImage: "mappin.and.ellipse")
-                                .foregroundColor(selectedTab == 1 ? .white : .blue)
                         }
                         .tag(1)
                         
@@ -80,154 +78,178 @@ struct MarkerView: View {
                         .background(Color.customBackground)
                         .tabItem {
                             Label("TransitionZone", systemImage: "arrow.triangle.turn.up.right.diamond.fill")
-                                .foregroundColor(selectedTab == 2 ? .white : .blue)
                         }
                         .tag(2)
                         
                         VStack {
-                            Text("CONNECTION").foregroundColor(.white)
+                            if room.getConnections().isEmpty {
+                                VStack {
+                                    Text("No connections available for \(room.name)")
+                                        .foregroundColor(.gray)
+                                        .font(.headline)
+                                        .padding()
+                                }
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .background(Color.customBackground)
+                            } else {
+                                ScrollView {
+                                    LazyVStack(spacing: 25) {
+                                        ForEach(room.getConnections(), id: \.id) { connection in
+                                            DefaultCardView(name: connection.name, date: Date())
+                                        }
+                                    }
+                                }
+                                .padding()
+                            }
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(Color.customBackground)
                         .tabItem {
                             Label("Connection", systemImage: "link")
-                                .foregroundColor(selectedTab == 3 ? .blue : .white)
                         }
                         .tag(3)
                     }
-                    .accentColor(.white)
                 }
             }
             .background(Color.customBackground)
             .foregroundColor(.white)
-        }
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                Text(tabTitle)
-                    .font(.system(size: 26, weight: .heavy))
-                    .foregroundColor(.white)
-            }
-            ToolbarItem(placement: .navigationBarTrailing) {
-                HStack {
-                    if selectedTab == 1 {
-                        NavigationLink(destination: Text("Add Marker View")) {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.system(size: 26))
-                                .foregroundStyle(.white, .blue, .blue)
-                        }
-                        Menu {
-                            Button(action: {
-                                // Azione per il pulsante "Rename"
-                                isRenameSheetPresented = true
-                            }) {
-                                Text("Rename")
-                                Image(systemName: "pencil")
+            .navigationTitle(tabTitle)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+//                ToolbarItem(placement: .navigationBarLeading) {
+//                    Button(action: {
+//                        Text("CIAO")
+//                    }) {
+//                        Image(systemName: "arrow.left")
+//                    }
+////                }
+//                ToolbarItem(placement: .principal) {
+//                    Text(tabTitle)
+//                        .font(.system(size: 26, weight: .heavy))
+//                        .foregroundColor(.white)
+//                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    HStack {
+                        if selectedTab == 1 {
+                            NavigationLink(destination: Text("Add Marker View")) {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.system(size: 26))
+                                    .foregroundStyle(.white, .blue, .blue)
                             }
-                            Button(action: {
-                                print("Upload Building to Server button tapped")
-                            }) {
-                                Text("Upload Building to Server")
-                                Image(systemName: "icloud.and.arrow.up")
+                            Menu {
+                                Button(action: {
+                                    // Azione per il pulsante "Rename"
+                                    isRenameSheetPresented = true
+                                }) {
+                                    Text("Rename")
+                                    Image(systemName: "pencil")
+                                }
+                                Button(action: {
+                                    print("Upload Building to Server button tapped")
+                                }) {
+                                    Text("Upload Building to Server")
+                                    Image(systemName: "icloud.and.arrow.up")
+                                }
+                                Button(action: {
+                                    print("Info button tapped")
+                                }) {
+                                    Text("Info")
+                                    Image(systemName: "info.circle")
+                                }
+                                Button(action: {
+                                    print("Delete Building button tapped")
+                                }) {
+                                    Text("Delete")
+                                    Image(systemName: "trash")
+                                }
+                            } label: {
+                                Image(systemName: "pencil.circle.fill")
+                                    .font(.system(size: 26))
+                                    .symbolRenderingMode(.palette)
+                                    .foregroundStyle(.white, .blue, .blue)
                             }
-                            Button(action: {
-                                print("Info button tapped")
-                            }) {
-                                Text("Info")
-                                Image(systemName: "info.circle")
+                        } else if selectedTab == 2 {
+                            NavigationLink(destination: Text("Add Transition Zone View")) {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.system(size: 26))
+                                    .foregroundStyle(.white, .blue, .blue)
                             }
-                            Button(action: {
-                                print("Delete Building button tapped")
-                            }) {
-                                Text("Delete")
-                                Image(systemName: "trash")
+                        } else if selectedTab == 3 {
+                            //TODO: aggiornare chiamata AddConnectionView
+                            NavigationLink(destination: AddConnectionView(selectedBuilding: building, selectedFloor: floor, selectedRoom: room)) {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.system(size: 26))
+                                    .foregroundStyle(.white, .blue, .blue)
                             }
-                        } label: {
-                            Image(systemName: "pencil.circle.fill")
-                                .font(.system(size: 26))
-                                .symbolRenderingMode(.palette)
-                                .foregroundStyle(.white, .blue, .blue)
-                        }
-                    } else if selectedTab == 2 {
-                        NavigationLink(destination: Text("Add Transition Zone View")) {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.system(size: 26))
-                                .foregroundStyle(.white, .blue, .blue)
-                        }
-                    } else if selectedTab == 3 {
-                        NavigationLink(destination: Text("Add Connection View")) {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.system(size: 26))
-                                .foregroundStyle(.white, .blue, .blue)
                         }
                     }
                 }
             }
-        }
-        .sheet(item: $selectedMarker) { marker in
-            VStack {
-                Text("Marker Details")
-                    .font(.system(size: 22))
-                    .fontWeight(.bold)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 20)
-                    .foregroundColor(.white)
-                Text("Details for \(marker.imageName)")
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(8)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 8)
-                Text("Rename Marker")
-                    .font(.system(size: 22))
-                    .fontWeight(.bold)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 20)
-                    .foregroundColor(.white)
-                TextField("New Marker Name", text: $newBuildingName)
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(8)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 8)
-                Spacer()
-                HStack {
-                    Button(action: {
-                        if !newBuildingName.isEmpty {
-                            // Salva il nuovo nome del marker
+            .sheet(item: $selectedMarker) { marker in
+                VStack {
+                    Text("Marker Details")
+                        .font(.system(size: 22))
+                        .fontWeight(.bold)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 20)
+                        .foregroundColor(.white)
+                    Text("Details for \(marker.imageName)")
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(8)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 8)
+                    Text("Rename Marker")
+                        .font(.system(size: 22))
+                        .fontWeight(.bold)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 20)
+                        .foregroundColor(.white)
+                    TextField("New Marker Name", text: $newBuildingName)
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(8)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 8)
+                    Spacer()
+                    HStack {
+                        Button(action: {
+                            if !newBuildingName.isEmpty {
+                                // Salva il nuovo nome del marker
+                            }
+                        }) {
+                            Text("SAVE")
+                                .font(.system(size: 22, weight: .heavy))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.blue)
+                                .cornerRadius(10)
                         }
-                    }) {
-                        Text("SAVE")
-                            .font(.system(size: 22, weight: .heavy))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.blue)
-                            .cornerRadius(10)
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 20)
+                        
+                        Button(action: {
+                            //TODO: deletereferenceMarker()
+                            selectedMarker = nil
+                        }) {
+                            Text("DELETE")
+                                .font(.system(size: 22, weight: .heavy))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(Color.red)
+                                .cornerRadius(10)
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 20)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 20)
-                    
-                    Button(action: {
-                        //TODO: deletereferenceMarker()
-                        selectedMarker = nil
-                    }) {
-                        Text("DELETE")
-                            .font(.system(size: 22, weight: .heavy))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.red)
-                            .cornerRadius(10)
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 20)
                 }
+                .padding()
+                .background(Color.customBackground.ignoresSafeArea())
             }
-            .padding()
-            .background(Color.customBackground.ignoresSafeArea())
         }
     }
     
@@ -256,6 +278,12 @@ struct MarkerView_Previews: PreviewProvider {
         let building = buildingModel.initTryData()
         let floor = building.floors.first!
         let room = floor.rooms.first!
-        return MarkerView(room: room, buildingName: building.name, floorName: floor.name)
+        return MarkerView(room: room, building: building, floor: floor)
     }
 }
+
+private let dateFormatter: DateFormatter = {
+    let formatter = DateFormatter()
+    formatter.dateStyle = .medium
+    return formatter
+}()

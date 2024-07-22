@@ -3,17 +3,17 @@ import SceneKit
 import simd
 import SwiftUI
 
-class Floor: Encodable, Identifiable{
+class Floor: Encodable, Identifiable, ObservableObject{
     
     private var _id = UUID()
-    private var _name: String
+    @Published private var _name: String
     private var _lastUpdate: Date
     private var _planimetry: Image
-    private var _associationMatrix: [String : RotoTraslationMatrix]
-    private var _rooms: [Room]
-    private var _sceneObjects: [SCNNode]?
-    private var _scene: SCNScene?
-    private var _sceneConfiguration: SCNScene?
+    @Published private var _associationMatrix: [String : RotoTraslationMatrix]
+    @Published private var _rooms: [Room]
+    @Published private var _sceneObjects: [SCNNode]?
+    @Published private var _scene: SCNScene?
+    @Published private var _sceneConfiguration: SCNScene?
     private var _floorURL: URL
     
     init(name: String, lastUpdate: Date, planimetry: Image, associationMatrix: [String : RotoTraslationMatrix], rooms: [Room], sceneObjects: [SCNNode]?, scene: SCNScene?, sceneConfiguration: SCNScene?, floorURL: URL) {
@@ -54,11 +54,11 @@ class Floor: Encodable, Identifiable{
     }
     
     var rooms: [Room] {
-        return Array(_rooms)
+        return _rooms
     }
     
     var sceneObjects: [SCNNode]? {
-        return Array(_sceneObjects ?? [])
+        return _sceneObjects 
     }
     
     var scene: SCNScene? {

@@ -3,27 +3,19 @@ import Foundation
 
 struct AddConnectionView: View {
     
-    enum ConnectionType: String, CaseIterable, Identifiable {
-        case sameFloor = "Same Floor"
-        case adjacentFloors = "Adjacent Floors"
-        case elevator = "Elevator"
-        
-        var id: String { self.rawValue }
-    }
+    var selectedBuilding: Building
+    @State var selectedFloor: Floor? = nil
+    @State var selectedRoom: Room? = nil
+    @State private var fromFloor: Floor?
+    @State private var fromRoom: Room?
+    @State private var fromTransitionZone: TransitionZone?
     
-    @State var fromFloor: Floor?
-    @State var fromRoom: Room?
-    @State var fromTransitionZone: TransitionZone?
-    
-    @State private var selectedFloor: Floor? = nil
-    @State private var selectedRoom: Room? = nil
     @State private var selectedTransitionZone: TransitionZone? = nil
     @State private var showAlert: Bool = false
-    @State private var selectedConnectionType: ConnectionType? = nil
+    @State private var isElevator: Bool = false
     
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.presentationMode) private var presentationMode
     @Environment(\.dismiss) private var dismiss
-    var selectedBuilding: Building
     
     var body: some View {
         NavigationStack {
@@ -37,12 +29,10 @@ struct AddConnectionView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack {
                         ForEach(selectedBuilding.floors) { floor in
-                            if floor.id != fromFloor?.id {
-                                DefaultCardView(name: floor.name, date: floor.lastUpdate, rowSize: 2)
-                                    .onTapGesture {
-                                        selectedFloor = floor
-                                    }
-                            }
+                            DefaultCardView(name: floor.name, date: floor.lastUpdate, rowSize: 2, isSelected: selectedFloor?.id == floor.id  )
+                                .onTapGesture {
+                                    selectedFloor = floor
+                                }
                         }
                     }
                 }
@@ -55,8 +45,11 @@ struct AddConnectionView: View {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack {
                                 ForEach(selectedFloor.rooms) { room in
-                                    DefaultCardView(name: room.name, date: room.lastUpdate, rowSize: 2).onTapGesture {
-                                        selectedRoom = room
+                                    if room.name != fromRoom?.name {
+                                        DefaultCardView(name: room.name, date: room.lastUpdate, rowSize: 2, isSelected: selectedRoom?.id == room.id  )
+                                            .onTapGesture {
+                                                selectedRoom = room
+                                            }
                                     }
                                 }
                             }
@@ -72,10 +65,10 @@ struct AddConnectionView: View {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack {
                                 ForEach(selectedRoom.transitionZones) { transitionZone in
-                                    DefaultCardView(name: transitionZone.name, date: Date(),
-                                                    rowSize: 2).onTapGesture {
-                                        selectedTransitionZone = transitionZone
-                                    }
+                                    DefaultCardView(name: transitionZone.name, date: Date(), rowSize: 2, isSelected: selectedTransitionZone?.id == transitionZone.id )
+                                        .onTapGesture {
+                                            selectedTransitionZone = transitionZone
+                                        }
                                 }
                             }
                         }
@@ -83,25 +76,10 @@ struct AddConnectionView: View {
                 }
                 
                 if selectedTransitionZone != nil {
-                    VStack {
-                        Divider()
-                        Text("Select Connection Type").font(.system(size: 22))
-                            .fontWeight(.heavy)
-                        Picker("Connection Type", selection: $selectedConnectionType) {
-                            ForEach(ConnectionType.allCases) { type in
-                                Text(type.rawValue).tag(type as ConnectionType?)
-                            }
-                        }
-                        .pickerStyle(MenuPickerStyle())
-                        .padding()
-                    }
-                }
-                
-                if selectedConnectionType != nil {
                     Spacer()
                     Button(action: {
                         if fromTransitionZone != nil {
-                            //createConnection()
+                            insertConnection()
                             showAlert = true
                             dismiss()
                         } else {
@@ -114,13 +92,21 @@ struct AddConnectionView: View {
                         selectedRoom = nil
                         selectedFloor = nil
                     }) {
-                        Text(fromTransitionZone == nil ? "SELECT START" : "SAVE")
-                            .font(.system(size: 22, weight: .heavy))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity, alignment: .bottom)
-                            .padding()
-                            .background(Color.blue)
-                            .cornerRadius(10)
+                        VStack {
+                            if (fromTransitionZone != nil) {
+                                Toggle(isOn: $isElevator) {
+                                    Text("Elevator Connection")
+                                }
+                                .toggleStyle(SwitchToggleStyle()).padding()
+                            }
+                            Text(fromTransitionZone == nil ? "SELECT START" : "SAVE")
+                                .font(.system(size: 22, weight: .heavy))
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity, alignment: .bottom)
+                                .padding()
+                                .background(Color.blue)
+                                .cornerRadius(10)
+                        }
                     }
                     .padding(.horizontal, 20)
                     .padding(.bottom, 20)
@@ -166,33 +152,44 @@ struct AddConnectionView: View {
         .background(Color.customBackground.ignoresSafeArea())
     }
     
-//    private func createConnection() {
-//        guard let fromTransitionZone = fromTransitionZone, let selectedTransitionZone = selectedTransitionZone, let connectionType = selectedConnectionType else {
-//            return
-//        }
-//        
-//        let connection: Connection
-//        switch connectionType {
-//        case .sameFloor:
-//            connection = SameFloorConnection(name: "Same Floor Connection", targetRoom: fromRoom?.name!)
-//        case .adjacentFloors:
-//            connection = AdjacentFloorsConnection(name: "Adjacent Floors Connection", targetFloor: fromFloor.name!, targetRoom: fromRoom!)
-//        case .elevator:
-//            connection = ElevatorConnection(name: "Elevator Connection", targetFloor: fromFloor.name!, targetRoom: fromRoom.name!)
-//        }
-//        
-//        fromTransitionZone.connection = connection
-//    }
+    private func createConnection() -> (Connection, Connection)? {
+        if (fromFloor?.name == selectedFloor?.name) {
+            if let fromRoomName = fromRoom?.name, let toRoomName = selectedRoom?.name {
+                let connection = SameFloorConnection(name: "Same Floor Connection", targetRoom: toRoomName)
+                let mirrorConnection = SameFloorConnection(name: "Same Floor Connection", targetRoom: fromRoomName)
+                return (connection, mirrorConnection)
+            }
+        }
+        
+        if !isElevator {
+            if let fromFloorName = fromFloor?.name, let fromRoomName = fromRoom?.name, let toFloorName = selectedFloor?.name, let toRoomName = selectedRoom?.name {
+                let connection = AdjacentFloorsConnection(name: "Adjacent Floors Connection", targetFloor: toFloorName, targetRoom: toRoomName)
+                let mirrorConnection = AdjacentFloorsConnection(name: "Adjacent Floors Connection", targetFloor: fromFloorName, targetRoom: fromRoomName)
+                return (connection, mirrorConnection)
+            }
+        }
+        
+        if let fromFloorName = fromFloor?.name, let fromRoomName = fromRoom?.name, let toFloorName = selectedFloor?.name, let toRoomName = selectedRoom?.name {
+            let connection = ElevatorConnection(name: "Elevator Connection", targetFloor: toFloorName, targetRoom: toRoomName)
+            let mirrorConnection = ElevatorConnection(name: "Elevator Connection", targetFloor: fromFloorName, targetRoom: fromRoomName)
+            return (connection, mirrorConnection)
+        }
+        return nil
+    }
+    
+    func insertConnection() {
+        if let (fromConnection, toConnection) = createConnection() {
+            fromTransitionZone?.connection = fromConnection
+            selectedTransitionZone?.connection = toConnection
+        }
+    }
 }
 
 struct AddConnection_Preview: PreviewProvider {
     static var previews: some View {
         let buildingModel = BuildingModel.getInstance()
         let selectedBuilding = buildingModel.initTryData()
-        let floor = selectedBuilding.floors.first!
-        let room = floor.rooms.first!
-        let transitionZone = room.transitionZones.first!
         
-        return AddConnectionView(fromFloor: floor, fromRoom: room, fromTransitionZone: transitionZone, selectedBuilding: selectedBuilding)
+        return AddConnectionView(selectedBuilding: selectedBuilding)
     }
 }

@@ -3,7 +3,7 @@ import Foundation
 
 struct FloorView: View {
     
-    @State var building : Building
+    @ObservedObject var building : Building
     @State private var searchText: String = ""
     @State private var isRenameSheetPresented = false
     @State private var newBuildingName: String = ""
@@ -37,7 +37,7 @@ struct FloorView: View {
                         ScrollView {
                             LazyVStack(spacing: 25) {
                                 ForEach(filteredFloors, id: \.id) { floor in
-                                    NavigationLink(destination: RoomView( floor: floor, buildingName: building.name)) {
+                                    NavigationLink(destination: RoomView( floor: floor, building: building)) {
                                         DefaultCardView(name: floor.name, date: floor.lastUpdate)
                                     }
                                 }
