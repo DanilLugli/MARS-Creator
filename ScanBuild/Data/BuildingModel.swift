@@ -4,6 +4,9 @@ import SceneKit
 import SwiftUI
 
 class BuildingModel: ObservableObject {
+    //TODO: Fare Dump
+    //TODO: Creare percorsi relativi
+    //TODO: Creare fromARFile
     
     private static var _instance: BuildingModel?
     private static let LOGGER = Logger(tag: String(describing: BuildingModel.self))
@@ -33,12 +36,10 @@ class BuildingModel: ObservableObject {
     }
     
     func initTryData() -> Building {
-        if !self.buildings.isEmpty {
-            return self.getBuildings()[0]
-        }
+        self.buildings = []
         
         //Aggiungi 10 building
-        for i in 1...10 {
+        for i in 1...3 {
             let building = Building(name: "Building \(i)", lastUpdate: Date(), floors: [], buildingURL: URL(fileURLWithPath: ""))
 
             // Aggiungi 5 piani al primo edificio
@@ -71,11 +72,23 @@ class BuildingModel: ObservableObject {
         return self.getBuildings()[0]
     }
 
+    //TODO: Modificare tutte le print in Log
     private func loadBuildingsFromRoot() throws {
         let fileManager = FileManager.default
-        
+
+        // Verifica se la cartella root esiste
+        if !fileManager.fileExists(atPath: BuildingModel.SCANBUILD_ROOT.path) {
+            // Se la cartella root non esiste, la crea
+            do {
+                try fileManager.createDirectory(at: BuildingModel.SCANBUILD_ROOT, withIntermediateDirectories: true, attributes: nil)
+                print("Cartella root creata: \(BuildingModel.SCANBUILD_ROOT.path)")
+            } catch {
+                throw NSError(domain: "com.example.ScanBuild", code: 1, userInfo: [NSLocalizedDescriptionKey: "Errore durante la creazione della cartella root: \(error)"])
+            }
+        }
+
         let buildingURLs = try fileManager.contentsOfDirectory(at: BuildingModel.SCANBUILD_ROOT, includingPropertiesForKeys: [.isDirectoryKey], options: .skipsHiddenFiles)
-        
+
         for buildingURL in buildingURLs {
             var isDirectory: ObjCBool = false
             if fileManager.fileExists(atPath: buildingURL.path, isDirectory: &isDirectory), isDirectory.boolValue {

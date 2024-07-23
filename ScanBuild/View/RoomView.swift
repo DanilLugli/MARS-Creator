@@ -2,10 +2,8 @@ import SwiftUI
 import Foundation
 
 struct RoomView: View {
-    
-    
-    
-    @State var floor: Floor
+
+    @ObservedObject var floor: Floor
     var building: Building
     @State private var searchText: String = ""
     @State private var isRenameSheetPresented = false
@@ -38,7 +36,28 @@ struct RoomView: View {
                         }
                         .tag(1)
                     
-                    ListRoomsView(building: building, rooms: filteredRooms, floor: floor).frame(maxWidth: .infinity, maxHeight: .infinity)
+                    //TODO: Perchè non va la VIew esterna ?????
+                    VStack {
+                        if floor.rooms.isEmpty {
+                            VStack {
+                                Text("Add Room to \(floor.name) with + icon")
+                                    .foregroundColor(.gray)
+                                    .font(.headline)
+                                    .padding()
+                            }
+                        } else {
+                            ScrollView {
+                                LazyVStack(spacing: 50) {
+                                    ForEach(floor.rooms, id: \.id) { room in
+                                        NavigationLink(destination: MarkerView(room: room, building: building,   floor: floor)) {
+                                            DefaultCardView(name: room.name, date: room.lastUpdate).padding()
+                                        }
+                                    }
+                                }
+                            }
+                            .padding()
+                        }
+                    }.frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(Color.customBackground)
                         .tabItem {
                             Label("Rooms", systemImage: "list.dash")
@@ -66,7 +85,7 @@ struct RoomView: View {
             ToolbarItem(placement: .navigationBarTrailing) {
                 HStack {
                     if selectedTab == 0 {
-                        NavigationLink(destination: ScanningView(room: $newRoom), isActive: $isNavigationActive) {
+                        NavigationLink(destination: AddRoomView(floor: floor), isActive: $isNavigationActive) {
                             Image(systemName: "plus.circle.fill")
                                 .font(.system(size: 26))
                                 .foregroundStyle(.white, .blue, .blue)

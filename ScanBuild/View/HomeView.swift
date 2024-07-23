@@ -12,15 +12,16 @@ struct HomeView: View {
         NavigationStack {
             VStack {
                 Spacer()
-                Spacer()
+                
                 TextField("Search", text: $searchText)
                     .padding(7)
                     .background(Color(.systemGray6))
                     .cornerRadius(8)
                     .padding(.horizontal, 10)
                     .padding(.top, 90)
-                    .frame(width: 180)
-                Spacer()
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                
                 
                 if buildingsModel.getBuildings().isEmpty {
                     VStack {
@@ -31,10 +32,10 @@ struct HomeView: View {
                     }
                 } else {
                     ScrollView {
-                        LazyVStack(spacing: 25) {
+                        LazyVStack(spacing: 50) {
                             ForEach(filteredBuildings, id: \.id) { building in
                                 NavigationLink(destination: FloorView(building: building)) {
-                                    DefaultCardView(name: building.name, date: building.lastUpdate)
+                                    DefaultCardView(name: building.name, date: building.lastUpdate).padding()
                                 }
                             }
                         }

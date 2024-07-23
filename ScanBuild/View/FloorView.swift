@@ -35,10 +35,10 @@ struct FloorView: View {
                         .background(Color.customBackground)
                     } else {
                         ScrollView {
-                            LazyVStack(spacing: 25) {
+                            LazyVStack(spacing: 50) {
                                 ForEach(filteredFloors, id: \.id) { floor in
                                     NavigationLink(destination: RoomView( floor: floor, building: building)) {
-                                        DefaultCardView(name: floor.name, date: floor.lastUpdate)
+                                        DefaultCardView(name: floor.name, date: floor.lastUpdate).padding()
                                     }
                                 }
                             }

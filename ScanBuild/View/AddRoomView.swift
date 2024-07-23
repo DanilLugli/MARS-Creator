@@ -5,7 +5,8 @@ struct AddRoomView: View {
     
     @State private var roomName: String = ""
     @Environment(\.presentationMode) var presentationMode
-    @State var floor: Floor
+    @ObservedObject var floor: Floor
+   
 
     var body: some View {
         NavigationStack {
@@ -82,6 +83,7 @@ struct AddRoomView_Preview: PreviewProvider {
         let buildingModel = BuildingModel.getInstance()
         let firstBuilding = buildingModel.initTryData()
         let firstFloor = firstBuilding.floors.first!
+       
         return AddRoomView(floor: firstFloor)
     }
 }

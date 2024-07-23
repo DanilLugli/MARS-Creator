@@ -3,7 +3,9 @@ import Foundation
 
 struct MarkerView: View {
     
-    @State var room: Room
+    //TODO: Se non c'è la planimetry, aggiungere immagine + per fare la SCAN
+    
+    @ObservedObject var room: Room
     var building: Building
     var floor: Floor
     @State private var searchText: String = ""
@@ -51,12 +53,12 @@ struct MarkerView: View {
                                 .background(Color.customBackground)
                             } else {
                                 ScrollView {
-                                    LazyVStack(spacing: 25) {
+                                    LazyVStack(spacing: 50) {
                                         ForEach(filteredMarker, id: \.id) { marker in
                                             Button(action: {
                                                 selectedMarker = marker
                                             }) {
-                                                DefaultCardView(name: marker.imageName, date: Date())
+                                                DefaultCardView(name: marker.imageName, date: Date()).padding()
                                             }
                                         }
                                     }
@@ -93,9 +95,9 @@ struct MarkerView: View {
                                 .background(Color.customBackground)
                             } else {
                                 ScrollView {
-                                    LazyVStack(spacing: 25) {
+                                    LazyVStack(spacing: 50) {
                                         ForEach(room.getConnections(), id: \.id) { connection in
-                                            DefaultCardView(name: connection.name, date: Date())
+                                            DefaultCardView(name: connection.name, date: Date()).padding()
                                         }
                                     }
                                 }
@@ -116,18 +118,7 @@ struct MarkerView: View {
             .navigationTitle(tabTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-//                ToolbarItem(placement: .navigationBarLeading) {
-//                    Button(action: {
-//                        Text("CIAO")
-//                    }) {
-//                        Image(systemName: "arrow.left")
-//                    }
-////                }
-//                ToolbarItem(placement: .principal) {
-//                    Text(tabTitle)
-//                        .font(.system(size: 26, weight: .heavy))
-//                        .foregroundColor(.white)
-//                }
+
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack {
                         if selectedTab == 1 {

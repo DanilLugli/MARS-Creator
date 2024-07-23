@@ -10,7 +10,7 @@ import SwiftUI
 struct ListRoomsView: View {
    
     var building: Building
-    @State var rooms : [Room]
+    var rooms : [Room]
     var floor : Floor
     
     var body: some View {
@@ -24,10 +24,10 @@ struct ListRoomsView: View {
                 }
             } else {
                 ScrollView {
-                    LazyVStack(spacing: 25) {
+                    LazyVStack(spacing: 50) {
                         ForEach(rooms, id: \.id) { room in
                             NavigationLink(destination: MarkerView(room: room, building: building,   floor: floor)) {
-                                DefaultCardView(name: room.name, date: room.lastUpdate)
+                                DefaultCardView(name: room.name, date: room.lastUpdate).padding()
                             }
                         }
                     }
