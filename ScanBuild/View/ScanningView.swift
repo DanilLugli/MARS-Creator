@@ -4,7 +4,8 @@ import RoomPlan
 
 struct ScanningView: View {
     
-    @Binding var room: Room?
+    @ObservedObject var room: Room
+    var floor: Floor
     
     @State private var messagesFromWorldMap: String = ""
     @State private var worlMapNewFeatures: Int = 0
@@ -68,7 +69,7 @@ struct ScanningView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text(room?.name ?? "SCANNING ROOM")
+                    Text(room.name)
                         .font(.system(size: 26, weight: .heavy))
                         .foregroundColor(.white)
                 }
@@ -79,7 +80,13 @@ struct ScanningView: View {
     
     struct ScanningView_Previews: PreviewProvider {
         static var previews: some View {
-            ScanningView(room: .constant(Room(name: "Preview Room", lastUpdate: Date(), referenceMarkers: [], transitionZones: [], sceneObjects: [], scene: nil, worldMap: nil, roomURL: URL(fileURLWithPath: ""))))
+//            ScanningView(room: Room(name: "Preview Room", lastUpdate: Date(), referenceMarkers: [], transitionZones: [], sceneObjects: [], scene: nil, worldMap: nil, roomURL: URL(fileURLWithPath: "")), floor: )
+            
+            
+            return ScanningView(room: Room(name: "", lastUpdate: Date(), referenceMarkers: [], transitionZones: [], sceneObjects: [], scene: nil, worldMap: nil, roomURL: URL(fileURLWithPath: "")), floor: Floor(name: "", lastUpdate: Date(), planimetry: Image(""),associationMatrix: [:], rooms: [], sceneObjects: [], scene: nil, sceneConfiguration: nil, floorURL: URL(fileURLWithPath: "")))
+            
+            
+ 
         }
     }
 }

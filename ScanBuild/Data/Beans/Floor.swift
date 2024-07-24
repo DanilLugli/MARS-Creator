@@ -54,7 +54,11 @@ class Floor: Encodable, Identifiable, ObservableObject{
     }
     
     var rooms: [Room] {
-        return _rooms
+        get{
+            return _rooms
+        }set{
+            rooms = newValue
+        }
     }
     
     var sceneObjects: [SCNNode]? {
@@ -70,7 +74,12 @@ class Floor: Encodable, Identifiable, ObservableObject{
     }
     
     var floorURL: URL {
-        return _floorURL
+        get{
+            return _floorURL
+        }set{
+            _floorURL = newValue
+        }
+        
     }
     
     // Implementazione personalizzata di Encodable
@@ -91,10 +100,40 @@ class Floor: Encodable, Identifiable, ObservableObject{
     
     func addRoom(room: Room) {
         _rooms.append(room)
+        
+        // Creare la directory della stanza all'interno di "<floor_name>_Rooms"
+        let roomsDirectory = floorURL.appendingPathComponent("\(self.name)_Rooms")
+        let roomURL = roomsDirectory.appendingPathComponent(room.name)
+        
+        do {
+            try FileManager.default.createDirectory(at: roomURL, withIntermediateDirectories: true, attributes: nil)
+            room.roomURL = roomURL
+            print("Folder created at: \(roomURL.path)")
+            
+            // Creare le cartelle all'interno della directory della stanza
+            let subdirectories = ["JsonMaps", "JsonParametric", "Maps", "MapUsdz", "PlistMetadata", "ReferenceMarker", "TransitionZone"]
+            
+            for subdirectory in subdirectories {
+                let subdirectoryURL = roomURL.appendingPathComponent(subdirectory)
+                try FileManager.default.createDirectory(at: subdirectoryURL, withIntermediateDirectories: true, attributes: nil)
+                print("Subdirectory created at: \(subdirectoryURL.path)")
+            }
+            
+        } catch {
+            print("Error creating folder for room \(room.name): \(error)")
+        }
     }
-    
+
     func deleteRoom(room: Room) {
         _rooms.removeAll { $0.id == room.id }
+        
+        let roomURL = floorURL.appendingPathComponent(room.name)
+        do {
+            try FileManager.default.removeItem(at: roomURL)
+            print("Folder deleted at: \(roomURL.path)")
+        } catch {
+            print("Error deleting folder for room \(room.name): \(error)")
+        }
     }
     
     private func loadAssociationMatrix() -> [RotoTraslationMatrix] {

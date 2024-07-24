@@ -16,13 +16,15 @@ struct FloorView: View {
                         .font(.system(size: 14))
                         .fontWeight(.heavy)
                     Spacer()
-                    Spacer()
+
                     TextField("Search", text: $searchText)
                         .padding(7)
                         .background(Color(.systemGray6))
                         .cornerRadius(8)
                         .padding(.horizontal, 10)
-                        .frame(width: 180)
+                        .padding(.top, 90)
+                        .frame(maxWidth: .infinity)
+                        .padding()
                     
                     if building.floors.isEmpty {
                         VStack {

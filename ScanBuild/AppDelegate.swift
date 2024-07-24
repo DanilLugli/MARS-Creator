@@ -26,6 +26,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
     
+    func createAppFolder() {
+            let fileManager = FileManager.default
+            if let appName = Bundle.main.infoDictionary?["CFBundleName"] as? String {
+                do {
+                    let appFolderURL = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent(appName)
+                    if !fileManager.fileExists(atPath: appFolderURL.path) {
+                        try fileManager.createDirectory(at: appFolderURL, withIntermediateDirectories: true, attributes: nil)
+                        print("Folder created at: \(appFolderURL.path)")
+                    } else {
+                        print("Folder already exists at: \(appFolderURL.path)")
+                    }
+                } catch {
+                    print("Error creating folder: \(error)")
+                }
+            }
+        }
+    
     func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.

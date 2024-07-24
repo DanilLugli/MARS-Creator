@@ -100,7 +100,8 @@ struct RoomCaptureViewContainer: UIViewRepresentable {
                 let finalRoom = try! await self.roomBuilder.capturedRoom(from: data)
                 
                 saveJSONMap(finalRoom, name)
-                saveUSDZMap(finalRoom, name)
+                //TODO: add floorURL
+                //saveUSDZMap(finalRoom, name, floorURL: floorURL)
                 
                 session.arSession.getCurrentWorldMap(completionHandler: { [self] worldMap, error in
                     if let m = worldMap {

@@ -12,7 +12,7 @@ class BuildingModel: ObservableObject {
     private static let LOGGER = Logger(tag: String(describing: BuildingModel.self))
     
     static var SCANBUILD_ROOT: URL {
-        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         return documentsDirectory.appendingPathComponent("ScanBuild")
     }
     private static let FLOOR_DATA_FOLDER = "Floor_Data"
@@ -72,7 +72,6 @@ class BuildingModel: ObservableObject {
         return self.getBuildings()[0]
     }
 
-    //TODO: Modificare tutte le print in Log
     private func loadBuildingsFromRoot() throws {
         let fileManager = FileManager.default
 
@@ -86,10 +85,14 @@ class BuildingModel: ObservableObject {
                 throw NSError(domain: "com.example.ScanBuild", code: 1, userInfo: [NSLocalizedDescriptionKey: "Errore durante la creazione della cartella root: \(error)"])
             }
         }
+        
+       
 
         let buildingURLs = try fileManager.contentsOfDirectory(at: BuildingModel.SCANBUILD_ROOT, includingPropertiesForKeys: [.isDirectoryKey], options: .skipsHiddenFiles)
-
+        print(buildingURLs)
+        
         for buildingURL in buildingURLs {
+            print(buildingURL)
             var isDirectory: ObjCBool = false
             if fileManager.fileExists(atPath: buildingURL.path, isDirectory: &isDirectory), isDirectory.boolValue {
                 let attributes = try fileManager.attributesOfItem(atPath: buildingURL.path)
@@ -153,7 +156,12 @@ class BuildingModel: ObservableObject {
     
     private func loadRooms(from floorURL: URL) throws -> [Room] {
         let fileManager = FileManager.default
-        let roomURLs = try fileManager.contentsOfDirectory(at: floorURL, includingPropertiesForKeys: [.isDirectoryKey], options: .skipsHiddenFiles)
+        
+        // Modifica il percorso per puntare alla directory "<floor_name>_Rooms"
+        let roomsDirectoryURL = floorURL.appendingPathComponent("\(floorURL.lastPathComponent)_Rooms")
+        
+        // Ottieni l'elenco delle directory delle stanze
+        let roomURLs = try fileManager.contentsOfDirectory(at: roomsDirectoryURL, includingPropertiesForKeys: [.isDirectoryKey], options: .skipsHiddenFiles)
         
         var rooms: [Room] = []
         for roomURL in roomURLs {
@@ -196,17 +204,17 @@ class BuildingModel: ObservableObject {
                         }
                     }
                     
-                    // Load sceneObjects and scene from MapUsdz
-                    let mapUsdzURL = roomURL.appendingPathComponent("MapUsdz")
-                    if fileManager.fileExists(atPath: mapUsdzURL.path) {
-                        let mapUsdzContents = try fileManager.contentsOfDirectory(at: mapUsdzURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
-                        for fileURL in mapUsdzContents {
-                            if fileURL.pathExtension == "usdz" {
-                                scene = try SCNScene(url: fileURL, options: nil)
-                                sceneObjects.append(contentsOf: scene!.rootNode.childNodes)
-                            }
-                        }
-                    }
+//                    // Load sceneObjects and scene from MapUsdz
+//                    let mapUsdzURL = roomURL.appendingPathComponent("MapUsdz")
+//                    if fileManager.fileExists(atPath: mapUsdzURL.path) {
+//                        let mapUsdzContents = try fileManager.contentsOfDirectory(at: mapUsdzURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+//                        for fileURL in mapUsdzContents {
+//                            if fileURL.pathExtension == "usdz" {
+//                                scene = try SCNScene(url: fileURL, options: nil)
+//                                sceneObjects.append(contentsOf: scene!.rootNode.childNodes)
+//                            }
+//                        }
+//                    }
                     
                     let room = Room(name: roomURL.lastPathComponent, lastUpdate: lastModifiedDate, referenceMarkers: referenceMarkers, transitionZones: transitionZones, sceneObjects: sceneObjects, scene: scene, worldMap: worldMap, roomURL: roomURL)
                     rooms.append(room)
@@ -222,9 +230,28 @@ class BuildingModel: ObservableObject {
     
     func addBuilding(building: Building) {
         buildings.append(building)
+        
+        let buildingURL = BuildingModel.SCANBUILD_ROOT.appendingPathComponent(building.name)
+        do {
+            try FileManager.default.createDirectory(at: buildingURL, withIntermediateDirectories: true, attributes: nil)
+            building.buildingURL = buildingURL
+            print("Folder created at: \(buildingURL.path)")
+        } catch {
+            print("Error creating folder for building \(building.name): \(error)")
+        }
     }
-    
+
     func deleteBuilding(id: UUID) {
-        buildings.removeAll { $0.id == id }
+        if let building = buildings.first(where: { $0.id == id }) {
+            buildings.removeAll { $0.id == id }
+            
+            let buildingURL = BuildingModel.SCANBUILD_ROOT.appendingPathComponent(building.name)
+            do {
+                try FileManager.default.removeItem(at: buildingURL)
+                print("Folder deleted at: \(buildingURL.path)")
+            } catch {
+                print("Error deleting folder for building \(building.name): \(error)")
+            }
+        }
     }
 }

@@ -78,6 +78,8 @@ class Room: Encodable, Identifiable, ObservableObject {
     var roomURL: URL {
         get {
             return _roomURL
+        }set{
+            _roomURL = newValue
         }
     }
     

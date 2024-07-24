@@ -16,11 +16,14 @@ func saveJSONMap(_ room: CapturedRoom, _ name: String) {
     }
 }
 
-func saveUSDZMap(_ room: CapturedRoom, _ name: String) {
+func saveUSDZMap(_ room: CapturedRoom, _ name: String, floorURL: URL) {
     do {
-        let saveURL = BuildingModel.SCANBUILD_ROOT.appendingPathComponent("MapUsdz").appendingPathComponent("\(name).usdz")
+        // Costruisci il percorso per salvare il file USDZ e il file di metadata nella cartella "<floor_name>_Data"
+        let dataDirectoryURL = floorURL.appendingPathComponent("\(floorURL.lastPathComponent)_Data")
+        let saveURL = dataDirectoryURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(name).usdz")
+        
         if #available(iOS 17.0, *) {
-            let metadataURL = BuildingModel.SCANBUILD_ROOT.appendingPathComponent("PlistMetadata").appendingPathComponent("\(name).plist")
+            let metadataURL = dataDirectoryURL.appendingPathComponent("PlistMetadata").appendingPathComponent("\(name).plist")
             try room.export(
                 to: saveURL,
                 metadataURL: metadataURL,
@@ -32,13 +35,13 @@ func saveUSDZMap(_ room: CapturedRoom, _ name: String) {
                 exportOptions: [.parametric]
             )
         }
+        
         NotificationCenter.default.post(name: .genericMessage, object: "saved USDZ: true")
     } catch {
         print("Error = \(error)")
         NotificationCenter.default.post(name: .genericMessage, object: "saved USDZ: false")
     }
 }
-
 func saveARWorldMap(_ worldMap: ARWorldMap, _ name: String) {
     do {
         let data = try NSKeyedArchiver.archivedData(withRootObject: worldMap, requiringSecureCoding: true)
