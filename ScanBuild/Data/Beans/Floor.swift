@@ -3,20 +3,20 @@ import SceneKit
 import simd
 import SwiftUI
 
-class Floor: Encodable, Identifiable, ObservableObject{
+class Floor: NamedURL, Encodable, Identifiable, ObservableObject {
     
     private var _id = UUID()
     @Published private var _name: String
     private var _lastUpdate: Date
     private var _planimetry: Image
-    @Published private var _associationMatrix: [String : RotoTraslationMatrix]
+    @Published private var _associationMatrix: [String: RotoTraslationMatrix]
     @Published private var _rooms: [Room]
     @Published private var _sceneObjects: [SCNNode]?
     @Published private var _scene: SCNScene?
     @Published private var _sceneConfiguration: SCNScene?
     private var _floorURL: URL
     
-    init(name: String, lastUpdate: Date, planimetry: Image, associationMatrix: [String : RotoTraslationMatrix], rooms: [Room], sceneObjects: [SCNNode]?, scene: SCNScene?, sceneConfiguration: SCNScene?, floorURL: URL) {
+    init(name: String, lastUpdate: Date, planimetry: Image, associationMatrix: [String: RotoTraslationMatrix], rooms: [Room], sceneObjects: [SCNNode]?, scene: SCNScene?, sceneConfiguration: SCNScene?, floorURL: URL) {
         self._name = name
         self._lastUpdate = lastUpdate
         self._planimetry = planimetry
@@ -49,20 +49,21 @@ class Floor: Encodable, Identifiable, ObservableObject{
         return _planimetry
     }
     
-    var associationMatrix: [String : RotoTraslationMatrix] {
+    var associationMatrix: [String: RotoTraslationMatrix] {
         return _associationMatrix
     }
     
     var rooms: [Room] {
-        get{
+        get {
             return _rooms
-        }set{
-            rooms = newValue
+        }
+        set {
+            _rooms = newValue
         }
     }
     
     var sceneObjects: [SCNNode]? {
-        return _sceneObjects 
+        return _sceneObjects
     }
     
     var scene: SCNScene? {
@@ -74,12 +75,18 @@ class Floor: Encodable, Identifiable, ObservableObject{
     }
     
     var floorURL: URL {
-        get{
+        get {
             return _floorURL
-        }set{
+        }
+        set {
             _floorURL = newValue
         }
-        
+    }
+    
+    var url: URL {
+        get {
+            return floorURL
+        }
     }
     
     // Implementazione personalizzata di Encodable
@@ -102,7 +109,7 @@ class Floor: Encodable, Identifiable, ObservableObject{
         _rooms.append(room)
         
         // Creare la directory della stanza all'interno di "<floor_name>_Rooms"
-        let roomsDirectory = floorURL.appendingPathComponent("\(self.name)_Rooms")
+        let roomsDirectory = floorURL.appendingPathComponent(BuildingModel.FLOOR_ROOMS_FOLDER)
         let roomURL = roomsDirectory.appendingPathComponent(room.name)
         
         do {
@@ -150,5 +157,4 @@ class Floor: Encodable, Identifiable, ObservableObject{
         // Implement logic to create association matrix
         return []
     }
-    
 }

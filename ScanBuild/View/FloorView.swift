@@ -1,6 +1,8 @@
 import SwiftUI
 import Foundation
 
+// TODO: Crea un MapUsdz a cazzo nella directory del floor.
+
 struct FloorView: View {
     
     @ObservedObject var building : Building
@@ -15,14 +17,13 @@ struct FloorView: View {
                     Text("\(building.name) > Floors")
                         .font(.system(size: 14))
                         .fontWeight(.heavy)
-                    Spacer()
+                    
 
                     TextField("Search", text: $searchText)
                         .padding(7)
                         .background(Color(.systemGray6))
                         .cornerRadius(8)
                         .padding(.horizontal, 10)
-                        .padding(.top, 90)
                         .frame(maxWidth: .infinity)
                         .padding()
                     

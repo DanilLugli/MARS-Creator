@@ -15,7 +15,9 @@ class BuildingModel: ObservableObject {
         let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         return documentsDirectory.appendingPathComponent("ScanBuild")
     }
-    private static let FLOOR_DATA_FOLDER = "Floor_Data"
+    static let FLOOR_DATA_FOLDER = "Data"
+    static let FLOOR_ROOMS_FOLDER = "Rooms"
+    
     
     @Published private var buildings: [Building]
     
@@ -77,7 +79,7 @@ class BuildingModel: ObservableObject {
 
         // Verifica se la cartella root esiste
         if !fileManager.fileExists(atPath: BuildingModel.SCANBUILD_ROOT.path) {
-            // Se la cartella root non esiste, la crea
+            
             do {
                 try fileManager.createDirectory(at: BuildingModel.SCANBUILD_ROOT, withIntermediateDirectories: true, attributes: nil)
                 print("Cartella root creata: \(BuildingModel.SCANBUILD_ROOT.path)")
@@ -85,9 +87,6 @@ class BuildingModel: ObservableObject {
                 throw NSError(domain: "com.example.ScanBuild", code: 1, userInfo: [NSLocalizedDescriptionKey: "Errore durante la creazione della cartella root: \(error)"])
             }
         }
-        
-       
-
         let buildingURLs = try fileManager.contentsOfDirectory(at: BuildingModel.SCANBUILD_ROOT, includingPropertiesForKeys: [.isDirectoryKey], options: .skipsHiddenFiles)
         print(buildingURLs)
         
@@ -158,7 +157,7 @@ class BuildingModel: ObservableObject {
         let fileManager = FileManager.default
         
         // Modifica il percorso per puntare alla directory "<floor_name>_Rooms"
-        let roomsDirectoryURL = floorURL.appendingPathComponent("\(floorURL.lastPathComponent)_Rooms")
+        let roomsDirectoryURL = floorURL.appendingPathComponent(BuildingModel.FLOOR_ROOMS_FOLDER)
         
         // Ottieni l'elenco delle directory delle stanze
         let roomURLs = try fileManager.contentsOfDirectory(at: roomsDirectoryURL, includingPropertiesForKeys: [.isDirectoryKey], options: .skipsHiddenFiles)

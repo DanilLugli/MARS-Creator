@@ -2,7 +2,7 @@ import SwiftUI
 import Foundation
 
 struct RoomView: View {
-
+    
     @ObservedObject var floor: Floor
     var building: Building
     @State private var searchText: String = ""
@@ -19,26 +19,27 @@ struct RoomView: View {
                 Text(selectedTab == 1 ? "\(building.name) > \(floor.name) > Planimetry" : (selectedTab == 2 ? "\(building.name) > \(floor.name) > Matrix" : "\(building.name) > \(floor.name) > Rooms"))
                     .font(.system(size: 14))
                     .fontWeight(.heavy)
-                Spacer()
+                
                 TextField("Search", text: $searchText)
                     .padding(7)
                     .background(Color(.systemGray6))
                     .cornerRadius(8)
                     .padding(.horizontal, 10)
-                    .padding(.top, 90)
                     .frame(maxWidth: .infinity)
                     .padding()
                 
                 TabView(selection: $selectedTab) {
-                    FloorPlanimetryView()
+                    Text("Add Planimetry with + icon")
+                        .foregroundColor(.gray)
+                        .font(.headline)
+                        .padding()
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(Color.customBackground)
                         .tabItem {
                             Label("Planimetry", systemImage: "map.fill")
                         }
-                        .tag(1)
+                        .tag(0)
                     
-                    //TODO: Perchè non va la VIew esterna ?????
                     VStack {
                         if floor.rooms.isEmpty {
                             VStack {
@@ -51,7 +52,7 @@ struct RoomView: View {
                             ScrollView {
                                 LazyVStack(spacing: 50) {
                                     ForEach(floor.rooms, id: \.id) { room in
-                                        NavigationLink(destination: MarkerView(room: room, building: building,   floor: floor)) {
+                                        NavigationLink(destination: MarkerView(room: room, building: building, floor: floor)) {
                                             DefaultCardView(name: room.name, date: room.lastUpdate).padding()
                                         }
                                     }
@@ -59,14 +60,19 @@ struct RoomView: View {
                             }
                             .padding()
                         }
-                    }.frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color.customBackground)
-                        .tabItem {
-                            Label("Rooms", systemImage: "list.dash")
-                        }
-                        .tag(0)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.customBackground)
+                    .tabItem {
+                        Label("Rooms", systemImage: "list.dash")
+                    }
+                    .tag(1)
                     
-                    ListMatrixView().frame(maxWidth: .infinity, maxHeight: .infinity)
+                    Text("Add Matrix with + icon")
+                        .foregroundColor(.gray)
+                        .font(.headline)
+                        .padding()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(Color.customBackground)
                         .tabItem {
                             Label("Matrix", systemImage: "sum")
@@ -87,7 +93,7 @@ struct RoomView: View {
             ToolbarItem(placement: .navigationBarTrailing) {
                 HStack {
                     if selectedTab == 0 {
-                        NavigationLink(destination: AddRoomView(floor: floor), isActive: $isNavigationActive) {
+                        NavigationLink(destination: ScanningView(namedUrl: floor), isActive: $isNavigationActive) {
                             Image(systemName: "plus.circle.fill")
                                 .font(.system(size: 26))
                                 .foregroundStyle(.white, .blue, .blue)
@@ -97,62 +103,16 @@ struct RoomView: View {
                                     self.isNavigationActive = true
                                 }
                         }
-                        Menu {
-                            Button(action: {
-                                print("Rename button tapped")
-                            }) {
-                                Text("Rename Connection")
-                                Image(systemName: "pencil")
-                            }
-                            Button(action: {
-                                print("Info button tapped")
-                            }) {
-                                Text("Info")
-                                Image(systemName: "info.circle")
-                            }
-                            Button(action: {
-                                print("Delete Building button tapped")
-                            }) {
-                                Text("Delete Connection")
-                                Image(systemName: "trash").foregroundColor(.red)
-                            }
-                        } label: {
-                            Image(systemName: "pencil.circle.fill")
+                    } else if selectedTab == 1 {
+                        NavigationLink(destination: AddRoomView(floor: floor), isActive: $isNavigationActive) {
+                            Image(systemName: "plus.circle.fill")
                                 .font(.system(size: 26))
-                                .symbolRenderingMode(.palette)
                                 .foregroundStyle(.white, .blue, .blue)
-                        }
-                    } else {
-                        Menu {
-                            Button(action: {
-                                isRenameSheetPresented = true
-                            }) {
-                                Text("Rename")
-                                Image(systemName: "pencil")
-                            }
-                            Button(action: {
-                                print("Upload Building to Server button tapped")
-                            }) {
-                                Text("Upload Building to Server")
-                                Image(systemName: "icloud.and.arrow.up")
-                            }
-                            Button(action: {
-                                print("Info button tapped")
-                            }) {
-                                Text("Info")
-                                Image(systemName: "info.circle")
-                            }
-                            Button(action: {
-                                print("Delete Building button tapped")
-                            }) {
-                                Text("Delete Building")
-                                Image(systemName: "trash").foregroundColor(.red)
-                            }
-                        } label: {
-                            Image(systemName: "pencil.circle.fill")
-                                .font(.system(size: 26))
-                                .symbolRenderingMode(.palette)
-                                .foregroundStyle(.white, .blue, .blue)
+                                .onTapGesture {
+                                    let newRoom = Room(name: "New Room", lastUpdate: Date(), referenceMarkers: [], transitionZones: [], sceneObjects: [], scene: nil, worldMap: nil, roomURL: URL(fileURLWithPath: ""))
+                                    self.newRoom = newRoom
+                                    self.isNavigationActive = true
+                                }
                         }
                     }
                 }

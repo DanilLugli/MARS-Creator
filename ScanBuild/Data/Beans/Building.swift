@@ -81,8 +81,8 @@ class Building: Encodable, ObservableObject {
             print("Folder created at: \(floorURL.path)")
             
             // Creare le cartelle aggiuntive all'interno della directory del piano
-            let dataDirectory = floorURL.appendingPathComponent("\(floor.name)_Data")
-            let roomsDirectory = floorURL.appendingPathComponent("\(floor.name)_Rooms")
+            let dataDirectory = floorURL.appendingPathComponent(BuildingModel.FLOOR_DATA_FOLDER)
+            let roomsDirectory = floorURL.appendingPathComponent(BuildingModel.FLOOR_ROOMS_FOLDER)
             
             try FileManager.default.createDirectory(at: dataDirectory, withIntermediateDirectories: true, attributes: nil)
             try FileManager.default.createDirectory(at: roomsDirectory, withIntermediateDirectories: true, attributes: nil)
@@ -90,11 +90,23 @@ class Building: Encodable, ObservableObject {
             print("Data directory created at: \(dataDirectory.path)")
             print("Rooms directory created at: \(roomsDirectory.path)")
             
+            // Creare le cartelle aggiuntive all'interno della directory Data
+            let jsonParametricDirectory = dataDirectory.appendingPathComponent("JsonParametric")
+            let mapUsdzDirectory = dataDirectory.appendingPathComponent("MapUsdz")
+            let plistMetadataDirectory = dataDirectory.appendingPathComponent("PlistMetadata")
+            
+            try FileManager.default.createDirectory(at: jsonParametricDirectory, withIntermediateDirectories: true, attributes: nil)
+            try FileManager.default.createDirectory(at: mapUsdzDirectory, withIntermediateDirectories: true, attributes: nil)
+            try FileManager.default.createDirectory(at: plistMetadataDirectory, withIntermediateDirectories: true, attributes: nil)
+            
+            print("JsonParametric directory created at: \(jsonParametricDirectory.path)")
+            print("MapUsdz directory created at: \(mapUsdzDirectory.path)")
+            print("PlistMetadata directory created at: \(plistMetadataDirectory.path)")
+            
         } catch {
             print("Error creating folder for floor \(floor.name): \(error)")
         }
     }
-
     func deleteFloorByName(name: String) {
         _floors.removeAll { $0.name == name }
         

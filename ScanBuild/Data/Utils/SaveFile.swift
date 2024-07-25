@@ -2,12 +2,12 @@ import Foundation
 import ARKit
 import RoomPlan
 
-func saveJSONMap(_ room: CapturedRoom, _ name: String) {
+func saveJSONMap(_ room: CapturedRoom, _ name: String, at url: URL) {
     do {
         let jsonEncoder = JSONEncoder()
         jsonEncoder.outputFormatting = [.prettyPrinted, .sortedKeys]
         let jsonData = try jsonEncoder.encode(room)
-        let saveURL = BuildingModel.SCANBUILD_ROOT.appendingPathComponent("JsonParametric").appendingPathComponent(name)
+        let saveURL = url.appendingPathComponent("JsonParametric").appendingPathComponent(name).appendingPathExtension("json")
         try jsonData.write(to: saveURL)
         NotificationCenter.default.post(name: .genericMessage, object: "saved JSON: true")
     } catch {
@@ -16,10 +16,21 @@ func saveJSONMap(_ room: CapturedRoom, _ name: String) {
     }
 }
 
-func saveUSDZMap(_ room: CapturedRoom, _ name: String, floorURL: URL) {
+func saveARWorldMap(_ worldMap: ARWorldMap, _ name: String, at url: URL) {
     do {
-        // Costruisci il percorso per salvare il file USDZ e il file di metadata nella cartella "<floor_name>_Data"
-        let dataDirectoryURL = floorURL.appendingPathComponent("\(floorURL.lastPathComponent)_Data")
+        let data = try NSKeyedArchiver.archivedData(withRootObject: worldMap, requiringSecureCoding: true)
+        let saveURL = url.appendingPathComponent("Maps").appendingPathComponent(name).appendingPathExtension("map")
+        try data.write(to: saveURL, options: [.atomic])
+        NotificationCenter.default.post(name: .genericMessage, object: "saved AR: true")
+    } catch {
+        print("Can't save map: \(error.localizedDescription)")
+        NotificationCenter.default.post(name: .genericMessage, object: "saved AR: false")
+    }
+}
+
+func saveUSDZMap(_ room: CapturedRoom, _ name: String, at url: URL) {
+    do {
+        let dataDirectoryURL = url
         let saveURL = dataDirectoryURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(name).usdz")
         
         if #available(iOS 17.0, *) {
@@ -42,23 +53,3 @@ func saveUSDZMap(_ room: CapturedRoom, _ name: String, floorURL: URL) {
         NotificationCenter.default.post(name: .genericMessage, object: "saved USDZ: false")
     }
 }
-func saveARWorldMap(_ worldMap: ARWorldMap, _ name: String) {
-    do {
-        let data = try NSKeyedArchiver.archivedData(withRootObject: worldMap, requiringSecureCoding: true)
-        try data.write(to: BuildingModel.SCANBUILD_ROOT.appendingPathComponent("Maps").appending(path: name), options: [.atomic])
-        NotificationCenter.default.post(name: .genericMessage, object: "saved AR: true")
-    } catch {
-        print("Can't save map: \(error.localizedDescription)")
-        NotificationCenter.default.post(name: .genericMessage, object: "saved AR: false")
-    }
-}
-//func saveARWorldMap(_ worldMap: ARWorldMap, _ name: String) {
-//    do {
-//        let data = try NSKeyedArchiver.archivedData(withRootObject: worldMap, requiringSecureCoding: true)
-//        try data.write(to: BuildingModel.SCANBUILD_ROOT.appendingPathComponent("Maps").appendingPathComponent(name), options: [.atomic])
-//        NotificationCenter.default.post(name: .genericMessage, object: "saved AR: true")
-//    } catch {
-//        print("Can't save map: \(error.localizedDescription)")
-//        NotificationCenter.default.post(name: .genericMessage, object: "saved AR: false")
-//    }
-//}

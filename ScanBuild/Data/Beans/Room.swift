@@ -2,7 +2,7 @@ import Foundation
 import ARKit
 import SceneKit
 
-class Room: Encodable, Identifiable, ObservableObject {
+class Room: NamedURL, Encodable, Identifiable, ObservableObject {
     private var _id: UUID = UUID()
     @Published private var _name: String
     private var _lastUpdate: Date
@@ -80,6 +80,12 @@ class Room: Encodable, Identifiable, ObservableObject {
             return _roomURL
         }set{
             _roomURL = newValue
+        }
+    }
+    
+    var url: URL {
+        get {
+            return roomURL
         }
     }
     

@@ -21,20 +21,22 @@ struct MarkerView: View {
                     Text("\(building.name) > \(floor.name) > \(room.name) > \(tabTitle)")
                         .font(.system(size: 14))
                         .fontWeight(.heavy)
-                    Spacer()
-                    Spacer()
+               
                     TextField("Search", text: $searchText)
                         .padding(7)
                         .background(Color(.systemGray6))
                         .cornerRadius(8)
                         .padding(.horizontal, 10)
-                        .padding(.top, 90)
+                        //.padding(.top, 90)
                         .frame(maxWidth: .infinity)
                         .padding()
                     
                     TabView(selection: $selectedTab) {
                         VStack {
-                            Text("PLANIMETRY").foregroundColor(.white)
+                            Text("Add Planimetry with + icon")
+                                .foregroundColor(.gray)
+                                .font(.headline)
+                                .padding()
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(Color.customBackground)
@@ -126,7 +128,7 @@ struct MarkerView: View {
 
                  if selectedTab == 0 {
                             //TODO: aggiornare chiamata AddConnectionView
-                     NavigationLink(destination: ScanningView(room: room, floor: floor)) {
+                     NavigationLink(destination: ScanningView(namedUrl: room)) {
                                 Image(systemName: "plus.circle.fill")
                                     .font(.system(size: 26))
                                     .foregroundStyle(.white, .blue, .blue)

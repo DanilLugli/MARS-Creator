@@ -11,14 +11,12 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                Spacer()
                 
                 TextField("Search", text: $searchText)
                     .padding(7)
                     .background(Color(.systemGray6))
                     .cornerRadius(8)
                     .padding(.horizontal, 10)
-                    .padding(.top, 90)
                     .frame(maxWidth: .infinity)
                     .padding()
                 
