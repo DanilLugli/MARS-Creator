@@ -34,6 +34,10 @@
 		AA78F5F32C3430C80044F825 /* ServerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA78F5F22C3430C80044F825 /* ServerManager.swift */; };
 		AA8E0A572C52BA6C0097BDCD /* ARSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA8E0A562C52BA6C0097BDCD /* ARSessionManager.swift */; };
 		AA8E0A5B2C52C69D0097BDCD /* NamedURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA8E0A5A2C52C69D0097BDCD /* NamedURL.swift */; };
+		AA8E0A5E2C57E4B20097BDCD /* ComplexModule in Frameworks */ = {isa = PBXBuildFile; productRef = AA8E0A5D2C57E4B20097BDCD /* ComplexModule */; };
+		AA8E0A602C57E4B20097BDCD /* Numerics in Frameworks */ = {isa = PBXBuildFile; productRef = AA8E0A5F2C57E4B20097BDCD /* Numerics */; };
+		AA8E0A622C57E4B20097BDCD /* RealModule in Frameworks */ = {isa = PBXBuildFile; productRef = AA8E0A612C57E4B20097BDCD /* RealModule */; };
+		AA8E0A642C57E50F0097BDCD /* VisualizeRoomViewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA8E0A632C57E50F0097BDCD /* VisualizeRoomViewContainer.swift */; };
 		AAA29E6A2C1711AA00CA267C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA29E692C1711AA00CA267C /* AppDelegate.swift */; };
 		AAA29E6C2C1711AA00CA267C /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = AAA29E6B2C1711AA00CA267C /* Shaders.metal */; };
 		AAA29E6F2C1711AA00CA267C /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA29E6E2C1711AA00CA267C /* Renderer.swift */; };
@@ -81,6 +85,7 @@
 		AA78F5F22C3430C80044F825 /* ServerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerManager.swift; sourceTree = "<group>"; };
 		AA8E0A562C52BA6C0097BDCD /* ARSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARSessionManager.swift; sourceTree = "<group>"; };
 		AA8E0A5A2C52C69D0097BDCD /* NamedURL.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NamedURL.swift; sourceTree = "<group>"; };
+		AA8E0A632C57E50F0097BDCD /* VisualizeRoomViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualizeRoomViewContainer.swift; sourceTree = "<group>"; };
 		AAA29E662C1711AA00CA267C /* ScanBuild.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ScanBuild.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AAA29E692C1711AA00CA267C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		AAA29E6B2C1711AA00CA267C /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
@@ -108,6 +113,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA8E0A602C57E4B20097BDCD /* Numerics in Frameworks */,
+				AA8E0A5E2C57E4B20097BDCD /* ComplexModule in Frameworks */,
+				AA8E0A622C57E4B20097BDCD /* RealModule in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -123,6 +131,7 @@
 				AA2CA5542C3DB61100C88C94 /* ExportRoomViewContainer.swift */,
 				AA2CA5562C3DB61E00C88C94 /* SCNViewContainer.swift */,
 				AA8E0A562C52BA6C0097BDCD /* ARSessionManager.swift */,
+				AA8E0A632C57E50F0097BDCD /* VisualizeRoomViewContainer.swift */,
 			);
 			path = AR;
 			sourceTree = "<group>";
@@ -255,6 +264,11 @@
 			dependencies = (
 			);
 			name = ScanBuild;
+			packageProductDependencies = (
+				AA8E0A5D2C57E4B20097BDCD /* ComplexModule */,
+				AA8E0A5F2C57E4B20097BDCD /* Numerics */,
+				AA8E0A612C57E4B20097BDCD /* RealModule */,
+			);
 			productName = ScanBuild;
 			productReference = AAA29E662C1711AA00CA267C /* ScanBuild.app */;
 			productType = "com.apple.product-type.application";
@@ -283,6 +297,9 @@
 				Base,
 			);
 			mainGroup = AAA29E5D2C1711AA00CA267C;
+			packageReferences = (
+				AA8E0A5C2C57E4B20097BDCD /* XCRemoteSwiftPackageReference "swift-numerics" */,
+			);
 			productRefGroup = AAA29E672C1711AA00CA267C /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -317,6 +334,7 @@
 				AA64CC802C47F91F005C883B /* ElevatorConnection.swift in Sources */,
 				AAE57FAB2C384E6400F0196F /* DefaultCardView.swift in Sources */,
 				AA2CA55B2C3F07A500C88C94 /* MarkerView.swift in Sources */,
+				AA8E0A642C57E50F0097BDCD /* VisualizeRoomViewContainer.swift in Sources */,
 				AAE57FB12C385D2B00F0196F /* ConnectedDotsView.swift in Sources */,
 				AA2CA55D2C3FC62400C88C94 /* MatrixView.swift in Sources */,
 				AA2CA5512C3DB5F400C88C94 /* CaptureViewContainer.swift in Sources */,
@@ -568,6 +586,35 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		AA8E0A5C2C57E4B20097BDCD /* XCRemoteSwiftPackageReference "swift-numerics" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-numerics.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		AA8E0A5D2C57E4B20097BDCD /* ComplexModule */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA8E0A5C2C57E4B20097BDCD /* XCRemoteSwiftPackageReference "swift-numerics" */;
+			productName = ComplexModule;
+		};
+		AA8E0A5F2C57E4B20097BDCD /* Numerics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA8E0A5C2C57E4B20097BDCD /* XCRemoteSwiftPackageReference "swift-numerics" */;
+			productName = Numerics;
+		};
+		AA8E0A612C57E4B20097BDCD /* RealModule */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = AA8E0A5C2C57E4B20097BDCD /* XCRemoteSwiftPackageReference "swift-numerics" */;
+			productName = RealModule;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = AAA29E5E2C1711AA00CA267C /* Project object */;
 }

@@ -114,6 +114,17 @@ struct RoomView: View {
                                     self.isNavigationActive = true
                                 }
                         }
+                    } else if selectedTab == 2{
+                        NavigationLink(destination: MatrixView(floor: floor), isActive: $isNavigationActive) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.system(size: 26))
+                                .foregroundStyle(.white, .blue, .blue)
+                                .onTapGesture {
+//                                    let newRoom = Room(name: "New Room", lastUpdate: Date(), referenceMarkers: [], transitionZones: [], sceneObjects: [], scene: nil, worldMap: nil, roomURL: URL(fileURLWithPath: ""))
+//                                    self.newRoom = newRoom
+                                    self.isNavigationActive = true
+                                }
+                        }
                     }
                 }
             }

@@ -6,7 +6,7 @@ struct CaptureViewContainer: UIViewRepresentable {
     typealias UIViewType = RoomCaptureView
     
     private let roomCaptureView: RoomCaptureView
-    private let arSession = ARSession()
+    var arSession = ARSession()
     
     var sessionDelegate: SessionDelegate
     
@@ -44,6 +44,10 @@ struct CaptureViewContainer: UIViewRepresentable {
             roomCaptureView.captureSession.stop(pauseARSession: pauseARSession)
         } else {
             roomCaptureView.captureSession.stop()
+        }
+        
+        if !pauseARSession {
+            arSession.pause()
         }
     }
     

@@ -115,7 +115,7 @@ class BuildingModel: ObservableObject {
                 let attributes = try fileManager.attributesOfItem(atPath: floorURL.path)
                 if let lastModifiedDate = attributes[.modificationDate] as? Date {
                     
-                    let floorDataURL = floorURL.appendingPathComponent(BuildingModel.FLOOR_DATA_FOLDER)
+                    let floorDataURL = floorURL//.appendingPathComponent(BuildingModel.FLOOR_DATA_FOLDER)
                     
                     var sceneObjects: [SCNNode] = []
                     var scene: SCNScene? = nil

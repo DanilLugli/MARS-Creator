@@ -81,7 +81,7 @@ class Building: Encodable, ObservableObject {
             print("Folder created at: \(floorURL.path)")
             
             // Creare le cartelle aggiuntive all'interno della directory del piano
-            let dataDirectory = floorURL.appendingPathComponent(BuildingModel.FLOOR_DATA_FOLDER)
+            let dataDirectory = floorURL//.appendingPathComponent(BuildingModel.FLOOR_DATA_FOLDER)
             let roomsDirectory = floorURL.appendingPathComponent(BuildingModel.FLOOR_ROOMS_FOLDER)
             
             try FileManager.default.createDirectory(at: dataDirectory, withIntermediateDirectories: true, attributes: nil)
@@ -92,6 +92,7 @@ class Building: Encodable, ObservableObject {
             
             // Creare le cartelle aggiuntive all'interno della directory Data
             let jsonParametricDirectory = dataDirectory.appendingPathComponent("JsonParametric")
+            print("PINO \(jsonParametricDirectory)")
             let mapUsdzDirectory = dataDirectory.appendingPathComponent("MapUsdz")
             let plistMetadataDirectory = dataDirectory.appendingPathComponent("PlistMetadata")
             
@@ -103,10 +104,14 @@ class Building: Encodable, ObservableObject {
             print("MapUsdz directory created at: \(mapUsdzDirectory.path)")
             print("PlistMetadata directory created at: \(plistMetadataDirectory.path)")
             
+           
+            
         } catch {
             print("Error creating folder for floor \(floor.name): \(error)")
         }
     }
+    
+    
     func deleteFloorByName(name: String) {
         _floors.removeAll { $0.name == name }
         
