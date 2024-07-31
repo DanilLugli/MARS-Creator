@@ -50,7 +50,11 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject {
     }
     
     var associationMatrix: [String: RotoTraslationMatrix] {
-        return _associationMatrix
+        get{
+            return _associationMatrix
+        }set{
+            _associationMatrix = newValue
+        }
     }
     
     var rooms: [Room] {

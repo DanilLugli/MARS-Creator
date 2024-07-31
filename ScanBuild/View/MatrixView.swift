@@ -21,7 +21,17 @@ struct MatrixView: View {
     
     @State var apiResponseCode = ""
     
-    @State var responseFromServer = false
+    @State var responseFromServer = false {
+        didSet {
+            if responseFromServer {
+                showAlert = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                    showAlert = false
+                    responseFromServer = false
+                }
+            }
+        }
+    }
     @State var response: (HTTPURLResponse?, [String: Any]) = (nil, ["": ""])
     
     @State private var showButton1 = false
@@ -32,6 +42,8 @@ struct MatrixView: View {
     @State private var selectedMap: URL = URL(fileURLWithPath: "")
     @State private var availableMaps: [String] = []
     @State private var filteredLocalMaps: [String] = []
+    
+    @State private var showAlert = false
     
     @ObservedObject var floor: Floor
     
@@ -87,29 +99,35 @@ struct MatrixView: View {
     var body: some View {
         NavigationStack {
             VStack {
+                
+                ConnectedDotsView(
+                    labels: ["1°", "2°", "3°"],
+                    progress: min(matchingNodesForAPI.count + 1, 3)
+                ).padding()
+                
                 VStack {
-                    Text("CREATE MATRIX").bold().font(.largeTitle).foregroundColor(.white)
-                    Text("GLOBAL Map").bold().font(.title3).foregroundColor(.white)
+                    Text("\(floor.name) Map").bold().font(.title3).foregroundColor(.white)
                 }
                 
                 HStack {
                     Button("+") {
                         globalView.zoomIn()
-                    }.buttonStyle(.bordered).bold().background(Color(red: 255/255, green: 235/255, blue: 205/255)).cornerRadius(8)
+                    }.buttonStyle(.bordered).bold().background(Color.blue.opacity(0.4)).cornerRadius(8)
                     Button("-") {
                         globalView.zoomOut()
-                    }.buttonStyle(.bordered).bold().background(Color(red: 255/255, green: 235/255, blue: 205/255)).cornerRadius(8)
+                    }.buttonStyle(.bordered).bold().background(Color.blue.opacity(0.4)).cornerRadius(8)
                 }
                 
                 globalView
                     .border(Color.white)
+                    .cornerRadius(10)
                     .padding()
                     .shadow(color: Color.gray, radius: 3)
                 
                 HStack {
                     Picker("Choose Global Node", selection: $selectedGlobalNodeName) {
                         Text("Choose Global Node")
-                        ForEach(globalNodes, id: \.self) {Text($0)}
+                        ForEach(globalNodes, id: \.self) { Text($0) }
                     }.onChange(of: selectedGlobalNodeName, perform: { _ in
                         globalView.changeColorOfNode(nodeName: selectedGlobalNodeName, color: UIColor.green)
                         
@@ -118,10 +136,10 @@ struct MatrixView: View {
                         localNodes = localView.scnView.scene?.rootNode.childNodes(passingTest: {
                             n, _ in n.name != nil && n.name!.starts(with: firstTwoLetters) && n.name! != "Room" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp"
                         })
-                        .sorted(by: {a, b in a.scale.x > b.scale.x})
-                        .map{node in node.name ?? "nil"} ?? []
+                        .sorted(by: { a, b in a.scale.x > b.scale.x })
+                        .map { node in node.name ?? "nil" } ?? []
                         
-                        selectedGlobalNode = globalView.scnView.scene?.rootNode.childNodes(passingTest: {n,_ in n.name != nil && n.name! == selectedGlobalNodeName}).first
+                        selectedGlobalNode = globalView.scnView.scene?.rootNode.childNodes(passingTest: { n, _ in n.name != nil && n.name! == selectedGlobalNodeName }).first
                     })
                     
                     if let _size = selectedGlobalNode?.scale {
@@ -134,7 +152,7 @@ struct MatrixView: View {
                 
                 if let _localMaps = localMaps {
                     HStack {
-                        Text("LOCAL Map").bold().font(.title3).foregroundColor(.white)
+                        Text("\(selectedMap.deletingPathExtension().lastPathComponent) Map").bold().font(.title3).foregroundColor(.white)
                     }
                     Picker("", selection: $selectedMap) {
                         Text("Choose Local Map").foregroundColor(.white)
@@ -142,7 +160,6 @@ struct MatrixView: View {
                             Text(map.deletingPathExtension().lastPathComponent) // Display room name without .usdz extension
                         }
                     }.onChange(of: selectedMap, perform: { _ in
-                        
                         localView.loadRoomMaps(name: selectedMap.lastPathComponent, borders: false, usdzURL: selectedMap)
                         
                         let numbersCharacterSet = CharacterSet.decimalDigits
@@ -163,14 +180,15 @@ struct MatrixView: View {
                     HStack {
                         Button("+") {
                             localView.zoomIn()
-                        }.buttonStyle(.bordered).bold().background(Color(red: 255/255, green: 235/255, blue: 205/255)).cornerRadius(6)
+                        }.buttonStyle(.bordered).bold().background(Color.blue.opacity(0.4)).cornerRadius(6)
                         Button("-") {
                             localView.zoomOut()
-                        }.buttonStyle(.bordered).bold().background(Color(red: 255/255, green: 235/255, blue: 205/255)).cornerRadius(6)
+                        }.buttonStyle(.bordered).bold().background(Color.blue.opacity(0.4)).cornerRadius(6)
                     }
                     
                     localView
                         .border(Color.white)
+                        .cornerRadius(10)
                         .padding()
                         .shadow(color: Color.gray, radius: 3)
                     
@@ -206,18 +224,24 @@ struct MatrixView: View {
                             matchingNodesForAPI.append((_selectedLocalNode, _selectedGlobalNode))
                             print(_selectedLocalNode)
                             print(_selectedGlobalNode)
-                            print(selectedMap.lastPathComponent ?? "")
+                            print(selectedMap.lastPathComponent)
                             print(matchingNodesForAPI)
                         }.buttonStyle(.bordered)
-                            .background(Color(red: 240/255, green: 151/255, blue: 45/255))
-                            .cornerRadius(6)
+                            .background(Color.green.opacity(0.4)                            .cornerRadius(10))
                             .bold()
                     }
-                    Text("matched nodes: \(matchingNodesForAPI.count)")
+//                    Text("matched nodes: \(matchingNodesForAPI.count)").foregroundColor(.white)
                     if matchingNodesForAPI.count >= 3 {
-                        Button("ransac Alignment API") {
+                        Button("Create Matrix") {
+                            
                             Task {
-                                print(selectedMap.lastPathComponent ?? "")
+                                let emptyMatrix = RotoTraslationMatrix(
+                                    name: selectedMap.deletingPathExtension().lastPathComponent,
+                                    translation: simd_float4x4(1),
+                                    r_Y: simd_float4x4(1)
+                                )
+                                floor.associationMatrix["\(selectedMap.deletingPathExtension().lastPathComponent)"] = emptyMatrix
+                                print(selectedMap.lastPathComponent)
                                 print(matchingNodesForAPI)
                                 responseFromServer = true
                             }
@@ -228,9 +252,15 @@ struct MatrixView: View {
                     }
                 }
             }.background(Color.customBackground)
+                .alert(isPresented: $showAlert) {
+                    Alert(
+                        title: Text("Matrix Created Correctly"),
+                        message: nil
+                       
+                    )
+                }
         }
     }
-    
     func orderBySimilarity(node: SCNNode, listOfNodes: [SCNNode]) -> [SCNNode] {
         print(node.scale)
         var result: [(SCNNode, Float)] = []
@@ -238,7 +268,8 @@ struct MatrixView: View {
             result.append((n, simd_fast_distance(n.simdScale, node.simdScale)))
         }
         return result.sorted(by: { a, b in a.1 < b.1 }).map { $0.0 }
-    }}
+    }
+}
 
 struct MatrixView_Preview: PreviewProvider {
     static var previews: some View {

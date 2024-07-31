@@ -56,7 +56,7 @@ struct FloorView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Text("\(building.name)")
+                Text("BUILDING")
                     .font(.system(size: 26, weight: .heavy))
                     .foregroundColor(.white)
             }

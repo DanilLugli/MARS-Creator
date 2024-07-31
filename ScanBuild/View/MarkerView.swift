@@ -13,35 +13,46 @@ struct MarkerView: View {
     @State private var newBuildingName: String = ""
     @State private var selectedMarker: ReferenceMarker? = nil
     @State private var selectedTab: Int = 0
+    var mapView = SCNViewContainer()
     
     var body: some View {
         NavigationStack {
             VStack {
                 VStack {
-                    Text("\(building.name) > \(floor.name) > \(room.name) > \(tabTitle)")
+                    Text("\(building.name) > \(floor.name) > \(room.name)")
                         .font(.system(size: 14))
                         .fontWeight(.heavy)
-               
+                    
                     TextField("Search", text: $searchText)
                         .padding(7)
                         .background(Color(.systemGray6))
                         .cornerRadius(8)
                         .padding(.horizontal, 10)
-                        //.padding(.top, 90)
+                    //.padding(.top, 90)
                         .frame(maxWidth: .infinity)
                         .padding()
                     
                     TabView(selection: $selectedTab) {
                         VStack {
-                            Text("Add Planimetry with + icon")
-                                .foregroundColor(.gray)
-                                .font(.headline)
-                                .padding()
+                            if isDirectoryEmpty(url: room.roomURL.appendingPathComponent("MapUsdz")){
+                                Text("Add Planimetry with + icon")
+                                    .foregroundColor(.gray)
+                                    .font(.headline)
+                                    .padding()
+                            } else {
+                                VStack {
+                                    mapView
+                                        .border(Color.white).cornerRadius(10).padding().shadow(color: Color.gray, radius: 3)
+                                }
+                                .onAppear {
+                                    mapView.loadRoomMaps(name: room.name, borders: true, usdzURL: room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"))
+                                }
+                            }
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(Color.customBackground)
                         .tabItem {
-                            Label("Planimetry", systemImage: "map")
+                            Label("Planimetry", systemImage: "map.fill")
                         }
                         .tag(0)
                         
@@ -62,7 +73,7 @@ struct MarkerView: View {
                                             Button(action: {
                                                 selectedMarker = marker
                                             }) {
-                                                DefaultCardView(name: marker.imageName, date: Date()).padding()
+                                                MarkerCardView(name: marker.imageName, rowSize: 1).padding()
                                             }
                                         }
                                     }
@@ -78,8 +89,13 @@ struct MarkerView: View {
                         .tag(1)
                         
                         VStack {
-                            Text("TRANSITION ZONE").foregroundColor(.white)
+                            Text("No connections available for \(room.name)")
+                                .foregroundColor(.gray)
+                                .font(.headline)
+                                .padding()
                         }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color.customBackground)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(Color.customBackground)
                         .tabItem {
@@ -87,48 +103,61 @@ struct MarkerView: View {
                         }
                         .tag(2)
                         
-//                        VStack {
-//                            if room.getConnections().isEmpty {
-//                                VStack {
-//                                    Text("No connections available for \(room.name)")
-//                                        .foregroundColor(.gray)
-//                                        .font(.headline)
-//                                        .padding()
-//                                }
-//                                .frame(maxWidth: .infinity, maxHeight: .infinity)
-//                                .background(Color.customBackground)
-//                            } else {
-//                                ScrollView {
-//                                    LazyVStack(spacing: 50) {
-//                                        ForEach(room.getConnections(), id: \.id) { connection in
-//                                            DefaultCardView(name: connection.name, date: Date()).padding()
-//                                        }
-//                                    }
-//                                }
-//                                .padding()
-//                            }
-//                        }
-//                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-//                        .background(Color.customBackground)
-//                        .tabItem {
-//                            Label("Connection", systemImage: "link")
-//                        }
-//                        .tag(3)
+                        //                        VStack {
+                        //                            if room.getConnections().isEmpty {
+                        //                                VStack {
+                        //                                    Text("No connections available for \(room.name)")
+                        //                                        .foregroundColor(.gray)
+                        //                                        .font(.headline)
+                        //                                        .padding()
+                        //                                }
+                        //                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        //                                .background(Color.customBackground)
+                        //                            } else {
+                        //                                ScrollView {
+                        //                                    LazyVStack(spacing: 50) {
+                        //                                        ForEach(room.getConnections(), id: \.id) { connection in
+                        //                                            DefaultCardView(name: connection.name, date: Date()).padding()
+                        //                                        }
+                        //                                    }
+                        //                                }
+                        //                                .padding()
+                        //                            }
+                        //                        }
+                        //                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        //                        .background(Color.customBackground)
+                        //                        .tabItem {
+                        //                            Label("Connection", systemImage: "link")
+                        //                        }
+                        //                        .tag(3)
                     }
                 }
             }
             .background(Color.customBackground)
             .foregroundColor(.white)
-            .navigationTitle(tabTitle)
+            .foregroundColor(.white)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                
+                ToolbarItem(placement: .principal) {
+                    Text("ROOM")
+                        .font(.system(size: 26, weight: .heavy))
+                        .foregroundColor(.white)
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                }
+
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack {
-
-                 if selectedTab == 0 {
+                        
+                        if selectedTab == 0 {
                             //TODO: aggiornare chiamata AddConnectionView
-                     NavigationLink(destination: ScanningView(namedUrl: room)) {
+                            NavigationLink(destination: ScanningView(namedUrl: room)) {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.system(size: 26))
+                                    .foregroundStyle(.white, .blue, .blue)
+                            }
+                        }else if selectedTab == 2{
+                            NavigationLink(destination: AddConnectionView(selectedBuilding: building)) {
                                 Image(systemName: "plus.circle.fill")
                                     .font(.system(size: 26))
                                     .foregroundStyle(.white, .blue, .blue)
@@ -137,71 +166,37 @@ struct MarkerView: View {
                     }
                 }
             }
-        }
-        .sheet(item: $selectedMarker) { marker in
-            VStack {
-                Text("Marker Details")
-                    .font(.system(size: 22))
-                    .fontWeight(.bold)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 20)
-                    .foregroundColor(.white)
-                Text("Details for \(marker.imageName)")
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(8)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 8)
-                Text("Rename Marker")
-                    .font(.system(size: 22))
-                    .fontWeight(.bold)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 20)
-                    .foregroundColor(.white)
-                TextField("New Marker Name", text: $newBuildingName)
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(8)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 8)
-                Spacer()
-                HStack {
-                    Button(action: {
-                        if !newBuildingName.isEmpty {
-                            // Salva il nuovo nome del marker
-                        }
-                    }) {
-                        Text("SAVE")
-                            .font(.system(size: 22, weight: .heavy))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.blue)
-                            .cornerRadius(10)
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 20)
+            .sheet(item: $selectedMarker) { marker in
+                VStack {
+                    Text("Marker Details")
+                        .font(.system(size: 22))
+                        .fontWeight(.bold)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 20)
+                        .foregroundColor(.white)
+                    selectedMarker?.image
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(height: 200)
+                        .background(Color(.systemGray6))
+                        .cornerRadius(10)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 8)
+                    Text("Position Marker")
+                        .font(.system(size: 22))
+                        .fontWeight(.bold)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 20)
+                        .foregroundColor(.white)
+                    mapView.border(Color.white).cornerRadius(10).padding().shadow(color: Color.gray, radius: 3)
+                    Spacer()
                     
-                    Button(action: {
-                        //TODO: deletereferenceMarker()
-                        selectedMarker = nil
-                    }) {
-                        Text("DELETE")
-                            .font(.system(size: 22, weight: .heavy))
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.red)
-                            .cornerRadius(10)
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 20)
                 }
+                .padding()
+                .background(Color.customBackground.ignoresSafeArea())
             }
-            .padding()
-            .background(Color.customBackground.ignoresSafeArea())
         }
     }
     
@@ -223,6 +218,17 @@ struct MarkerView: View {
         }
     }
     
+    func isDirectoryEmpty(url: URL) -> Bool {
+        let fileManager = FileManager.default
+        do {
+            let contents = try fileManager.contentsOfDirectory(at: url, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+            return contents.isEmpty
+        } catch {
+            print("Error checking directory contents: \(error)")
+            return true
+        }
+    }
+    
     struct MarkerView_Previews: PreviewProvider {
         static var previews: some View {
             let buildingModel = BuildingModel.getInstance()
@@ -240,3 +246,4 @@ struct MarkerView: View {
         return formatter
     }()
 }
+

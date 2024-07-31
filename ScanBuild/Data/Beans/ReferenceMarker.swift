@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-class ReferenceMarker: Codable, Identifiable, ObservableObject {
+class ReferenceMarker: ObservableObject, Codable, Identifiable  {
     private var _id: UUID = UUID()
     @Published private var _image: Image? = nil
     private var _imagePath : URL

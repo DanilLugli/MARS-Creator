@@ -17,18 +17,14 @@ struct SCNViewContainer: UIViewRepresentable {
     typealias UIViewType = SCNView
     
     var scnView = SCNView(frame: .zero)
-    
     var handler = HandleTap()
     
     var cameraNode = SCNNode()
     var massCenter = SCNNode()
-    
     var delegate = RenderDelegate()
-    
     var dimension = SCNVector3()
     
     var rotoTraslation: [DictToRototraslation] = []
-    
     @State var rotoTraslationActive: Int = 0
     
     init() {
@@ -43,40 +39,6 @@ struct SCNViewContainer: UIViewRepresentable {
             rotoTraslationActive = (rotoTraslationActive - 1) % rotoTraslation.count
         }
     }
-    
-//    func loadgeneralMap(borders: Bool, name: String) {
-//        
-//        scnView.scene = try! SCNScene(url: Model
-//            .shared
-//            .directoryURL
-//            .appending(path: "ExportCombined")
-//            .appending(path: "\(name).usdz"))
-//        
-//        //print("--> LOADING GLOBAL MAP TO CONVERTION")
-//        //print(scnView.scene)
-//        
-//        drawContent(borders: borders)
-//        setMassCenter()
-//        setCamera()
-//        NotificationCenter
-//            .default
-//            .post(name: .genericMessage, object: "map loaded correctly")
-//    }
-//    
-//    func loadRoomMaps(name: String, borders: Bool) {
-//        scnView.scene = try! SCNScene(url: Model.shared.directoryURL
-//            .appending(path: "MapUsdz")
-//            .appending(path: "\(name).usdz"))
-//        //print("load single map")
-//        drawContent(borders: borders)
-//        
-//        setMassCenter()
-//        setCamera()
-//        NotificationCenter
-//            .default
-//            .post(name: .genericMessage,
-//                  object: "map loaded correctly")
-//    }
     
     func setCamera() {
         scnView.scene?.rootNode.addChildNode(cameraNode)
@@ -112,8 +74,6 @@ struct SCNViewContainer: UIViewRepresentable {
     }
     
     func drawContent(borders: Bool) {
-        //print("draw content")
-        //add room content
         print(borders)
         
         scnView.scene?
@@ -122,23 +82,19 @@ struct SCNViewContainer: UIViewRepresentable {
                 n,_ in n.name != nil && n.name! != "Room" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp" && n.name! != "__selected__"
             })
             .forEach{
-                //print($0.name)
-                //print($0.scale)
+
                 let material = SCNMaterial()
                 material.diffuse.contents = UIColor.black
                 if ($0.name!.prefix(5) == "Floor") {material.diffuse.contents = UIColor.white.withAlphaComponent(0.2)}
                 if ($0.name!.prefix(4) == "Door" || $0.name!.prefix(4) == "Open") {material.diffuse.contents = UIColor.red}
                 material.lightingModel = .physicallyBased
                 $0.geometry?.materials = [material]
-                //let angle = $0.eulerAngles.y
-                //$0.eulerAngles.y -= angle
+                
                 if borders {
-                    //print("draw borders")
                     $0.scale.x = $0.scale.x < 0.2 ? $0.scale.x + 0.1 : $0.scale.x
                     $0.scale.z = $0.scale.z < 0.2 ? $0.scale.z + 0.1 : $0.scale.z
                     $0.scale.y = ($0.name!.prefix(4) == "Wall") ? 0.1 : $0.scale.y
                 }
-                //$0.eulerAngles.y = angle
             }
     }
 
@@ -299,6 +255,32 @@ struct SCNViewContainer: UIViewRepresentable {
     }
 
     func updateUIView(_ uiView: SCNView, context: Context) {}
+    
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+    
+    class Coordinator: NSObject {
+        var parent: SCNViewContainer
+        
+        init(_ parent: SCNViewContainer) {
+            self.parent = parent
+        }
+        
+        @objc func handlePinch(_ gesture: UIPinchGestureRecognizer) {
+            guard let camera = parent.cameraNode.camera else { return }
+            let scale = gesture.scale
+            camera.orthographicScale /= Double(scale)
+            gesture.scale = 1
+        }
+        
+        @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
+            let translation = gesture.translation(in: parent.scnView)
+            parent.cameraNode.position.x -= Float(translation.x) * 0.01
+            parent.cameraNode.position.z += Float(translation.y) * 0.01
+            gesture.setTranslation(.zero, in: parent.scnView)
+        }
+    }
 }
 
 func generateSphereNode(_ color: UIColor, _ radius: CGFloat) -> SCNNode {

@@ -3,17 +3,20 @@ import simd
 
 // RotoTraslationMatrix and SIMDMatrix4x4 implementations
 struct RotoTraslationMatrix: Codable {
+    let name: String
     let translation: SIMDMatrix4x4
     let r_Y: SIMDMatrix4x4
 
-    init(translation: simd_float4x4, r_Y: simd_float4x4) {
+
+    init(name: String, translation: simd_float4x4, r_Y: simd_float4x4) {
+        self.name = name
         self.translation = SIMDMatrix4x4(matrix: translation)
         self.r_Y = SIMDMatrix4x4(matrix: r_Y)
     }
     
 
     private enum CodingKeys: String, CodingKey {
-        case translation, r_Y
+        case translation, r_Y, name
     }
 }
 

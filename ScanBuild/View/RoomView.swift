@@ -12,11 +12,12 @@ struct RoomView: View {
     @State private var animateRooms: Bool = false
     @State private var newRoom: Room? = nil
     @State private var isNavigationActive = false
+    var mapView = SCNViewContainer()
     
     var body: some View {
         NavigationStack {
             VStack {
-                Text(selectedTab == 1 ? "\(building.name) > \(floor.name) > Planimetry" : (selectedTab == 2 ? "\(building.name) > \(floor.name) > Matrix" : "\(building.name) > \(floor.name) > Rooms"))
+                Text("\(building.name) > \(floor.name)")
                     .font(.system(size: 14))
                     .fontWeight(.heavy)
                 
@@ -29,16 +30,31 @@ struct RoomView: View {
                     .padding()
                 
                 TabView(selection: $selectedTab) {
-                    Text("Add Planimetry with + icon")
-                        .foregroundColor(.gray)
-                        .font(.headline)
-                        .padding()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color.customBackground)
-                        .tabItem {
-                            Label("Planimetry", systemImage: "map.fill")
+                    
+                    VStack {
+                        if floor.planimetry == nil {
+                            Text("Add Planimetry with + icon")
+                                .foregroundColor(.gray)
+                                .font(.headline)
+                                .padding()
+                        } else {
+                            VStack {
+                                mapView
+                                    .border(Color.white).cornerRadius(10).padding().shadow(color: Color.gray, radius: 3)
+                            }
+                            .onAppear {
+                                mapView.loadgeneralMap(borders: true, usdzURL: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz"))
+                            }
                         }
-                        .tag(0)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.customBackground)
+                    .tabItem {
+                        Label("Planimetry", systemImage: "map.fill")
+                    }
+                    .tag(0)
+                    
+                    
                     
                     VStack {
                         if floor.rooms.isEmpty {
@@ -68,10 +84,28 @@ struct RoomView: View {
                     }
                     .tag(1)
                     
-                    Text("Add Matrix with + icon")
-                        .foregroundColor(.gray)
-                        .font(.headline)
-                        .padding()
+                    
+                    VStack{
+                        if floor.associationMatrix.isEmpty {
+                            VStack {
+                                Text("Add Matrix with + icon")
+                                    .foregroundColor(.gray)
+                                    .font(.headline)
+                                    .padding()
+                            }
+                        } else {
+                            ScrollView {
+                                LazyVStack(spacing: 50) {
+                                    ForEach(floor.associationMatrix.keys.sorted(), id: \.self) { key in
+                                        if let matrix = floor.associationMatrix[key]{
+                                            DefaultCardView(name: matrix.name, date: Date(), rowSize: 1, isSelected: false)
+                                        }
+                                    }
+                                }
+                            }
+                            .padding()
+                        }
+                    }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(Color.customBackground)
                         .tabItem {
@@ -86,7 +120,7 @@ struct RoomView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Text(selectedTab == 0 ? "\(floor.name)" : (selectedTab == 1 ? "PLANIMETRY" : "MATRIX"))
+                Text("FLOOR")
                     .font(.system(size: 26, weight: .heavy))
                     .foregroundColor(.white)
             }
@@ -120,8 +154,8 @@ struct RoomView: View {
                                 .font(.system(size: 26))
                                 .foregroundStyle(.white, .blue, .blue)
                                 .onTapGesture {
-//                                    let newRoom = Room(name: "New Room", lastUpdate: Date(), referenceMarkers: [], transitionZones: [], sceneObjects: [], scene: nil, worldMap: nil, roomURL: URL(fileURLWithPath: ""))
-//                                    self.newRoom = newRoom
+                                    //                                    let newRoom = Room(name: "New Room", lastUpdate: Date(), referenceMarkers: [], transitionZones: [], sceneObjects: [], scene: nil, worldMap: nil, roomURL: URL(fileURLWithPath: ""))
+                                    //                                    self.newRoom = newRoom
                                     self.isNavigationActive = true
                                 }
                         }

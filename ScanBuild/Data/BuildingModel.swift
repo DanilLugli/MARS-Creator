@@ -185,6 +185,15 @@ class BuildingModel: ObservableObject {
                                 let jsonData = try Data(contentsOf: fileURL)
                                 let decodedMarkers = try JSONDecoder().decode([ReferenceMarker].self, from: jsonData)
                                 referenceMarkers.append(contentsOf: decodedMarkers)
+                            } else if fileURL.pathExtension == "jpg" || fileURL.pathExtension == "png" || fileURL.pathExtension == "JPG" || fileURL.pathExtension == "PNG" || fileURL.pathExtension == "JPEG" || fileURL.pathExtension == "jpeg" {
+                                // Assuming the image file name is the same as the marker name
+                                let imageName = fileURL.deletingPathExtension().lastPathComponent
+                                let imagePath = fileURL
+                                // Create a new ReferenceMarker
+                                let coordinates = Coordinates(x: Float(Double.random(in: -100...100)), y: Float(Double.random(in: -100...100))) // Adjust accordingly
+                                let rmUML = URL(fileURLWithPath: "") // Adjust accordingly
+                                let newMarker = ReferenceMarker(_imagePath: imagePath, _imageName: imageName, _coordinates: coordinates, _rmUML: rmUML)
+                                referenceMarkers.append(newMarker)
                             }
                         }
                     }

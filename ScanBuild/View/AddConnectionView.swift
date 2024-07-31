@@ -29,7 +29,7 @@ struct AddConnectionView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack {
                         ForEach(selectedBuilding.floors) { floor in
-                            DefaultCardView(name: floor.name, date: floor.lastUpdate, rowSize: 2, isSelected: selectedFloor?.id == floor.id  )
+                            DefaultCardView(name: floor.name, date: floor.lastUpdate, rowSize: 1, isSelected: selectedFloor?.id == floor.id  ).padding()
                                 .onTapGesture {
                                     selectedFloor = floor
                                 }
@@ -46,7 +46,7 @@ struct AddConnectionView: View {
                             HStack {
                                 ForEach(selectedFloor.rooms) { room in
                                     if room.name != fromRoom?.name {
-                                        DefaultCardView(name: room.name, date: room.lastUpdate, rowSize: 2, isSelected: selectedRoom?.id == room.id  )
+                                        DefaultCardView(name: room.name, date: room.lastUpdate, rowSize: 2, isSelected: selectedRoom?.id == room.id  ).padding()
                                             .onTapGesture {
                                                 selectedRoom = room
                                             }
@@ -125,29 +125,29 @@ struct AddConnectionView: View {
                     .font(.system(size: 22, weight: .heavy))
                     .foregroundColor(.white)
             }
-            ToolbarItem(placement: .navigationBarTrailing) {
-                HStack {
-                    NavigationLink(destination: AddBuildingView()) {
-                        Image(systemName: "plus.circle.fill")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 31, height: 31)
-                            .foregroundColor(.blue)
-                            .background(Circle().fill(Color.white).frame(width: 31, height: 31))
-                    }
-                    Button(action: {
-                        // Azione per il pulsante "info.circle"
-                        print("Info button tapped")
-                    }) {
-                        Image(systemName: "info.circle")
-                            .foregroundColor(.white)
-                            .padding(8)
-                            .frame(width: 30, height: 30)
-                            .background(Color.blue)
-                            .clipShape(Circle())
-                    }
-                }
-            }
+//            ToolbarItem(placement: .navigationBarTrailing) {
+//                HStack {
+//                    NavigationLink(destination: AddBuildingView()) {
+//                        Image(systemName: "plus.circle.fill")
+//                            .resizable()
+//                            .aspectRatio(contentMode: .fit)
+//                            .frame(width: 31, height: 31)
+//                            .foregroundColor(.blue)
+//                            .background(Circle().fill(Color.white).frame(width: 31, height: 31))
+//                    }
+//                    Button(action: {
+//                        // Azione per il pulsante "info.circle"
+//                        print("Info button tapped")
+//                    }) {
+//                        Image(systemName: "info.circle")
+//                            .foregroundColor(.white)
+//                            .padding(8)
+//                            .frame(width: 30, height: 30)
+//                            .background(Color.blue)
+//                            .clipShape(Circle())
+//                    }
+//                }
+//            }
         }
         .background(Color.customBackground.ignoresSafeArea())
     }
