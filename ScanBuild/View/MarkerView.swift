@@ -13,6 +13,7 @@ struct MarkerView: View {
     @State private var newBuildingName: String = ""
     @State private var selectedMarker: ReferenceMarker? = nil
     @State private var selectedTab: Int = 0
+    @State private var isNavigationActive = false
     var mapView = SCNViewContainer()
     
     var body: some View {
@@ -23,14 +24,14 @@ struct MarkerView: View {
                         .font(.system(size: 14))
                         .fontWeight(.heavy)
                     
-                    TextField("Search", text: $searchText)
-                        .padding(7)
-                        .background(Color(.systemGray6))
-                        .cornerRadius(8)
-                        .padding(.horizontal, 10)
-                    //.padding(.top, 90)
-                        .frame(maxWidth: .infinity)
-                        .padding()
+//                    TextField("Search", text: $searchText)
+//                        .padding(7)
+//                        .background(Color(.systemGray6))
+//                        .cornerRadius(8)
+//                        .padding(.horizontal, 10)
+//                    //.padding(.top, 90)
+//                        .frame(maxWidth: .infinity)
+//                        .padding()
                     
                     TabView(selection: $selectedTab) {
                         VStack {
@@ -87,6 +88,35 @@ struct MarkerView: View {
                             Label("Marker", systemImage: "mappin.and.ellipse")
                         }
                         .tag(1)
+                        
+                        
+                        VStack{
+                            if floor.associationMatrix.isEmpty {
+                                VStack {
+                                    Text("Add Matrix with + icon")
+                                        .foregroundColor(.gray)
+                                        .font(.headline)
+                                        .padding()
+                                }
+                            } else {
+                                ScrollView {
+                                    LazyVStack(spacing: 50) {
+                                        ForEach(floor.associationMatrix.keys.sorted(), id: \.self) { key in
+                                            if let matrix = floor.associationMatrix[key]{
+                                                DefaultCardView(name: matrix.name, date: Date(), rowSize: 1, isSelected: false)
+                                            }
+                                        }
+                                    }
+                                }
+                                .padding()
+                            }
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color.customBackground)
+                        .tabItem {
+                            Label("Matrix", systemImage: "sum")
+                        }
+                        .tag(3)
                         
                         VStack {
                             Text("No connections available for \(room.name)")
@@ -145,7 +175,7 @@ struct MarkerView: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                 }
-
+                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack {
                         
@@ -161,6 +191,17 @@ struct MarkerView: View {
                                 Image(systemName: "plus.circle.fill")
                                     .font(.system(size: 26))
                                     .foregroundStyle(.white, .blue, .blue)
+                            }
+                        } else if selectedTab == 3{
+                            NavigationLink(destination: MatrixView(floor: floor, room: room), isActive: $isNavigationActive) {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.system(size: 26))
+                                    .foregroundStyle(.white, .blue, .blue)
+                                    .onTapGesture {
+                                        //                                    let newRoom = Room(name: "New Room", lastUpdate: Date(), referenceMarkers: [], transitionZones: [], sceneObjects: [], scene: nil, worldMap: nil, roomURL: URL(fileURLWithPath: ""))
+                                        //                                    self.newRoom = newRoom
+                                        self.isNavigationActive = true
+                                    }
                             }
                         }
                     }

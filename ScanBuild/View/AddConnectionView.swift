@@ -65,7 +65,7 @@ struct AddConnectionView: View {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack {
                                 ForEach(selectedRoom.transitionZones) { transitionZone in
-                                    DefaultCardView(name: transitionZone.name, date: Date(), rowSize: 2, isSelected: selectedTransitionZone?.id == transitionZone.id )
+                                    DefaultCardView(name: transitionZone.name, date: Date(), rowSize: 1, isSelected: selectedTransitionZone?.id == transitionZone.id )
                                         .onTapGesture {
                                             selectedTransitionZone = transitionZone
                                         }
