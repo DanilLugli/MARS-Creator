@@ -17,6 +17,7 @@ class BuildingModel: ObservableObject {
     }
     static let FLOOR_DATA_FOLDER = "Data"
     static let FLOOR_ROOMS_FOLDER = "Rooms"
+    static let ASSASSOCIATION_MATRIX_FILE = ""
     
     
     @Published private var buildings: [Building]
@@ -146,6 +147,12 @@ class BuildingModel: ObservableObject {
                     
                     let floor = Floor(name: floorURL.lastPathComponent, lastUpdate: lastModifiedDate, planimetry: Image(""),
                                       associationMatrix: associationMatrix ?? [:], rooms: rooms, sceneObjects: sceneObjects, scene: scene, sceneConfiguration: sceneConfiguration, floorURL: floorURL)
+                    
+                    let associationMatrixURL = floorURL.appendingPathComponent("\(floor.name).json")
+                                   if fileManager.fileExists(atPath: associationMatrixURL.path) {
+                                       floor.loadAssociationMatrixFromJSON(fileURL: associationMatrixURL)
+                                   }
+                    
                     floors.append(floor)
                 }
             }

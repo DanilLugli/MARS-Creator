@@ -8,43 +8,69 @@ struct ScanningView: View {
     @State private var messagesFromWorldMap: String = ""
     @State private var worldMapNewFeatures: Int = 0
     @State private var worldMapCounter: Int = 0
-    @State var isScanningRoom = true
+    @State var isScanningRoom = false // Inizia come false
     
     @State var captureView: CaptureViewContainer?
     
     @State private var dimensions: [String] = []
     @State var message = ""
     @State private var mapName: String = ""
-    
+    @Environment(\.presentationMode) var presentationMode
+
     init(namedUrl: NamedURL) {
         self._namedUrl = State(initialValue: namedUrl)
-        self._captureView = State(initialValue: CaptureViewContainer(namedUrl: namedUrl))
     }
     
     var body: some View {
         NavigationStack {
             ZStack {
-                if let captureView = captureView {
+                if isScanningRoom, let captureView = captureView {
                     captureView
                         .edgesIgnoringSafeArea(.all)
                 } else {
-                    Text("Loading...")
+                    Text("Press Start to begin scanning of \(namedUrl.name)")
+                        .foregroundColor(.gray).bold()
                         .onAppear {
-                            captureView = CaptureViewContainer(namedUrl: namedUrl)
+                            // Placeholder
                         }
                 }
                 
                 VStack {
                     HStack {
-                        ScanningCardView(worldMapCounter: worldMapCounter, messagesFromWorldMap: messagesFromWorldMap, newFeatures: worldMapNewFeatures, onSave: {
-                            isScanningRoom = false
-                            let finalMapName = mapName.isEmpty ? "Map_\(Date().timeIntervalSince1970)" : mapName
-                            captureView?.stopCapture(pauseARSession: false)
-                        })
-                        .padding()
+                        if isScanningRoom {
+                            ScanningCardView(
+                                messagesFromWorldMap: messagesFromWorldMap,
+                                newFeatures: namedUrl is Room ? worldMapNewFeatures : nil,
+                                onSave: {
+                                    isScanningRoom = false
+                                    let finalMapName = mapName.isEmpty ? "Map_\(Date().timeIntervalSince1970)" : mapName
+                                    captureView?.stopCapture(pauseARSession: false)
+                                }
+                            )
+                            .padding()
+                            .zIndex(1)
+                        }
                         
                         Spacer()
-                    }.padding(.top, -300)
+                    }
+                    .padding(.top)
+                    
+                    Spacer()
+                    
+                    if !isScanningRoom {
+                        Button(action: {
+                            isScanningRoom = true
+                            captureView = CaptureViewContainer(namedUrl: namedUrl)
+                        }) {
+                            Text("Start")
+                                .font(.largeTitle).bold()
+                                .padding()
+                                .background(Color.green)
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                        }
+                        .padding()
+                    }
                 }
                 .onReceive(NotificationCenter.default.publisher(for: .worldMapCounter)) { notification in
                     if let counter = notification.object as? Int {
@@ -79,9 +105,17 @@ struct ScanningView: View {
                         .font(.system(size: 26, weight: .heavy))
                         .foregroundColor(.white)
                 }
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        presentationMode.wrappedValue.dismiss()
+                    }) {
+                        Image(systemName: "chevron.left")
+                            .foregroundColor(.white)
+                    }
+                }
             }
             .onDisappear {
-                captureView?.stopCapture(pauseARSession: false)
+                //captureView?.stopCapture(pauseARSession: false, saveData: false)
             }
         }
     }

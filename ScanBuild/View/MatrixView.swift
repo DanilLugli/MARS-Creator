@@ -27,7 +27,7 @@ struct MatrixView: View {
     @State var responseFromServer = false {
         didSet {
             if responseFromServer {
-               // showAlert = true
+                // showAlert = true
                 showSheet = true
                 DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                     showAlert = false
@@ -94,13 +94,24 @@ struct MatrixView: View {
                 String(n.name!.suffix(4)) != "_grp"
             }).compactMap { node in node.name } ?? []))
         
-        localNodes = localView.scnView.scene?.rootNode.childNodes(passingTest: {
-            n, _ in n.name != nil && n.name! != "Room" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp"
-        })
-        .sorted(by: { a, b in a.scale.x > b.scale.x })
-        .map { node in node.name ?? "nil" } ?? []
-        print("Child Nodes: \(localView.scnView.scene?.rootNode.childNodes)")
-        
+        localNodes = Array(Set(localView
+            .scnView
+            .scene?
+            .rootNode
+            .childNodes(passingTest: {
+                n, _ in n.name != nil &&
+                n.name! != "Room" &&
+                n.name! != "Geom" &&
+                String(n.name!.suffix(4)) != "_grp"
+            }).compactMap { node in node.name } ?? []))
+        Te
+//        localNodes = localView.scnView.scene?.rootNode.childNodes(passingTest: {
+//            n, _ in n.name != nil && n.name! != "Room" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp"
+//        })
+//        .sorted(by: { a, b in a.scale.x > b.scale.x })
+//        .map { node in node.name ?? "nil" } ?? []
+//        print("Child Nodes: \(localView.scnView.scene?.rootNode.childNodes)")
+//        
         //        localMaps = getUSDZMapURLs(for: floor)
     }
     
@@ -349,38 +360,20 @@ struct MatrixView: View {
                 )
             }
             .sheet(isPresented: $showSheet) {
-                ScrollView {
-//                    VStack(alignment: .leading) {
-//                        if let _res = response.0 { Text("Status code: (_res.statusCode)") }
-//                        let _ = print(response.1)
-//                        ForEach(response.1.sorted(by: {a,b in a.key.count > b.key.count}), id: \.key) { k,v in
-//                            if k=="err" {
-//                                Text("\(k) -> \(v as! String)")
-//                            } else {
-//                                let _v = v as! [String: Any]
-//                                Text(k)
-//                                if let reg_result = _v["reg_result"] as? String {Text(reg_result)}
-//                                Text("R_Y")
-//                                Text(printMatrix(matrix: _v["R_Y"] as! [[Double]], decimal: 4))
-//                                
-//                                Text("diffMatrices")
-//                                Text(printMatrix(matrix: _v["diffMatrices"] as! [[Double]], decimal: 4))
-//                                
-//                                Text("translation")
-//                                Text(printMatrix(matrix: _v["translation"] as! [[Double]], decimal: 4))
-//                                
-//                            }
-//                            
-//                            Divider()
-//                        }
-//                    }
+                VStack{
+                    Text("ROOM POSITION CREATED AND SAVED CORRECTLY").font(.system(size: 26, weight: .heavy))
+                        .foregroundColor(.white).padding()
+                    Spacer()
                     Button("SAVE ROOM POSITION") {
                         saveConversionGlobalLocal(response.1, floor.floorURL, floor.name)
                     }.buttonStyle(.bordered)
                         .background(Color.blue.opacity(0.4))
                         .cornerRadius(8).padding()
                         .bold()
-                }
+                        .padding()
+                    
+                }.frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.customBackground.ignoresSafeArea())
             }
         }
     }

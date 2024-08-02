@@ -147,18 +147,75 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject {
         }
     }
     
-    private func loadAssociationMatrix() -> [RotoTraslationMatrix] {
-        // Implement logic to load association matrix
-        return []
+    func loadAssociationMatrixFromJSON(fileURL: URL) {
+        do {
+            let data = try Data(contentsOf: fileURL)
+            let jsonDecoder = JSONDecoder()
+            let jsonObject = try JSONSerialization.jsonObject(with: data, options: [])
+            guard let dictionary = jsonObject as? [String: [String: [[Float]]]] else {
+                print("Error: Cannot convert JSON data to dictionary")
+                return
+            }
+            
+            for (key, value) in dictionary {
+                guard let translationArray = value["translation"],
+                      let r_YArray = value["R_Y"] else {
+                    print("Error: Missing keys in dictionary")
+                    continue
+                }
+                
+                let translationMatrix = simd_float4x4(rows: translationArray.map { simd_float4($0) })
+                let r_YMatrix = simd_float4x4(rows: r_YArray.map { simd_float4($0) })
+                
+                let rotoTranslationMatrix = RotoTraslationMatrix(name: key, translation: translationMatrix, r_Y: r_YMatrix)
+                
+                self._associationMatrix[key] = rotoTranslationMatrix
+            }
+        } catch {
+            print("Error loading JSON data: \(error)")
+        }
     }
+    
+    func isMatrixPresent(named matrixName: String, inFileAt url: URL) -> Bool {
+        do {
+            let data = try Data(contentsOf: url)
+            let json = try JSONSerialization.jsonObject(with: data, options: [])
+            
+            guard let matricesDict = json as? [String: [String: [[Double]]]] else {
+                print("Il formato del file JSON non è corretto.")
+                return false
+            }
+            
+            return matricesDict[matrixName] != nil
+            
+        } catch {
+            print("Errore durante la lettura del file JSON: \(error)")
+            return false
+        }
+    }
+    
+    // ... Altre funzioni
+    
+    private func simd_float4(_ array: [Float]) -> simd_float4 {
+        return simd.simd_float4(array[0], array[1], array[2], array[3])
+    }
+    
+    private func simd_float4x4(rows: [simd_float4]) -> simd_float4x4 {
+        return simd_float4x4(rows: rows)
+    }
+    
+//    private func loadAssociationMatrix() -> [RotoTraslationMatrix] {
+//        // Implement logic to load association matrix
+//        return []
+//    }
     
     func saveAssociationMatrix(associationMatrix: [RotoTraslationMatrix]) -> Bool {
         // Implement logic to save association matrix
         return true
     }
     
-    func createAssociationMatrix(room: Room, nodes: [(SCNNode, SCNNode)]) -> [RotoTraslationMatrix] {
-        // Implement logic to create association matrix
-        return []
-    }
+//    func createAssociationMatrix(room: Room, nodes: [(SCNNode, SCNNode)]) -> [RotoTraslationMatrix] {
+//        // Implement logic to create association matrix
+//        return []
+//    }
 }

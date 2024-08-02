@@ -10,23 +10,25 @@ import SwiftUI
 
 
 struct ScanningCardView: View {
-    var worldMapCounter: Int
+    //var worldMapCounter: Int
     var messagesFromWorldMap: String
-    var newFeatures: Int
+    var newFeatures: Int?
     var onSave: () -> Void
     
     var body: some View {
         HStack {
             VStack(alignment: .leading) {
-                Text("WorldMapCounter: \(worldMapCounter)")
-                    .foregroundColor(.white)
-                    .font(.system(size: 16, weight: .bold))
+                //                Text("WorldMapCounter: \(worldMapCounter)")
+                //                    .foregroundColor(.white)
+                //                    .font(.system(size: 16, weight: .bold))
                 Text(messagesFromWorldMap)
                     .foregroundColor(.white)
                     .font(.system(size: 16, weight: .bold))
-                Text("new features: \(newFeatures)")
-                    .foregroundColor(.white)
-                    .font(.system(size: 16, weight: .bold))
+                if let newFeatures = newFeatures {
+                    Text("new features: \(newFeatures)")
+                        .foregroundColor(.white)
+                        .font(.system(size: 16, weight: .bold))
+                }
             }
             Spacer()
             Button(action: {
@@ -36,10 +38,11 @@ struct ScanningCardView: View {
                     .resizable()
                     .frame(width: 40, height: 40)
                     .foregroundColor(.green)
+                    
             }
         }
         .padding()
-        .background(Color.black.opacity(0.7))
-        .cornerRadius(10)
+        .background(Color.gray.opacity(0.6))
+        .cornerRadius(12)
     }
 }

@@ -43,8 +43,38 @@ struct RoomView: View {
                                 .padding()
                         } else {
                             VStack {
-                                mapView
-                                    .border(Color.white).cornerRadius(10).padding().shadow(color: Color.gray, radius: 3)
+                                ZStack {
+                                    mapView
+                                        .border(Color.white)
+                                        .cornerRadius(10)
+                                        .padding()
+                                        .shadow(color: Color.gray, radius: 3)
+                                    
+                                    VStack {
+                                        HStack {
+                                            Spacer() // Push buttons to the right
+                                            HStack {
+                                                Button("+") {
+                                                    mapView.zoomIn()
+                                                }
+                                                .buttonStyle(.bordered)
+                                                .bold()
+                                                .background(Color.blue.opacity(0.4))
+                                                .cornerRadius(8)
+                                                
+                                                Button("-") {
+                                                    mapView.zoomOut()
+                                                }
+                                                .buttonStyle(.bordered)
+                                                .bold()
+                                                .background(Color.blue.opacity(0.4))
+                                                .cornerRadius(8).padding()
+                                            }
+                                            .padding()
+                                        }
+                                        Spacer() // Push buttons to the top
+                                    }
+                                }
                             }
                             .onAppear {
                                 mapView.loadgeneralMap(borders: true, usdzURL: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz"))
@@ -54,14 +84,13 @@ struct RoomView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(Color.customBackground)
                     .tabItem {
-                        Label("Planimetry", systemImage: "map.fill")
+                        Label("Floor Planimetry", systemImage: "map.fill")
                     }
                     .tag(0)
                     
                     
                     
                     VStack {
-                        
                         TextField("Search", text: $searchText)
                             .padding(7)
                             .background(Color(.systemGray6))
@@ -114,19 +143,16 @@ struct RoomView: View {
                     if selectedTab == 0 {
                         Menu {
                             Button(action: {
-                                // Azione per il pulsante "Rename"
                                 isDocumentPickerPresented = true
                             }) {
-                                Label("Upload File", systemImage: "pencil")
+                                Label("Upload File", systemImage: "square.and.arrow.down")
                             }
                             
                             // Aggiungiamo il pulsante che naviga verso ScanningView
                             Button(action: {
-                                let newRoom = Room(name: "New Room", lastUpdate: Date(), referenceMarkers: [], transitionZones: [], sceneObjects: [], scene: nil, worldMap: nil, roomURL: URL(fileURLWithPath: ""))
-                                self.newRoom = newRoom
                                 self.isNavigationActive = true
                             }) {
-                                Label("Add Room", systemImage: "plus.circle.fill")
+                                Label("Add Floor", systemImage: "plus.circle")
                             }
                             
                         } label: {
@@ -138,19 +164,8 @@ struct RoomView: View {
 
                         NavigationLink(destination: ScanningView(namedUrl: floor), isActive: $isNavigationActive) {
                             EmptyView()
-                        
                         }
                         
-//                        NavigationLink(destination: ScanningView(namedUrl: floor), isActive: $isNavigationActive) {
-//                            Image(systemName: "plus.circle.fill")
-//                                .font(.system(size: 26))
-//                                .foregroundStyle(.white, .blue, .blue)
-//                                .onTapGesture {
-//                                    let newRoom = Room(name: "New Room", lastUpdate: Date(), referenceMarkers: [], transitionZones: [], sceneObjects: [], scene: nil, worldMap: nil, roomURL: URL(fileURLWithPath: ""))
-//                                    self.newRoom = newRoom
-//                                    self.isNavigationActive = true
-//                                }
-//                        }
                     } else if selectedTab == 1 {
                         NavigationLink(destination: AddRoomView(floor: floor), isActive: $isNavigationActive) {
                             Image(systemName: "plus.circle.fill")
@@ -202,7 +217,7 @@ struct RoomView: View {
             .background(Color.customBackground.ignoresSafeArea())
         }
         .sheet(isPresented: $isDocumentPickerPresented) {
-            DocumentPicker { url in
+            DocumentPickerView { url in
                 selectedFileURL = url
                 // Gestisci il file selezionato qui
                 print("Selected file URL: \(url)")
@@ -219,40 +234,40 @@ struct RoomView: View {
     }
 }
 
-struct DocumentPicker: UIViewControllerRepresentable {
-    var onPick: (URL) -> Void
-    
-    func makeCoordinator() -> Coordinator {
-        return Coordinator(onPick: onPick)
-    }
-    
-    func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
-        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [UTType.content, UTType.item], asCopy: true)
-        picker.delegate = context.coordinator
-        return picker
-    }
-    
-    func updateUIViewController(_ uiViewController: UIDocumentPickerViewController, context: Context) {
-        // No update needed
-    }
-    
-    class Coordinator: NSObject, UIDocumentPickerDelegate {
-        var onPick: (URL) -> Void
-        
-        init(onPick: @escaping (URL) -> Void) {
-            self.onPick = onPick
-        }
-        
-        func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-            guard let pickedURL = urls.first else { return }
-            onPick(pickedURL)
-        }
-        
-        func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
-            // Handle cancellation if needed
-        }
-    }
-}
+//struct DocumentPicker: UIViewControllerRepresentable {
+//    var onPick: (URL) -> Void
+//    
+//    func makeCoordinator() -> Coordinator {
+//        return Coordinator(onPick: onPick)
+//    }
+//    
+//    func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
+//        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [UTType.content, UTType.item], asCopy: true)
+//        picker.delegate = context.coordinator
+//        return picker
+//    }
+//    
+//    func updateUIViewController(_ uiViewController: UIDocumentPickerViewController, context: Context) {
+//        // No update needed
+//    }
+//    
+//    class Coordinator: NSObject, UIDocumentPickerDelegate {
+//        var onPick: (URL) -> Void
+//        
+//        init(onPick: @escaping (URL) -> Void) {
+//            self.onPick = onPick
+//        }
+//        
+//        func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+//            guard let pickedURL = urls.first else { return }
+//            onPick(pickedURL)
+//        }
+//        
+//        func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+//            // Handle cancellation if needed
+//        }
+//    }
+//}
 
 struct RoomView_Previews: PreviewProvider {
     static var previews: some View {
