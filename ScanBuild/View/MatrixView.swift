@@ -104,15 +104,6 @@ struct MatrixView: View {
                 n.name! != "Geom" &&
                 String(n.name!.suffix(4)) != "_grp"
             }).compactMap { node in node.name } ?? []))
-        Te
-//        localNodes = localView.scnView.scene?.rootNode.childNodes(passingTest: {
-//            n, _ in n.name != nil && n.name! != "Room" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp"
-//        })
-//        .sorted(by: { a, b in a.scale.x > b.scale.x })
-//        .map { node in node.name ?? "nil" } ?? []
-//        print("Child Nodes: \(localView.scnView.scene?.rootNode.childNodes)")
-//        
-        //        localMaps = getUSDZMapURLs(for: floor)
     }
     
     var body: some View {
@@ -177,36 +168,15 @@ struct MatrixView: View {
                         
                         selectedGlobalNode = globalView.scnView.scene?.rootNode.childNodes(passingTest: { n, _ in n.name != nil && n.name! == selectedGlobalNodeName }).first
                     })
-                    
-                    if let _size = selectedGlobalNode?.scale {
-                        Text("\(_size.x) \(_size.y) \(_size.z)")
-                    }
                 }
                 
                 Divider().background(Color.black).shadow(radius: 100)
                 
-                if room != nil {
-                    HStack {
-                        Text("\(room.name)").bold().font(.title3).foregroundColor(.white)
-                    }
-                    //                    Picker("", selection: $selectedMap) {
-                    //                        Text("Choose Local Map").foregroundColor(.white)
-                    //                        ForEach(_localMaps, id: \.self) { map in
-                    //                            Text(map.deletingPathExtension().lastPathComponent) // Display room name without .usdz extension
-                    //                        }
-                    //                    }.onChange(of: selectedMap, perform: { _ in
-                    ////                        localView.loadRoomMaps(name: selectedMap.lastPathComponent, borders: false, usdzURL: selectedMap)
-                    ////
-                    //                        let numbersCharacterSet = CharacterSet.decimalDigits
-                    //                        let mapName = selectedMap.lastPathComponent.components(separatedBy: numbersCharacterSet).joined()
-                    //
-                    ////                        globalView.loadgeneralMap(borders: false, usdzURL: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("Taverna.usdz"))
-                    //
-                    //                    })
+                HStack {
+                    Text("\(room.name)").bold().font(.title3).foregroundColor(.white)
                 }
                 
                 if room != nil {
-                    
                     ZStack {
                         localView
                             .border(Color.white)
@@ -309,41 +279,7 @@ struct MatrixView: View {
                             .bold()
                     }
                 }
-                //                if responseFromServer {
-                //
-                //                    if let _res = response.0 {Text("status code: \(_res.statusCode)")}
-                //                    let _ = print(response.1)
-                //                    ScrollView {
-                //                        VStack(alignment: .leading) {
-                //                            ForEach(response.1.sorted(by: {a,b in a.key.count > b.key.count}), id: \.key) { k,v in
-                //                                if k=="err" {
-                //                                    Text("\(k) -> \(v as! String)")
-                //                                } else {
-                //                                    let _v = v as! [String: Any]
-                //                                    Text(k)
-                //                                    if let reg_result = _v["reg_result"] as? String {Text(reg_result)}
-                //                                    Text("R_Y")
-                //                                    Text(printMatrix(matrix: _v["R_Y"] as! [[Double]], decimal: 4))
-                //
-                //                                    Text("diffMatrices")
-                //                                    Text(printMatrix(matrix: _v["diffMatrices"] as! [[Double]], decimal: 4))
-                //
-                //                                    Text("translation")
-                //                                    Text(printMatrix(matrix: _v["translation"] as! [[Double]], decimal: 4))
-                //
-                //                                }
-                //
-                //                                Divider()
-                //                            }
-                //                        }
-                //                        Button("SAVE ROOM POSITION") {
-                //                            saveConversionGlobalLocal(response.1, floor.floorURL, floor.name)
-                //                        }.buttonStyle(.bordered)
-                //                            .background(Color.blue.opacity(0.4))
-                //                            .cornerRadius(8).padding()
-                //                            .bold()
-                //                    }
-                //                }
+            
             }
             .background(Color.customBackground)
             .toolbar {

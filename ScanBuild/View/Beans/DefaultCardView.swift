@@ -43,7 +43,7 @@ struct DefaultCardView: View {
 
 struct DefaultCardView_Previews: PreviewProvider {
     static var previews: some View {
-        DefaultCardView(name: "Room", date: Date(), rowSize: 2, isSelected: true)
+        DefaultCardView(name: "Room", date: Date(), rowSize: 1, isSelected: true)
     }
 }
 

@@ -93,7 +93,6 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject {
         }
     }
     
-    // Implementazione personalizzata di Encodable
     private enum CodingKeys: String, CodingKey {
         case name
         case lastUpdate
@@ -194,8 +193,6 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject {
         }
     }
     
-    // ... Altre funzioni
-    
     private func simd_float4(_ array: [Float]) -> simd_float4 {
         return simd.simd_float4(array[0], array[1], array[2], array[3])
     }
@@ -203,19 +200,4 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject {
     private func simd_float4x4(rows: [simd_float4]) -> simd_float4x4 {
         return simd_float4x4(rows: rows)
     }
-    
-//    private func loadAssociationMatrix() -> [RotoTraslationMatrix] {
-//        // Implement logic to load association matrix
-//        return []
-//    }
-    
-    func saveAssociationMatrix(associationMatrix: [RotoTraslationMatrix]) -> Bool {
-        // Implement logic to save association matrix
-        return true
-    }
-    
-//    func createAssociationMatrix(room: Room, nodes: [(SCNNode, SCNNode)]) -> [RotoTraslationMatrix] {
-//        // Implement logic to create association matrix
-//        return []
-//    }
 }

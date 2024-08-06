@@ -18,6 +18,7 @@ struct RoomView: View {
     @State private var selectedFileURL: URL?
     @State private var showFloorMap: Bool = false
     var mapView = SCNViewContainer()
+    var mapPositionView = SCNViewMapContainer()
     
     var body: some View {
         NavigationStack {
@@ -44,40 +45,88 @@ struct RoomView: View {
                         } else {
                             VStack {
                                 ZStack {
-                                    mapView
-                                        .border(Color.white)
-                                        .cornerRadius(10)
-                                        .padding()
-                                        .shadow(color: Color.gray, radius: 3)
+                                    if showFloorMap{
+                                        mapPositionView
+                                            .border(Color.white)
+                                            .cornerRadius(10)
+                                            .padding()
+                                            .shadow(color: Color.gray, radius: 3)
+                                    } else {
+                                        mapView
+                                            .border(Color.white)
+                                            .cornerRadius(10)
+                                            .padding()
+                                            .shadow(color: Color.gray, radius: 3)
+                                    }
                                     
                                     VStack {
                                         HStack {
                                             Spacer() // Push buttons to the right
-                                            HStack {
-                                                Button("+") {
-                                                    mapView.zoomIn()
+                                            if showFloorMap{
+                                                HStack {
+                                                    Button("+") {
+                                                        mapView.zoomIn()
+                                                    }
+                                                    .buttonStyle(.bordered)
+                                                    .bold()
+                                                    .background(Color.blue.opacity(0.4))
+                                                    .cornerRadius(8)
+                                                    
+                                                    Button("-") {
+                                                        mapView.zoomOut()
+                                                    }
+                                                    .buttonStyle(.bordered)
+                                                    .bold()
+                                                    .background(Color.blue.opacity(0.4))
+                                                    .cornerRadius(8).padding()
                                                 }
-                                                .buttonStyle(.bordered)
-                                                .bold()
-                                                .background(Color.blue.opacity(0.4))
-                                                .cornerRadius(8)
-                                                
-                                                Button("-") {
-                                                    mapView.zoomOut()
+                                                .padding()
+                                            }else{
+                                                HStack {
+                                                    Button("+") {
+                                                        mapPositionView.handler.zoomIn()
+                                                    }
+                                                    .buttonStyle(.bordered)
+                                                    .bold()
+                                                    .background(Color.blue.opacity(0.4))
+                                                    .cornerRadius(8)
+                                                    
+                                                    Button("-") {
+                                                        mapPositionView.handler.zoomOut()
+                                                    }
+                                                    .buttonStyle(.bordered)
+                                                    .bold()
+                                                    .background(Color.blue.opacity(0.4))
+                                                    .cornerRadius(8).padding()
                                                 }
-                                                .buttonStyle(.bordered)
-                                                .bold()
-                                                .background(Color.blue.opacity(0.4))
-                                                .cornerRadius(8).padding()
+                                                .padding()
                                             }
-                                            .padding()
+                                            
                                         }
                                         Spacer() // Push buttons to the top
                                     }
                                 }
                             }
                             .onAppear {
-                                mapView.loadgeneralMap(borders: true, usdzURL: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz"))
+                                // Definisci un array di URL
+                                var roomURLs: [URL] = []
+                                
+                                floor.rooms.forEach { room in
+                                    print(room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"))
+                                    roomURLs.append(room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"))
+                                }
+                                
+                                mapPositionView.handler.loadMaps(
+                                    floor: floor,
+                                    roomURLs: roomURLs,
+                                    borders: true
+                                )
+                                
+                                // Carica la mappa generale
+                                mapView.loadgeneralMap(
+                                    borders: true,
+                                    usdzURL: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz")
+                                )
                             }
                         }
                     }
@@ -125,7 +174,7 @@ struct RoomView: View {
                         Label("Rooms", systemImage: "list.dash")
                     }
                     .tag(1)
-
+                    
                 }
             }
             .background(Color.customBackground)
@@ -161,7 +210,7 @@ struct RoomView: View {
                                 .symbolRenderingMode(.palette)
                                 .foregroundStyle(.white, .blue, .blue)
                         }
-
+                        
                         NavigationLink(destination: ScanningView(namedUrl: floor), isActive: $isNavigationActive) {
                             EmptyView()
                         }
@@ -233,42 +282,6 @@ struct RoomView: View {
         }
     }
 }
-
-//struct DocumentPicker: UIViewControllerRepresentable {
-//    var onPick: (URL) -> Void
-//    
-//    func makeCoordinator() -> Coordinator {
-//        return Coordinator(onPick: onPick)
-//    }
-//    
-//    func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
-//        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [UTType.content, UTType.item], asCopy: true)
-//        picker.delegate = context.coordinator
-//        return picker
-//    }
-//    
-//    func updateUIViewController(_ uiViewController: UIDocumentPickerViewController, context: Context) {
-//        // No update needed
-//    }
-//    
-//    class Coordinator: NSObject, UIDocumentPickerDelegate {
-//        var onPick: (URL) -> Void
-//        
-//        init(onPick: @escaping (URL) -> Void) {
-//            self.onPick = onPick
-//        }
-//        
-//        func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-//            guard let pickedURL = urls.first else { return }
-//            onPick(pickedURL)
-//        }
-//        
-//        func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
-//            // Handle cancellation if needed
-//        }
-//    }
-//}
-
 struct RoomView_Previews: PreviewProvider {
     static var previews: some View {
         let buildingModel = BuildingModel.getInstance()
@@ -278,3 +291,4 @@ struct RoomView_Previews: PreviewProvider {
         return RoomView(floor: floor, building: building)
     }
 }
+

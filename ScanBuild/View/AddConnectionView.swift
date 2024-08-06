@@ -29,7 +29,7 @@ struct AddConnectionView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack {
                         ForEach(selectedBuilding.floors) { floor in
-                            DefaultCardView(name: floor.name, date: floor.lastUpdate, rowSize: 1, isSelected: selectedFloor?.id == floor.id  ).padding()
+                            ConnectionCardView(name: floor.name, date: floor.lastUpdate, isSelected: selectedFloor?.id == floor.id  ).padding()
                                 .onTapGesture {
                                     selectedFloor = floor
                                 }
@@ -46,7 +46,7 @@ struct AddConnectionView: View {
                             HStack {
                                 ForEach(selectedFloor.rooms) { room in
                                     if room.name != fromRoom?.name {
-                                        DefaultCardView(name: room.name, date: room.lastUpdate, rowSize: 2, isSelected: selectedRoom?.id == room.id  ).padding()
+                                        ConnectionCardView(name: room.name, date: room.lastUpdate, isSelected: selectedRoom?.id == room.id  ).padding()
                                             .onTapGesture {
                                                 selectedRoom = room
                                             }
@@ -65,7 +65,7 @@ struct AddConnectionView: View {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack {
                                 ForEach(selectedRoom.transitionZones) { transitionZone in
-                                    DefaultCardView(name: transitionZone.name, date: Date(), rowSize: 1, isSelected: selectedTransitionZone?.id == transitionZone.id )
+                                    ConnectionCardView(name: transitionZone.name, date: Date(), isSelected: selectedTransitionZone?.id == transitionZone.id ).padding()
                                         .onTapGesture {
                                             selectedTransitionZone = transitionZone
                                         }

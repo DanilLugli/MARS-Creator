@@ -5,12 +5,13 @@
 //  Created by Stefano di Terlizzi on 12/07/23.
 //
 
+
 import SwiftUI
 import SceneKit
-import ComplexModule
 import ARKit
 import RoomPlan
 import CoreMotion
+import ComplexModule
 
 struct SCNViewContainer: UIViewRepresentable {
     
@@ -24,11 +25,10 @@ struct SCNViewContainer: UIViewRepresentable {
     var delegate = RenderDelegate()
     var dimension = SCNVector3()
     
-    var rotoTraslation: [DictToRototraslation] = []
+    var rotoTraslation: [RotoTraslationMatrix] = []
     @State var rotoTraslationActive: Int = 0
     
     init() {
-        print("init SCNViewContainer")
         massCenter.worldPosition = SCNVector3(0, 0, 0)
     }
     
@@ -104,16 +104,16 @@ struct SCNViewContainer: UIViewRepresentable {
             drawContent(borders: borders)
             setMassCenter()
             setCamera()
-            NotificationCenter
-                .default
-                .post(name: .genericMessage,
-                      object: "map loaded correctly")
+//            NotificationCenter
+//                .default
+//                .post(name: .genericMessage,
+//                      object: "map loaded correctly")
         } catch {
             print("Error loading scene from URL: \(error)")
-            NotificationCenter
-                .default
-                .post(name: .genericMessage,
-                      object: "Error loading map")
+//            NotificationCenter
+//                .default
+//                .post(name: .genericMessage,
+//                      object: "Error loading map")
         }
     }
 
@@ -123,17 +123,18 @@ struct SCNViewContainer: UIViewRepresentable {
             drawContent(borders: borders)
             setMassCenter()
             setCamera()
-            NotificationCenter
-                .default
-                .post(name: .genericMessage, object: "map loaded correctly")
+//            NotificationCenter
+//                .default
+//                .post(name: .genericMessage, object: "map loaded correctly")
         } catch {
             print("Error loading scene from URL: \(error)")
-            NotificationCenter
-                .default
-                .post(name: .genericMessage, object: "Error loading map")
+//            NotificationCenter
+//                .default
+//                .post(name: .genericMessage, object: "Error loading map")
         }
     }
-//
+
+
 //    func drawOrigin(_ o: SCNVector3,_ color: UIColor, _ size: CGFloat, _ addY: Bool = false) {
 //        
 //        let sphere = generateSphereNode(color, size)
@@ -153,7 +154,7 @@ struct SCNViewContainer: UIViewRepresentable {
 //        scnView.scene?.rootNode.addChildNode(sphere)
 //         
 //    }
-//    
+    
     func zoomIn() {cameraNode.camera?.orthographicScale -= 0.5}
     
     func zoomOut() {cameraNode.camera?.orthographicScale += 0.5}
@@ -185,7 +186,7 @@ struct SCNViewContainer: UIViewRepresentable {
         var X: [Float] = [1000000.0, -1000000.0]
         var Z: [Float] = [1000000.0, -1000000.0]
         
-        var massCenter = SCNNode()
+        let massCenter = SCNNode()
         
         scnView.scene?.rootNode
             .childNodes(passingTest: {
@@ -201,7 +202,7 @@ struct SCNViewContainer: UIViewRepresentable {
                 if ($0.worldPosition.x > X[1]) {X[1] = $0.worldPosition.x}
                 if ($0.worldPosition.z < Z[0]) {Z[0] = $0.worldPosition.z}
                 if ($0.worldPosition.z > Z[1]) {Z[1] = $0.worldPosition.z}
-                print("\($0.name), \($0.worldPosition)")
+                print("\(String(describing: $0.name)), \($0.worldPosition)")
             }
         massCenter.worldPosition = SCNVector3((X[0]+X[1])/2, 0, (Z[0]+Z[1])/2)
         cameraNode.worldPosition = massCenter.worldPosition
@@ -230,7 +231,7 @@ struct SCNViewContainer: UIViewRepresentable {
     func changeColorOfNode(nodeName: String, color: UIColor) {
         drawContent(borders: false)
         if let _node = scnView.scene?.rootNode.childNodes(passingTest: { n,_ in n.name != nil && n.name! == nodeName }).first {
-            var copy = _node.copy() as! SCNNode
+            let copy = _node.copy() as! SCNNode
             copy.name = "__selected__"
             let material = SCNMaterial()
             material.diffuse.contents = color
@@ -296,7 +297,7 @@ func generateSphereNode(_ color: UIColor, _ radius: CGFloat) -> SCNNode {
     //let sphere = SCNPyramid(width: radius, height: radius*2, length: radius)
     let sphereNode2 = SCNNode()
     sphereNode2.geometry = sphere2
-    var color2 = color
+    let color2 = color
     sphereNode2.geometry?.firstMaterial?.diffuse.contents = color2.withAlphaComponent(color2.cgColor.alpha - 0.3)
     sphereNode2.position = SCNVector3(0, 0, -1)
     
@@ -304,7 +305,7 @@ func generateSphereNode(_ color: UIColor, _ radius: CGFloat) -> SCNNode {
     //let sphere = SCNPyramid(width: radius, height: radius*2, length: radius)
     let sphereNode3 = SCNNode()
     sphereNode3.geometry = sphere3
-    var color3 = color
+    _ = color
     sphereNode3.geometry?.firstMaterial?.diffuse.contents = color2.withAlphaComponent(color2.cgColor.alpha - 0.6)
     sphereNode3.position = SCNVector3(-0.5, 0, 0)
     
