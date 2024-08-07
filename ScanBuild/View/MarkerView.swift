@@ -4,12 +4,13 @@ import Foundation
 struct MarkerView: View {
     
     @ObservedObject var room: Room
-    var building: Building
-    var floor: Floor
+    @ObservedObject var building: Building
+    @ObservedObject var floor: Floor
     @State private var searchText: String = ""
     @State private var isRenameSheetPresented = false
     @State private var newBuildingName: String = ""
     @State private var selectedMarker: ReferenceMarker? = nil
+    @State private var selectedConnection: TransitionZone? = nil
     @State private var selectedTab: Int = 0
     @State private var isNavigationActive = false
     @State private var isNavigationActive3 = false
@@ -24,10 +25,9 @@ struct MarkerView: View {
                         .font(.system(size: 14))
                         .fontWeight(.heavy)
                     
-                    
                     TabView(selection: $selectedTab) {
                         VStack {
-                            if isDirectoryEmpty(url: room.roomURL.appendingPathComponent("MapUsdz")){
+                            if isDirectoryEmpty(url: room.roomURL.appendingPathComponent("MapUsdz")) {
                                 Text("Add Planimetry with + icon")
                                     .foregroundColor(.gray)
                                     .font(.headline)
@@ -111,27 +111,17 @@ struct MarkerView: View {
                         }
                         .tag(1)
                         
-                        
-                        VStack{
+                        VStack {
                             if floor.associationMatrix.isEmpty {
-//                                VStack {
-//                                    Text("Add Matrix with + icon")
-//                                        .foregroundColor(.gray)
-//                                        .font(.headline)
-//                                        .padding()
-//                                }
-                                VStack{
+                                VStack {
                                     let isSelected = floor.isMatrixPresent(named: room.name, inFileAt: floor.floorURL.appendingPathComponent("\(floor.name).json"))
                                     MatrixCardView(floor: floor.name, room: room.name, exist: isSelected, date: Date(), rowSize: 1)
-                                
                                 }
                                 .padding()
-                                
                             } else {
-                                VStack{
+                                VStack {
                                     let isSelected = floor.isMatrixPresent(named: room.name, inFileAt: floor.floorURL.appendingPathComponent("\(floor.name).json"))
                                     MatrixCardView(floor: room.name, room: room.name, exist: isSelected, date: Date(), rowSize: 1)
-                                
                                 }
                                 .padding()
                             }
@@ -141,114 +131,175 @@ struct MarkerView: View {
                         .tabItem {
                             Label("Room Position", systemImage: "sum")
                         }
-                        .tag(3)
+                        .tag(2)
                         
                         VStack {
-                            Text("No connections available for \(room.name)")
-                                .foregroundColor(.gray)
-                                .font(.headline)
-                                .padding()
+                            if room.transitionZones.isEmpty {
+                                VStack {
+                                    Text("No Connection for \(room.name)")
+                                        .foregroundColor(.gray)
+                                        .font(.headline)
+                                        .padding()
+                                }
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .background(Color.customBackground)
+                            } else {
+                                ScrollView {
+                                    LazyVStack(spacing: 50) {
+                                        ForEach(filteredConnection, id: \.id) { transitionZone in
+                                            Button(action: {
+                                                selectedConnection = transitionZone
+                                            }) {
+                                                if let connection = transitionZone.connection as? AdjacentFloorsConnection {
+                                                    ListConnectionCardView(
+                                                        floor: connection.targetFloor,
+                                                        room: connection.targetRoom,
+                                                        transitionZone: transitionZone.name,
+                                                        exist: true,
+                                                        date: Date(),
+                                                        rowSize: 1
+                                                    ).padding()
+                                                } else if let connection = transitionZone.connection as? SameFloorConnection{
+                                                    
+                                                    ListConnectionCardView(
+                                                        floor: floor.name,
+                                                        room: connection.targetRoom,
+                                                        transitionZone: transitionZone.name,
+                                                        exist: false,
+                                                        date: Date(),
+                                                        rowSize: 1
+                                                    ).padding()
+                                                
+                                                }
+                                            }
+                                        }
+                                    }
+                                    .padding()                                    
+                                    .refreshable {
+                                        ForEach(filteredConnection, id: \.id) { transitionZone in
+                                            Button(action: {
+                                                selectedConnection = transitionZone
+                                            }) {
+                                                if let connection = transitionZone.connection as? AdjacentFloorsConnection {
+                                                    ListConnectionCardView(
+                                                        floor: connection.targetFloor,
+                                                        room: connection.targetRoom,
+                                                        transitionZone: transitionZone.name,
+                                                        exist: true,
+                                                        date: Date(),
+                                                        rowSize: 1
+                                                    ).padding()
+                                                } else if let connection = transitionZone.connection as? SameFloorConnection{
+                                                    
+                                                    ListConnectionCardView(
+                                                        floor: floor.name,
+                                                        room: connection.targetRoom,
+                                                        transitionZone: transitionZone.name,
+                                                        exist: false,
+                                                        date: Date(),
+                                                        rowSize: 1
+                                                    ).padding()
+                                                }
+                                            }
+                                        }
+                                        print("Refreshing...")
+                                    }
+                                }
+                            }
                         }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color.customBackground)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(Color.customBackground)
                         .tabItem {
-                            Label("TransitionZone", systemImage: "arrow.triangle.turn.up.right.diamond.fill")
+                            Label("Connection", systemImage: "arrow.left.arrow.right")
                         }
-                        .tag(2)
+                        .tag(3)
                     }
                 }
+                .background(Color.customBackground)
+                .foregroundColor(.white)
             }
-            .background(Color.customBackground)
-            .foregroundColor(.white)
-        }
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                Text("ROOM")
-                    .font(.system(size: 26, weight: .heavy))
-                    .foregroundColor(.white)
-            }
-            ToolbarItem(placement: .navigationBarTrailing) {
-                if selectedTab == 0 {
-                    HStack{
-                        NavigationLink(destination: ScanningView(namedUrl: room), isActive: $isNavigationActive) {
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("ROOM")
+                        .font(.system(size: 26, weight: .heavy))
+                        .foregroundColor(.white)
+                }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    if selectedTab == 0 {
+                        HStack {
+                            NavigationLink(destination: ScanningView(namedUrl: room), isActive: $isNavigationActive) {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.system(size: 26))
+                                    .foregroundStyle(.white, .blue, .blue)
+                            }
+                            
+                            Button(action: {
+                                isDocumentPickerPresented2 = true
+                            }) {
+                                Label("Upload File", systemImage: "square.and.arrow.up.circle.fill").font(.system(size: 26))
+                                    .foregroundStyle(.white, .blue, .blue)
+                            }
+                        }
+                    } else if selectedTab == 1 {
+                        Button(action: {
+                            isDocumentPickerPresented2 = true
+                        }) {
                             Image(systemName: "plus.circle.fill")
                                 .font(.system(size: 26))
                                 .foregroundStyle(.white, .blue, .blue)
                         }
-                        
-                        Button(action: {
-                            isDocumentPickerPresented2 = true
-                        }) {
-                            Label("Upload File", systemImage: "square.and.arrow.up.circle.fill").font(.system(size: 26))
+                    } else if selectedTab == 3 {
+                        NavigationLink(destination: AddConnectionView(selectedBuilding: building)) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.system(size: 26))
                                 .foregroundStyle(.white, .blue, .blue)
                         }
-                        
-                    }
-                } else if selectedTab == 1 {
-                    
-                    Button(action: {
-                        isDocumentPickerPresented2 = true
-                    }) {
-                        Label("Upload File", systemImage: "square.and.arrow.up.circle.fill").font(.system(size: 26))
-                            .foregroundStyle(.white, .blue, .blue)
-                    }
-                    
-                }else if selectedTab == 2 {
-                    NavigationLink(destination: AddConnectionView(selectedBuilding: building)) {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 26))
-                            .foregroundStyle(.white, .blue, .blue)
-                    }
-                } else if selectedTab == 3 {
-                    NavigationLink(destination: MatrixView(floor: floor, room: room), isActive: $isNavigationActive3) {
-                        Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 26))
-                            .foregroundStyle(.white, .blue, .blue)
-                            .onTapGesture {
-                                self.isNavigationActive3 = true
-                            }
+                    } else if selectedTab == 2 {
+                        NavigationLink(destination: MatrixView(floor: floor, room: room), isActive: $isNavigationActive3) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.system(size: 26))
+                                .foregroundStyle(.white, .blue, .blue)
+                                .onTapGesture {
+                                    self.isNavigationActive3 = true
+                                }
+                        }
                     }
                 }
             }
-        }
-        .sheet(isPresented: $isDocumentPickerPresented2) {
-            DocumentPickerView { url in
-                // Handle the selected file URL here
-                print("Selected file URL: \(url)")
+            .sheet(isPresented: $isDocumentPickerPresented2) {
+                VStack {
+                    DocumentPickerView { url in
+                        print("Selected file URL: \(url)")
+                        if url.pathExtension == "jpg" || url.pathExtension == "png" || url.pathExtension == "JPG" || url.pathExtension == "PNG" || url.pathExtension == "JPEG" || url.pathExtension == "jpeg" {
+                            // Assuming the image file name is the same as the marker name
+                            let imageName = url.deletingPathExtension().lastPathComponent
+                            let imagePath = url
+                            // Create a new ReferenceMarker
+                            let coordinates = Coordinates(x: Float(Double.random(in: -100...100)), y: Float(Double.random(in: -100...100))) // Adjust accordingly
+                            let rmUML = URL(fileURLWithPath: "") // Adjust accordingly
+                            let newMarker = ReferenceMarker(_imagePath: imagePath, _imageName:imageName, _coordinates: coordinates, _rmUML: rmUML)
+                            room.referenceMarkers.append(newMarker)
+                        }
+                    }
+                }
+                .frame(maxHeight: .infinity)
             }
-        }
-        .sheet(item: $selectedMarker) { marker in
-            VStack {
-                Text("Marker Details")
-                    .font(.system(size: 22))
-                    .fontWeight(.bold)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 20)
-                    .foregroundColor(.white)
-                selectedMarker?.image
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(height: 200)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(10)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 8)
-                Text("Position Marker")
-                    .font(.system(size: 22))
-                    .fontWeight(.bold)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 20)
-                    .foregroundColor(.white)
-                mapView.border(Color.white).cornerRadius(10).padding().shadow(color: Color.gray, radius: 3)
-                Spacer()
+            .sheet(item: $selectedMarker) { marker in
+                VStack {
+                    Text("Position Marker")
+                        .font(.system(size: 22))
+                        .fontWeight(.bold)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 20)
+                        .foregroundColor(.white)               
+                    mapView.border(Color.white).cornerRadius(10).padding().shadow(color: Color.gray, radius: 3)
+                    Spacer()
+                }
+                .padding()
+                .background(Color.customBackground.ignoresSafeArea())
             }
-            .padding()
-            .background(Color.customBackground.ignoresSafeArea())
         }
     }
     
@@ -270,6 +321,18 @@ struct MarkerView: View {
         }
     }
     
+    var filteredConnection: [TransitionZone] {
+        let filteredZones = room.transitionZones.filter { transitionZone in
+            transitionZone.connection != nil
+        }
+        
+        if searchText.isEmpty {
+            return filteredZones
+        } else {
+            return filteredZones.filter { $0.name.lowercased().contains(searchText.lowercased()) }
+        }
+    }
+    
     func isDirectoryEmpty(url: URL) -> Bool {
         let fileManager = FileManager.default
         do {
@@ -279,22 +342,20 @@ struct MarkerView: View {
             print("Error checking directory contents: \(error)")
             return true
         }
+    }}
+
+struct MarkerView_Previews: PreviewProvider {
+    static var previews: some View {
+        let buildingModel = BuildingModel.getInstance()
+        let building = buildingModel.initTryData()
+        let floor = building.floors.first!
+        let room = floor.rooms.first!
+        return MarkerView(room: room, building: building, floor: floor)
     }
-    
-    
-    struct MarkerView_Previews: PreviewProvider {
-        static var previews: some View {
-            let buildingModel = BuildingModel.getInstance()
-            let building = buildingModel.initTryData()
-            let floor = building.floors.first!
-            let room = floor.rooms.first!
-            return MarkerView(room: room, building: building, floor: floor)
-        }
-    }
-    
-    private let dateFormatter: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        return formatter
-    }()
 }
+
+private let dateFormatter: DateFormatter = {
+    let formatter = DateFormatter()
+    formatter.dateStyle = .medium
+    return formatter
+}()

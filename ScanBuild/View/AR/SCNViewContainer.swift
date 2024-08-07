@@ -82,18 +82,21 @@ struct SCNViewContainer: UIViewRepresentable {
                 n,_ in n.name != nil && n.name! != "Room" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp" && n.name! != "__selected__"
             })
             .forEach{
-
                 let material = SCNMaterial()
-                material.diffuse.contents = UIColor.black
-                if ($0.name!.prefix(5) == "Floor") {material.diffuse.contents = UIColor.white.withAlphaComponent(0.2)}
-                if ($0.name!.prefix(4) == "Door" || $0.name!.prefix(4) == "Open") {material.diffuse.contents = UIColor.red}
-                material.lightingModel = .physicallyBased
-                $0.geometry?.materials = [material]
-                
-                if borders {
-                    $0.scale.x = $0.scale.x < 0.2 ? $0.scale.x + 0.1 : $0.scale.x
-                    $0.scale.z = $0.scale.z < 0.2 ? $0.scale.z + 0.1 : $0.scale.z
-                    $0.scale.y = ($0.name!.prefix(4) == "Wall") ? 0.1 : $0.scale.y
+                if $0.name == "Floor0" {
+                    material.diffuse.contents = UIColor.green
+                } else {
+                    material.diffuse.contents = UIColor.black
+                    if ($0.name!.prefix(5) == "Floor") {material.diffuse.contents = UIColor.white.withAlphaComponent(0.2)}
+                    if ($0.name!.prefix(4) == "Door" || $0.name!.prefix(4) == "Open") {material.diffuse.contents = UIColor.red}
+                    material.lightingModel = .physicallyBased
+                    $0.geometry?.materials = [material]
+                    
+                    if borders {
+                        $0.scale.x = $0.scale.x < 0.2 ? $0.scale.x + 0.1 : $0.scale.x
+                        $0.scale.z = $0.scale.z < 0.2 ? $0.scale.z + 0.1 : $0.scale.z
+                        $0.scale.y = ($0.name!.prefix(4) == "Wall") ? 0.1 : $0.scale.y
+                    }
                 }
             }
     }

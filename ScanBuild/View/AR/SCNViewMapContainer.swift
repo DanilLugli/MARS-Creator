@@ -55,17 +55,10 @@ class SCNViewMapHandler: ObservableObject {
                         applyRotoTraslation(to: roomNode, with: self.rotoTraslation[index])
                     }
                     
-                    roomNode.name = roomURL.deletingPathExtension().lastPathComponent
+//                    roomNode.name = roomURL.deletingPathExtension().lastPathComponent
+//                    
+//                    scnView.scene?.rootNode.addChildNode(roomNode)
                     
-                    scnView.scene?.rootNode.addChildNode(roomNode)
-                    
-                    // Stampa le informazioni del nodo radice e la sua trasformazione
-                    print("Root node: \(roomScene.rootNode)")
-                    print("Transform of root node: \(roomScene.rootNode.transform)")
-                    
-                    // Stampa le informazioni del nodo specifico "floor0" e la sua trasformazione
-                    print("Node 'floor0': \(roomNode)")
-                    print("Transform of node 'floor0': \(roomNode.transform)")
                 } else {
                     print("Node 'floor0' not found in scene: \(roomURL)")
                 }
@@ -97,17 +90,19 @@ class SCNViewMapHandler: ObservableObject {
             })
             .forEach {
                 let material = SCNMaterial()
-                
-                if $0.name == "Floor0" {
-                    material.diffuse.contents = UIColor.blue
-                } else {
-                    material.diffuse.contents = UIColor.black
-                    if ($0.name!.prefix(5) == "Floor") {
-                        material.diffuse.contents = UIColor.green.withAlphaComponent(0.2)
-                    }
-                    if ($0.name!.prefix(4) == "Door" || $0.name!.prefix(4) == "Open") {
-                        material.diffuse.contents = UIColor.orange
-                    }
+
+                material.diffuse.contents = UIColor.black
+                if ($0.name! == "Bagno") {
+                    material.diffuse.contents = UIColor.yellow.withAlphaComponent(0.2)
+                }
+                if ($0.name! == "Sala") {
+                    material.diffuse.contents = UIColor.orange.withAlphaComponent(0.2)
+                }
+                if ($0.name!.prefix(5) == "Floor") {
+                    material.diffuse.contents = UIColor.green.withAlphaComponent(0.2)
+                }
+                if ($0.name!.prefix(4) == "Door" || $0.name!.prefix(4) == "Open") {
+                    material.diffuse.contents = UIColor.green
                 }
                 
                 material.lightingModel = .physicallyBased
@@ -119,6 +114,24 @@ class SCNViewMapHandler: ObservableObject {
                     $0.scale.y = ($0.name!.prefix(4) == "Wall") ? 0.1 : $0.scale.y
                 }
             }
+    }
+    
+    func changeColorOfNode(nodeName: String, color: UIColor) {
+        drawContent(borders: false)
+        if let _node = scnView.scene?.rootNode.childNodes(passingTest: { n,_ in n.name != nil && n.name! == nodeName }).first {
+            let copy = _node.copy() as! SCNNode
+            copy.name = "__selected__"
+            let material = SCNMaterial()
+          
+            let transparentColor = color.withAlphaComponent(0.3)
+            material.diffuse.contents = transparentColor
+            material.lightingModel = .physicallyBased
+            copy.geometry?.materials = [material]
+//            copy.worldPosition.y += 4
+//            copy.scale.x = _node.scale.x < 0.2 ? _node.scale.x + 0.1 : _node.scale.x
+//            copy.scale.z = _node.scale.z < 0.2 ? _node.scale.z + 0.1 : _node.scale.z
+            scnView.scene?.rootNode.addChildNode(copy)
+        }
     }
     
     func zoomIn() { cameraNode.camera?.orthographicScale -= 0.5 }
@@ -161,6 +174,11 @@ class SCNViewMapHandler: ObservableObject {
         
         print("NODE: ")
         print(node)
+        print("\n")
+        print(node.simdWorldTransform.columns.3)
+        print("\n")
+        print(rotoTraslation.translation)
+        print("\n\n\n\n\n")
         node.simdWorldTransform.columns.3 = node.simdWorldTransform.columns.3 * rotoTraslation.translation
         
         let r_Y = simd_float3x3([
@@ -205,14 +223,14 @@ struct SCNViewMapContainer: UIViewRepresentable {
     @ObservedObject var handler: SCNViewMapHandler
     
     init() {
-            let scnView = SCNView(frame: .zero)
-            let cameraNode = SCNNode()
-            let massCenter = SCNNode()
-            
-            massCenter.worldPosition = SCNVector3(0, 0, 0)
-            
-            self.handler = SCNViewMapHandler(scnView: scnView, cameraNode: cameraNode, massCenter: massCenter)
-        }
+        let scnView = SCNView(frame: .zero)
+        let cameraNode = SCNNode()
+        let massCenter = SCNNode()
+        
+        massCenter.worldPosition = SCNVector3(0, 0, 0)
+        
+        self.handler = SCNViewMapHandler(scnView: scnView, cameraNode: cameraNode, massCenter: massCenter)
+    }
     
     func makeUIView(context: Context) -> SCNView {
         handler.scnView

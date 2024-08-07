@@ -11,19 +11,20 @@ struct ListConnectionCardView: View {
     
     var floor: String
     var room: String
+    var transitionZone: String
     var exist: Bool
     var date: Date
     var rowSize: Int
    
     
-    init(floor: String, room: String, exist: Bool, date: Date, rowSize: Int) {
+    init(floor: String, room: String, transitionZone: String, exist: Bool, date: Date, rowSize: Int) {
         self.floor = floor
         self.room = room
+        self.transitionZone = transitionZone
         self.exist = exist
         self.date = date
         self.rowSize = rowSize
     }
-    
     
     var body: some View {
         GeometryReader { geometry in
@@ -32,34 +33,34 @@ struct ListConnectionCardView: View {
                                     .fill(Color.white)
                 
                 VStack(alignment: .leading) {
-                    HStack{
-                        Text(floor)
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.black)
-                        Text(" - ")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.black)
-                        Text(room)
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.black)
-                    }
-                    HStack{
-                        Text("Exist:")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.black)
-                        Text("\(exist)")
-                            .font(.system(size: 16, weight: .bold))
-
-                            .foregroundColor(exist ? .green : .red)
+                    VStack{
+                        Text("Connection Created With:").font(.system(size: 14, weight: .bold))
+                            .foregroundColor(.green)
+                        
+                        HStack{
+                            Text(floor)
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundColor(.black)
+                            Text(" -> ")
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundColor(.black)
+                            Text(room)
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundColor(.black)
+                            Text(" -> ")
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundColor(.black)
+                            Text(transitionZone)
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundColor(.black)
+                        }
                     }
                     Text("\(dateFormatter.string(from: date))")
                         .font(.system(size: 14))
                         .foregroundColor(.gray)
                 }
-                .padding()
-                
             }
-            .frame(width: geometry.size.width / CGFloat(rowSize), height: 80)
+            .frame(width: geometry.size.width / CGFloat(rowSize), height: 120)
             .cornerRadius(10)
             .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 2)
             
@@ -69,7 +70,7 @@ struct ListConnectionCardView: View {
 
 
 #Preview {
-    ListConnectionCardView(floor: "floor", room: "room", exist: true, date: Date(), rowSize: 1)
+    ListConnectionCardView(floor: "floor", room: "room", transitionZone: "TZ", exist: true, date: Date(), rowSize: 1)
 }
 
 private let dateFormatter: DateFormatter = {

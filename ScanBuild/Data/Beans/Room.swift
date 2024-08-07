@@ -48,6 +48,8 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject {
     var referenceMarkers: [ReferenceMarker] {
         get {
             return _referenceMarkers
+        }set{
+            _referenceMarkers = newValue
         }
     }
     

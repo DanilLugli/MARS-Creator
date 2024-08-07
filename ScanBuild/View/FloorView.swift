@@ -1,8 +1,6 @@
 import SwiftUI
 import Foundation
 
-// TODO: Crea un MapUsdz a cazzo nella directory del floor.
-
 struct FloorView: View {
     
     @ObservedObject var building : Building

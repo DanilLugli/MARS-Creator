@@ -6,14 +6,12 @@ class TransitionZone: Codable, Identifiable {
     private var _name: String
     private var _connection: Connection?
     private var _transitionArea: Coordinates
-    private var _tzJsonURL: URL
     
 
-    init(name: String, connection: Connection?, transitionArea: Coordinates, tzJsonURL: URL) {
+    init(name: String, connection: Connection?, transitionArea: Coordinates) {
         self._name = name
         self._connection = connection
         self._transitionArea = transitionArea
-        self._tzJsonURL = tzJsonURL
     }
     
     var id: UUID {
@@ -45,11 +43,6 @@ class TransitionZone: Codable, Identifiable {
         }
     }
 
-    var tzJsonURL: URL {
-        get {
-            return _tzJsonURL
-        }
-    }
     
     // Implementazione personalizzata di Codable
     private enum CodingKeys: String, CodingKey {
@@ -66,7 +59,6 @@ class TransitionZone: Codable, Identifiable {
         try container.encode(_name, forKey: .name)
         try container.encode(_connection, forKey: .connection)
         try container.encode(_transitionArea, forKey: .transitionArea)
-        try container.encode(_tzJsonURL, forKey: .tzJsonURL)
     }
     
     required init(from decoder: Decoder) throws {
@@ -75,10 +67,9 @@ class TransitionZone: Codable, Identifiable {
         _name = try container.decode(String.self, forKey: .name)
         _connection = try container.decodeIfPresent(Connection.self, forKey: .connection)
         _transitionArea = try container.decode(Coordinates.self, forKey: .transitionArea)
-        _tzJsonURL = try container.decode(URL.self, forKey: .tzJsonURL)
     }
     
     func overlapWith(rectangle: Rectangle) {
-        // Implement logic to check if overlapping with another rectangle
+        
     }
 }

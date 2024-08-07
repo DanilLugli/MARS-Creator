@@ -153,6 +153,13 @@
 			path = AR;
 			sourceTree = "<group>";
 		};
+		AA3A24F62C638A5D00E162A3 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		AA64CC832C4957FC005C883B /* Connection */ = {
 			isa = PBXGroup;
 			children = (
@@ -230,6 +237,7 @@
 			children = (
 				AAA29E682C1711AA00CA267C /* ScanBuild */,
 				AAA29E672C1711AA00CA267C /* Products */,
+				AA3A24F62C638A5D00E162A3 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};

@@ -101,7 +101,6 @@ struct RoomView: View {
                                                 }
                                                 .padding()
                                             }
-                                            
                                         }
                                         Spacer() // Push buttons to the top
                                     }
@@ -122,11 +121,15 @@ struct RoomView: View {
                                     borders: true
                                 )
                                 
+//                                mapPositionView.handler.changeColorOfNode(nodeName: "Bagno", color: UIColor.orange)
+//                                mapPositionView.handler.changeColorOfNode(nodeName: "Sala", color: UIColor.yellow)
+                                
                                 // Carica la mappa generale
                                 mapView.loadgeneralMap(
                                     borders: true,
                                     usdzURL: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz")
                                 )
+                                
                             }
                         }
                     }

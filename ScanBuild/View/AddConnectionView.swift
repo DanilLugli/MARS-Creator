@@ -4,8 +4,10 @@ import Foundation
 struct AddConnectionView: View {
     
     var selectedBuilding: Building
-    @State var selectedFloor: Floor? = nil
-    @State var selectedRoom: Room? = nil
+    var initialSelectedFloor: Floor? = nil
+    var initialSelectedRoom: Room? = nil
+    @State var selectedFloor: Floor?
+    @State var selectedRoom: Room?
     @State private var fromFloor: Floor?
     @State private var fromRoom: Room?
     @State private var fromTransitionZone: TransitionZone?
@@ -32,6 +34,7 @@ struct AddConnectionView: View {
                             ConnectionCardView(name: floor.name, date: floor.lastUpdate, isSelected: selectedFloor?.id == floor.id  ).padding()
                                 .onTapGesture {
                                     selectedFloor = floor
+                                    selectedRoom = nil // Clear selected room when floor changes
                                 }
                         }
                     }
@@ -118,6 +121,14 @@ struct AddConnectionView: View {
             .alert(isPresented: $showAlert) {
                 Alert(title: Text("Connection Created"), message: Text("Connection created successfully"))
             }
+            .onAppear {
+                
+                DispatchQueue.main.async {
+                    selectedFloor = initialSelectedFloor
+                    selectedRoom = initialSelectedRoom
+                }
+                
+            }
         }
         .toolbar {
             ToolbarItem(placement: .principal) {
@@ -125,29 +136,6 @@ struct AddConnectionView: View {
                     .font(.system(size: 22, weight: .heavy))
                     .foregroundColor(.white)
             }
-//            ToolbarItem(placement: .navigationBarTrailing) {
-//                HStack {
-//                    NavigationLink(destination: AddBuildingView()) {
-//                        Image(systemName: "plus.circle.fill")
-//                            .resizable()
-//                            .aspectRatio(contentMode: .fit)
-//                            .frame(width: 31, height: 31)
-//                            .foregroundColor(.blue)
-//                            .background(Circle().fill(Color.white).frame(width: 31, height: 31))
-//                    }
-//                    Button(action: {
-//                        // Azione per il pulsante "info.circle"
-//                        print("Info button tapped")
-//                    }) {
-//                        Image(systemName: "info.circle")
-//                            .foregroundColor(.white)
-//                            .padding(8)
-//                            .frame(width: 30, height: 30)
-//                            .background(Color.blue)
-//                            .clipShape(Circle())
-//                    }
-//                }
-//            }
         }
         .background(Color.customBackground.ignoresSafeArea())
     }
@@ -157,6 +145,15 @@ struct AddConnectionView: View {
             if let fromRoomName = fromRoom?.name, let toRoomName = selectedRoom?.name {
                 let connection = SameFloorConnection(name: "Same Floor Connection", targetRoom: toRoomName)
                 let mirrorConnection = SameFloorConnection(name: "Same Floor Connection", targetRoom: fromRoomName)
+                
+                let newTransitionZone = TransitionZone(name: "New Transition Zone", connection: mirrorConnection, transitionArea: Coordinates(x: 1, y: 2))
+                
+                // Aggiungi la nuova TransitionZone all'array transitionZones della stanza
+                do {
+                    try initialSelectedRoom?.addTransitionZone(transitionZone: newTransitionZone)
+                } catch {
+                    print("Errore durante l'aggiunta della TransitionZone: \(error)")
+                }
                 return (connection, mirrorConnection)
             }
         }
@@ -165,6 +162,16 @@ struct AddConnectionView: View {
             if let fromFloorName = fromFloor?.name, let fromRoomName = fromRoom?.name, let toFloorName = selectedFloor?.name, let toRoomName = selectedRoom?.name {
                 let connection = AdjacentFloorsConnection(name: "Adjacent Floors Connection", targetFloor: toFloorName, targetRoom: toRoomName)
                 let mirrorConnection = AdjacentFloorsConnection(name: "Adjacent Floors Connection", targetFloor: fromFloorName, targetRoom: fromRoomName)
+                
+                let newTransitionZone = TransitionZone(name: "New Transition Zone", connection: mirrorConnection, transitionArea: Coordinates(x: 1, y: 2))
+                
+                // Aggiungi la nuova TransitionZone all'array transitionZones della stanza
+                do {
+                    try initialSelectedRoom?.addTransitionZone(transitionZone: newTransitionZone)
+                } catch {
+                    print("Errore durante l'aggiunta della TransitionZone: \(error)")
+                }
+                
                 return (connection, mirrorConnection)
             }
         }
@@ -189,7 +196,9 @@ struct AddConnection_Preview: PreviewProvider {
     static var previews: some View {
         let buildingModel = BuildingModel.getInstance()
         let selectedBuilding = buildingModel.initTryData()
+        let floor = selectedBuilding.floors.first!
+        let room = floor.rooms.first!
         
-        return AddConnectionView(selectedBuilding: selectedBuilding)
+        return AddConnectionView(selectedBuilding: selectedBuilding, initialSelectedFloor: floor, initialSelectedRoom: room)
     }
 }

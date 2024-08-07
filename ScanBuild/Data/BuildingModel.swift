@@ -44,7 +44,7 @@ class BuildingModel: ObservableObject {
         //Aggiungi 10 building
         for i in 1...3 {
             let building = Building(name: "Building \(i)", lastUpdate: Date(), floors: [], buildingURL: URL(fileURLWithPath: ""))
-
+            
             // Aggiungi 5 piani al primo edificio
             for j in 1...5 {
                 let floor = Floor(name: "Floor \(j)", lastUpdate: Date(), planimetry: Image(""), associationMatrix: [String : RotoTraslationMatrix](), rooms: [], sceneObjects: nil, scene: nil, sceneConfiguration: nil, floorURL: URL(fileURLWithPath: ""))
@@ -58,7 +58,7 @@ class BuildingModel: ObservableObject {
                     for z in 1...2 {
                         let xMin = Float.random(in: 0...10)
                         let yMin = Float.random(in: 0...10)
-                        let transitionZone = TransitionZone(name: "Scala \(z)", connection: nil, transitionArea: Coordinates(x: xMin, y: yMin), tzJsonURL: URL(fileURLWithPath: ""))
+                        let transitionZone = TransitionZone(name: "Scala \(z)", connection: nil, transitionArea: Coordinates(x: xMin, y: yMin))
                         do {
                             try room.addTransitionZone(transitionZone: transitionZone)
                         } catch {
@@ -74,10 +74,10 @@ class BuildingModel: ObservableObject {
         
         return self.getBuildings()[0]
     }
-
+    
     private func loadBuildingsFromRoot() throws {
         let fileManager = FileManager.default
-
+        
         // Verifica se la cartella root esiste
         if !fileManager.fileExists(atPath: BuildingModel.SCANBUILD_ROOT.path) {
             
@@ -149,9 +149,9 @@ class BuildingModel: ObservableObject {
                                       associationMatrix: associationMatrix ?? [:], rooms: rooms, sceneObjects: sceneObjects, scene: scene, sceneConfiguration: sceneConfiguration, floorURL: floorURL)
                     
                     let associationMatrixURL = floorURL.appendingPathComponent("\(floor.name).json")
-                                   if fileManager.fileExists(atPath: associationMatrixURL.path) {
-                                       floor.loadAssociationMatrixFromJSON(fileURL: associationMatrixURL)
-                                   }
+                    if fileManager.fileExists(atPath: associationMatrixURL.path) {
+                        floor.loadAssociationMatrixFromJSON(fileURL: associationMatrixURL)
+                    }
                     
                     floors.append(floor)
                 }
@@ -205,31 +205,53 @@ class BuildingModel: ObservableObject {
                         }
                     }
                     
-                    // Load TransitionZone data
-                    let transitionZoneURL = roomURL.appendingPathComponent("TransitionZone")
-                    if fileManager.fileExists(atPath: transitionZoneURL.path) {
-                        let transitionZoneContents = try fileManager.contentsOfDirectory(at: transitionZoneURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
-                        for fileURL in transitionZoneContents {
-                            // Load each TransitionZone file (assumed to be JSON files)
-                            if fileURL.pathExtension == "json" {
-                                let jsonData = try Data(contentsOf: fileURL)
-                                let decodedZones = try JSONDecoder().decode([TransitionZone].self, from: jsonData)
-                                transitionZones.append(contentsOf: decodedZones)
-                            }
-                        }
-                    }
                     
-//                    // Load sceneObjects and scene from MapUsdz
-//                    let mapUsdzURL = roomURL.appendingPathComponent("MapUsdz")
-//                    if fileManager.fileExists(atPath: mapUsdzURL.path) {
-//                        let mapUsdzContents = try fileManager.contentsOfDirectory(at: mapUsdzURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
-//                        for fileURL in mapUsdzContents {
-//                            if fileURL.pathExtension == "usdz" {
-//                                scene = try SCNScene(url: fileURL, options: nil)
-//                                sceneObjects.append(contentsOf: scene!.rootNode.childNodes)
-//                            }
+                    let transitionZone = TransitionZone(
+                        name: "Scale",
+                        connection: nil,
+                        transitionArea: Coordinates(x: Float(Double.random(in: -90...90)), y: Float(Double.random(in: -180...180)))
+                    )
+                    transitionZones.append(transitionZone)
+                        
+                        // Salva la TransitionZone casuale come file JSON
+//                        let jsonData = try JSONEncoder().encode(transitionZone)
+//                        try jsonData.write(to: roomURL.appendingPathComponent("TransitionZone"))
+                    
+                    
+                    // Load TransitionZone data
+//                    let transitionZoneURL = roomURL.appendingPathComponent("TransitionZone")
+//                    if fileManager.fileExists(atPath: transitionZoneURL.path) {
+//                        let transitionZoneContents = try fileManager.contentsOfDirectory(at: transitionZoneURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+//                        for fileURL in transitionZoneContents {
+////                            if fileURL.pathExtension == "json" {
+////                                let jsonData = try Data(contentsOf: fileURL)
+////                                let decodedZones = try JSONDecoder().decode([TransitionZone].self, from: jsonData)
+////                                transitionZones.append(contentsOf: decodedZones)
+////                            }
+////                            else {
+//
+//                          //  }
 //                        }
 //                    }
+
+//                    let transitionZoneURL = roomURL.appendingPathComponent("TransitionZone/TransitionZone.json")
+//                    if fileManager.fileExists(atPath: transitionZoneURL.path) {
+//                        let jsonData = try Data(contentsOf: transitionZoneURL)
+//                        let decodedZones = try JSONDecoder().decode([TransitionZone].self, from: jsonData)
+//                        transitionZones.append(contentsOf: decodedZones)
+//                    }
+                    
+                    //                    // Load sceneObjects and scene from MapUsdz
+                    //                    let mapUsdzURL = roomURL.appendingPathComponent("MapUsdz")
+                    //                    if fileManager.fileExists(atPath: mapUsdzURL.path) {
+                    //                        let mapUsdzContents = try fileManager.contentsOfDirectory(at: mapUsdzURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+                    //                        for fileURL in mapUsdzContents {
+                    //                            if fileURL.pathExtension == "usdz" {
+                    //                                scene = try SCNScene(url: fileURL, options: nil)
+                    //                                sceneObjects.append(contentsOf: scene!.rootNode.childNodes)
+                    //                            }
+                    //                        }
+                    //                    }
                     
                     let room = Room(name: roomURL.lastPathComponent, lastUpdate: lastModifiedDate, referenceMarkers: referenceMarkers, transitionZones: transitionZones, sceneObjects: sceneObjects, scene: scene, worldMap: worldMap, roomURL: roomURL)
                     rooms.append(room)
@@ -255,7 +277,7 @@ class BuildingModel: ObservableObject {
             print("Error creating folder for building \(building.name): \(error)")
         }
     }
-
+    
     func deleteBuilding(id: UUID) {
         if let building = buildings.first(where: { $0.id == id }) {
             buildings.removeAll { $0.id == id }

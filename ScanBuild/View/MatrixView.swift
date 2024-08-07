@@ -302,6 +302,8 @@ struct MatrixView: View {
                     Spacer()
                     Button("SAVE ROOM POSITION") {
                         saveConversionGlobalLocal(response.1, floor.floorURL, floor.name)
+                        
+                        showSheet = false
                     }.buttonStyle(.bordered)
                         .background(Color.blue.opacity(0.4))
                         .cornerRadius(8).padding()
