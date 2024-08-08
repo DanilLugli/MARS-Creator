@@ -18,7 +18,7 @@ struct MatrixView: View {
     var localMaps: [URL]?
     
     @State var globalNodes: [String]
-    @State var localNodes: [String] = []
+    @State var localNodes: [String]
     
     @State var matchingNodesForAPI: [(SCNNode, SCNNode)] = []
     
@@ -94,16 +94,32 @@ struct MatrixView: View {
                 String(n.name!.suffix(4)) != "_grp"
             }).compactMap { node in node.name } ?? []))
         
-        localNodes = Array(Set(localView
-            .scnView
-            .scene?
-            .rootNode
-            .childNodes(passingTest: {
-                n, _ in n.name != nil &&
-                n.name! != "Room" &&
-                n.name! != "Geom" &&
-                String(n.name!.suffix(4)) != "_grp"
-            }).compactMap { node in node.name } ?? []))
+        if let nodes = localView.scnView.scene?.rootNode.childNodes(passingTest: { n, _ in
+            n.name != nil &&
+            n.name! != "Room" &&
+            n.name! != "Geom" &&
+            String(n.name!.suffix(4)) != "_grp"
+        }) {
+            let names = nodes.compactMap { $0.name }
+            print("Collected node names: \(names)")
+
+            // Rimuovere i duplicati utilizzando un dizionario per tracciare i nomi già visti
+            var uniqueNamesDict = [String: Bool]()
+            var uniqueNamesArray = [String]()
+
+            for name in names {
+                if uniqueNamesDict[name] == nil {
+                    uniqueNamesDict[name] = true
+                    uniqueNamesArray.append(name)
+                }
+            }
+
+            localNodes = uniqueNamesArray.sorted()
+
+            print("Unique node names: \(localNodes)")
+        } else {
+            localNodes = []
+        }
     }
     
     var body: some View {
@@ -211,8 +227,8 @@ struct MatrixView: View {
                     }
                     
                     HStack {
-                        Picker("", selection: $selectedLocalNodeName) {
-                            Text("Choose Room Node").foregroundColor(.white)
+                        Picker("Choose Room Node", selection: $selectedLocalNodeName) {
+                            Text("Choose Room Node")
                             ForEach(localNodes, id: \.self) { Text($0) }
                         }.onChange(of: selectedLocalNodeName, perform: { _ in
                             localView.changeColorOfNode(nodeName: selectedLocalNodeName, color: UIColor.green)

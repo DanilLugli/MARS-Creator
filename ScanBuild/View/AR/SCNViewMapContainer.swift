@@ -55,9 +55,9 @@ class SCNViewMapHandler: ObservableObject {
                         applyRotoTraslation(to: roomNode, with: self.rotoTraslation[index])
                     }
                     
-//                    roomNode.name = roomURL.deletingPathExtension().lastPathComponent
-//                    
-//                    scnView.scene?.rootNode.addChildNode(roomNode)
+                    roomNode.name = roomURL.deletingPathExtension().lastPathComponent
+                    
+                    scnView.scene?.rootNode.addChildNode(roomNode)
                     
                 } else {
                     print("Node 'floor0' not found in scene: \(roomURL)")
@@ -93,7 +93,7 @@ class SCNViewMapHandler: ObservableObject {
 
                 material.diffuse.contents = UIColor.black
                 if ($0.name! == "Bagno") {
-                    material.diffuse.contents = UIColor.yellow.withAlphaComponent(0.2)
+                    material.diffuse.contents = UIColor.black.withAlphaComponent(0.2)
                 }
                 if ($0.name! == "Sala") {
                     material.diffuse.contents = UIColor.orange.withAlphaComponent(0.2)
