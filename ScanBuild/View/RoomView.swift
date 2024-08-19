@@ -82,7 +82,7 @@ struct RoomView: View {
                         VStack {
                             if room.referenceMarkers.isEmpty {
                                 VStack {
-                                    Text("No Marker in \(room.name)")
+                                    Text("Add Marker with + icon")
                                         .foregroundColor(.gray)
                                         .font(.headline)
                                         .padding()
@@ -176,6 +176,7 @@ struct RoomView: View {
                                     }
                                     .padding()                                    
                                     .refreshable {
+                                        
                                         ForEach(filteredConnection, id: \.id) { transitionZone in
                                             Button(action: {
                                                 selectedConnection = transitionZone
@@ -227,20 +228,59 @@ struct RoomView: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     if selectedTab == 0 {
-                        HStack {
-                            NavigationLink(destination: ScanningView(namedUrl: room), isActive: $isNavigationActive) {
-                                Image(systemName: "plus.circle.fill")
-                                    .font(.system(size: 26))
-                                    .foregroundStyle(.white, .blue, .blue)
+                        Menu {
+                            
+                            Button(action: {
+                                self.isNavigationActive = true
+                            }) {
+                                Label("Create Planimetry", systemImage: "plus")
                             }
                             
                             Button(action: {
                                 isDocumentPickerPresented2 = true
                             }) {
-                                Label("Upload File", systemImage: "square.and.arrow.up.circle.fill").font(.system(size: 26))
-                                    .foregroundStyle(.white, .blue, .blue)
+                                Label("Upload Planimetry from File", systemImage: "square.and.arrow.down")
                             }
+                            
+                            Button(action: {
+                                isDocumentPickerPresented2 = true
+                            }) {
+                                Label("Update Planimetry", systemImage: "arrow.clockwise")
+                            }
+                            
+                            Divider()
+                            
+                            Button(action: {
+                                isDocumentPickerPresented2 = true
+                            }) {
+                                Label("Rename Room", systemImage: "pencil")
+                            }
+                            
+                           
+                            Divider()
+                            
+                            Button(role: .destructive, action: {
+                                //TODO: Aggiustare l'eliminazione della room
+                            }) {
+                                HStack {
+                                            Image(systemName: "trash")
+                                                .foregroundColor(.red) // Imposta l'icona in rosso
+                                            Text("Delete Room")
+                                                .foregroundColor(.red) // Imposta il testo in rosso
+                                        }
+                            }
+                            
+                        } label: {
+                            Image(systemName: "pencil.circle.fill")
+                                .font(.system(size: 26))
+                                .symbolRenderingMode(.palette)
+                                .foregroundStyle(.white, .blue, .blue)
                         }
+                        
+                        NavigationLink(destination: ScanningView(namedUrl: room), isActive: $isNavigationActive) {
+                            EmptyView()
+                        }
+                        
                     } else if selectedTab == 1 {
                         Button(action: {
                             isDocumentPickerPresented2 = true

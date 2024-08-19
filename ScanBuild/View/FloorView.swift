@@ -196,17 +196,47 @@ struct FloorView: View {
                 HStack {
                     if selectedTab == 0 {
                         Menu {
-                            Button(action: {
-                                isDocumentPickerPresented = true
-                            }) {
-                                Label("Upload File", systemImage: "square.and.arrow.down")
-                            }
                             
-                            // Aggiungiamo il pulsante che naviga verso ScanningView
                             Button(action: {
                                 self.isNavigationActive = true
                             }) {
-                                Label("Add Floor", systemImage: "plus.circle")
+                                Label("Create Planimetry", systemImage: "plus")
+                            }
+                            
+                            Button(action: {
+                                isDocumentPickerPresented = true
+                            }) {
+                                Label("Upload Planimetry from File", systemImage: "square.and.arrow.down")
+                            }
+                            
+                            Button(action: {
+                                isDocumentPickerPresented = true
+                            }) {
+                                Label("Update Planimetry", systemImage: "arrow.clockwise")
+                            }
+                            
+                            Divider()
+                            
+                            
+                            Button(action: {
+                                isDocumentPickerPresented = true
+                            }) {
+                                Label("Rename Floor", systemImage: "pencil")
+                            }
+                            
+                            
+                            
+                            Divider()
+                            
+                            Button(role: .destructive, action: {
+                                //TODO: Aggiustare l'eliminazione della room
+                            }) {
+                                HStack {
+                                            Image(systemName: "trash")
+                                                .foregroundColor(.red) // Imposta l'icona in rosso
+                                            Text("Delete Floor")
+                                                .foregroundColor(.red) // Imposta il testo in rosso
+                                        }
                             }
                             
                         } label: {
@@ -219,6 +249,7 @@ struct FloorView: View {
                         NavigationLink(destination: ScanningView(namedUrl: floor), isActive: $isNavigationActive) {
                             EmptyView()
                         }
+                        
                         
                     } 
                     else if selectedTab == 1 {

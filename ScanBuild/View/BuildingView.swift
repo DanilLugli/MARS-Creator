@@ -66,23 +66,31 @@ struct BuildingView: View {
                             .foregroundStyle(.white, .blue, .blue)
                     }
                     Menu {
+                        
                         Button(action: {
                             // Azione per il pulsante "Rename"
                             isRenameSheetPresented = true
                         }) {
-                            Label("Rename", systemImage: "pencil")
+                            Label("Rename Building", systemImage: "pencil")
                         }
+                        
+                        Divider()
+                        
                         Button(action: {
-                            print("Upload Building to Server button tapped")
+                            print("Save Building to Server button tapped")
                         }) {
-                            Label("Upload Building to Server", systemImage: "icloud.and.arrow.up")
+                            Label("Save Building to Server", systemImage: "icloud.and.arrow.up")
                         }
+                        
                         Button(action: {
-                            print("Info button tapped")
+                            print("Upload Building from File")
                         }) {
-                            Label("Info", systemImage: "info.circle")
+                            Label("Upload Building from File", systemImage: "square.and.arrow.down")
                         }
-                        Button(action: {
+                        
+                        Divider()
+                        
+                        Button(role: .destructive, action: {
                             print("Delete Building button tapped")
                         }) {
                             Label("Delete Building", systemImage: "trash")

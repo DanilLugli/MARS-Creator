@@ -47,7 +47,7 @@ struct RoomCardView: View {
                     if position == false{
                         Image(systemName: "exclamationmark.circle")
                             .foregroundColor(.red)
-                            .font(.system(size: 40))
+                            .font(.system(size: 30))
                             .padding(.trailing) // puoi regolare la dimensione del simbolo
                             .onTapGesture {
                                 showAlert = true // Mostra l'alert quando premi l'immagine
@@ -61,8 +61,11 @@ struct RoomCardView: View {
             .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 2)
             // Usa il modificatore .alert per mostrare l'alert
             .alert(isPresented: $showAlert) {
-                Alert(title: Text("ATTENTION!"), message: Text("\(name) has no position in his Floor.\nYou have to calculate in Room Position page.\n\n(\(name) -> Tab: Room Position -> Add Room Position)"), dismissButton: .default(Text("OK")))
-                
+                Alert(
+                    title: Text("ATTENTION!").foregroundColor(.red),
+                    message: Text("\(name) has no position in his Floor.\nYou have to calculate in Room Position page.\n\n(\(name) -> Tab: Room Position -> Add Room Position)"),
+                    dismissButton: .default(Text("OK"))
+                )
             }
             
         }

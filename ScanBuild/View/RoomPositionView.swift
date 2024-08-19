@@ -22,6 +22,11 @@ struct RoomPositionView: View {
     
     @State var matchingNodesForAPI: [(SCNNode, SCNNode)] = []
     
+//    @State var matchingNodesForAPI: [(SCNNode, SCNNode)] = [
+//        (SCNNode(), SCNNode()),
+//        (SCNNode(), SCNNode())
+//    ]
+    
     @State var apiResponseCode = ""
     
     @State var responseFromServer = false {
@@ -126,8 +131,8 @@ struct RoomPositionView: View {
         NavigationStack {
             VStack {
                 ConnectedDotsView(
-                    labels: ["1°", "2°", "3°"],
-                    progress: min(matchingNodesForAPI.count + 1, 3)
+                    labels: ["1° Association", "2° Association", "3° Association", "Confirm"],
+                    progress: min(matchingNodesForAPI.count + 1, 4)
                 )
                 
                 VStack {
@@ -255,14 +260,15 @@ struct RoomPositionView: View {
                 HStack {
                     if let _selectedLocalNode = selectedLocalNode,
                        let _selectedGlobalNode = selectedGlobalNode {
-                        Button("confirm relation") {
+                        Button("Confirm Relation") {
                             matchingNodesForAPI.append((_selectedLocalNode, _selectedGlobalNode))
                             print(_selectedLocalNode)
                             print(_selectedGlobalNode)
                             print(selectedMap.lastPathComponent)
                             print(matchingNodesForAPI)
                         }.buttonStyle(.bordered)
-                            .background(Color.green.opacity(0.4)                            .cornerRadius(10))
+                            .background(Color.blue.opacity(0.4)
+                            .cornerRadius(10))
                             .bold()
                     }
                     //                    Text("matched nodes: \(matchingNodesForAPI.count)").foregroundColor(.white)
@@ -290,7 +296,9 @@ struct RoomPositionView: View {
                                 showSheet = true
                             }
                         }.buttonStyle(.bordered)
-                            .background(Color(red: 255/255, green: 235/255, blue: 205/255))
+                            .frame(width: 150, height: 50)
+                            .foregroundColor(.white)
+                            .background(Color(red: 62/255, green: 206/255, blue: 76/255))
                             .cornerRadius(6)
                             .bold()
                     }
