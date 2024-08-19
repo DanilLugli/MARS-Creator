@@ -14,8 +14,8 @@
 		AA2CA5552C3DB61100C88C94 /* ExportRoomViewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA5542C3DB61100C88C94 /* ExportRoomViewContainer.swift */; };
 		AA2CA5572C3DB61E00C88C94 /* SCNViewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA5562C3DB61E00C88C94 /* SCNViewContainer.swift */; };
 		AA2CA5592C3EF87A00C88C94 /* ReferenceMarker.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA5582C3EF87A00C88C94 /* ReferenceMarker.swift */; };
-		AA2CA55B2C3F07A500C88C94 /* MarkerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA55A2C3F07A500C88C94 /* MarkerView.swift */; };
-		AA2CA55D2C3FC62400C88C94 /* MatrixView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA55C2C3FC62400C88C94 /* MatrixView.swift */; };
+		AA2CA55B2C3F07A500C88C94 /* RoomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA55A2C3F07A500C88C94 /* RoomView.swift */; };
+		AA2CA55D2C3FC62400C88C94 /* RoomPositionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA55C2C3FC62400C88C94 /* RoomPositionView.swift */; };
 		AA3A24F12C62599A00E162A3 /* SCNViewMapContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA3A24F02C62599A00E162A3 /* SCNViewMapContainer.swift */; };
 		AA3A24F32C62924200E162A3 /* ConnectionCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA3A24F22C62924200E162A3 /* ConnectionCardView.swift */; };
 		AA3A24F52C62942300E162A3 /* ListConnectionCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA3A24F42C62942300E162A3 /* ListConnectionCardView.swift */; };
@@ -55,7 +55,7 @@
 		AAB6190A2C502995008F77EE /* AddRoomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAB619092C502995008F77EE /* AddRoomView.swift */; };
 		AAD778A72C5288A40091181A /* ScanningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD778A62C5288A30091181A /* ScanningView.swift */; };
 		AAD778A92C528C600091181A /* FloorCaptureViewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD778A82C528C600091181A /* FloorCaptureViewContainer.swift */; };
-		AAE57F9E2C3764FC00F0196F /* RoomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE57F9D2C3764FC00F0196F /* RoomView.swift */; };
+		AAE57F9E2C3764FC00F0196F /* FloorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE57F9D2C3764FC00F0196F /* FloorView.swift */; };
 		AAE57FA02C376D0D00F0196F /* AddConnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE57F9F2C376D0D00F0196F /* AddConnectionView.swift */; };
 		AAE57FA22C37FB6100F0196F /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE57FA12C37FB6100F0196F /* Color.swift */; };
 		AAE57FA62C382C6D00F0196F /* TransitionZone.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE57FA52C382C6D00F0196F /* TransitionZone.swift */; };
@@ -74,8 +74,8 @@
 		AA2CA5542C3DB61100C88C94 /* ExportRoomViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportRoomViewContainer.swift; sourceTree = "<group>"; };
 		AA2CA5562C3DB61E00C88C94 /* SCNViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SCNViewContainer.swift; sourceTree = "<group>"; };
 		AA2CA5582C3EF87A00C88C94 /* ReferenceMarker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReferenceMarker.swift; sourceTree = "<group>"; };
-		AA2CA55A2C3F07A500C88C94 /* MarkerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkerView.swift; sourceTree = "<group>"; };
-		AA2CA55C2C3FC62400C88C94 /* MatrixView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatrixView.swift; sourceTree = "<group>"; };
+		AA2CA55A2C3F07A500C88C94 /* RoomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomView.swift; sourceTree = "<group>"; };
+		AA2CA55C2C3FC62400C88C94 /* RoomPositionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomPositionView.swift; sourceTree = "<group>"; };
 		AA3A24F02C62599A00E162A3 /* SCNViewMapContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SCNViewMapContainer.swift; sourceTree = "<group>"; };
 		AA3A24F22C62924200E162A3 /* ConnectionCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionCardView.swift; sourceTree = "<group>"; };
 		AA3A24F42C62942300E162A3 /* ListConnectionCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListConnectionCardView.swift; sourceTree = "<group>"; };
@@ -115,7 +115,7 @@
 		AAB619092C502995008F77EE /* AddRoomView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddRoomView.swift; sourceTree = "<group>"; };
 		AAD778A62C5288A30091181A /* ScanningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanningView.swift; sourceTree = "<group>"; };
 		AAD778A82C528C600091181A /* FloorCaptureViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloorCaptureViewContainer.swift; sourceTree = "<group>"; };
-		AAE57F9D2C3764FC00F0196F /* RoomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomView.swift; sourceTree = "<group>"; };
+		AAE57F9D2C3764FC00F0196F /* FloorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloorView.swift; sourceTree = "<group>"; };
 		AAE57F9F2C376D0D00F0196F /* AddConnectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddConnectionView.swift; sourceTree = "<group>"; };
 		AAE57FA12C37FB6100F0196F /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		AAE57FA52C382C6D00F0196F /* TransitionZone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitionZone.swift; sourceTree = "<group>"; };
@@ -190,14 +190,14 @@
 				AA2CA54F2C3DB5C600C88C94 /* AR */,
 				AA78F5DA2C2C773E0044F825 /* BuildingsView.swift */,
 				AA78F5DC2C2DB51D0044F825 /* BuildingView.swift */,
-				AAE57F9D2C3764FC00F0196F /* RoomView.swift */,
-				AA2CA55A2C3F07A500C88C94 /* MarkerView.swift */,
+				AAE57F9D2C3764FC00F0196F /* FloorView.swift */,
+				AA2CA55A2C3F07A500C88C94 /* RoomView.swift */,
 				AAD778A62C5288A30091181A /* ScanningView.swift */,
+				AA2CA55C2C3FC62400C88C94 /* RoomPositionView.swift */,
 				AA78F5E02C2DB6DE0044F825 /* AddBuildingView.swift */,
 				AAE57F9F2C376D0D00F0196F /* AddConnectionView.swift */,
 				AAB619092C502995008F77EE /* AddRoomView.swift */,
 				AA2CA5252C39FF3000C88C94 /* AddFloorView.swift */,
-				AA2CA55C2C3FC62400C88C94 /* MatrixView.swift */,
 				AAE57FA12C37FB6100F0196F /* Color.swift */,
 				AA8E0A6B2C5D02280097BDCD /* DocumentPickerView.swift */,
 			);
@@ -370,10 +370,10 @@
 				AA78F5D62C2C6BAC0044F825 /* Room.swift in Sources */,
 				AA64CC802C47F91F005C883B /* ElevatorConnection.swift in Sources */,
 				AAE57FAB2C384E6400F0196F /* DefaultCardView.swift in Sources */,
-				AA2CA55B2C3F07A500C88C94 /* MarkerView.swift in Sources */,
+				AA2CA55B2C3F07A500C88C94 /* RoomView.swift in Sources */,
 				AA8E0A642C57E50F0097BDCD /* VisualizeRoomViewContainer.swift in Sources */,
 				AAE57FB12C385D2B00F0196F /* ConnectedDotsView.swift in Sources */,
-				AA2CA55D2C3FC62400C88C94 /* MatrixView.swift in Sources */,
+				AA2CA55D2C3FC62400C88C94 /* RoomPositionView.swift in Sources */,
 				AA2CA5512C3DB5F400C88C94 /* CaptureViewContainer.swift in Sources */,
 				AA64CC862C495D73005C883B /* Rectangle.swift in Sources */,
 				AAD778A72C5288A40091181A /* ScanningView.swift in Sources */,
@@ -405,7 +405,7 @@
 				AA78F5ED2C3303910044F825 /* Logger.swift in Sources */,
 				AA2CA5572C3DB61E00C88C94 /* SCNViewContainer.swift in Sources */,
 				AAFB3A002C4DB6EF00DBC593 /* extensionNotificationName.swift in Sources */,
-				AAE57F9E2C3764FC00F0196F /* RoomView.swift in Sources */,
+				AAE57F9E2C3764FC00F0196F /* FloorView.swift in Sources */,
 				AA78F5EA2C33006F0044F825 /* BuildingModel.swift in Sources */,
 				AA8E0A6C2C5D02280097BDCD /* DocumentPickerView.swift in Sources */,
 				AAA29E6A2C1711AA00CA267C /* AppDelegate.swift in Sources */,

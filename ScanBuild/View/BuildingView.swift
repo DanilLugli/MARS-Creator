@@ -38,7 +38,7 @@ struct BuildingView: View {
                         ScrollView {
                             LazyVStack(spacing: 50) {
                                 ForEach(filteredFloors, id: \.id) { floor in
-                                    NavigationLink(destination: RoomView( floor: floor, building: building)) {
+                                    NavigationLink(destination: FloorView( floor: floor, building: building)) {
                                         DefaultCardView(name: floor.name, date: floor.lastUpdate).padding()
                                     }
                                 }
@@ -145,7 +145,7 @@ struct BuildingView: View {
     }
 }
 
-struct FloorView_Previews: PreviewProvider {
+struct BuildingView_Previews: PreviewProvider {
     static var previews: some View {
         let buildingModel = BuildingModel.getInstance()
         let firstBuilding = buildingModel.initTryData()

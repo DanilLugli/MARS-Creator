@@ -74,7 +74,7 @@ struct BuildingsView: View {
     }
 }
 
-struct HomeView_Previews: PreviewProvider {
+struct BuildingsView_Previews: PreviewProvider {
     static var previews: some View {
         let buildingModel = BuildingModel.getInstance()
         let _ = buildingModel.initTryData()

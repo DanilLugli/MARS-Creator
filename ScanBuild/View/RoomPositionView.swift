@@ -2,7 +2,7 @@ import Foundation
 import SwiftUI
 import SceneKit
 
-struct MatrixView: View {
+struct RoomPositionView: View {
     
     @ObservedObject var floor: Floor
     @ObservedObject var room: Room
@@ -343,14 +343,14 @@ func orderBySimilarity(node: SCNNode, listOfNodes: [SCNNode]) -> [SCNNode] {
 }
 
 
-struct MatrixView_Preview: PreviewProvider {
+struct RoomPositionView_Preview: PreviewProvider {
     static var previews: some View {
         let buildingModel = BuildingModel.getInstance()
         let firstBuildingIndex = buildingModel.initTryData()
         let floor = firstBuildingIndex.floors.first!
         let room = floor.rooms.first!
         
-        return MatrixView(floor: floor, room: room)
+        return RoomPositionView(floor: floor, room: room)
     }
 }
 
