@@ -14,6 +14,8 @@ struct RoomCardView: View {
     var rowSize: Int
     var isSelected: Bool
     
+    @State private var showAlert = false
+    
     init(name: String, date: Date, position: Bool, rowSize: Int, isSelected: Bool) {
         self.name = name
         self.date = date
@@ -39,20 +41,29 @@ struct RoomCardView: View {
                             .font(.system(size: 14))
                             .foregroundColor(.gray)
                     }.padding(.leading, 50)
-
+                    
                     Spacer()
                     Image(systemName: "exclamationmark.circle")
-                                        .foregroundColor(.red)
-                                        .font(.system(size: 30)).padding(.trailing) // puoi regolare la dimensione del simbolo
+                        .foregroundColor(.red)
+                        .font(.system(size: 40))
+                        .padding(.trailing) // puoi regolare la dimensione del simbolo
+                        .onTapGesture {
+                            showAlert = true // Mostra l'alert quando premi l'immagine
+                        }
                     
                 }
-
+                
                 
             }
             .frame(width: geometry.size.width / CGFloat(rowSize), height: 80)
             .cornerRadius(10)
             .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 2)
-
+            // Usa il modificatore .alert per mostrare l'alert
+            .alert(isPresented: $showAlert) {
+                Alert(title: Text("ATTENTION!"), message: Text("\(name) has no position in his Floor.\nYou have to calculate in Room Position page.\n\n(\(name) -> Tab: Room Position -> Add Room Position)"), dismissButton: .default(Text("OK")))
+                
+            }
+            
         }
     }
 }
