@@ -4,17 +4,25 @@ import Foundation
 struct AddConnectionView: View {
     
     var selectedBuilding: Building
+    
     var initialSelectedFloor: Floor? = nil
     var initialSelectedRoom: Room? = nil
-    @State var selectedFloor: Floor?
+    
+    @State var selectedFloor: Floor? = nil
     @State var selectedRoom: Room?
+    @State private var fromTransitionZone: TransitionZone?
+    
     @State private var fromFloor: Floor?
     @State private var fromRoom: Room?
-    @State private var fromTransitionZone: TransitionZone?
     
     @State private var selectedTransitionZone: TransitionZone? = nil
     @State private var showAlert: Bool = false
     @State private var isElevator: Bool = false
+    
+    @State private var isMenuPresented: Bool = false
+    @State private var showActionSheetFloor = false
+    @State private var showActionSheetRoom = false
+    @State private var showActionSheetTZ = false
     
     @Environment(\.presentationMode) private var presentationMode
     @Environment(\.dismiss) private var dismiss
@@ -22,98 +30,81 @@ struct AddConnectionView: View {
     var body: some View {
         NavigationStack {
             VStack {
+                
                 Text("\(selectedBuilding.name) > New Connection")
                     .font(.system(size: 14))
                     .fontWeight(.heavy)
-                ConnectedDotsView(labels: ["1° Connection From", "2° Connection To"], progress: fromTransitionZone == nil ? 1 : 2).padding()
-                Text("Choose Floor").font(.system(size: 22))
-                    .fontWeight(.heavy)
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack {
-                        ForEach(selectedBuilding.floors) { floor in
-                            ConnectionCardView(name: floor.name, date: floor.lastUpdate, isSelected: selectedFloor?.id == floor.id  ).padding()
+                ConnectedDotsView(labels: ["1° Connection From", "2° Connection To", "3° Confirm"], progress: fromTransitionZone == nil ? 1 : 2).padding(.top)
+                
+                
+                
+                HStack{
+                    VStack{
+                        Text("Floor")
+                            .font(.system(size: 22))
+                            .fontWeight(.heavy)
+                        
+                        HStack {
+                            ConnectionCardView(name: selectedFloor?.name ?? "Choose\nFloor", isSelected: selectedFloor != nil)
+                                .padding()
                                 .onTapGesture {
-                                    selectedFloor = floor
-                                    selectedRoom = nil // Clear selected room when floor changes
+                                    showActionSheetFloor = true // Mostra l'ActionSheet al tap
+                                }
+                                .actionSheet(isPresented: $showActionSheetFloor) {
+                                    ActionSheet(
+                                        title: Text("Select a Floor"),
+                                        buttons: actionSheetFloorButtons()
+                                    )
                                 }
                         }
                     }
-                }
-                
-                if let selectedFloor = selectedFloor {
-                    VStack {
-                        Divider()
-                        Text("Choose Room").font(.system(size: 22))
+                    
+                    
+                    
+                    VStack{
+                        Text("Room")
+                            .font(.system(size: 22))
                             .fontWeight(.heavy)
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack {
-                                ForEach(selectedFloor.rooms) { room in
-                                    if room.name != fromRoom?.name {
-                                        ConnectionCardView(name: room.name, date: room.lastUpdate, isSelected: selectedRoom?.id == room.id  ).padding()
-                                            .onTapGesture {
-                                                selectedRoom = room
-                                            }
-                                    }
+                        
+                        
+                        HStack {
+                            ConnectionCardView(name: selectedRoom?.name ?? "Choose\nRoom", isSelected: selectedRoom != nil).padding()
+                                .onTapGesture {
+                                    showActionSheetRoom = true // Mostra l'ActionSheet al tap
                                 }
-                            }
+                                .actionSheet(isPresented: $showActionSheetRoom) {
+                                    ActionSheet(
+                                        title: Text("Select a Room"),
+                                        buttons: actionSheetRoomButtons()
+                                    )
+                                }
+                            
                         }
-                    }.padding()
-                }
-                
-                if let selectedRoom = selectedRoom {
-                    VStack {
-                        Divider()
-                        Text("Choose Transition Zone").font(.system(size: 22))
+                    }
+                    
+                    
+                    
+                    VStack{
+                        Text("Transition\nZone")
+                            .font(.system(size: 14))
                             .fontWeight(.heavy)
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack {
-                                ForEach(selectedRoom.transitionZones) { transitionZone in
-                                    ConnectionCardView(name: transitionZone.name, date: Date(), isSelected: selectedTransitionZone?.id == transitionZone.id ).padding()
-                                        .onTapGesture {
-                                            selectedTransitionZone = transitionZone
-                                        }
+                        
+                        HStack {
+                            ConnectionCardView(name: selectedTransitionZone?.name ?? "Choose\nT. Z.", isSelected: selectedTransitionZone != nil ).padding()
+                                .onTapGesture {
+                                    showActionSheetTZ = true // Mostra l'ActionSheet al tap
                                 }
-                            }
-                        }
-                    }.padding()
-                }
-                
-                if selectedTransitionZone != nil {
-                    Spacer()
-                    Button(action: {
-                        if fromTransitionZone != nil {
-                            insertConnection()
-                            showAlert = true
-                            dismiss()
-                        } else {
-                            fromTransitionZone = selectedTransitionZone
-                            fromFloor = selectedFloor
-                            fromRoom = selectedRoom
+                                .actionSheet(isPresented: $showActionSheetTZ) {
+                                    ActionSheet(
+                                        title: Text("Select a Transition Zone"),
+                                        buttons: actionSheetTZButtons()
+                                    )
+                                }
                         }
                         
-                        selectedTransitionZone = nil
-                        selectedRoom = nil
-                        selectedFloor = nil
-                    }) {
-                        VStack {
-                            if (fromTransitionZone != nil) {
-                                Toggle(isOn: $isElevator) {
-                                    Text("Elevator Connection")
-                                }
-                                .toggleStyle(SwitchToggleStyle()).padding()
-                            }
-                            Text(fromTransitionZone == nil ? "SELECT START" : "SAVE")
-                                .font(.system(size: 22, weight: .heavy))
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity, alignment: .bottom)
-                                .padding()
-                                .background(Color.blue)
-                                .cornerRadius(10)
-                        }
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 20)
-                }
+                    
+                }.padding()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .background(Color.customBackground)
@@ -138,6 +129,53 @@ struct AddConnectionView: View {
             }
         }
         .background(Color.customBackground.ignoresSafeArea())
+    }
+    
+    func actionSheetFloorButtons() -> [ActionSheet.Button] {
+        var buttons: [ActionSheet.Button] = selectedBuilding.floors.map { floor in
+                .default(Text(floor.name)) {
+                    selectedFloor = floor
+                    isMenuPresented = false
+                }
+        }
+        
+        buttons.append(.cancel())
+        return buttons
+    }
+    
+    func actionSheetRoomButtons() -> [ActionSheet.Button] {
+        guard let rooms = selectedFloor?.rooms else {
+            return [.cancel()]
+        }
+        
+        // Crea un array di pulsanti per ogni stanza
+        var buttons: [ActionSheet.Button] = rooms.map { room in
+                .default(Text(room.name)) {  // Qui specifica chiaramente che è un ActionSheet.Button
+                    selectedRoom = room
+                    isMenuPresented = false
+                }
+        }
+        // Aggiungi il pulsante "Cancel" alla fine
+        buttons.append(.cancel())
+        
+        return buttons
+    }
+    
+    func actionSheetTZButtons() -> [ActionSheet.Button] {
+        
+        guard let transitionZone = selectedRoom?.transitionZones else {
+            return [.cancel()]
+        }
+        
+        var buttons: [ActionSheet.Button] = transitionZone.map { transitionZone in
+                .default(Text(transitionZone.name)) {
+                    selectedTransitionZone = transitionZone
+                    isMenuPresented = false
+                }
+        }
+        
+        buttons.append(.cancel())
+        return buttons
     }
     
     private func createConnection() -> (Connection, Connection)? {
@@ -190,7 +228,11 @@ struct AddConnectionView: View {
             selectedTransitionZone?.connection = toConnection
         }
     }
+    
+    
 }
+
+
 
 struct AddConnection_Preview: PreviewProvider {
     static var previews: some View {

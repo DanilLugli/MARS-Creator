@@ -28,7 +28,8 @@ struct ConnectedDotsView: View {
                             
                             Text(label)
                                 .foregroundColor(.white)
-                                .font(.system(size: 12))
+                                .font(.system(size: 10))
+                                .bold()
                         }.frame(height: 34)
                         
                         if index < labels.count - 1 {

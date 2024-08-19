@@ -18,7 +18,7 @@
                BlueprintIdentifier = "AAA29E652C1711AA00CA267C"
                BuildableName = "ScanBuild.app"
                BlueprintName = "ScanBuild"
-               ReferencedContainer = "container:ScanBuild.xcodeproj">
+               ReferencedContainer = "container:ARL Creator.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -38,7 +38,7 @@
                BlueprintIdentifier = "AA78F5F72C3452420044F825"
                BuildableName = "ScanBuildUITests.xctest"
                BlueprintName = "ScanBuildUITests"
-               ReferencedContainer = "container:ScanBuild.xcodeproj">
+               ReferencedContainer = "container:ARL Creator.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -60,7 +60,7 @@
             BlueprintIdentifier = "AAA29E652C1711AA00CA267C"
             BuildableName = "ScanBuild.app"
             BlueprintName = "ScanBuild"
-            ReferencedContainer = "container:ScanBuild.xcodeproj">
+            ReferencedContainer = "container:ARL Creator.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <EnvironmentVariables>
@@ -94,7 +94,7 @@
             BlueprintIdentifier = "AAA29E652C1711AA00CA267C"
             BuildableName = "ScanBuild.app"
             BlueprintName = "ScanBuild"
-            ReferencedContainer = "container:ScanBuild.xcodeproj">
+            ReferencedContainer = "container:ARL Creator.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

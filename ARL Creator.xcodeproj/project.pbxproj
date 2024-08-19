@@ -323,7 +323,7 @@
 					};
 				};
 			};
-			buildConfigurationList = AAA29E612C1711AA00CA267C /* Build configuration list for PBXProject "ScanBuild" */;
+			buildConfigurationList = AAA29E612C1711AA00CA267C /* Build configuration list for PBXProject "ARL Creator" */;
 			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
@@ -613,7 +613,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		AAA29E612C1711AA00CA267C /* Build configuration list for PBXProject "ScanBuild" */ = {
+		AAA29E612C1711AA00CA267C /* Build configuration list for PBXProject "ARL Creator" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AAA29E782C1711AC00CA267C /* Debug */,

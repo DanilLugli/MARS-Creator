@@ -31,8 +31,8 @@ struct RoomCardView: View {
                     .stroke(isSelected ? Color.green : Color.clear, lineWidth: 6)
                     .background(RoundedRectangle(cornerRadius: 10).fill(Color.white))
                 HStack{
-                    Spacer()
-                    VStack(alignment: .center) {
+                    
+                    VStack(alignment: .leading) {
                         Text(name)
                             .font(.system(size: 20, weight: .bold))
                             .foregroundColor(.black)
@@ -40,20 +40,21 @@ struct RoomCardView: View {
                         Text("\(dateFormatter.string(from: date))")
                             .font(.system(size: 14))
                             .foregroundColor(.gray)
-                    }.padding(.leading, 50)
-                    
-                    Spacer()
-                    Image(systemName: "exclamationmark.circle")
-                        .foregroundColor(.red)
-                        .font(.system(size: 40))
-                        .padding(.trailing) // puoi regolare la dimensione del simbolo
-                        .onTapGesture {
-                            showAlert = true // Mostra l'alert quando premi l'immagine
-                        }
-                    
+                    }
                 }
-                
-                
+                HStack{
+                    Spacer()
+                    if position == false{
+                        Image(systemName: "exclamationmark.circle")
+                            .foregroundColor(.red)
+                            .font(.system(size: 40))
+                            .padding(.trailing) // puoi regolare la dimensione del simbolo
+                            .onTapGesture {
+                                showAlert = true // Mostra l'alert quando premi l'immagine
+                            }
+                    }
+                }
+               
             }
             .frame(width: geometry.size.width / CGFloat(rowSize), height: 80)
             .cornerRadius(10)
@@ -70,7 +71,7 @@ struct RoomCardView: View {
 
 struct RoomCardView_Previews: PreviewProvider {
     static var previews: some View {
-        RoomCardView(name: "Room", date: Date(), position: true, rowSize: 1, isSelected: true)
+        RoomCardView(name: "Room", date: Date(), position: false, rowSize: 1, isSelected: true)
     }
 }
 private let dateFormatter: DateFormatter = {
