@@ -131,7 +131,7 @@ struct MatrixView: View {
                 )
                 
                 VStack {
-                    Text("\(floor.name)").bold().font(.title3).foregroundColor(.white)
+                    Text("Floor: \(floor.name)").bold().font(.title3).foregroundColor(.white)
                 }
                 
                 ZStack {
@@ -189,7 +189,7 @@ struct MatrixView: View {
                 Divider().background(Color.black).shadow(radius: 100)
                 
                 HStack {
-                    Text("\(room.name)").bold().font(.title3).foregroundColor(.white)
+                    Text("Room: \(room.name)").bold().font(.title3).foregroundColor(.white)
                 }
                 
                 if room != nil {
@@ -300,7 +300,7 @@ struct MatrixView: View {
             .background(Color.customBackground)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text("MANUAL MODE")
+                    Text("CREATE ROOM POSITION")
                         .font(.system(size: 26, weight: .heavy))
                         .foregroundColor(.white)
                 }

@@ -42,7 +42,8 @@ struct RoomView: View {
                                 .foregroundColor(.gray)
                                 .font(.headline)
                                 .padding()
-                        } else {
+                        } 
+                        else {
                             VStack {
                                 ZStack {
                                     if showFloorMap{
@@ -163,7 +164,8 @@ struct RoomView: View {
                                 LazyVStack(spacing: 50) {
                                     ForEach(floor.rooms, id: \.id) { room in
                                         NavigationLink(destination: MarkerView(room: room, building: building, floor: floor)) {
-                                            DefaultCardView(name: room.name, date: room.lastUpdate).padding()
+                                            let isSelected = floor.isMatrixPresent(named: room.name, inFileAt: floor.floorURL.appendingPathComponent("\(floor.name).json"))
+                                            RoomCardView(name: room.name, date: room.lastUpdate, position: isSelected, rowSize: 1, isSelected: false).padding()
                                         }
                                     }
                                 }
@@ -218,7 +220,8 @@ struct RoomView: View {
                             EmptyView()
                         }
                         
-                    } else if selectedTab == 1 {
+                    } 
+                    else if selectedTab == 1 {
                         NavigationLink(destination: AddRoomView(floor: floor), isActive: $isNavigationActive) {
                             Image(systemName: "plus.circle.fill")
                                 .font(.system(size: 26))

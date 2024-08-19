@@ -210,7 +210,7 @@ struct MarkerView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(Color.customBackground)
                         .tabItem {
-                            Label("Connection", systemImage: "arrow.left.arrow.right")
+                            Label("Connections", systemImage: "arrow.left.arrow.right")
                         }
                         .tag(3)
                     }

@@ -51,7 +51,7 @@ struct ContentView: View {
     
     var body: some View {
         
-        HomeView().frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/, maxHeight: .infinity).edgesIgnoringSafeArea(.all).background(Color.customBackground)
+        BuildingsView().frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/, maxHeight: .infinity).edgesIgnoringSafeArea(.all).background(Color.customBackground)
     }
 }
 

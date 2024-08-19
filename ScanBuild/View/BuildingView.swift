@@ -1,7 +1,7 @@
 import SwiftUI
 import Foundation
 
-struct FloorView: View {
+struct BuildingView: View {
     
     @ObservedObject var building : Building
     @State private var searchText: String = ""
@@ -150,6 +150,6 @@ struct FloorView_Previews: PreviewProvider {
         let buildingModel = BuildingModel.getInstance()
         let firstBuilding = buildingModel.initTryData()
         
-        return FloorView(building: firstBuilding)
+        return BuildingView(building: firstBuilding)
     }
 }

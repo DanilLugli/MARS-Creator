@@ -25,7 +25,7 @@ struct AddConnectionView: View {
                 Text("\(selectedBuilding.name) > New Connection")
                     .font(.system(size: 14))
                     .fontWeight(.heavy)
-                ConnectedDotsView(labels: ["1° T.Z.", "2° T.Z."], progress: fromTransitionZone == nil ? 1 : 2).padding()
+                ConnectedDotsView(labels: ["1° Connection From", "2° Connection To"], progress: fromTransitionZone == nil ? 1 : 2).padding()
                 Text("Choose Floor").font(.system(size: 22))
                     .fontWeight(.heavy)
                 ScrollView(.horizontal, showsIndicators: false) {

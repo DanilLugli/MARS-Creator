@@ -1,7 +1,7 @@
 import SwiftUI
 import Foundation
 
-struct HomeView: View {
+struct BuildingsView: View {
     
     @ObservedObject var buildingsModel = BuildingModel.getInstance()
     @State private var searchText = ""
@@ -32,7 +32,7 @@ struct HomeView: View {
                     ScrollView {
                         LazyVStack(spacing: 50) {
                             ForEach(filteredBuildings, id: \.id) { building in
-                                NavigationLink(destination: FloorView(building: building)) {
+                                NavigationLink(destination: BuildingView(building: building)) {
                                     DefaultCardView(name: building.name, date: building.lastUpdate).padding()
                                 }
                             }
@@ -79,6 +79,6 @@ struct HomeView_Previews: PreviewProvider {
         let buildingModel = BuildingModel.getInstance()
         let _ = buildingModel.initTryData()
         
-        return HomeView().environmentObject(buildingModel)
+        return BuildingsView().environmentObject(buildingModel)
     }
 }
