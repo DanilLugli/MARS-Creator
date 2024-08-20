@@ -262,10 +262,12 @@ struct RoomPositionView: View {
                        let _selectedGlobalNode = selectedGlobalNode {
                         Button("Confirm Relation") {
                             matchingNodesForAPI.append((_selectedLocalNode, _selectedGlobalNode))
+                            
                             print(_selectedLocalNode)
                             print(_selectedGlobalNode)
                             print(selectedMap.lastPathComponent)
                             print(matchingNodesForAPI)
+                            
                         }.buttonStyle(.bordered)
                             .background(Color.blue.opacity(0.4)
                             .cornerRadius(10))

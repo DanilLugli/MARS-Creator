@@ -290,7 +290,7 @@ struct RoomView: View {
                                 .foregroundStyle(.white, .blue, .blue)
                         }
                     } else if selectedTab == 3 {
-                        NavigationLink(destination: AddConnectionView(selectedBuilding: building)) {
+                        NavigationLink(destination: AddConnectionView(selectedBuilding: building, selectedFloor: floor, selectedRoom: room)) {
                             Image(systemName: "plus.circle.fill")
                                 .font(.system(size: 26))
                                 .foregroundStyle(.white, .blue, .blue)

@@ -59,20 +59,20 @@ struct AddRoomView: View {
                         .font(.system(size: 22, weight: .heavy))
                         .foregroundColor(.white)
                 }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack {
-                        Button(action: {
-                            print("Info button tapped")
-                        }) {
-                            Image(systemName: "info.circle.fill")
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 31, height: 31)
-                                .foregroundColor(.blue)
-                                .background(Circle().fill(Color.white).frame(width: 31, height: 31))
-                        }
-                    }
-                }
+//                ToolbarItem(placement: .navigationBarTrailing) {
+//                    HStack {
+//                        Button(action: {
+//                            print("Info button tapped")
+//                        }) {
+//                            Image(systemName: "info.circle.fill")
+//                                .resizable()
+//                                .aspectRatio(contentMode: .fit)
+//                                .frame(width: 31, height: 31)
+//                                .foregroundColor(.blue)
+//                                .background(Circle().fill(Color.white).frame(width: 31, height: 31))
+//                        }
+//                    }
+//                }
             }
         }
     }

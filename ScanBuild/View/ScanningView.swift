@@ -8,7 +8,7 @@ struct ScanningView: View {
     @State private var messagesFromWorldMap: String = ""
     @State private var worldMapNewFeatures: Int = 0
     @State private var worldMapCounter: Int = 0
-    @State var isScanningRoom = false // Inizia come false
+    @State var isScanningRoom = false 
     
     @State var captureView: CaptureViewContainer?
     

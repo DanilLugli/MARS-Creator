@@ -16,14 +16,6 @@ struct BuildingView: View {
                         .font(.system(size: 14))
                         .fontWeight(.heavy)
                     
-
-                    TextField("Search", text: $searchText)
-                        .padding(7)
-                        .background(Color(.systemGray6))
-                        .cornerRadius(8)
-                        .padding(.horizontal, 10)
-                        .frame(maxWidth: .infinity)
-                        .padding()
                     
                     if building.floors.isEmpty {
                         VStack {
@@ -35,6 +27,15 @@ struct BuildingView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(Color.customBackground)
                     } else {
+                        
+                        TextField("Search", text: $searchText)
+                            .padding(7)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(8)
+                            .padding(.horizontal, 10)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                        
                         ScrollView {
                             LazyVStack(spacing: 50) {
                                 ForEach(filteredFloors, id: \.id) { floor in

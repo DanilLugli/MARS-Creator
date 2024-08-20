@@ -12,14 +12,6 @@ struct BuildingsView: View {
         NavigationStack {
             VStack {
                 
-                TextField("Search", text: $searchText)
-                    .padding(7)
-                    .background(Color(.systemGray6))
-                    .cornerRadius(8)
-                    .padding(.horizontal, 10)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                
                 
                 if buildingsModel.getBuildings().isEmpty {
                     VStack {
@@ -29,15 +21,29 @@ struct BuildingsView: View {
                             .padding()
                     }
                 } else {
-                    ScrollView {
-                        LazyVStack(spacing: 50) {
-                            ForEach(filteredBuildings, id: \.id) { building in
-                                NavigationLink(destination: BuildingView(building: building)) {
-                                    DefaultCardView(name: building.name, date: building.lastUpdate).padding()
+                    VStack{
+                        
+                        TextField("Search", text: $searchText)
+                            .padding(7)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(8)
+                            .padding(.horizontal, 10)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                        
+                        
+                        ScrollView {
+                            LazyVStack(spacing: 50) {
+                                ForEach(filteredBuildings, id: \.id) { building in
+                                    NavigationLink(destination: BuildingView(building: building)) {
+                                        DefaultCardView(name: building.name, date: building.lastUpdate).padding()
+                                    }
                                 }
                             }
-                        }
-                    }.padding(.top, 30)
+                        }.padding(.top, 30)
+                    }
+                    
+
                 }
             }
             .foregroundColor(.white)

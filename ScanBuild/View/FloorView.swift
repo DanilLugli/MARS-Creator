@@ -42,7 +42,7 @@ struct FloorView: View {
                                 .foregroundColor(.gray)
                                 .font(.headline)
                                 .padding()
-                        } 
+                        }
                         else {
                             VStack {
                                 ZStack {
@@ -144,13 +144,6 @@ struct FloorView: View {
                     
                     
                     VStack {
-                        TextField("Search", text: $searchText)
-                            .padding(7)
-                            .background(Color(.systemGray6))
-                            .cornerRadius(8)
-                            .padding(.horizontal, 10)
-                            .frame(maxWidth: .infinity)
-                            .padding()
                         
                         if floor.rooms.isEmpty {
                             VStack {
@@ -160,6 +153,15 @@ struct FloorView: View {
                                     .padding()
                             }
                         } else {
+                            
+                            TextField("Search", text: $searchText)
+                                .padding(7)
+                                .background(Color(.systemGray6))
+                                .cornerRadius(8)
+                                .padding(.horizontal, 10)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                            
                             ScrollView {
                                 LazyVStack(spacing: 50) {
                                     ForEach(floor.rooms, id: \.id) { room in
@@ -179,7 +181,6 @@ struct FloorView: View {
                         Label("Rooms", systemImage: "list.dash")
                     }
                     .tag(1)
-                    
                 }
             }
             .background(Color.customBackground)
@@ -187,11 +188,11 @@ struct FloorView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            
             ToolbarItem(placement: .principal) {
-                Text("FLOOR")
-                    .font(.system(size: 26, weight: .heavy))
-                    .foregroundColor(.white)
+                Text("FLOOR").font(.system(size: 26, weight: .heavy)).foregroundColor(.white)
             }
+            
             ToolbarItem(placement: .navigationBarTrailing) {
                 HStack {
                     if selectedTab == 0 {
@@ -232,17 +233,16 @@ struct FloorView: View {
                                 //TODO: Aggiustare l'eliminazione della room
                             }) {
                                 HStack {
-                                            Image(systemName: "trash")
-                                                .foregroundColor(.red) // Imposta l'icona in rosso
-                                            Text("Delete Floor")
-                                                .foregroundColor(.red) // Imposta il testo in rosso
-                                        }
+                                    Image(systemName: "trash")
+                                        .foregroundColor(.red) // Imposta l'icona in rosso
+                                    Text("Delete Floor")
+                                        .foregroundColor(.red) // Imposta il testo in rosso
+                                }
                             }
                             
                         } label: {
                             Image(systemName: "pencil.circle.fill")
                                 .font(.system(size: 26))
-                                .symbolRenderingMode(.palette)
                                 .foregroundStyle(.white, .blue, .blue)
                         }
                         
@@ -251,7 +251,7 @@ struct FloorView: View {
                         }
                         
                         
-                    } 
+                    }
                     else if selectedTab == 1 {
                         NavigationLink(destination: AddRoomView(floor: floor), isActive: $isNavigationActive) {
                             Image(systemName: "plus.circle.fill")
@@ -319,6 +319,7 @@ struct FloorView: View {
         }
     }
 }
+
 struct FloorView_Previews: PreviewProvider {
     static var previews: some View {
         let buildingModel = BuildingModel.getInstance()
