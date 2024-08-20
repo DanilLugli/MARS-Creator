@@ -1,7 +1,7 @@
 import SwiftUI
 import Foundation
 
-struct AddConnectionView: View {
+struct AddStairsConnectionView: View {
     
     var selectedBuilding: Building
     @State var selectedFloor: Floor?
@@ -107,8 +107,8 @@ struct AddConnectionView: View {
                         selectedRoom = nil
                     }) {
                         HStack {
-                            Text("Next")
-                            Image(systemName: "arrow.right")
+                            Text("Next").bold()
+                            Image(systemName: "arrow.right").bold()
                         }
                         .font(.system(size: 20))
                         .padding()
@@ -150,7 +150,7 @@ struct AddConnectionView: View {
         }
         .toolbar {
             ToolbarItem(placement: .principal) {
-                Text("NEW CONNECTION")
+                Text("NEW STAIRS FLOORS CONNECTION")
                     .font(.system(size: 22, weight: .heavy))
                     .foregroundColor(.white)
             }
@@ -203,8 +203,33 @@ struct AddConnectionView: View {
     }
     
     private func createConnection() {
-        // Logica per creare la connessione tra `fromTransitionZone` e `toTransitionZone`
+        
         print("Connection created between \(fromTransitionZone?.name ?? "") and \(toTransitionZone?.name ?? "")")
+        
+        // Verifica che tutte le informazioni necessarie siano presenti
+           guard let fromFloor = selectedFloor,
+                 let fromRoom = selectedRoom,
+                 let fromTransitionZone = fromTransitionZone,
+                 let toFloor = selectedFloor,
+                 let toRoom = selectedRoom,
+                 let toTransitionZone = toTransitionZone else {
+               print("Incomplete data for creating a connection")
+               return
+           }
+           
+           // Crea la connessione tra le due TransitionZone
+           let fromConnection = AdjacentFloorsConnection(name: "Connection to \(toRoom.name)", targetFloor: toFloor.name, targetRoom: toRoom.name)
+           let toConnection = AdjacentFloorsConnection(name: "Connection to \(fromRoom.name)", targetFloor: fromFloor.name, targetRoom: fromRoom.name)
+
+           // Imposta le connessioni nelle TransitionZone
+           fromTransitionZone.connection = fromConnection
+           toTransitionZone.connection = toConnection
+           
+           // Stampa per verificare che la connessione sia stata creata correttamente
+           print("Connection created from \(fromRoom.name) to \(toRoom.name)")
+           print("From Transition Zone Connection: \(fromConnection.targetRoom)")
+           print("To Transition Zone Connection: \(toConnection.targetRoom)")
+           
     }
     
     func insertConnection() {
@@ -244,6 +269,6 @@ struct AddConnection_Preview: PreviewProvider {
         let floor = selectedBuilding.floors.first!
         let room = floor.rooms.first!
         
-        return AddConnectionView(selectedBuilding: selectedBuilding, initialSelectedFloor: floor, initialSelectedRoom: room)
+        return AddStairsConnectionView(selectedBuilding: selectedBuilding, initialSelectedFloor: floor, initialSelectedRoom: room)
     }
 }

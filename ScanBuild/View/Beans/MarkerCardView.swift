@@ -16,6 +16,7 @@ struct MarkerCardView: View {
             imageName
                 .resizable()
                 .scaledToFit()
+                .frame(width: 100, height: 100)
                 .clipped()
                 .cornerRadius(10)
                 .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 2)

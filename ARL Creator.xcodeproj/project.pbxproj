@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		AA0FD83F2C750BC600DF6E20 /* AddSameConnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0FD83E2C750BC600DF6E20 /* AddSameConnectionView.swift */; };
 		AA2CA5262C39FF3000C88C94 /* AddFloorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA5252C39FF3000C88C94 /* AddFloorView.swift */; };
 		AA2CA54C2C3D7ABA00C88C94 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA54B2C3D7ABA00C88C94 /* ContentView.swift */; };
 		AA2CA5512C3DB5F400C88C94 /* CaptureViewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA5502C3DB5F400C88C94 /* CaptureViewContainer.swift */; };
@@ -56,7 +57,7 @@
 		AAD778A72C5288A40091181A /* ScanningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD778A62C5288A30091181A /* ScanningView.swift */; };
 		AAD778A92C528C600091181A /* FloorCaptureViewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD778A82C528C600091181A /* FloorCaptureViewContainer.swift */; };
 		AAE57F9E2C3764FC00F0196F /* FloorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE57F9D2C3764FC00F0196F /* FloorView.swift */; };
-		AAE57FA02C376D0D00F0196F /* AddConnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE57F9F2C376D0D00F0196F /* AddConnectionView.swift */; };
+		AAE57FA02C376D0D00F0196F /* AddStairsConnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE57F9F2C376D0D00F0196F /* AddStairsConnectionView.swift */; };
 		AAE57FA22C37FB6100F0196F /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE57FA12C37FB6100F0196F /* Color.swift */; };
 		AAE57FA62C382C6D00F0196F /* TransitionZone.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE57FA52C382C6D00F0196F /* TransitionZone.swift */; };
 		AAE57FAB2C384E6400F0196F /* DefaultCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE57FAA2C384E6400F0196F /* DefaultCardView.swift */; };
@@ -67,6 +68,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		AA0FD83E2C750BC600DF6E20 /* AddSameConnectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddSameConnectionView.swift; sourceTree = "<group>"; };
 		AA2CA5252C39FF3000C88C94 /* AddFloorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFloorView.swift; sourceTree = "<group>"; };
 		AA2CA54B2C3D7ABA00C88C94 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		AA2CA5502C3DB5F400C88C94 /* CaptureViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureViewContainer.swift; sourceTree = "<group>"; };
@@ -116,7 +118,7 @@
 		AAD778A62C5288A30091181A /* ScanningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanningView.swift; sourceTree = "<group>"; };
 		AAD778A82C528C600091181A /* FloorCaptureViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloorCaptureViewContainer.swift; sourceTree = "<group>"; };
 		AAE57F9D2C3764FC00F0196F /* FloorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloorView.swift; sourceTree = "<group>"; };
-		AAE57F9F2C376D0D00F0196F /* AddConnectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddConnectionView.swift; sourceTree = "<group>"; };
+		AAE57F9F2C376D0D00F0196F /* AddStairsConnectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddStairsConnectionView.swift; sourceTree = "<group>"; };
 		AAE57FA12C37FB6100F0196F /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		AAE57FA52C382C6D00F0196F /* TransitionZone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitionZone.swift; sourceTree = "<group>"; };
 		AAE57FAA2C384E6400F0196F /* DefaultCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultCardView.swift; sourceTree = "<group>"; };
@@ -195,7 +197,8 @@
 				AAD778A62C5288A30091181A /* ScanningView.swift */,
 				AA2CA55C2C3FC62400C88C94 /* RoomPositionView.swift */,
 				AA78F5E02C2DB6DE0044F825 /* AddBuildingView.swift */,
-				AAE57F9F2C376D0D00F0196F /* AddConnectionView.swift */,
+				AAE57F9F2C376D0D00F0196F /* AddStairsConnectionView.swift */,
+				AA0FD83E2C750BC600DF6E20 /* AddSameConnectionView.swift */,
 				AAB619092C502995008F77EE /* AddRoomView.swift */,
 				AA2CA5252C39FF3000C88C94 /* AddFloorView.swift */,
 				AAE57FA12C37FB6100F0196F /* Color.swift */,
@@ -391,7 +394,7 @@
 				AA8E0A572C52BA6C0097BDCD /* ARSessionManager.swift in Sources */,
 				AA78F5E12C2DB6DE0044F825 /* AddBuildingView.swift in Sources */,
 				AA2CA5262C39FF3000C88C94 /* AddFloorView.swift in Sources */,
-				AAE57FA02C376D0D00F0196F /* AddConnectionView.swift in Sources */,
+				AAE57FA02C376D0D00F0196F /* AddStairsConnectionView.swift in Sources */,
 				AA64CC822C47FDA8005C883B /* RotoTraslationMatrix.swift in Sources */,
 				AAFB3A022C4DB73400DBC593 /* SaveFile.swift in Sources */,
 				AA78F5E82C3300550044F825 /* Connection.swift in Sources */,
@@ -412,6 +415,7 @@
 				AA64CC7E2C47F903005C883B /* AdjacentFloorsConnection.swift in Sources */,
 				AA8E0A6A2C5BA4D90097BDCD /* ServerCreateMatrix.swift in Sources */,
 				AA64CC882C495F51005C883B /* Coordinates.swift in Sources */,
+				AA0FD83F2C750BC600DF6E20 /* AddSameConnectionView.swift in Sources */,
 				AA4D2CDB2C7358EE000312A7 /* RoomCardView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

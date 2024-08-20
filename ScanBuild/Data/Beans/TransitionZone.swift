@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-class TransitionZone: Codable, Identifiable {
+class TransitionZone: Codable, Identifiable, Equatable {
     private var _id: UUID = UUID()
     private var _name: String
     private var _connection: Connection?
@@ -12,6 +12,10 @@ class TransitionZone: Codable, Identifiable {
         self._name = name
         self._connection = connection
         self._transitionArea = transitionArea
+    }
+    
+    static func ==(lhs: TransitionZone, rhs: TransitionZone) -> Bool {
+        return lhs.id == rhs.id // Compara gli ID, o qualsiasi altra proprietà unica
     }
     
     var id: UUID {

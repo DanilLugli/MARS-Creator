@@ -11,15 +11,19 @@ struct ListConnectionCardView: View {
     
     var floor: String
     var room: String
+    var targetFloor: String
+    var targetRoom: String
     var transitionZone: String
     var exist: Bool
     var date: Date
     var rowSize: Int
    
     
-    init(floor: String, room: String, transitionZone: String, exist: Bool, date: Date, rowSize: Int) {
+    init(floor: String, room: String, targetFloor: String, targetRoom: String, transitionZone: String, exist: Bool, date: Date, rowSize: Int) {
         self.floor = floor
         self.room = room
+        self.targetFloor = targetFloor
+        self.targetRoom = targetRoom
         self.transitionZone = transitionZone
         self.exist = exist
         self.date = date
@@ -34,26 +38,41 @@ struct ListConnectionCardView: View {
                 
                 VStack(alignment: .leading) {
                     VStack{
-                        Text("Connection Created With:").font(.system(size: 14, weight: .bold))
-                            .foregroundColor(.green)
-                        
-                        HStack{
-                            Text(floor)
-                                .font(.system(size: 20, weight: .bold))
-                                .foregroundColor(.black)
-                            Text(" -> ")
-                                .font(.system(size: 20, weight: .bold))
-                                .foregroundColor(.black)
-                            Text(room)
-                                .font(.system(size: 20, weight: .bold))
-                                .foregroundColor(.black)
-                            Text(" -> ")
-                                .font(.system(size: 20, weight: .bold))
-                                .foregroundColor(.black)
-                            Text(transitionZone)
-                                .font(.system(size: 20, weight: .bold))
-                                .foregroundColor(.black)
+                        VStack{
+                            HStack{
+                                Text(floor)
+                                    .font(.system(size: 20, weight: .bold))
+                                    .foregroundColor(.black)
+                                Text(" -> ")
+                                    .font(.system(size: 20, weight: .bold))
+                                    .foregroundColor(.black)
+                                Text(room)
+                                    .font(.system(size: 20, weight: .bold))
+                                    .foregroundColor(.black)
+                            }
+                            
+                            Text("Has a connection To:").font(.system(size: 14, weight: .bold))
+                                .foregroundColor(.green)
+                            
+                            HStack{
+                                Text(targetFloor)
+                                    .font(.system(size: 20, weight: .bold))
+                                    .foregroundColor(.black)
+                                Text(" -> ")
+                                    .font(.system(size: 20, weight: .bold))
+                                    .foregroundColor(.black)
+                                Text(targetRoom)
+                                    .font(.system(size: 20, weight: .bold))
+                                    .foregroundColor(.black)
+                                Text(" -> ")
+                                    .font(.system(size: 20, weight: .bold))
+                                    .foregroundColor(.black)
+                                Text(transitionZone)
+                                    .font(.system(size: 20, weight: .bold))
+                                    .foregroundColor(.black)
+                            }
                         }
+
                     }
                     Text("\(dateFormatter.string(from: date))")
                         .font(.system(size: 14))
@@ -70,7 +89,7 @@ struct ListConnectionCardView: View {
 
 
 #Preview {
-    ListConnectionCardView(floor: "floor", room: "room", transitionZone: "TZ", exist: true, date: Date(), rowSize: 1)
+    ListConnectionCardView(floor: "Floor1", room: "Room2", targetFloor: "floor", targetRoom: "room", transitionZone: "TZ", exist: false, date: Date(), rowSize: 1)
 }
 
 private let dateFormatter: DateFormatter = {

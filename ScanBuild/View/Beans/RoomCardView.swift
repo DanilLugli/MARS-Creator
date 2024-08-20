@@ -44,11 +44,12 @@ struct RoomCardView: View {
                 }
                 HStack{
                     Spacer()
-                    if position == false{
+                    if position == false {
                         Image(systemName: "exclamationmark.circle")
                             .foregroundColor(.red)
                             .font(.system(size: 30))
-                            .padding(.trailing) // puoi regolare la dimensione del simbolo
+                            .padding(.trailing) // Regola la posizione
+                            .padding(20) // Aggiungi padding per aumentare l'area di tap
                             .onTapGesture {
                                 showAlert = true // Mostra l'alert quando premi l'immagine
                             }

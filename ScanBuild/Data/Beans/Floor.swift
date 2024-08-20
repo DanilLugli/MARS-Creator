@@ -3,7 +3,7 @@ import SceneKit
 import simd
 import SwiftUI
 
-class Floor: NamedURL, Encodable, Identifiable, ObservableObject {
+class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     
     private var _id = UUID()
     @Published private var _name: String
@@ -26,6 +26,10 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject {
         self._scene = scene
         self._sceneConfiguration = sceneConfiguration
         self._floorURL = floorURL
+    }
+    
+    static func ==(lhs: Floor, rhs: Floor) -> Bool {
+        return lhs.id == rhs.id // Compara gli ID, o qualsiasi altra proprietà unica
     }
     
     var id: UUID {

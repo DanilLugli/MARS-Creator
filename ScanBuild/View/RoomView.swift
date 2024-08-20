@@ -3,9 +3,9 @@ import Foundation
 
 struct RoomView: View {
     
-    @ObservedObject var room: Room
+    @State var room: Room
     @ObservedObject var building: Building
-    @ObservedObject var floor: Floor
+    @State var floor: Floor
     @State private var searchText: String = ""
     @State private var isRenameSheetPresented = false
     @State private var newBuildingName: String = ""
@@ -13,8 +13,9 @@ struct RoomView: View {
     @State private var selectedConnection: TransitionZone? = nil
     @State private var selectedTab: Int = 0
     @State private var isNavigationActive = false
-    @State private var isNavigationActive3 = false
+    @State private var isConnectionAdjacentFloor = false
     @State private var isDocumentPickerPresented2 = false
+    @State private var isConnectionSameFloor = false
     var mapView = SCNViewContainer()
     
     var body: some View {
@@ -148,62 +149,35 @@ struct RoomView: View {
                                     LazyVStack(spacing: 50) {
                                         ForEach(filteredConnection, id: \.id) { transitionZone in
                                             Button(action: {
-                                                selectedConnection = transitionZone
+                                                selectedConnection = transitionZone // Assicurati che `selectedConnection` sia dichiarato come @State
                                             }) {
                                                 if let connection = transitionZone.connection as? AdjacentFloorsConnection {
                                                     ListConnectionCardView(
-                                                        floor: connection.targetFloor,
-                                                        room: connection.targetRoom,
+                                                        floor: floor.name,
+                                                        room: room.name,
+                                                        targetFloor: connection.targetFloor,
+                                                        targetRoom: connection.targetRoom,
                                                         transitionZone: transitionZone.name,
                                                         exist: true,
                                                         date: Date(),
                                                         rowSize: 1
-                                                    ).padding()
-                                                } else if let connection = transitionZone.connection as? SameFloorConnection{
-                                                    
+                                                    )
+                                                    .padding(.top)
+                                                } else if let connection = transitionZone.connection as? SameFloorConnection {
                                                     ListConnectionCardView(
                                                         floor: floor.name,
                                                         room: connection.targetRoom,
+                                                        targetFloor: floor.name,
+                                                        targetRoom: connection.targetRoom,
                                                         transitionZone: transitionZone.name,
                                                         exist: false,
                                                         date: Date(),
                                                         rowSize: 1
-                                                    ).padding()
-                                                
+                                                    )
+                                                    .padding(.top)
                                                 }
                                             }
                                         }
-                                    }
-                                    .padding()                                    
-                                    .refreshable {
-                                        
-                                        ForEach(filteredConnection, id: \.id) { transitionZone in
-                                            Button(action: {
-                                                selectedConnection = transitionZone
-                                            }) {
-                                                if let connection = transitionZone.connection as? AdjacentFloorsConnection {
-                                                    ListConnectionCardView(
-                                                        floor: connection.targetFloor,
-                                                        room: connection.targetRoom,
-                                                        transitionZone: transitionZone.name,
-                                                        exist: true,
-                                                        date: Date(),
-                                                        rowSize: 1
-                                                    ).padding()
-                                                } else if let connection = transitionZone.connection as? SameFloorConnection{
-                                                    
-                                                    ListConnectionCardView(
-                                                        floor: floor.name,
-                                                        room: connection.targetRoom,
-                                                        transitionZone: transitionZone.name,
-                                                        exist: false,
-                                                        date: Date(),
-                                                        rowSize: 1
-                                                    ).padding()
-                                                }
-                                            }
-                                        }
-                                        print("Refreshing...")
                                     }
                                 }
                             }
@@ -263,11 +237,11 @@ struct RoomView: View {
                                 //TODO: Aggiustare l'eliminazione della room
                             }) {
                                 HStack {
-                                            Image(systemName: "trash")
-                                                .foregroundColor(.red) // Imposta l'icona in rosso
-                                            Text("Delete Room")
-                                                .foregroundColor(.red) // Imposta il testo in rosso
-                                        }
+                                    Image(systemName: "trash")
+                                        .foregroundColor(.red) // Imposta l'icona in rosso
+                                    Text("Delete Room")
+                                        .foregroundColor(.red) // Imposta il testo in rosso
+                                }
                             }
                             
                         } label: {
@@ -281,7 +255,8 @@ struct RoomView: View {
                             EmptyView()
                         }
                         
-                    } else if selectedTab == 1 {
+                    } 
+                    else if selectedTab == 1 {
                         Button(action: {
                             isDocumentPickerPresented2 = true
                         }) {
@@ -289,21 +264,64 @@ struct RoomView: View {
                                 .font(.system(size: 26))
                                 .foregroundStyle(.white, .blue, .blue)
                         }
-                    } else if selectedTab == 3 {
-                        NavigationLink(destination: AddConnectionView(selectedBuilding: building, selectedFloor: floor, selectedRoom: room)) {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.system(size: 26))
-                                .foregroundStyle(.white, .blue, .blue)
-                        }
-                    } else if selectedTab == 2 {
-                        NavigationLink(destination: RoomPositionView(floor: floor, room: room), isActive: $isNavigationActive3) {
+                    } 
+                    else if selectedTab == 2 {
+                        NavigationLink(destination: RoomPositionView(floor: floor, room: room), isActive: $isConnectionAdjacentFloor) {
                             Image(systemName: "plus.circle.fill")
                                 .font(.system(size: 26))
                                 .foregroundStyle(.white, .blue, .blue)
                                 .onTapGesture {
-                                    self.isNavigationActive3 = true
+                                    self.isConnectionAdjacentFloor = true
                                 }
                         }
+                    }
+                    else if selectedTab == 3 {
+                        ZStack{
+                            Menu {
+                                
+                                Button(action: {
+                                    isConnectionSameFloor = true
+                                }) {
+                                    Label("Create Same Floor Connection", systemImage: "arrow.left.arrow.right")
+                                }
+                                
+                                Button(action: {
+                                    isConnectionAdjacentFloor = true
+                                }) {
+                                    Label("Create Adjacent Floors Connection", systemImage: "arrow.up.arrow.down")
+                                }
+                                
+                                // Navigazione verso una terza vista
+                                Button(action: {
+                                    //TODO: Create in future Connection with Elevator
+                                }) {
+                                    Label("Create Elevator Connection", systemImage: "arrow.up.and.line.horizontal.and.arrow.down")
+                                }
+                                
+                            } label: {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.system(size: 26))
+                                    .foregroundStyle(.white, .blue, .blue)
+                            }
+                            
+                            // NavigationLink per AddStairsConnectionView, attivato al di fuori del menu
+                            NavigationLink(
+                                destination: AddStairsConnectionView(selectedBuilding: building, selectedFloor: floor, selectedRoom: room),
+                                isActive: $isConnectionAdjacentFloor,
+                                label: {
+                                    EmptyView()
+                                }
+                            )
+                            
+                            NavigationLink(
+                                destination: AddSameConnectionView(selectedBuilding: building, selectedFloor: floor, selectedRoom: room),
+                                isActive: $isConnectionSameFloor,
+                                label: {
+                                    EmptyView()
+                                }
+                            )
+                        }
+                        
                     }
                 }
             }
@@ -324,8 +342,7 @@ struct RoomView: View {
                     }
                 }
                 .frame(maxHeight: .infinity)
-            }
-            .sheet(item: $selectedMarker) { marker in
+            }.sheet(item: $selectedMarker) { marker in
                 VStack {
                     Text("Position Marker")
                         .font(.system(size: 22))

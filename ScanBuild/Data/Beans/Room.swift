@@ -2,7 +2,7 @@ import Foundation
 import ARKit
 import SceneKit
 
-class Room: NamedURL, Encodable, Identifiable, ObservableObject {
+class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     private var _id: UUID = UUID()
     @Published private var _name: String
     private var _lastUpdate: Date
@@ -22,6 +22,10 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject {
         self._scene = scene
         self._worldMap = worldMap
         self._roomURL = roomURL
+    }
+    
+    static func ==(lhs: Room, rhs: Room) -> Bool {
+        return lhs.id == rhs.id // Compara gli ID, o qualsiasi altra proprietà unica
     }
     
     var id: UUID {
