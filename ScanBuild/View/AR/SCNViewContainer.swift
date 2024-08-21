@@ -120,7 +120,7 @@ struct SCNViewContainer: UIViewRepresentable {
         }
     }
 
-    func loadgeneralMap(borders: Bool, usdzURL: URL) {
+    func loadFloorPlanimetry(borders: Bool, usdzURL: URL) {
         do {
             scnView.scene = try SCNScene(url: usdzURL)
             drawContent(borders: borders)

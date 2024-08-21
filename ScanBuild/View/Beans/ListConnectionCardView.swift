@@ -43,43 +43,45 @@ struct ListConnectionCardView: View {
                                 Text(floor)
                                     .font(.system(size: 20, weight: .bold))
                                     .foregroundColor(.black)
-                                Text(" -> ")
-                                    .font(.system(size: 20, weight: .bold))
+                                Text(Image(systemName: "arrow.right"))
+                                    .font(.system(size: 15, weight: .bold))
                                     .foregroundColor(.black)
                                 Text(room)
                                     .font(.system(size: 20, weight: .bold))
                                     .foregroundColor(.black)
-                            }
+                            }.padding(.top, -8)
                             
                             Text("Has a connection To:").font(.system(size: 14, weight: .bold))
                                 .foregroundColor(.green)
+                                .padding(.top, -8)
                             
                             HStack{
                                 Text(targetFloor)
                                     .font(.system(size: 20, weight: .bold))
                                     .foregroundColor(.black)
-                                Text(" -> ")
-                                    .font(.system(size: 20, weight: .bold))
+                                Text(Image(systemName: "arrow.right"))
+                                    .font(.system(size: 15, weight: .bold))
                                     .foregroundColor(.black)
                                 Text(targetRoom)
                                     .font(.system(size: 20, weight: .bold))
                                     .foregroundColor(.black)
-                                Text(" -> ")
-                                    .font(.system(size: 20, weight: .bold))
+                                Text(Image(systemName: "arrow.right"))
+                                    .font(.system(size: 15, weight: .bold))
                                     .foregroundColor(.black)
                                 Text(transitionZone)
                                     .font(.system(size: 20, weight: .bold))
                                     .foregroundColor(.black)
-                            }
+                            }.padding(.top, -8)
                         }
 
                     }
-                    Text("\(dateFormatter.string(from: date))")
+                    Text("Created: \(dateFormatter.string(from: date))")
                         .font(.system(size: 14))
                         .foregroundColor(.gray)
+                        .padding(.top, 5)
                 }
             }
-            .frame(width: geometry.size.width / CGFloat(rowSize), height: 120)
+            .frame(width: geometry.size.width / CGFloat(rowSize), height: 150)
             .cornerRadius(10)
             .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 2)
             

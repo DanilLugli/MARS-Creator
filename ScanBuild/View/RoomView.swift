@@ -7,15 +7,27 @@ struct RoomView: View {
     @ObservedObject var building: Building
     @State var floor: Floor
     @State private var searchText: String = ""
-    @State private var isRenameSheetPresented = false
+
     @State private var newBuildingName: String = ""
     @State private var selectedMarker: ReferenceMarker? = nil
     @State private var selectedConnection: TransitionZone? = nil
     @State private var selectedTab: Int = 0
+    
+    @State private var selectedFileURL: URL?
+    @State private var isRenameSheetPresented = false
     @State private var isNavigationActive = false
     @State private var isConnectionAdjacentFloor = false
-    @State private var isDocumentPickerPresented2 = false
+    @State private var isRoomPlanimetryUploadPicker = false
     @State private var isConnectionSameFloor = false
+    @State private var isErrorAlertPresented = false
+    @State private var errorMessage: String = ""
+    
+    @State private var showUpdateOptionsAlert = false
+    @State private var showUpdateAlert = false
+    @State private var isOptionsSheetPresented = false
+    @State private var alertMessage = ""
+
+    
     var mapView = SCNViewContainer()
     
     var body: some View {
@@ -205,33 +217,34 @@ struct RoomView: View {
                         Menu {
                             
                             Button(action: {
-                                self.isNavigationActive = true
-                            }) {
-                                Label("Create Planimetry", systemImage: "plus")
-                            }
-                            
-                            Button(action: {
-                                isDocumentPickerPresented2 = true
-                            }) {
-                                Label("Upload Planimetry from File", systemImage: "square.and.arrow.down")
-                            }
-                            
-                            Button(action: {
-                                isDocumentPickerPresented2 = true
-                            }) {
-                                Label("Update Planimetry", systemImage: "arrow.clockwise")
-                            }
-                            
-                            Divider()
-                            
-                            Button(action: {
-                                isDocumentPickerPresented2 = true
+                                isRoomPlanimetryUploadPicker = true
                             }) {
                                 Label("Rename Room", systemImage: "pencil")
                             }
                             
-                           
                             Divider()
+                            
+                            Button(action: {
+                                self.isNavigationActive = true
+                            }) {
+                                Label("Create Planimetry", systemImage: "plus")
+                            }.disabled(FileManager.default.fileExists(atPath: room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz").path))
+                            
+                            Button(action: {
+                                isRoomPlanimetryUploadPicker = true
+                            }) {
+                                Label("Upload Planimetry from File", systemImage: "square.and.arrow.down")
+                            }.disabled(FileManager.default.fileExists(atPath: room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz").path))
+                            
+                            Button(action: {
+                                alertMessage = "If you proceed with the update, the current floor plan will be deleted.\nThis action is irreversible, are you sure you want to continue?"
+                                showUpdateAlert = true
+                            }) {
+                                Label("Update Planimetry", systemImage: "arrow.clockwise")
+                            }.disabled(!FileManager.default.fileExists(atPath: room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz").path))
+                            
+                            Divider()
+                            
                             
                             Button(role: .destructive, action: {
                                 //TODO: Aggiustare l'eliminazione della room
@@ -258,7 +271,7 @@ struct RoomView: View {
                     } 
                     else if selectedTab == 1 {
                         Button(action: {
-                            isDocumentPickerPresented2 = true
+                            isRoomPlanimetryUploadPicker = true
                         }) {
                             Image(systemName: "plus.circle.fill")
                                 .font(.system(size: 26))
@@ -306,7 +319,7 @@ struct RoomView: View {
                             
                             // NavigationLink per AddStairsConnectionView, attivato al di fuori del menu
                             NavigationLink(
-                                destination: AddStairsConnectionView(selectedBuilding: building, selectedFloor: floor, selectedRoom: room),
+                                destination: AddStairsConnectionView(building: building, initialSelectedFloor: floor, initialSelectedRoom: room),
                                 isActive: $isConnectionAdjacentFloor,
                                 label: {
                                     EmptyView()
@@ -314,7 +327,7 @@ struct RoomView: View {
                             )
                             
                             NavigationLink(
-                                destination: AddSameConnectionView(selectedBuilding: building, selectedFloor: floor, selectedRoom: room),
+                                destination: AddSameConnectionView(selectedBuilding: building, initialSelectedFloor: floor, initialSelectedRoom: room),
                                 isActive: $isConnectionSameFloor,
                                 label: {
                                     EmptyView()
@@ -324,25 +337,115 @@ struct RoomView: View {
                         
                     }
                 }
+            }.alert(isPresented: $isErrorAlertPresented) {
+                Alert(
+                    title: Text("Error"),
+                    message: Text(errorMessage),
+                    dismissButton: .default(Text("OK"))
+                )
             }
-            .sheet(isPresented: $isDocumentPickerPresented2) {
-                VStack {
-                    DocumentPickerView { url in
-                        print("Selected file URL: \(url)")
-                        if url.pathExtension == "jpg" || url.pathExtension == "png" || url.pathExtension == "JPG" || url.pathExtension == "PNG" || url.pathExtension == "JPEG" || url.pathExtension == "jpeg" {
-                            // Assuming the image file name is the same as the marker name
-                            let imageName = url.deletingPathExtension().lastPathComponent
-                            let imagePath = url
-                            // Create a new ReferenceMarker
-                            let coordinates = Coordinates(x: Float(Double.random(in: -100...100)), y: Float(Double.random(in: -100...100))) // Adjust accordingly
-                            let rmUML = URL(fileURLWithPath: "") // Adjust accordingly
-                            let newMarker = ReferenceMarker(_imagePath: imagePath, _imageName:imageName, _coordinates: coordinates, _rmUML: rmUML)
-                            room.referenceMarkers.append(newMarker)
+            .alert(isPresented: $showUpdateAlert) {
+                Alert(
+                    title: Text("ATTENTION").foregroundColor(.red),
+                    message: Text(alertMessage),
+                    dismissButton: .default(Text("OK")){
+                        isOptionsSheetPresented = true
+                    }
+                )
+            }
+            .sheet(isPresented: $isRoomPlanimetryUploadPicker) {
+                FilePickerView { url in
+                    selectedFileURL = url
+                    
+                    // Definisci il percorso di destinazione per il file selezionato
+                    let destinationURL = room.roomURL
+                        .appendingPathComponent("MapUsdz")
+                        .appendingPathComponent("\(room.name).usdz")
+                    
+                    // Crea la directory "MapUsdz" se non esiste già
+                    let fileManager = FileManager.default
+                    let mapUsdzDirectory = room.roomURL.appendingPathComponent("MapUsdz")
+                    
+                    do {
+                        // Crea la directory se non esiste
+                        if !fileManager.fileExists(atPath: mapUsdzDirectory.path) {
+                            try fileManager.createDirectory(at: mapUsdzDirectory, withIntermediateDirectories: true, attributes: nil)
                         }
+                        
+                        // Copia il file dal suo URL originale al nuovo percorso
+                        try fileManager.copyItem(at: url, to: destinationURL)
+                        print("File copied successfully to: \(destinationURL)")
+                        
+                    } catch {
+                        // In caso di errore, aggiorna lo stato e mostra l'alert
+                        errorMessage = "Failed to save the file: \(error.localizedDescription)"
+                        isErrorAlertPresented = true
                     }
                 }
-                .frame(maxHeight: .infinity)
-            }.sheet(item: $selectedMarker) { marker in
+            }
+            .sheet(isPresented: $isOptionsSheetPresented) {
+                VStack {
+                    Text("Choose an option")
+                        .font(.system(size: 26))
+                        .fontWeight(.bold)
+
+
+                    Button(action: {
+                        let fileManager = FileManager.default
+                        let filePath = room.roomURL
+                                            .appendingPathComponent("MapUsdz")
+                                            .appendingPathComponent("\(room.name).usdz")
+
+                        do {
+                            try fileManager.removeItem(at: filePath)
+                            print("File eliminato correttamente")
+                        } catch {
+                            print("Errore durante l'eliminazione del file: \(error)")
+                        }
+                        self.isOptionsSheetPresented = false
+                        // Setta isNavigationActive su true
+                        self.isNavigationActive = true
+                        // Chiudi la Sheet
+
+                    }) {
+                        Text("Create with AR")
+                            .font(.system(size: 20))
+                            .bold()
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                            .padding(.horizontal, 20)
+                    }
+                    .padding(.bottom, 10)
+
+                    Button(action: {
+                        // Chiudi la Sheet delle opzioni
+                        self.isOptionsSheetPresented = false
+                        
+                        // Apri la Sheet del file picker dopo aver chiuso quella corrente
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                            self.isRoomPlanimetryUploadPicker = true
+                        }
+
+                    }) {
+                        Text("Update From File")
+                            .font(.system(size: 20))
+                            .bold()
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                            .padding(.horizontal, 20)
+                    }
+                    .padding(.bottom, 10)
+                }
+                .background(Color.customBackground)
+                .padding()
+            }
+            .sheet(item: $selectedMarker) { marker in
                 VStack {
                     Text("Position Marker")
                         .font(.system(size: 22))

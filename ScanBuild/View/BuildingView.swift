@@ -81,13 +81,7 @@ struct BuildingView: View {
                             print("Save Building to Server button tapped")
                         }) {
                             Label("Save Building to Server", systemImage: "icloud.and.arrow.up")
-                        }
-                        
-                        Button(action: {
-                            print("Upload Building from File")
-                        }) {
-                            Label("Upload Building from File", systemImage: "square.and.arrow.down")
-                        }
+                        }.disabled(true)
                         
                         Divider()
                         

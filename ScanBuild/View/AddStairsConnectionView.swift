@@ -3,7 +3,7 @@ import Foundation
 
 struct AddStairsConnectionView: View {
     
-    var selectedBuilding: Building
+    var building: Building
     @State var selectedFloor: Floor?
     @State var selectedRoom: Room?
     
@@ -15,6 +15,8 @@ struct AddStairsConnectionView: View {
 
     @State private var fromFloor: Floor?
     @State private var fromRoom: Room?
+    
+    @State var mapView = SCNViewContainer()
 
     @State private var step: Int = 1  // Step of the connection creation process
     @State private var showConfirmView = false
@@ -29,7 +31,7 @@ struct AddStairsConnectionView: View {
         NavigationStack {
             VStack {
                 
-                Text("\(selectedBuilding.name) > New Connection")
+                Text("\(building.name) > New Connection")
                     .font(.system(size: 14))
                     .fontWeight(.heavy)
                 
@@ -98,6 +100,47 @@ struct AddStairsConnectionView: View {
                     }
                 }
                 .padding()
+                
+                VStack {
+                    ZStack {
+                        mapView
+                            .border(Color.white)
+                            .frame(width: 360, height: 420)
+                            .cornerRadius(10)
+                            .padding()
+                            .shadow(color: Color.gray, radius: 3)
+                        
+                        VStack {
+                            HStack {
+                                HStack {
+                                    Button("+") {
+                                        mapView.zoomIn()
+                                    }
+                                    .buttonStyle(.bordered)
+                                    .bold()
+                                    .background(Color.blue.opacity(0.4))
+                                    .cornerRadius(8)
+                                    
+                                    Button("-") {
+                                        mapView.zoomOut()
+                                    }
+                                    .buttonStyle(.bordered)
+                                    .bold()
+                                    .background(Color.blue.opacity(0.4))
+                                    .cornerRadius(8).padding()
+                                }
+                                .padding()
+                            }
+                            Spacer()
+                        }
+                    }
+                }
+                .onChange(of: selectedRoom) { newRoom in
+                    loadMap(for: newRoom)
+                }
+                .onAppear {
+                    loadMap(for: selectedRoom)
+                }
 
                 // Aggiunta del pulsante con freccia destra per confermare la selezione della prima T.Z.
                 if step == 1 && fromTransitionZone != nil {
@@ -142,7 +185,6 @@ struct AddStairsConnectionView: View {
             }
             .sheet(isPresented: $showConfirmView) {
                 ConfirmConnectionView {
-                    // Azione di conferma finale
                     insertConnection()
                     dismiss()
                 }
@@ -158,13 +200,39 @@ struct AddStairsConnectionView: View {
         .background(Color.customBackground.ignoresSafeArea())
     }
     
+    // Funzione per caricare la mappa
+    private func loadMap(for room: Room?) {
+        if let roomName = room?.name, let roomURL = room?.roomURL {
+            mapView.loadRoomMaps(
+                name: roomName,
+                borders: true,
+                usdzURL: roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(roomName).usdz")
+            )
+        }
+    }
+    
+    // Funzioni per gestire i pulsanti dell'ActionSheet
+    
     // Funzioni per gestire i pulsanti dell'ActionSheet
     func actionSheetFloorButtons() -> [ActionSheet.Button] {
-        var buttons: [ActionSheet.Button] = selectedBuilding.floors.map { floor in
-                .default(Text(floor.name)) {
-                    selectedFloor = floor
+        // Filtra i piani per escludere il piano già selezionato nel primo passaggio (fromFloor)
+        var buttons: [ActionSheet.Button] = building.floors
+            .filter { floor in
+                if step == 2 {
+                    // Escludiamo il piano selezionato nel primo step (fromFloor)
+                    return floor.name != fromFloor?.name
                 }
-        }
+                return true
+            }
+            .map { floor in
+                .default(Text(floor.name)) {
+                    if step == 1 {
+                        fromFloor = floor // Se siamo nello step 1, memorizziamo il piano selezionato
+                    } else {
+                        selectedFloor = floor // Se siamo nello step 2, memorizziamo il secondo piano selezionato
+                    }
+                }
+            }
         buttons.append(.cancel())
         return buttons
     }
@@ -174,11 +242,23 @@ struct AddStairsConnectionView: View {
             return [.cancel()]
         }
         
-        var buttons: [ActionSheet.Button] = rooms.map { room in
-                .default(Text(room.name)) {
-                    selectedRoom = room
+        // Filtra le stanze per escludere quella già selezionata nel primo passaggio
+        var buttons: [ActionSheet.Button] = rooms
+            .filter { room in
+                if step == 2 {
+                    return room.name != fromRoom?.name
                 }
-        }
+                return true
+            }
+            .map { room in
+                .default(Text(room.name)) {
+                    if step == 1 {
+                        fromRoom = room
+                    } else {
+                        selectedRoom = room
+                    }
+                }
+            }
         buttons.append(.cancel())
         return buttons
     }
@@ -189,18 +269,19 @@ struct AddStairsConnectionView: View {
         }
         
         var buttons: [ActionSheet.Button] = transitionZones.map { tz in
-                .default(Text(tz.name)) {
-                    if step == 1 {
-                        fromTransitionZone = tz
-                    } else {
-                        toTransitionZone = tz
-                        step = 3 // Pronto per confermare
-                    }
+            .default(Text(tz.name)) {
+                if step == 1 {
+                    fromTransitionZone = tz
+                } else {
+                    toTransitionZone = tz
+                    step = 3 // Pronto per confermare
                 }
+            }
         }
         buttons.append(.cancel())
         return buttons
     }
+
     
     private func createConnection() {
         
@@ -265,10 +346,10 @@ struct ConfirmConnectionView: View {
 struct AddConnection_Preview: PreviewProvider {
     static var previews: some View {
         let buildingModel = BuildingModel.getInstance()
-        let selectedBuilding = buildingModel.initTryData()
-        let floor = selectedBuilding.floors.first!
+        let building = buildingModel.initTryData()
+        let floor = building.floors.first!
         let room = floor.rooms.first!
         
-        return AddStairsConnectionView(selectedBuilding: selectedBuilding, initialSelectedFloor: floor, initialSelectedRoom: room)
+        return AddStairsConnectionView(building: building, initialSelectedFloor: floor, initialSelectedRoom: room)
     }
 }

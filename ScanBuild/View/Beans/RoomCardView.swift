@@ -60,7 +60,6 @@ struct RoomCardView: View {
             .frame(width: geometry.size.width / CGFloat(rowSize), height: 80)
             .cornerRadius(10)
             .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 2)
-            // Usa il modificatore .alert per mostrare l'alert
             .alert(isPresented: $showAlert) {
                 Alert(
                     title: Text("ATTENTION!").foregroundColor(.red),

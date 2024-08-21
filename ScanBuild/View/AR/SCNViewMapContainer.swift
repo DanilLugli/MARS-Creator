@@ -15,7 +15,7 @@ class SCNViewMapHandler: ObservableObject {
         self.massCenter = massCenter
     }
     
-    func loadMaps(floor: Floor, roomURLs: [URL], borders: Bool) {
+    func loadRoomMaps(floor: Floor, roomURLs: [URL], borders: Bool) {
         do {
             let floorFileURL = floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz")
             let floorURL = floor.floorURL

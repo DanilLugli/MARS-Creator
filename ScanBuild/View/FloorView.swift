@@ -8,15 +8,26 @@ struct FloorView: View {
     @ObservedObject var floor: Floor
     var building: Building
     @State private var searchText: String = ""
-    @State private var isRenameSheetPresented = false
+   
     @State private var newBuildingName: String = ""
     @State private var selectedTab: Int = 0
     @State private var animateRooms: Bool = false
     @State private var newRoom: Room? = nil
     @State private var isNavigationActive = false
-    @State private var isDocumentPickerPresented = false
+    
     @State private var selectedFileURL: URL?
     @State private var showFloorMap: Bool = false
+    
+    @State private var isFloorPlanimetryUploadPicker = false
+    @State private var isRenameSheetPresented = false
+    @State private var isErrorUpdateAlertPresented = false
+    @State private var showUpdateOptionsAlert = false
+    @State private var showUpdateAlert = false
+    @State private var isOptionsSheetPresented = false
+    @State private var alertMessage = ""
+    
+    @State private var errorMessage: String = ""
+    
     var mapView = SCNViewContainer()
     var mapPositionView = SCNViewMapContainer()
     
@@ -116,7 +127,7 @@ struct FloorView: View {
                                     roomURLs.append(room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"))
                                 }
                                 
-                                mapPositionView.handler.loadMaps(
+                                mapPositionView.handler.loadRoomMaps(
                                     floor: floor,
                                     roomURLs: roomURLs,
                                     borders: true
@@ -126,7 +137,7 @@ struct FloorView: View {
                                 mapPositionView.handler.changeColorOfNode(nodeName: "Sala", color: UIColor.yellow)
                                 
                                 // Carica la mappa generale
-                                mapView.loadgeneralMap(
+                                mapView.loadFloorPlanimetry(
                                     borders: true,
                                     usdzURL: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz")
                                 )
@@ -199,32 +210,35 @@ struct FloorView: View {
                         Menu {
                             
                             Button(action: {
-                                self.isNavigationActive = true
-                            }) {
-                                Label("Create Planimetry", systemImage: "plus")
-                            }
-                            
-                            Button(action: {
-                                isDocumentPickerPresented = true
-                            }) {
-                                Label("Upload Planimetry from File", systemImage: "square.and.arrow.down")
-                            }
-                            
-                            Button(action: {
-                                isDocumentPickerPresented = true
-                            }) {
-                                Label("Update Planimetry", systemImage: "arrow.clockwise")
-                            }
-                            
-                            Divider()
-                            
-                            
-                            Button(action: {
-                                isDocumentPickerPresented = true
+                                isFloorPlanimetryUploadPicker = true
                             }) {
                                 Label("Rename Floor", systemImage: "pencil")
                             }
                             
+                            Divider()
+                            
+                            Button(action: {
+                                
+                                self.isNavigationActive = true
+                                
+                                   }) {
+                                Label("Create Planimetry", systemImage: "plus")
+                            }.disabled(FileManager.default.fileExists(atPath: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz").path))
+                            
+                            Button(action: {
+                                isFloorPlanimetryUploadPicker = true
+                            }) {
+                                Label("Upload Planimetry from File", systemImage: "square.and.arrow.down")
+                            }.disabled(FileManager.default.fileExists(atPath: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz").path))
+                            
+                            Divider()
+                            
+                            Button(action: {
+                                alertMessage = "If you proceed with the update, the current floor plan will be deleted.\nThis action is irreversible, are you sure you want to continue?"
+                                showUpdateAlert = true
+                            }) {
+                                Label("Update Planimetry", systemImage: "arrow.clockwise")
+                            }.disabled(!FileManager.default.fileExists(atPath: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz").path))
                             
                             
                             Divider()
@@ -267,6 +281,22 @@ struct FloorView: View {
                 }
             }
         }
+        .alert(isPresented: $isErrorUpdateAlertPresented) {
+            Alert(
+                title: Text("Error"),
+                message: Text(errorMessage),
+                dismissButton: .default(Text("OK"))
+            )
+        }
+        .alert(isPresented: $showUpdateAlert) {
+            Alert(
+                title: Text("ATTENTION").foregroundColor(.red),
+                message: Text(alertMessage),
+                dismissButton: .default(Text("OK")){
+                    isOptionsSheetPresented = true
+                }
+            )
+        }
         .sheet(isPresented: $isRenameSheetPresented) {
             VStack {
                 Text("Rename Building")
@@ -302,13 +332,97 @@ struct FloorView: View {
             .padding()
             .background(Color.customBackground.ignoresSafeArea())
         }
-        .sheet(isPresented: $isDocumentPickerPresented) {
-            DocumentPickerView { url in
+        .sheet(isPresented: $isFloorPlanimetryUploadPicker) {
+            FilePickerView { url in
                 selectedFileURL = url
-                // Gestisci il file selezionato qui
-                print("Selected file URL: \(url)")
+                
+                // Definisci il percorso di destinazione per il file selezionato
+                let destinationURL = floor.floorURL
+                    .appendingPathComponent("MapUsdz")
+                    .appendingPathComponent("\(floor.name).usdz")
+                
+                // Crea la directory "MapUsdz" se non esiste già
+                let fileManager = FileManager.default
+                let mapUsdzDirectory = floor.floorURL.appendingPathComponent("MapUsdz")
+                
+                do {
+                    // Crea la directory se non esiste
+                    if !fileManager.fileExists(atPath: mapUsdzDirectory.path) {
+                        try fileManager.createDirectory(at: mapUsdzDirectory, withIntermediateDirectories: true, attributes: nil)
+                    }
+                    
+                    // Copia il file dal suo URL originale al nuovo percorso
+                    try fileManager.copyItem(at: url, to: destinationURL)
+                    print("File copied successfully to: \(destinationURL)")
+                    
+                } catch {
+                    // In caso di errore, aggiorna lo stato e mostra l'alert
+                    errorMessage = "Failed to save the file: \(error.localizedDescription)"
+                    isErrorUpdateAlertPresented = true
+                }
             }
         }
+        .sheet(isPresented: $isOptionsSheetPresented) {
+            VStack {
+                Text("Choose an option")
+                    .font(.system(size: 26))
+                    .fontWeight(.bold)
+                    .padding()
+
+                Button(action: {
+                    let fileManager = FileManager.default
+                    let filePath = floor.floorURL
+                                        .appendingPathComponent("MapUsdz")
+                                        .appendingPathComponent("\(floor.name).usdz")
+
+                    do {
+                        try fileManager.removeItem(at: filePath)
+                        print("File eliminato correttamente")
+                    } catch {
+                        print("Errore durante l'eliminazione del file: \(error)")
+                    }
+                    self.isOptionsSheetPresented = false
+                    // Setta isNavigationActive su true
+                    self.isNavigationActive = true
+                    // Chiudi la Sheet
+
+                }) {
+                    Text("Create with AR")
+                        .font(.system(size: 20))
+                        .bold()
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                        .padding(.horizontal, 20)
+                }
+                .padding(.bottom, 10)
+
+                Button(action: {
+                    // Chiudi la Sheet delle opzioni
+                    self.isOptionsSheetPresented = false
+                    
+                    // Apri la Sheet del file picker dopo aver chiuso quella corrente
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                        self.isFloorPlanimetryUploadPicker = true
+                    }
+
+                }) {
+                    Text("Update From File")
+                        .font(.system(size: 20))
+                        .bold()
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                        .padding(.horizontal, 20)
+                }
+                .padding(.bottom, 10)
+            }
+            .padding()
+        }.background(Color.customBackground)
     }
     
     var filteredRooms: [Room] {

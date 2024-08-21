@@ -9,7 +9,7 @@ import SwiftUI
 import UIKit
 import UniformTypeIdentifiers
 
-struct DocumentPickerView: UIViewControllerRepresentable {
+struct FilePickerView: UIViewControllerRepresentable {
     var onPick: (URL) -> Void
     
     func makeCoordinator() -> Coordinator {
