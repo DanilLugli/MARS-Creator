@@ -23,6 +23,8 @@ struct AddSameConnectionView: View {
     @State private var showActionSheetRoom = false
     @State private var showActionSheetTZ = false
     
+    @State var mapView = SCNViewContainer()
+    
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
@@ -98,6 +100,48 @@ struct AddSameConnectionView: View {
                     }
                 }
                 .padding()
+                
+                
+                VStack {
+                    ZStack {
+                        mapView
+                            .border(Color.white)
+                            .frame(width: 360, height: 420)
+                            .cornerRadius(10)
+                            .padding()
+                            .shadow(color: Color.gray, radius: 3)
+                        
+                        VStack {
+                            HStack {
+                                HStack {
+                                    Button("+") {
+                                        mapView.zoomIn()
+                                    }
+                                    .buttonStyle(.bordered)
+                                    .bold()
+                                    .background(Color.blue.opacity(0.4))
+                                    .cornerRadius(8)
+                                    
+                                    Button("-") {
+                                        mapView.zoomOut()
+                                    }
+                                    .buttonStyle(.bordered)
+                                    .bold()
+                                    .background(Color.blue.opacity(0.4))
+                                    .cornerRadius(8).padding()
+                                }
+                                .padding()
+                            }
+                            Spacer()
+                        }
+                    }
+                }
+                .onChange(of: selectedRoom) { newRoom in
+                    loadMap(for: newRoom)
+                }
+                .onAppear {
+                    loadMap(for: selectedRoom)
+                }
 
                 // Aggiunta del pulsante con freccia destra per confermare la selezione della prima T.Z.
                 if step == 1 && fromTransitionZone != nil {
@@ -225,6 +269,16 @@ struct AddSameConnectionView: View {
             }
         buttons.append(.cancel())
         return buttons
+    }
+    
+    private func loadMap(for room: Room?) {
+        if let roomName = room?.name, let roomURL = room?.roomURL {
+            mapView.loadRoomMaps(
+                name: roomName,
+                borders: true,
+                usdzURL: roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(roomName).usdz")
+            )
+        }
     }
     
     private func createConnection() {
