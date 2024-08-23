@@ -3,30 +3,31 @@ import Foundation
 
 struct RoomView: View {
     
-    @State var room: Room
+    @ObservedObject var room: Room
     @ObservedObject var building: Building
-    @State var floor: Floor
-    @State private var searchText: String = ""
-
-    @State private var newBuildingName: String = ""
+    @ObservedObject var floor: Floor
+    
+    @State private var newRoomName: String = ""
     @State private var selectedMarker: ReferenceMarker? = nil
     @State private var selectedConnection: TransitionZone? = nil
     @State private var selectedTab: Int = 0
-    
     @State private var selectedFileURL: URL?
+    
     @State private var isRenameSheetPresented = false
     @State private var isNavigationActive = false
     @State private var isConnectionAdjacentFloor = false
     @State private var isRoomPlanimetryUploadPicker = false
     @State private var isConnectionSameFloor = false
     @State private var isErrorAlertPresented = false
-    @State private var errorMessage: String = ""
-    
+    @State private var isOptionsSheetPresented = false
+
     @State private var showUpdateOptionsAlert = false
     @State private var showUpdateAlert = false
-    @State private var isOptionsSheetPresented = false
+    @State private var showDeleteConfirmation = false
+    
+    @State private var errorMessage: String = ""
     @State private var alertMessage = ""
-
+    @State private var searchText: String = ""
     
     var mapView = SCNViewContainer()
     
@@ -217,7 +218,7 @@ struct RoomView: View {
                         Menu {
                             
                             Button(action: {
-                                isRoomPlanimetryUploadPicker = true
+                                 isRenameSheetPresented = true
                             }) {
                                 Label("Rename Room", systemImage: "pencil")
                             }
@@ -236,6 +237,8 @@ struct RoomView: View {
                                 Label("Upload Planimetry from File", systemImage: "square.and.arrow.down")
                             }.disabled(FileManager.default.fileExists(atPath: room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz").path))
                             
+                            Divider()
+                            
                             Button(action: {
                                 alertMessage = "If you proceed with the update, the current floor plan will be deleted.\nThis action is irreversible, are you sure you want to continue?"
                                 showUpdateAlert = true
@@ -245,9 +248,8 @@ struct RoomView: View {
                             
                             Divider()
                             
-                            
                             Button(role: .destructive, action: {
-                                //TODO: Aggiustare l'eliminazione della room
+                                showDeleteConfirmation = true
                             }) {
                                 HStack {
                                     Image(systemName: "trash")
@@ -337,7 +339,40 @@ struct RoomView: View {
                         
                     }
                 }
-            }.alert(isPresented: $isErrorAlertPresented) {
+            }
+            .confirmationDialog("Are you sure to delete Room?", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
+                Button("Yes", role: .destructive) {
+                    floor.deleteRoom(room: room)
+                    print("Room eliminata")
+                    //dismiss() // Chiude la vista corrente, se necessario
+                }
+                
+                Button("Cancel", role: .cancel) {
+                    //Optional
+                }
+            }
+            .alert("Rename Room", isPresented: $isRenameSheetPresented, actions: {
+                TextField("New Room Name", text: $newRoomName)
+                    .padding()
+
+                Button("SAVE", action: {
+                    if !newRoomName.isEmpty {
+                        do {
+                            try floor.renameRoom(floor: floor, room: room, newName: newRoomName)
+                        } catch {
+                            print("Errore durante la rinomina: \(error.localizedDescription)")
+                        }
+                        isRenameSheetPresented = false
+                    }
+                })
+                
+                Button("Cancel", role: .cancel, action: {
+                    isRenameSheetPresented = false
+                })
+            }, message: {
+                Text("Enter a new name for the Room.")
+            })
+            .alert(isPresented: $isErrorAlertPresented) {
                 Alert(
                     title: Text("Error"),
                     message: Text(errorMessage),

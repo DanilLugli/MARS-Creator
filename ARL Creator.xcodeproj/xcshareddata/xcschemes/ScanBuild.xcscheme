@@ -16,7 +16,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "AAA29E652C1711AA00CA267C"
-               BuildableName = "ScanBuild.app"
+               BuildableName = "ARL Creator.app"
                BlueprintName = "ScanBuild"
                ReferencedContainer = "container:ARL Creator.xcodeproj">
             </BuildableReference>
@@ -58,7 +58,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "AAA29E652C1711AA00CA267C"
-            BuildableName = "ScanBuild.app"
+            BuildableName = "ARL Creator.app"
             BlueprintName = "ScanBuild"
             ReferencedContainer = "container:ARL Creator.xcodeproj">
          </BuildableReference>
@@ -92,7 +92,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "AAA29E652C1711AA00CA267C"
-            BuildableName = "ScanBuild.app"
+            BuildableName = "ARL Creator.app"
             BlueprintName = "ScanBuild"
             ReferencedContainer = "container:ARL Creator.xcodeproj">
          </BuildableReference>

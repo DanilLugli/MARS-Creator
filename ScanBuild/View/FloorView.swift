@@ -5,33 +5,37 @@ import UniformTypeIdentifiers
 
 struct FloorView: View {
     
+    @EnvironmentObject var buildingModel: BuildingModel
     @ObservedObject var floor: Floor
-    var building: Building
+    @ObservedObject var building: Building
     @State private var searchText: String = ""
    
-    @State private var newBuildingName: String = ""
+    @State private var newFloorName: String = ""
     @State private var selectedTab: Int = 0
     @State private var animateRooms: Bool = false
     @State private var newRoom: Room? = nil
-    @State private var isNavigationActive = false
     
     @State private var selectedFileURL: URL?
     @State private var showFloorMap: Bool = false
     
+    @State private var isNavigationActive = false
     @State private var isFloorPlanimetryUploadPicker = false
     @State private var isRenameSheetPresented = false
     @State private var isErrorUpdateAlertPresented = false
-    @State private var showUpdateOptionsAlert = false
-    @State private var showUpdateAlert = false
     @State private var isOptionsSheetPresented = false
-    @State private var alertMessage = ""
     
+    @State private var showUpdateOptionsAlert = false
+    @State private var showDeleteConfirmation = false // Stato per mostrare l'alert
+    @State private var showUpdateAlert = false
+
+    @State private var alertMessage = ""
     @State private var errorMessage: String = ""
     
     var mapView = SCNViewContainer()
     var mapPositionView = SCNViewMapContainer()
     
     var body: some View {
+        
         NavigationStack {
             VStack {
                 Text("\(building.name) > \(floor.name)")
@@ -152,8 +156,6 @@ struct FloorView: View {
                     }
                     .tag(0)
                     
-                    
-                    
                     VStack {
                         
                         if floor.rooms.isEmpty {
@@ -199,18 +201,15 @@ struct FloorView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            
             ToolbarItem(placement: .principal) {
                 Text("FLOOR").font(.system(size: 26, weight: .heavy)).foregroundColor(.white)
             }
-            
             ToolbarItem(placement: .navigationBarTrailing) {
                 HStack {
                     if selectedTab == 0 {
                         Menu {
-                            
                             Button(action: {
-                                isFloorPlanimetryUploadPicker = true
+                                isRenameSheetPresented = true
                             }) {
                                 Label("Rename Floor", systemImage: "pencil")
                             }
@@ -234,7 +233,7 @@ struct FloorView: View {
                             Divider()
                             
                             Button(action: {
-                                alertMessage = "If you proceed with the update, the current floor plan will be deleted.\nThis action is irreversible, are you sure you want to continue?"
+                                alertMessage = "If you proceed with the update:\n1. Current floor plan\n2. All rooms position\nWill be deleted.\nThis action is irreversible, are you sure you want to continue?"
                                 showUpdateAlert = true
                             }) {
                                 Label("Update Planimetry", systemImage: "arrow.clockwise")
@@ -244,13 +243,11 @@ struct FloorView: View {
                             Divider()
                             
                             Button(role: .destructive, action: {
-                                //TODO: Aggiustare l'eliminazione della room
+                                showDeleteConfirmation = true
                             }) {
                                 HStack {
                                     Image(systemName: "trash")
-                                        .foregroundColor(.red) // Imposta l'icona in rosso
                                     Text("Delete Floor")
-                                        .foregroundColor(.red) // Imposta il testo in rosso
                                 }
                             }
                             
@@ -259,12 +256,9 @@ struct FloorView: View {
                                 .font(.system(size: 26))
                                 .foregroundStyle(.white, .blue, .blue)
                         }
-                        
                         NavigationLink(destination: ScanningView(namedUrl: floor), isActive: $isNavigationActive) {
                             EmptyView()
                         }
-                        
-                        
                     }
                     else if selectedTab == 1 {
                         NavigationLink(destination: AddRoomView(floor: floor), isActive: $isNavigationActive) {
@@ -281,6 +275,17 @@ struct FloorView: View {
                 }
             }
         }
+        .confirmationDialog("Are you sure to delete Floor?", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
+            Button("Yes", role: .destructive) {
+                building.deleteFloor(floor: floor)
+                print("Floor eliminato")
+                //dismiss() // Chiude la vista corrente
+            }
+            
+            Button("Cancel", role: .cancel) {
+                //Optional
+            }
+        }
         .alert(isPresented: $isErrorUpdateAlertPresented) {
             Alert(
                 title: Text("Error"),
@@ -292,46 +297,76 @@ struct FloorView: View {
             Alert(
                 title: Text("ATTENTION").foregroundColor(.red),
                 message: Text(alertMessage),
-                dismissButton: .default(Text("OK")){
+                primaryButton: .destructive(Text("OK")) {
+                    // Azione quando si preme "OK"
                     isOptionsSheetPresented = true
+                },
+                secondaryButton: .cancel(Text("Cancel")) {
+                    // Azione quando si preme "Cancel" (chiude l'alert automaticamente)
                 }
             )
         }
-        .sheet(isPresented: $isRenameSheetPresented) {
-            VStack {
-                Text("Rename Building")
-                    .font(.system(size: 22))
-                    .fontWeight(.bold)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 20)
-                    .foregroundColor(.white)
-                TextField("New Building Name", text: $newBuildingName)
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(8)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 8)
-                Spacer()
-                Button(action: {
-                    if !newBuildingName.isEmpty {
-                        // Salva il nuovo nome dell'edificio
+        .alert("Rename Floor", isPresented: $isRenameSheetPresented, actions: {
+            TextField("New Floor Name", text: $newFloorName)
+                .padding()
+
+            Button("SAVE", action: {
+                if !newFloorName.isEmpty {
+                    do {
+                        try building.renameFloor(floor: floor, newName: newFloorName)
+                    } catch {
+                        print("Errore durante la rinomina: \(error.localizedDescription)")
                     }
-                }) {
-                    Text("SAVE")
-                        .font(.system(size: 22, weight: .heavy))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .cornerRadius(10)
+                    isRenameSheetPresented = false
                 }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 20)
-            }
-            .padding()
-            .background(Color.customBackground.ignoresSafeArea())
-        }
+            })
+            
+            Button("Cancel", role: .cancel, action: {
+                isRenameSheetPresented = false
+            })
+        }, message: {
+            Text("Enter a new name for the Floor.")
+        })
+//        .sheet(isPresented: $isRenameSheetPresented) {
+//            VStack {
+//                Text("Rename Building")
+//                    .font(.system(size: 22))
+//                    .fontWeight(.bold)
+//                    .frame(maxWidth: .infinity, alignment: .leading)
+//                    .padding(.horizontal, 20)
+//                    .padding(.top, 20)
+//                    .foregroundColor(.white)
+//                TextField("New Building Name", text: $newBuildingName)
+//                    .padding()
+//                    .background(Color(.systemGray6))
+//                    .cornerRadius(8)
+//                    .padding(.horizontal, 20)
+//                    .padding(.top, 8)
+//                Spacer()
+//                Button(action: {
+//                    if !newBuildingName.isEmpty {
+//                        do {
+//                            try building.renameFloor(floor: floor, newName: newBuildingName)
+//                            print("Floor rinominato correttamente a \(newBuildingName)")
+//                        } catch {
+//                            print("Errore durante la rinomina del floor: \(error.localizedDescription)")
+//                        }
+//                    }
+//                }) {
+//                    Text("SAVE")
+//                        .font(.system(size: 22, weight: .heavy))
+//                        .foregroundColor(.white)
+//                        .frame(maxWidth: .infinity)
+//                        .padding()
+//                        .background(Color.blue)
+//                        .cornerRadius(10)
+//                }
+//                .padding(.horizontal, 20)
+//                .padding(.bottom, 20)
+//            }
+//            .padding()
+//            .background(Color.customBackground.ignoresSafeArea())
+//        }
         .sheet(isPresented: $isFloorPlanimetryUploadPicker) {
             FilePickerView { url in
                 selectedFileURL = url

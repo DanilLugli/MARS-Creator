@@ -106,7 +106,7 @@
 		AA8E0A672C59480D0097BDCD /* MarkerCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkerCardView.swift; sourceTree = "<group>"; };
 		AA8E0A692C5BA4D90097BDCD /* ServerCreateMatrix.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerCreateMatrix.swift; sourceTree = "<group>"; };
 		AA8E0A6B2C5D02280097BDCD /* FilePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilePickerView.swift; sourceTree = "<group>"; };
-		AAA29E662C1711AA00CA267C /* ScanBuild.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ScanBuild.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AAA29E662C1711AA00CA267C /* ARL Creator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ARL Creator.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AAA29E692C1711AA00CA267C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		AAA29E6B2C1711AA00CA267C /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		AAA29E6D2C1711AA00CA267C /* ShaderTypes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ShaderTypes.h; sourceTree = "<group>"; };
@@ -249,7 +249,7 @@
 		AAA29E672C1711AA00CA267C /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				AAA29E662C1711AA00CA267C /* ScanBuild.app */,
+				AAA29E662C1711AA00CA267C /* ARL Creator.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -308,7 +308,7 @@
 				AA8E0A612C57E4B20097BDCD /* RealModule */,
 			);
 			productName = ScanBuild;
-			productReference = AAA29E662C1711AA00CA267C /* ScanBuild.app */;
+			productReference = AAA29E662C1711AA00CA267C /* ARL Creator.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -571,7 +571,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "EveryLAB-Tesi.ScanBuild";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "ARL Creator";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "ScanBuild/ScanBuild-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
@@ -606,7 +606,7 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "EveryLAB-Tesi.ScanBuild";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = "ARL Creator";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OBJC_BRIDGING_HEADER = "ScanBuild/ScanBuild-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;

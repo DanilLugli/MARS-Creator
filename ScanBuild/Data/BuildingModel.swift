@@ -20,7 +20,7 @@ class BuildingModel: ObservableObject {
     static let ASSASSOCIATION_MATRIX_FILE = ""
     
     
-    @Published private var buildings: [Building]
+    @Published var buildings: [Building]
     
     private init() {
         self.buildings = []
@@ -75,7 +75,7 @@ class BuildingModel: ObservableObject {
         return self.getBuildings()[0]
     }
     
-    private func loadBuildingsFromRoot() throws {
+    func loadBuildingsFromRoot() throws {
         let fileManager = FileManager.default
         
         // Verifica se la cartella root esiste
@@ -278,17 +278,54 @@ class BuildingModel: ObservableObject {
         }
     }
     
-    func deleteBuilding(id: UUID) {
-        if let building = buildings.first(where: { $0.id == id }) {
-            buildings.removeAll { $0.id == id }
-            
-            let buildingURL = BuildingModel.SCANBUILD_ROOT.appendingPathComponent(building.name)
-            do {
-                try FileManager.default.removeItem(at: buildingURL)
-                print("Folder deleted at: \(buildingURL.path)")
-            } catch {
-                print("Error deleting folder for building \(building.name): \(error)")
-            }
+    func renameBuilding(building: Building, newName: String) throws -> Bool {
+        let fileManager = FileManager.default
+        let oldBuildingURL = building.buildingURL
+        let newBuildingURL = BuildingModel.SCANBUILD_ROOT.appendingPathComponent(newName)
+
+        // Verifica se esiste già un building con il nuovo nome
+        guard !fileManager.fileExists(atPath: newBuildingURL.path) else {
+            throw NSError(domain: "com.example.ScanBuild", code: 3, userInfo: [NSLocalizedDescriptionKey: "Esiste già un building con il nome \(newName)"])
+        }
+
+        // Rinomina la cartella del building
+        do {
+            try fileManager.moveItem(at: oldBuildingURL, to: newBuildingURL)
+        } catch {
+            throw NSError(domain: "com.example.ScanBuild", code: 4, userInfo: [NSLocalizedDescriptionKey: "Errore durante la rinomina della cartella del building: \(error.localizedDescription)"])
+        }
+        
+        // Aggiorna l'oggetto building
+        building.buildingURL = newBuildingURL
+        building.name = newName
+        
+        self.buildings = []
+        
+        do {
+            try self.loadBuildingsFromRoot()
+        } catch {
+            BuildingModel.LOGGER.log("Errore durante il caricamento dei buildings: \(error)")
+        }
+
+        // Log the rename
+        BuildingModel.LOGGER.log("Building rinominato da \(building.name) a \(newName)")
+        
+        return true
+    }
+    
+    func deleteBuilding(building: Building) {
+        // Rimuovi il building dall'array
+        buildings.removeAll { $0.id == building.id }
+        
+        // Ottieni il percorso del building
+        let buildingURL = BuildingModel.SCANBUILD_ROOT.appendingPathComponent(building.name)
+        
+        // Elimina la cartella del building
+        do {
+            try FileManager.default.removeItem(at: buildingURL)
+            print("Folder deleted at: \(buildingURL.path)")
+        } catch {
+            print("Error deleting folder for building \(building.name): \(error.localizedDescription)")
         }
     }
 }

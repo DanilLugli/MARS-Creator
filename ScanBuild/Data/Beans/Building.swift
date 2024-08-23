@@ -111,6 +111,25 @@ class Building: Encodable, ObservableObject {
         }
     }
     
+    func deleteFloor(floor: Floor) {
+        // Rimuovi il floor dall'array _floors
+        _floors.removeAll { $0.id == floor.id }
+        
+        // Ottieni l'URL della cartella del floor da eliminare
+        let floorURL = buildingURL.appendingPathComponent(floor.name)
+        
+        // Elimina la cartella del floor dal file system
+        do {
+            if FileManager.default.fileExists(atPath: floorURL.path) {
+                try FileManager.default.removeItem(at: floorURL)
+                print("Floor \(floor.name) eliminato con successo da \(floorURL.path).")
+            } else {
+                print("La cartella del floor \(floor.name) non esiste.")
+            }
+        } catch {
+            print("Errore durante l'eliminazione del floor \(floor.name): \(error)")
+        }
+    }
     
     func deleteFloorByName(name: String) {
         _floors.removeAll { $0.name == name }
@@ -121,6 +140,97 @@ class Building: Encodable, ObservableObject {
             print("Folder deleted at: \(floorURL.path)")
         } catch {
             print("Error deleting folder for floor \(name): \(error)")
+        }
+    }
+    
+    func renameFloor(floor: Floor, newName: String) throws -> Bool {
+        let fileManager = FileManager.default
+        let oldFloorURL = floor.floorURL
+        let newFloorURL = oldFloorURL.deletingLastPathComponent().appendingPathComponent(newName)
+
+        // Verifica se esiste già un floor con il nuovo nome
+        guard !fileManager.fileExists(atPath: newFloorURL.path) else {
+            throw NSError(domain: "com.example.ScanBuild", code: 3, userInfo: [NSLocalizedDescriptionKey: "Esiste già un floor con il nome \(newName)"])
+        }
+
+        // Rinomina la cartella del floor
+        do {
+            try fileManager.moveItem(at: oldFloorURL, to: newFloorURL)
+        } catch {
+            throw NSError(domain: "com.example.ScanBuild", code: 4, userInfo: [NSLocalizedDescriptionKey: "Errore durante la rinomina della cartella del floor: \(error.localizedDescription)"])
+        }
+        
+        // Aggiorna l'oggetto floor
+        floor.floorURL = newFloorURL
+        floor.name = newName
+       
+        
+        do {
+            try renameFilesInFloorDirectoriesAndJSON(floor: floor, newName: newName)
+        } catch {
+            print("Errore durante la rinomina dei file: \(error.localizedDescription)")
+        }
+        
+        // Ricarica i buildings dal file system per aggiornare i percorsi automaticamente
+        BuildingModel.getInstance().buildings = []
+
+        do {
+            try BuildingModel.getInstance().loadBuildingsFromRoot()
+        } catch {
+            print("Errore durante il caricamento dei buildings: \(error)")
+        }
+
+        return true
+    }
+    
+    func renameFilesInFloorDirectoriesAndJSON(floor: Floor, newName: String) throws {
+        let fileManager = FileManager.default
+        let directories = ["PlistMetadata", "MapUsdz", "JsonParametric"]
+        
+        // Rinomina tutti i file .json nella cartella principale del floor
+        let floorDirectoryURL = floor.floorURL
+        let floorFiles = try fileManager.contentsOfDirectory(at: floorDirectoryURL, includingPropertiesForKeys: nil)
+        
+        for oldFileURL in floorFiles where oldFileURL.pathExtension == "json" {
+            let oldFileName = oldFileURL.lastPathComponent
+            let newFileName = "\(newName).json"
+            let newFileURL = oldFileURL.deletingLastPathComponent().appendingPathComponent(newFileName)
+            
+            do {
+                try fileManager.moveItem(at: oldFileURL, to: newFileURL)
+                print("File .json rinominato da \(oldFileName) a \(newFileName) nella cartella principale del floor.")
+            } catch {
+                throw NSError(domain: "com.example.ScanBuild", code: 7, userInfo: [NSLocalizedDescriptionKey: "Errore durante la rinomina del file .json \(oldFileName): \(error.localizedDescription)"])
+            }
+        }
+
+        // Itera su ciascuna delle cartelle (PlistMetadata, MapUsdz, JsonParametric)
+        for directory in directories {
+            let directoryURL = floorDirectoryURL.appendingPathComponent(directory)
+            
+            // Verifica se la directory esiste
+            guard fileManager.fileExists(atPath: directoryURL.path) else {
+                print("La directory \(directory) non esiste per il floor \(floor.name).")
+                continue
+            }
+
+            // Ottieni tutti i file all'interno della directory
+            let fileURLs = try fileManager.contentsOfDirectory(at: directoryURL, includingPropertiesForKeys: nil)
+
+            // Itera su ciascun file per rinominarlo
+            for oldFileURL in fileURLs {
+                let oldFileName = oldFileURL.lastPathComponent
+                let fileExtension = oldFileURL.pathExtension
+                let newFileName = "\(newName).\(fileExtension)"
+                let newFileURL = oldFileURL.deletingLastPathComponent().appendingPathComponent(newFileName)
+                
+                do {
+                    try fileManager.moveItem(at: oldFileURL, to: newFileURL)
+                    print("File rinominato da \(oldFileName) a \(newFileName) nella directory \(directory).")
+                } catch {
+                    throw NSError(domain: "com.example.ScanBuild", code: 6, userInfo: [NSLocalizedDescriptionKey: "Errore durante la rinomina del file \(oldFileName) in \(directory): \(error.localizedDescription)"])
+                }
+            }
         }
     }
     

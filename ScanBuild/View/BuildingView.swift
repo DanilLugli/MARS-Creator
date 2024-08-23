@@ -8,6 +8,9 @@ struct BuildingView: View {
     @State private var isRenameSheetPresented = false
     @State private var newBuildingName: String = ""
     
+    @State private var showDeleteConfirmation = false // Stato per mostrare l'alert
+    //@Environment(\.dismiss) var dismiss // Accesso all'azione di dismiss
+    
     var body: some View {
         NavigationStack {
             VStack {
@@ -39,7 +42,7 @@ struct BuildingView: View {
                         ScrollView {
                             LazyVStack(spacing: 50) {
                                 ForEach(filteredFloors, id: \.id) { floor in
-                                    NavigationLink(destination: FloorView( floor: floor, building: building)) {
+                                    NavigationLink(destination: FloorView(floor: floor, building: building)) {
                                         DefaultCardView(name: floor.name, date: floor.lastUpdate).padding()
                                     }
                                 }
@@ -67,7 +70,6 @@ struct BuildingView: View {
                             .foregroundStyle(.white, .blue, .blue)
                     }
                     Menu {
-                        
                         Button(action: {
                             // Azione per il pulsante "Rename"
                             isRenameSheetPresented = true
@@ -86,7 +88,10 @@ struct BuildingView: View {
                         Divider()
                         
                         Button(role: .destructive, action: {
+                            showDeleteConfirmation = true
+                            
                             print("Delete Building button tapped")
+                            
                         }) {
                             Label("Delete Building", systemImage: "trash")
                                 .foregroundColor(.red)
@@ -100,43 +105,81 @@ struct BuildingView: View {
                 }
             }
         }
-        .sheet(isPresented: $isRenameSheetPresented) {
-            VStack {
-                Text("Rename Building")
-                    .font(.system(size: 22))
-                    .fontWeight(.bold)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 20)
-                    .foregroundColor(.white)
-                TextField("New Building Name", text: $newBuildingName)
-                    .padding()
-                    .background(Color(.systemGray6))
-                    .cornerRadius(8)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 8)
-                Spacer()
-                Button(action: {
-                    if !newBuildingName.isEmpty {
-                        building.name = newBuildingName
-                        newBuildingName = ""
-                        isRenameSheetPresented = false
-                    }
-                }) {
-                    Text("SAVE")
-                        .font(.system(size: 22, weight: .heavy))
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .cornerRadius(10)
-                }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 20)
+        .confirmationDialog("Confirm Deletion", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
+            Button("Delete", role: .destructive) {
+                // Azione per confermare l'eliminazione
+                BuildingModel.getInstance().deleteBuilding(building: building)
+                print("Building eliminato")
+                //dismiss()
             }
-            .padding()
-            .background(Color.customBackground.ignoresSafeArea())
+            
+            Button("Cancel", role: .cancel) {
+                // Azione per annullare
+            }
+        } message: {
+            Text("Are you sure you want to delete this building? This action cannot be undone.")
         }
+        .alert("Rename Building", isPresented: $isRenameSheetPresented, actions: {
+            TextField("New Building Name", text: $newBuildingName)
+                .padding()
+
+            Button("SAVE", action: {
+                if !newBuildingName.isEmpty {
+                    do {
+                        try BuildingModel.getInstance().renameBuilding(building: building, newName: newBuildingName)
+                    } catch {
+                        print("Errore durante la rinomina: \(error.localizedDescription)")
+                    }
+                    isRenameSheetPresented = false
+                }
+            })
+            
+            Button("Cancel", role: .cancel, action: {
+                isRenameSheetPresented = false
+            })
+        }, message: {
+            Text("Enter a new name for the building.")
+        })
+//        .sheet(isPresented: $isRenameSheetPresented) {
+//            VStack {
+//                Text("Rename Building")
+//                    .font(.system(size: 22))
+//                    .fontWeight(.bold)
+//                    .frame(maxWidth: .infinity, alignment: .leading)
+//                    .padding(.horizontal, 20)
+//                    .padding(.top, 20)
+//                    .foregroundColor(.white)
+//                TextField("New Building Name", text: $newBuildingName)
+//                    .padding()
+//                    .background(Color(.systemGray6))
+//                    .cornerRadius(8)
+//                    .padding(.horizontal, 20)
+//                    .padding(.top, 8)
+//                Spacer()
+//                Button(action: {
+//                    if !newBuildingName.isEmpty {
+//                        do {
+//                            try BuildingModel.getInstance().renameBuilding(building: building, newName: newBuildingName)
+//                        } catch {
+//                            print("Errore durante la rinomina: \(error.localizedDescription)")
+//                        }
+//                        isRenameSheetPresented = false
+//                    }
+//                }) {
+//                    Text("SAVE")
+//                        .font(.system(size: 22, weight: .heavy))
+//                        .foregroundColor(.white)
+//                        .frame(maxWidth: .infinity)
+//                        .padding()
+//                        .background(Color.blue)
+//                        .cornerRadius(10)
+//                }
+//                .padding(.horizontal, 20)
+//                .padding(.bottom, 20)
+//            }
+//            .padding()
+//            .background(Color.customBackground.ignoresSafeArea())
+//        }
     }
     
     var filteredFloors: [Floor] {
