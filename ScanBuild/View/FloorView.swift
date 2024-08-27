@@ -9,7 +9,7 @@ struct FloorView: View {
     @ObservedObject var floor: Floor
     @ObservedObject var building: Building
     @State private var searchText: String = ""
-   
+    
     @State private var newFloorName: String = ""
     @State private var selectedTab: Int = 0
     @State private var animateRooms: Bool = false
@@ -27,7 +27,7 @@ struct FloorView: View {
     @State private var showUpdateOptionsAlert = false
     @State private var showDeleteConfirmation = false // Stato per mostrare l'alert
     @State private var showUpdateAlert = false
-
+    
     @State private var alertMessage = ""
     @State private var errorMessage: String = ""
     
@@ -81,7 +81,8 @@ struct FloorView: View {
                                             if showFloorMap{
                                                 HStack {
                                                     Button("+") {
-                                                        mapView.zoomIn()
+                                                        mapPositionView.handler.zoomIn()
+                                                        
                                                     }
                                                     .buttonStyle(.bordered)
                                                     .bold()
@@ -89,7 +90,7 @@ struct FloorView: View {
                                                     .cornerRadius(8)
                                                     
                                                     Button("-") {
-                                                        mapView.zoomOut()
+                                                        mapPositionView.handler.zoomOut()
                                                     }
                                                     .buttonStyle(.bordered)
                                                     .bold()
@@ -100,7 +101,7 @@ struct FloorView: View {
                                             }else{
                                                 HStack {
                                                     Button("+") {
-                                                        mapPositionView.handler.zoomIn()
+                                                        mapView.zoomIn()
                                                     }
                                                     .buttonStyle(.bordered)
                                                     .bold()
@@ -108,7 +109,8 @@ struct FloorView: View {
                                                     .cornerRadius(8)
                                                     
                                                     Button("-") {
-                                                        mapPositionView.handler.zoomOut()
+                                                        mapView.zoomOut()
+                                                        
                                                     }
                                                     .buttonStyle(.bordered)
                                                     .bold()
@@ -223,7 +225,7 @@ struct FloorView: View {
                                 
                                 self.isNavigationActive = true
                                 
-                                   }) {
+                            }) {
                                 Label("Create Planimetry", systemImage: "plus")
                             }.disabled(FileManager.default.fileExists(atPath: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz").path))
                             
@@ -255,11 +257,11 @@ struct FloorView: View {
                             }
                             
                         } label: {
-                            Image(systemName: "pencil.circle.fill")
+                            Image(systemName: "ellipsis.circle.fill")
                                 .font(.system(size: 26))
                                 .foregroundStyle(.white, .blue, .blue)
                         }
-                        NavigationLink(destination: ScanningView(namedUrl: floor), isActive: $isNavigationActive) {
+                        NavigationLink(destination: FloorScanningView(namedUrl: floor), isActive: $isNavigationActive) {
                             EmptyView()
                         }
                     }
@@ -312,7 +314,7 @@ struct FloorView: View {
         .alert("Rename Floor", isPresented: $isRenameSheetPresented, actions: {
             TextField("New Floor Name", text: $newFloorName)
                 .padding()
-
+            
             Button("SAVE", action: {
                 if !newFloorName.isEmpty {
                     do {
@@ -366,13 +368,13 @@ struct FloorView: View {
                     .font(.system(size: 26))
                     .fontWeight(.bold)
                     .padding()
-
+                
                 Button(action: {
                     let fileManager = FileManager.default
                     let filePath = floor.floorURL
-                                        .appendingPathComponent("MapUsdz")
-                                        .appendingPathComponent("\(floor.name).usdz")
-
+                        .appendingPathComponent("MapUsdz")
+                        .appendingPathComponent("\(floor.name).usdz")
+                    
                     do {
                         try fileManager.removeItem(at: filePath)
                         print("File eliminato correttamente")
@@ -383,7 +385,7 @@ struct FloorView: View {
                     // Setta isNavigationActive su true
                     self.isNavigationActive = true
                     // Chiudi la Sheet
-
+                    
                 }) {
                     Text("Create with AR")
                         .font(.system(size: 20))
@@ -396,7 +398,7 @@ struct FloorView: View {
                         .padding(.horizontal, 20)
                 }
                 .padding(.bottom, 10)
-
+                
                 Button(action: {
                     // Chiudi la Sheet delle opzioni
                     self.isOptionsSheetPresented = false
@@ -405,7 +407,7 @@ struct FloorView: View {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                         self.isFloorPlanimetryUploadPicker = true
                     }
-
+                    
                 }) {
                     Text("Update From File")
                         .font(.system(size: 20))

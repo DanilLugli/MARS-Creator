@@ -13,7 +13,7 @@ struct CaptureViewContainer: UIViewRepresentable {
     private let configuration: RoomCaptureSession.Configuration
     
     init(namedUrl: NamedURL) {
-        print("init captureView")
+        print("Initializing CaptureViewContainer")
         sessionDelegate = SessionDelegate(namedUrl: namedUrl)
         configuration = RoomCaptureSession.Configuration()
         
@@ -62,19 +62,12 @@ struct CaptureViewContainer: UIViewRepresentable {
     class SessionDelegate: UIViewController, RoomCaptureSessionDelegate, RoomCaptureViewDelegate, ARSessionDelegate {
         
         var currentMapName: String?
-        
         var finalResults: CapturedRoom?
-        
         var roomBuilder = RoomBuilder(options: [.beautifyObjects])
-        
         private var featuresPoints: [UInt64] = []
-        
         private var worldMapCounter = 0
-        
         static var save = false
-        
         var r: CaptureViewContainer?
-        
         @State var namedUrl: NamedURL
         
         init(namedUrl: NamedURL) {
@@ -87,58 +80,76 @@ struct CaptureViewContainer: UIViewRepresentable {
             fatalError("init(coder:) has not been implemented")
         }
         
-        func setCaptureView(_ r: CaptureViewContainer) { self.r = r }
+        func setCaptureView(_ r: CaptureViewContainer) {
+            self.r = r
+        }
         
         func captureSession(_ session: RoomCaptureSession, didUpdate room: CapturedRoom) {
-            session.arSession.getCurrentWorldMap(completionHandler: { worldMap, error in
+            session.arSession.getCurrentWorldMap { worldMap, error in
                 guard let worldMap = worldMap else {
                     print("Can't get current world map")
-                    print(error!.localizedDescription)
+                    if let error = error {
+                        print(error.localizedDescription)
+                    }
                     return
                 }
                 self.worldMapCounter += 1
                 NotificationCenter.default.post(name: .worldMapMessage, object: worldMap)
-                if self.namedUrl is Room {NotificationCenter.default.post(name: .worlMapNewFeatures, object: worldMap.rawFeaturePoints.identifiers.difference(from: self.featuresPoints).count)
+                if self.namedUrl is Room {
+                    NotificationCenter.default.post(
+                        name: .worldMapNewFeatures,
+                        object: worldMap.rawFeaturePoints.identifiers.difference(from: self.featuresPoints).count
+                    )
                     
-                    NotificationCenter.default.post(name: .worldMapCounter, object: self.worldMapCounter)}
-            })
+                    NotificationCenter.default.post(name: .worldMapCounter, object: self.worldMapCounter)
+                }
+            }
         }
         
         func captureSession(_ session: RoomCaptureSession, didEndWith data: CapturedRoomData, error: Error?) {
             print(SessionDelegate.save)
             if !SessionDelegate.save { return }
             
-            if let error {
+            if let error = error {
                 print("Error in captureSession(_:didEndWith:error:)")
                 print(error)
+                return
             }
             
             Task {
-                let name = currentMapName ?? "_\(DateFormatter.localizedString(from: Date(), dateStyle: .medium, timeStyle: .short))"
-                let finalRoom = try! await self.roomBuilder.capturedRoom(from: data)
-                
-                print(namedUrl.url)
-                
-                saveJSONMap(finalRoom, name, at: namedUrl.url)
-                
-                saveUSDZMap(finalRoom, namedUrl.name, at: namedUrl.url)
-                
-                session.arSession.getCurrentWorldMap(completionHandler: { [self] worldMap, error in
-                    if let m = worldMap {
-                        if self.namedUrl is Room {saveARWorldMap(m, name, at: namedUrl.url)
-                            let newIdentifiers = worldMap?.rawFeaturePoints.identifiers.difference(from: featuresPoints)
-                            let addedIdentifiers = newIdentifiers!.compactMap { change -> UInt64? in
-                                switch change {
-                                case .insert(_, let identifier, _):
-                                    return identifier
-                                default:
-                                    return nil
+                do {
+                    let name = currentMapName ?? "_\(DateFormatter.localizedString(from: Date(), dateStyle: .medium, timeStyle: .short))"
+                    let finalRoom = try await self.roomBuilder.capturedRoom(from: data)
+                    
+                    print(namedUrl.url)
+                    
+                    saveJSONMap(finalRoom, name, at: namedUrl.url)
+                    saveUSDZMap(finalRoom, namedUrl.name, at: namedUrl.url)
+                    
+                    session.arSession.getCurrentWorldMap { [self] worldMap, error in
+                        if let worldMap = worldMap {
+                            if self.namedUrl is Room {
+                                saveARWorldMap(worldMap, name, at: namedUrl.url)
+                                
+                                let newIdentifiers = worldMap.rawFeaturePoints.identifiers.difference(from: featuresPoints)
+                                let addedIdentifiers = newIdentifiers.compactMap { change -> UInt64? in
+                                    switch change {
+                                    case .insert(_, let identifier, _):
+                                        return identifier
+                                    default:
+                                        return nil
+                                    }
                                 }
+                                featuresPoints.append(contentsOf: addedIdentifiers)
                             }
-                            featuresPoints.append(contentsOf: addedIdentifiers)}
-                        SessionDelegate.save = false
+                            SessionDelegate.save = false
+                        } else if let error = error {
+                            print("Error getting world map: \(error.localizedDescription)")
+                        }
                     }
-                })
+                } catch {
+                    print("Error during room capturing or saving: \(error)")
+                }
             }
         }
         
@@ -157,7 +168,19 @@ struct CaptureViewContainer: UIViewRepresentable {
         }
         
         func session(_ session: ARSession, didUpdate frame: ARFrame) {
-            // Gestione dello stato della mappa del mondo
+            // Handle world map status updates
+            switch frame.worldMappingStatus {
+            case .notAvailable:
+                NotificationCenter.default.post(name: .genericMessage, object: "Map Status: Not available")
+            case .limited:
+                NotificationCenter.default.post(name: .genericMessage, object: "Map Status: Available but has limited features")
+            case .extending:
+                NotificationCenter.default.post(name: .genericMessage, object: "Map Status: Actively extending the map")
+            case .mapped:
+                NotificationCenter.default.post(name: .genericMessage, object: "Map Status: Mapped the visible Area")
+            @unknown default:
+                NotificationCenter.default.post(name: .genericMessage, object: "Map Status: Unknown state")
+            }
         }
     }
 }
@@ -167,3 +190,4 @@ struct CaptureViewContainer_Previews: PreviewProvider {
         CaptureViewContainer(namedUrl: Room(name: "Sample Room", lastUpdate: Date(), referenceMarkers: [], transitionZones: [], sceneObjects: [], scene: nil, worldMap: nil, roomURL: URL(fileURLWithPath:"")))
     }
 }
+

@@ -34,7 +34,7 @@ extension Notification.Name {
         return .init(rawValue: "trackingPosition.message")
     }
     
-    static var worlMapNewFeatures: Notification.Name {
+    static var worldMapNewFeatures: Notification.Name {
         return .init(rawValue: "worlMapNewFeatures.message")
     }
     

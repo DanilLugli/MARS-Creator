@@ -18,33 +18,37 @@ class SCNViewMapHandler: ObservableObject {
     func loadRoomMaps(floor: Floor, roomURLs: [URL], borders: Bool) {
         do {
             // Carica la scena del piano (MapUsdz)
-            let floorFileURL = floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz")
+            let floorFileURL = floor.floorURL.appendingPathComponent("MapUsdz")
+                .appendingPathComponent("\(floor.name).usdz")
             scnView.scene = try SCNScene(url: floorFileURL)
             
             drawContent(borders: borders)
             setMassCenter()
             setCamera()
-
+            
             // Itera attraverso ogni stanza (roomURL)
             for roomURL in roomURLs {
                 print("\n\nProcessing room URL: \(roomURL)")
                 let roomScene = try SCNScene(url: roomURL)
-
+                
                 // Trova il nodo chiamato "Floor0" all'interno della stanza
                 if let roomNode = roomScene.rootNode.childNode(withName: "Floor0", recursively: true) {
                     print("Found 'Floor0' node for room at: \(roomURL)")
-
+                    
                     // Estrai il nome della stanza dal nome del file
                     let roomName = roomURL.deletingPathExtension().lastPathComponent
-
+                    
                     // Cerca la matrice di trasformazione per la stanza nel dizionario associationMatrix
                     if let rotoTraslationMatrix = floor.associationMatrix[roomName] {
                         print("Applying transformation for room: \(roomName)")
                         print("Translation matrix: \(rotoTraslationMatrix.translation)")
                         print("Rotation matrix (r_Y): \(rotoTraslationMatrix.r_Y)")
-
+                        
+                        print("BEFORE POSITION: \nNode: \(roomNode.name ?? "Unnamed"), Position: \(roomNode.position)")
                         // Applica la matrice di roto-traslazione al nodo
                         applyRotoTraslation(to: roomNode, with: rotoTraslationMatrix)
+                        print("AFTER POSITION: \nNode: \(roomNode.name ?? "Unnamed"), Position: \(roomNode.position)")
+
                     } else {
                         print("No RotoTraslationMatrix found for room: \(roomName)")
                     }
@@ -52,34 +56,52 @@ class SCNViewMapHandler: ObservableObject {
                     // Imposta il nome del nodo in base al nome del file della stanza
                     roomNode.name = roomName
                     print("RoomNode aggiunto: \(roomNode)")
-
+                    
                     // Aggiungi un materiale per colorare il nodo
                     let material = SCNMaterial()
                     material.diffuse.contents = colorForRoom(named: roomName) // Ottieni il colore per la stanza
                     roomNode.geometry?.materials = [material]
-
+                    
                     // Aggiungi il nodo della stanza alla scena principale
                     scnView.scene?.rootNode.addChildNode(roomNode)
                 } else {
                     print("Node 'Floor0' not found in scene: \(roomURL)")
                 }
             }
+            
+            // Dopo aver aggiunto i nodi, stampa tutti i nodi della scena
+            printAllNodes(in: scnView.scene?.rootNode)
+            
         } catch {
             print("Error loading scene from URL: \(error)")
         }
     }
-
+    
     // Funzione di supporto per determinare il colore in base al nome della stanza
     func colorForRoom(named roomName: String) -> UIColor {
         switch roomName.lowercased() {
-        case "Lavanderia":
+        case "room 1":
+            
             return UIColor.blue.withAlphaComponent(0.3)
-        case "Sala":
-            return UIColor.orange.withAlphaComponent(0.3)
-        case "corridoio":
+        case "room 2":
+            return UIColor.yellow.withAlphaComponent(0.4)
+        case "room 3":
             return UIColor.green.withAlphaComponent(0.3)
         default:
-            return UIColor.red.withAlphaComponent(0.3) // Colore di default per altre stanze
+            print("Colore Default")
+            return UIColor.magenta.withAlphaComponent(0.3) // Colore di default per altre stanze
+        }
+    }
+    
+    func printAllNodes(in node: SCNNode?, indent: String = "") {
+        guard let node = node else { return }
+        
+        // Stampa il nodo corrente con l'indentazione
+        print("\(indent)Node: \(node.name ?? "Unnamed"), Position: \(node.position)")
+        
+        // Ricorsivamente stampa tutti i nodi figli
+        for child in node.childNodes {
+            printAllNodes(in: child, indent: indent + "  ")
         }
     }
     
@@ -98,36 +120,33 @@ class SCNViewMapHandler: ObservableObject {
     }
     
     func drawContent(borders: Bool) {
+        //print("draw content")
+        //add room content
+        print(borders)
+        
         scnView.scene?
             .rootNode
             .childNodes(passingTest: {
-                n, _ in n.name != nil && n.name! != "Room" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp" && n.name! != "__selected__"
+                n,_ in n.name != nil && n.name! != "Room" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp" && n.name! != "__selected__"
             })
-            .forEach {
+            .forEach{
+                //print($0.name)
+                //print($0.scale)
                 let material = SCNMaterial()
-
                 material.diffuse.contents = UIColor.black
-                if ($0.name! == "Bagno") {
-                    material.diffuse.contents = UIColor.black.withAlphaComponent(0.2)
-                }
-                if ($0.name! == "Sala") {
-                    material.diffuse.contents = UIColor.orange.withAlphaComponent(0.2)
-                }
-                if ($0.name!.prefix(5) == "Floor") {
-                    material.diffuse.contents = UIColor.green.withAlphaComponent(0.2)
-                }
-                if ($0.name!.prefix(4) == "Door" || $0.name!.prefix(4) == "Open") {
-                    material.diffuse.contents = UIColor.green
-                }
-                
+                if ($0.name!.prefix(5) == "Floor") {material.diffuse.contents = UIColor.white.withAlphaComponent(0.2)}
+                if ($0.name!.prefix(4) == "Door" || $0.name!.prefix(4) == "Open") {material.diffuse.contents = UIColor.red}
                 material.lightingModel = .physicallyBased
                 $0.geometry?.materials = [material]
-                
+                //let angle = $0.eulerAngles.y
+                //$0.eulerAngles.y -= angle
                 if borders {
+                    //print("draw borders")
                     $0.scale.x = $0.scale.x < 0.2 ? $0.scale.x + 0.1 : $0.scale.x
                     $0.scale.z = $0.scale.z < 0.2 ? $0.scale.z + 0.1 : $0.scale.z
                     $0.scale.y = ($0.name!.prefix(4) == "Wall") ? 0.1 : $0.scale.y
                 }
+                //$0.eulerAngles.y = angle
             }
     }
     
@@ -137,14 +156,14 @@ class SCNViewMapHandler: ObservableObject {
             let copy = _node.copy() as! SCNNode
             copy.name = "__selected__"
             let material = SCNMaterial()
-          
+            
             let transparentColor = color.withAlphaComponent(0.3)
             material.diffuse.contents = transparentColor
             material.lightingModel = .physicallyBased
             copy.geometry?.materials = [material]
-//            copy.worldPosition.y += 4
-//            copy.scale.x = _node.scale.x < 0.2 ? _node.scale.x + 0.1 : _node.scale.x
-//            copy.scale.z = _node.scale.z < 0.2 ? _node.scale.z + 0.1 : _node.scale.z
+            //            copy.worldPosition.y += 4
+            //            copy.scale.x = _node.scale.x < 0.2 ? _node.scale.x + 0.1 : _node.scale.x
+            //            copy.scale.z = _node.scale.z < 0.2 ? _node.scale.z + 0.1 : _node.scale.z
             scnView.scene?.rootNode.addChildNode(copy)
         }
     }
@@ -185,52 +204,6 @@ class SCNViewMapHandler: ObservableObject {
         scnView.scene?.rootNode.addChildNode(massCenter)
     }
     
-//    func applyRotoTraslation(to node: SCNNode, with rotoTraslation: RotoTraslationMatrix) {
-//        
-//        print("NODE: ")
-//        print(node)
-//        print("\n")
-//        print(node.simdWorldTransform.columns.3)
-//        print("\n")
-//        print(rotoTraslation.translation)
-//        print("\n\n\n\n\n")
-//        node.simdWorldTransform.columns.3 = node.simdWorldTransform.columns.3 * rotoTraslation.translation
-//        
-//        let r_Y = simd_float3x3([
-//            simd_float3(rotoTraslation.r_Y.columns.0.x, rotoTraslation.r_Y.columns.0.y, rotoTraslation.r_Y.columns.0.z),
-//            simd_float3(rotoTraslation.r_Y.columns.1.x, rotoTraslation.r_Y.columns.1.y, rotoTraslation.r_Y.columns.1.z),
-//            simd_float3(rotoTraslation.r_Y.columns.2.x, rotoTraslation.r_Y.columns.2.y, rotoTraslation.r_Y.columns.2.z),
-//        ])
-//        
-//        var rot = simd_float3x3([
-//            simd_float3(node.simdWorldTransform.columns.0.x, node.simdWorldTransform.columns.0.y, node.simdWorldTransform.columns.0.z),
-//            simd_float3(node.simdWorldTransform.columns.1.x, node.simdWorldTransform.columns.1.y, node.simdWorldTransform.columns.1.z),
-//            simd_float3(node.simdWorldTransform.columns.2.x, node.simdWorldTransform.columns.2.y, node.simdWorldTransform.columns.2.z),
-//        ])
-//        
-//        rot = r_Y * rot
-//        
-//        node.simdWorldTransform.columns.0 = simd_float4(
-//            rot.columns.0.x,
-//            rot.columns.0.y,
-//            rot.columns.0.z,
-//            node.simdWorldTransform.columns.0.w
-//        )
-//        node.simdWorldTransform.columns.1 = simd_float4(
-//            rot.columns.1.x,
-//            rot.columns.1.y,
-//            rot.columns.1.z,
-//            node.simdWorldTransform.columns.1.w
-//        )
-//        node.simdWorldTransform.columns.2 = simd_float4(
-//            rot.columns.2.x,
-//            rot.columns.2.y,
-//            rot.columns.2.z,
-//            node.simdWorldTransform.columns.2.w
-//        )
-//    }
-    
-//TODO: FUNZIONE CREATA DA GPT- Controllare se è corretta
     func applyRotoTraslation(to node: SCNNode, with rotoTraslation: RotoTraslationMatrix) {
         
         print("NODE: ")
@@ -240,37 +213,83 @@ class SCNViewMapHandler: ObservableObject {
         print("\n")
         print(rotoTraslation.translation)
         print("\n\n\n\n\n")
-        node.simdWorldTransform = rotoTraslation.translation * node.simdWorldTransform
+        node.simdWorldTransform.columns.3 = node.simdWorldTransform.columns.3 * rotoTraslation.translation
         
-        // Estrai la matrice di rotazione 3x3 da r_Y (matrice di rotazione)
-        let r_Y = simd_float3x3(
+        let r_Y = simd_float3x3([
             simd_float3(rotoTraslation.r_Y.columns.0.x, rotoTraslation.r_Y.columns.0.y, rotoTraslation.r_Y.columns.0.z),
             simd_float3(rotoTraslation.r_Y.columns.1.x, rotoTraslation.r_Y.columns.1.y, rotoTraslation.r_Y.columns.1.z),
-            simd_float3(rotoTraslation.r_Y.columns.2.x, rotoTraslation.r_Y.columns.2.y, rotoTraslation.r_Y.columns.2.z)
-        )
+            simd_float3(rotoTraslation.r_Y.columns.2.x, rotoTraslation.r_Y.columns.2.y, rotoTraslation.r_Y.columns.2.z),
+        ])
         
-        // Estrai la matrice di rotazione corrente del nodo
-        var rot = simd_float3x3(
+        var rot = simd_float3x3([
             simd_float3(node.simdWorldTransform.columns.0.x, node.simdWorldTransform.columns.0.y, node.simdWorldTransform.columns.0.z),
             simd_float3(node.simdWorldTransform.columns.1.x, node.simdWorldTransform.columns.1.y, node.simdWorldTransform.columns.1.z),
-            simd_float3(node.simdWorldTransform.columns.2.x, node.simdWorldTransform.columns.2.y, node.simdWorldTransform.columns.2.z)
-        )
+            simd_float3(node.simdWorldTransform.columns.2.x, node.simdWorldTransform.columns.2.y, node.simdWorldTransform.columns.2.z),
+        ])
         
-        // Combina la rotazione del nodo con la nuova rotazione
         rot = r_Y * rot
         
-        // Applica la nuova rotazione al nodo
         node.simdWorldTransform.columns.0 = simd_float4(
-            rot.columns.0.x, rot.columns.0.y, rot.columns.0.z, node.simdWorldTransform.columns.0.w
+            rot.columns.0.x,
+            rot.columns.0.y,
+            rot.columns.0.z,
+            node.simdWorldTransform.columns.0.w
         )
         node.simdWorldTransform.columns.1 = simd_float4(
-            rot.columns.1.x, rot.columns.1.y, rot.columns.1.z, node.simdWorldTransform.columns.1.w
+            rot.columns.1.x,
+            rot.columns.1.y,
+            rot.columns.1.z,
+            node.simdWorldTransform.columns.1.w
         )
         node.simdWorldTransform.columns.2 = simd_float4(
-            rot.columns.2.x, rot.columns.2.y, rot.columns.2.z, node.simdWorldTransform.columns.2.w
+            rot.columns.2.x,
+            rot.columns.2.y,
+            rot.columns.2.z,
+            node.simdWorldTransform.columns.2.w
         )
     }
     
+    //TODO: FUNZIONE CREATA DA GPT- Controllare se è corretta
+    //    func applyRotoTraslation(to node: SCNNode, with rotoTraslation: RotoTraslationMatrix) {
+    //
+    //        print("NODE: ")
+    //        print(node)
+    //        print("\n")
+    //        print(node.simdWorldTransform.columns.3)
+    //        print("\n")
+    //        print(rotoTraslation.translation)
+    //        print("\n\n\n\n\n")
+    //        node.simdWorldTransform = rotoTraslation.translation * node.simdWorldTransform
+    //
+    //        // Estrai la matrice di rotazione 3x3 da r_Y (matrice di rotazione)
+    //        let r_Y = simd_float3x3(
+    //            simd_float3(rotoTraslation.r_Y.columns.0.x, rotoTraslation.r_Y.columns.0.y, rotoTraslation.r_Y.columns.0.z),
+    //            simd_float3(rotoTraslation.r_Y.columns.1.x, rotoTraslation.r_Y.columns.1.y, rotoTraslation.r_Y.columns.1.z),
+    //            simd_float3(rotoTraslation.r_Y.columns.2.x, rotoTraslation.r_Y.columns.2.y, rotoTraslation.r_Y.columns.2.z)
+    //        )
+    //
+    //        // Estrai la matrice di rotazione corrente del nodo
+    //        var rot = simd_float3x3(
+    //            simd_float3(node.simdWorldTransform.columns.0.x, node.simdWorldTransform.columns.0.y, node.simdWorldTransform.columns.0.z),
+    //            simd_float3(node.simdWorldTransform.columns.1.x, node.simdWorldTransform.columns.1.y, node.simdWorldTransform.columns.1.z),
+    //            simd_float3(node.simdWorldTransform.columns.2.x, node.simdWorldTransform.columns.2.y, node.simdWorldTransform.columns.2.z)
+    //        )
+    //
+    //        // Combina la rotazione del nodo con la nuova rotazione
+    //        rot = r_Y * rot
+    //
+    //        // Applica la nuova rotazione al nodo
+    //        node.simdWorldTransform.columns.0 = simd_float4(
+    //            rot.columns.0.x, rot.columns.0.y, rot.columns.0.z, node.simdWorldTransform.columns.0.w
+    //        )
+    //        node.simdWorldTransform.columns.1 = simd_float4(
+    //            rot.columns.1.x, rot.columns.1.y, rot.columns.1.z, node.simdWorldTransform.columns.1.w
+    //        )
+    //        node.simdWorldTransform.columns.2 = simd_float4(
+    //            rot.columns.2.x, rot.columns.2.y, rot.columns.2.z, node.simdWorldTransform.columns.2.w
+    //        )
+    //    }
+    //
 }
 
 struct SCNViewMapContainer: UIViewRepresentable {

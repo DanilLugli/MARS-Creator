@@ -54,6 +54,7 @@
 		AAA29E712C1711AA00CA267C /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA29E702C1711AA00CA267C /* ViewController.swift */; };
 		AAA29E762C1711AC00CA267C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AAA29E752C1711AC00CA267C /* Assets.xcassets */; };
 		AAB6190A2C502995008F77EE /* AddRoomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAB619092C502995008F77EE /* AddRoomView.swift */; };
+		AAD2F4472C7E2CCF009D52E2 /* FloorScanningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD2F4462C7E2CCF009D52E2 /* FloorScanningView.swift */; };
 		AAD778A72C5288A40091181A /* ScanningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD778A62C5288A30091181A /* ScanningView.swift */; };
 		AAD778A92C528C600091181A /* FloorCaptureViewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD778A82C528C600091181A /* FloorCaptureViewContainer.swift */; };
 		AAE57F9E2C3764FC00F0196F /* FloorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE57F9D2C3764FC00F0196F /* FloorView.swift */; };
@@ -115,6 +116,7 @@
 		AAA29E752C1711AC00CA267C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AAA29E772C1711AC00CA267C /* ScanBuild-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ScanBuild-Bridging-Header.h"; sourceTree = "<group>"; };
 		AAB619092C502995008F77EE /* AddRoomView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddRoomView.swift; sourceTree = "<group>"; };
+		AAD2F4462C7E2CCF009D52E2 /* FloorScanningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloorScanningView.swift; sourceTree = "<group>"; };
 		AAD778A62C5288A30091181A /* ScanningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanningView.swift; sourceTree = "<group>"; };
 		AAD778A82C528C600091181A /* FloorCaptureViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloorCaptureViewContainer.swift; sourceTree = "<group>"; };
 		AAE57F9D2C3764FC00F0196F /* FloorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloorView.swift; sourceTree = "<group>"; };
@@ -147,9 +149,9 @@
 			children = (
 				AA8E0A562C52BA6C0097BDCD /* ARSessionManager.swift */,
 				AA2CA5502C3DB5F400C88C94 /* CaptureViewContainer.swift */,
+				AAD778A82C528C600091181A /* FloorCaptureViewContainer.swift */,
 				AA2CA5562C3DB61E00C88C94 /* SCNViewContainer.swift */,
 				AA3A24F02C62599A00E162A3 /* SCNViewMapContainer.swift */,
-				AAD778A82C528C600091181A /* FloorCaptureViewContainer.swift */,
 				AA2CA5522C3DB60300C88C94 /* ARSCNViewContainer.swift */,
 				AA2CA5542C3DB61100C88C94 /* ExportRoomViewContainer.swift */,
 				AA8E0A632C57E50F0097BDCD /* VisualizeRoomViewContainer.swift */,
@@ -203,6 +205,7 @@
 				AA2CA5252C39FF3000C88C94 /* AddFloorView.swift */,
 				AAE57FA12C37FB6100F0196F /* Color.swift */,
 				AA8E0A6B2C5D02280097BDCD /* FilePickerView.swift */,
+				AAD2F4462C7E2CCF009D52E2 /* FloorScanningView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -401,6 +404,7 @@
 				AAE57FA62C382C6D00F0196F /* TransitionZone.swift in Sources */,
 				AA78F5DB2C2C773E0044F825 /* BuildingsView.swift in Sources */,
 				AA8E0A5B2C52C69D0097BDCD /* NamedURL.swift in Sources */,
+				AAD2F4472C7E2CCF009D52E2 /* FloorScanningView.swift in Sources */,
 				AA3A24F12C62599A00E162A3 /* SCNViewMapContainer.swift in Sources */,
 				AA2CA5532C3DB60300C88C94 /* ARSCNViewContainer.swift in Sources */,
 				AA78F5F32C3430C80044F825 /* ServerManager.swift in Sources */,

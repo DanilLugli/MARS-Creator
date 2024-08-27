@@ -96,7 +96,7 @@ struct BuildingView: View {
                                 .foregroundColor(.red)
                         }
                     } label: {
-                        Image(systemName: "pencil.circle.fill")
+                        Image(systemName: "ellipsis.circle.fill")
                             .font(.system(size: 26))
                             .symbolRenderingMode(.palette)
                             .foregroundStyle(.white, .blue, .blue)

@@ -216,8 +216,12 @@ struct RoomView: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     if selectedTab == 0 {
+//                        NavigationLink(destination: ScanningView(namedUrl: room)) {
+//                            Image(systemName: "plus.circle.fill")
+//                                .font(.system(size: 26))
+//                                .foregroundStyle(.white, .blue, .blue)
+//                        }
                         Menu {
-                            
                             Button(action: {
                                  isRenameSheetPresented = true
                             }) {
@@ -227,7 +231,8 @@ struct RoomView: View {
                             Divider()
                             
                             Button(action: {
-                                self.isNavigationActive = true
+                                isNavigationActive = true
+                                print("isNavigationActive set to true") // Aggiungi per debug
                             }) {
                                 Label("Create Planimetry", systemImage: "plus")
                             }.disabled(FileManager.default.fileExists(atPath: room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz").path))
@@ -261,17 +266,20 @@ struct RoomView: View {
                             }
                             
                         } label: {
-                            Image(systemName: "pencil.circle.fill")
+                            Image(systemName: "ellipsis.circle.fill")
                                 .font(.system(size: 26))
                                 .symbolRenderingMode(.palette)
                                 .foregroundStyle(.white, .blue, .blue)
+                        }.background{
+                            NavigationLink(
+                                destination: ScanningView(namedUrl: room),
+                                isActive: $isNavigationActive,
+                                label: {
+                                    EmptyView()
+                                }
+                            )
                         }
-                        
-                        NavigationLink(destination: ScanningView(namedUrl: room), isActive: $isNavigationActive) {
-                            EmptyView()
-                        }
-                        
-                    } 
+                    }
                     else if selectedTab == 1 {
                         Button(action: {
                             isRoomPlanimetryUploadPicker = true
@@ -280,24 +288,13 @@ struct RoomView: View {
                                 .font(.system(size: 26))
                                 .foregroundStyle(.white, .blue, .blue)
                         }
-                    } 
+                    }
                     else if selectedTab == 2 {
-                        Menu {
-                                Button(action: {
-                                    isUpdateOpenView = true
-                                }) {
-                                    Label("Update Room Position", systemImage: "pencil")
-                                }
-                            } label: {
-                                Image(systemName: "plus.circle.fill")
-                                    .font(.system(size: 26))
-                                    .foregroundStyle(.white, .blue, .blue)
-                            }
-
-                        NavigationLink(destination: RoomPositionView(floor: floor, room: room),
-                                           isActive: $isUpdateOpenView) {
-                                EmptyView() // NavigationLink vuoto per il comportamento di isActive
-                            }
+                        NavigationLink(destination: RoomPositionView(floor: floor, room: room)) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.system(size: 26))
+                                .foregroundStyle(.white, .blue, .blue)
+                        }
                     }
                     else if selectedTab == 3 {
                         ZStack{

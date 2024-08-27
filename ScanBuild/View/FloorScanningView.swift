@@ -2,7 +2,7 @@ import SwiftUI
 import ARKit
 import RoomPlan
 
-struct ScanningView: View {
+struct FloorScanningView: View {
     @State var namedUrl: NamedURL
     
     @State private var messagesFromWorldMap: String = ""
@@ -11,7 +11,7 @@ struct ScanningView: View {
     @State private var placeSquare = false
     @State var isScanningRoom = false
     
-    @State var captureView: CaptureViewContainer?
+    @State var captureView: FloorCaptureViewContainer?
     
     @State private var dimensions: [String] = []
     @State var message = ""
@@ -45,7 +45,7 @@ struct ScanningView: View {
                                 onSave: {
                                     isScanningRoom = false
                                     let finalMapName = mapName.isEmpty ? "Map_\(Date().timeIntervalSince1970)" : mapName
-                                    captureView?.stopCapture(pauseARSession: false)
+                                    captureView?.stopCapture()
                                 }
                             )
                             .padding()
@@ -61,7 +61,7 @@ struct ScanningView: View {
                     if !isScanningRoom {
                         Button(action: {
                             isScanningRoom = true
-                            captureView = CaptureViewContainer(namedUrl: namedUrl)
+                            captureView = FloorCaptureViewContainer(namedUrl: namedUrl)
                         }) {
                             Text("Start")
                                 .font(.largeTitle).bold()
@@ -112,8 +112,8 @@ struct ScanningView: View {
     }
 }
 
-struct ScanningView_Previews: PreviewProvider {
+struct FloorScanningView_Previews: PreviewProvider {
     static var previews: some View {
-        ScanningView(namedUrl: Floor(name: "Sample Floor", lastUpdate: Date(), planimetry: SCNViewContainer(), associationMatrix: [:], rooms: [], sceneObjects: [], scene: nil, sceneConfiguration: nil, floorURL: URL(fileURLWithPath: "")))
+        FloorScanningView(namedUrl: Floor(name: "Sample Floor", lastUpdate: Date(), planimetry: SCNViewContainer(), associationMatrix: [:], rooms: [], sceneObjects: [], scene: nil, sceneConfiguration: nil, floorURL: URL(fileURLWithPath: "")))
     }
 }

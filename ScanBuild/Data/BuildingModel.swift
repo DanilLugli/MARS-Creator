@@ -47,7 +47,7 @@ class BuildingModel: ObservableObject {
             
             // Aggiungi 5 piani al primo edificio
             for j in 1...5 {
-                let floor = Floor(name: "Floor \(j)", lastUpdate: Date(), planimetry: Image(""), associationMatrix: [String : RotoTraslationMatrix](), rooms: [], sceneObjects: nil, scene: nil, sceneConfiguration: nil, floorURL: URL(fileURLWithPath: ""))
+                let floor = Floor(name: "Floor \(j)", lastUpdate: Date(), planimetry: SCNViewContainer(), associationMatrix: [String : RotoTraslationMatrix](), rooms: [], sceneObjects: nil, scene: nil, sceneConfiguration: nil, floorURL: URL(fileURLWithPath: ""))
                 
                 
                 for k in 1...5 {
@@ -156,7 +156,7 @@ class BuildingModel: ObservableObject {
                     
                     let floor = Floor(name: floorURL.lastPathComponent,
                                       lastUpdate: lastModifiedDate,
-                                      planimetry: Image(""),
+                                      planimetry: SCNViewContainer(),
                                       associationMatrix: associationMatrix ?? [:],
                                       rooms: rooms,
                                       sceneObjects: sceneObjects,

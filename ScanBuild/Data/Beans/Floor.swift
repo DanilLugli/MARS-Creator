@@ -8,7 +8,7 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     private var _id = UUID()
     @Published private var _name: String
     private var _lastUpdate: Date
-    private var _planimetry: Image
+    private var _planimetry: SCNViewContainer?
     @Published private var _associationMatrix: [String: RotoTraslationMatrix]
     @Published private var _rooms: [Room]
     @Published private var _sceneObjects: [SCNNode]?
@@ -16,7 +16,7 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     @Published private var _sceneConfiguration: SCNScene?
     private var _floorURL: URL
     
-    init(name: String, lastUpdate: Date, planimetry: Image, associationMatrix: [String: RotoTraslationMatrix], rooms: [Room], sceneObjects: [SCNNode]?, scene: SCNScene?, sceneConfiguration: SCNScene?, floorURL: URL) {
+    init(name: String, lastUpdate: Date, planimetry: SCNViewContainer?, associationMatrix: [String: RotoTraslationMatrix], rooms: [Room], sceneObjects: [SCNNode]?, scene: SCNScene?, sceneConfiguration: SCNScene?, floorURL: URL) {
         self._name = name
         self._lastUpdate = lastUpdate
         self._planimetry = planimetry
@@ -51,8 +51,8 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         return _lastUpdate
     }
     
-    var planimetry: Image {
-        return _planimetry
+    var planimetry: SCNViewContainer {
+        return _planimetry ?? SCNViewContainer()
     }
     
     var associationMatrix: [String: RotoTraslationMatrix] {

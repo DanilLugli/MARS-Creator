@@ -13,6 +13,5 @@ import ARKit
 class ARSessionManager {
     static let shared = ARSessionManager()
     let arSession = ARSession()
-    
     private init() {}
 }
