@@ -18,7 +18,7 @@ struct AddStairsConnectionView: View {
     
     @State var mapView = SCNViewContainer()
 
-    @State private var step: Int = 1  // Step of the connection creation process
+    @State private var step: Int = 1
     @State private var showConfirmView = false
 
     @State private var showActionSheetFloor = false
@@ -300,6 +300,7 @@ struct AddStairsConnectionView: View {
            
            // Crea la connessione tra le due TransitionZone
            let fromConnection = AdjacentFloorsConnection(name: "Connection to \(toRoom.name)", targetFloor: toFloor.name, targetRoom: toRoom.name)
+        
            let toConnection = AdjacentFloorsConnection(name: "Connection to \(fromRoom.name)", targetFloor: fromFloor.name, targetRoom: fromRoom.name)
 
            // Imposta le connessioni nelle TransitionZone

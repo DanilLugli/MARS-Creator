@@ -48,6 +48,10 @@ class Building: Encodable, ObservableObject {
         }
     }
     
+    func getFloor(_ floor: Floor) -> Floor? {
+        return floors.first { $0.id == floor.id }
+    }
+    
     var buildingURL: URL {
         get {
             return _buildingURL
@@ -164,6 +168,11 @@ class Building: Encodable, ObservableObject {
         floor.floorURL = newFloorURL
         floor.name = newName
        
+        // Forza l'aggiornamento della vista
+        DispatchQueue.main.async {
+            self.objectWillChange.send() // Notifica SwiftUI del cambiamento
+        }
+
         
         do {
             try renameFilesInFloorDirectoriesAndJSON(floor: floor, newName: newName)

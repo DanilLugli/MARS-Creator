@@ -4,6 +4,7 @@ import SceneKit
 
 struct RoomPositionView: View {
     
+    //@ObservedObject var building: Building
     @ObservedObject var floor: Floor
     @ObservedObject var room: Room
     
@@ -251,9 +252,6 @@ struct RoomPositionView: View {
                                 })
                             ).map { node in node.name ?? "nil" }
                         })
-                        if let _size = selectedLocalNode?.scale {
-                            Text("(_size.x) (_size.y) (_size.z)")
-                        }
                     }
                 }
                 
@@ -285,17 +283,12 @@ struct RoomPositionView: View {
                                     print("Error: \(response.1)")
                                 }
                                 
-                                //                                let emptyMatrix = RotoTraslationMatrix(
-                                //                                    name: selectedMap.deletingPathExtension().lastPathComponent,
-                                //                                    translation: simd_float4x4(1),
-                                //                                    r_Y: simd_float4x4(1)
-                                //                                )
-                                //                                floor.associationMatrix["\(selectedMap.deletingPathExtension().lastPathComponent)"] = emptyMatrix
                                 print(selectedMap.lastPathComponent)
                                 print(matchingNodesForAPI)
-                                saveConversionGlobalLocal(response.1, floor.floorURL, floor.name)
+                                
+                                //saveConversionGlobalLocal(response.1, floor.floorURL, floor)
                                 responseFromServer = true
-                                showSheet = true
+                                showAlert = true
                             }
                         }.buttonStyle(.bordered)
                             .frame(width: 150, height: 50)
@@ -317,27 +310,16 @@ struct RoomPositionView: View {
             }
             .alert(isPresented: $showAlert) {
                 Alert(
-                    title: Text("Matrix Created Correctly"),
-                    message: nil
+                    title: Text("ROOM POSITION CREATED")
+                        .font(.system(size: 26, weight: .heavy))
+                        .foregroundColor(.white),
+                    message: Text("Do you want to save the room position?"),
+                    primaryButton: .default(Text("SAVE ROOM POSITION")) {
+                        saveConversionGlobalLocal(response.1, floor.floorURL, floor)
+                        showAlert = false
+                    },
+                    secondaryButton: .cancel(Text("Cancel"))
                 )
-            }
-            .sheet(isPresented: $showSheet) {
-                VStack{
-                    Text("ROOM POSITION CREATED AND SAVED CORRECTLY").font(.system(size: 26, weight: .heavy))
-                        .foregroundColor(.white).padding()
-                    Spacer()
-                    Button("SAVE ROOM POSITION") {
-                        saveConversionGlobalLocal(response.1, floor.floorURL, floor.name)
-                        
-                        showSheet = false
-                    }.buttonStyle(.bordered)
-                        .background(Color.blue.opacity(0.4))
-                        .cornerRadius(8).padding()
-                        .bold()
-                        .padding()
-                    
-                }.frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color.customBackground.ignoresSafeArea())
             }
         }
     }

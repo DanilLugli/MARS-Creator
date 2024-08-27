@@ -92,7 +92,7 @@ func printMatrix(matrix: [[Double]], decimal: Int) -> String {
     return roundedMatrix.map { $0.map { String(repeating: " ", count: maxLength - $0.count) + $0 }.joined(separator: " ") }.joined(separator: "\n")
 }
 
-func saveConversionGlobalLocal(_ conversions: [String: Any], _ URLFile: URL, _ nameFloor: String) {
+func saveConversionGlobalLocal(_ conversions: [String: Any], _ URLFile: URL, _ floor: Floor) {
     var filteredDict = conversions.filter { $0.key.contains("TRANSFORMATION.LOCALTOGLOBAL") }
     filteredDict = Dictionary(uniqueKeysWithValues:filteredDict.map { key, value in
         let kMOD = String(key.split(separator: "_TRANSFORMATION.LOCALTOGLOBAL").first!)
@@ -101,14 +101,15 @@ func saveConversionGlobalLocal(_ conversions: [String: Any], _ URLFile: URL, _ n
         return (kMOD, vMOD)
     })
     
-    updateJSONFile(filteredDict, URLFile, nameFloor)
+    updateJSONFile(filteredDict, URLFile, floor)
+    
 }
 
-func updateJSONFile(_ dict: [String: Any], _ URLFile: URL, _ nameFLoor: String) {
+func updateJSONFile(_ dict: [String: Any], _ URLFile: URL, _ floor: Floor) {
     
     print("CALLING updateJSONFile ")
     let fileManager = FileManager.default
-    let fileURL = URLFile.appending(path: "\(nameFLoor).json")
+    let fileURL = URLFile.appending(path: "\(floor.name).json")
     
     if fileManager.fileExists(atPath: fileURL.path) {
         do {
@@ -119,6 +120,19 @@ func updateJSONFile(_ dict: [String: Any], _ URLFile: URL, _ nameFLoor: String) 
             }
             jsonData = try JSONSerialization.data(withJSONObject: json, options: .prettyPrinted)
             try jsonData.write(to: fileURL)
+            
+            print("PRIMA: \(floor.associationMatrix)")
+            // Ricarica il `floor` utilizzando la funzione `loadRoomPositionFromJson`
+            if let updatedAssociationMatrix = loadRoomPositionFromJson(from: fileURL) {
+                floor.associationMatrix = updatedAssociationMatrix
+                print("Floor updated with new associationMatrix")
+                
+                print("DOPO: \(floor.associationMatrix)")
+            } else {
+                print("Failed to load associationMatrix from JSON.")
+            }
+            
+            
         } catch {
             print("Errore_1")
             print(error.localizedDescription)

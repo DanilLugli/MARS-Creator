@@ -33,24 +33,21 @@ struct MatrixCardView: View {
                 
                 VStack(alignment: .leading) {
                     HStack{
-                        Text(floor)
+                        Text("Position of \(room)")
                             .font(.system(size: 20, weight: .bold))
                             .foregroundColor(.black)
-                        Text(" - ")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.black)
-                        Text(room)
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.black)
+                        
                     }
                     HStack{
-                        Text("Exist:")
-                            .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.black)
-                        Text("\(exist)")
-                            .font(.system(size: 16, weight: .bold))
+                        if exist{
+                            Text("Calculated".uppercased())
+                                .font(.system(size: 16, weight: .bold)).foregroundColor(.green)
 
-                            .foregroundColor(exist ? .green : .red)
+                        }else{
+                            Text("Calculate position using + icon")
+                                .font(.system(size: 16, weight: .bold)).foregroundColor(.red)
+                        }
+                        
                     }
                     Text("\(dateFormatter.string(from: date))")
                         .font(.system(size: 14))

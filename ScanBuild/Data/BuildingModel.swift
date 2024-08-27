@@ -88,6 +88,7 @@ class BuildingModel: ObservableObject {
                 throw NSError(domain: "com.example.ScanBuild", code: 1, userInfo: [NSLocalizedDescriptionKey: "Errore durante la creazione della cartella root: \(error)"])
             }
         }
+        
         let buildingURLs = try fileManager.contentsOfDirectory(at: BuildingModel.SCANBUILD_ROOT, includingPropertiesForKeys: [.isDirectoryKey], options: .skipsHiddenFiles)
         print(buildingURLs)
         
@@ -136,22 +137,38 @@ class BuildingModel: ObservableObject {
                                 } else if fileURL.lastPathComponent.contains("sceneConfiguration") {
                                     sceneConfiguration = try SCNScene(url: fileURL, options: nil)
                                 }
-                            } else if fileURL.pathExtension == "json" && fileURL.lastPathComponent.contains("associationMatrix") {
-                                let jsonData = try Data(contentsOf: fileURL)
-                                associationMatrix = try JSONDecoder().decode([String: RotoTraslationMatrix].self, from: jsonData)
                             }
+                        }
+                    }
+                    
+                    // Carica l'associationMatrix dal file JSON se esiste
+                    let associationMatrixURL = floorURL.appendingPathComponent("\(floorURL.lastPathComponent).json")
+                    if fileManager.fileExists(atPath: associationMatrixURL.path) {
+                        if let loadedMatrix = loadRoomPositionFromJson(from: associationMatrixURL) {
+                            associationMatrix = loadedMatrix
+                            print("Matrix loaded for floor \(floorURL.lastPathComponent): \(associationMatrix)")
+                        } else {
+                            print("Failed to load RotoTraslationMatrix from JSON file for floor \(floorURL.lastPathComponent)")
                         }
                     }
                     
                     let rooms = try loadRooms(from: floorURL)
                     
-                    let floor = Floor(name: floorURL.lastPathComponent, lastUpdate: lastModifiedDate, planimetry: Image(""),
-                                      associationMatrix: associationMatrix ?? [:], rooms: rooms, sceneObjects: sceneObjects, scene: scene, sceneConfiguration: sceneConfiguration, floorURL: floorURL)
+                    let floor = Floor(name: floorURL.lastPathComponent,
+                                      lastUpdate: lastModifiedDate,
+                                      planimetry: Image(""),
+                                      associationMatrix: associationMatrix ?? [:],
+                                      rooms: rooms,
+                                      sceneObjects: sceneObjects,
+                                      scene: scene,
+                                      sceneConfiguration: sceneConfiguration,
+                                      floorURL: floorURL)
                     
-                    let associationMatrixURL = floorURL.appendingPathComponent("\(floor.name).json")
-                    if fileManager.fileExists(atPath: associationMatrixURL.path) {
-                        floor.loadAssociationMatrixFromJSON(fileURL: associationMatrixURL)
-                    }
+//                    let associationMatrixURL = floorURL.appendingPathComponent("\(floor.name).json")
+//                    if fileManager.fileExists(atPath: associationMatrixURL.path) {
+//                        floor.loadAssociationMatrixFromJSON(fileURL: associationMatrixURL)
+//                        print("Matrix: \(floor.associationMatrix)")
+//                    }
                     
                     floors.append(floor)
                 }
@@ -263,6 +280,10 @@ class BuildingModel: ObservableObject {
     
     func getBuildings() -> [Building] {
         return buildings
+    }
+    
+    func getBuilding(_ building: Building) -> Building? {
+        return buildings.first { $0.id == building.id }
     }
     
     func addBuilding(building: Building) {

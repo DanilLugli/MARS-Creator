@@ -20,6 +20,7 @@ struct RoomView: View {
     @State private var isConnectionSameFloor = false
     @State private var isErrorAlertPresented = false
     @State private var isOptionsSheetPresented = false
+    @State private var isUpdateOpenView = false
 
     @State private var showUpdateOptionsAlert = false
     @State private var showUpdateAlert = false
@@ -281,14 +282,22 @@ struct RoomView: View {
                         }
                     } 
                     else if selectedTab == 2 {
-                        NavigationLink(destination: RoomPositionView(floor: floor, room: room), isActive: $isConnectionAdjacentFloor) {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.system(size: 26))
-                                .foregroundStyle(.white, .blue, .blue)
-                                .onTapGesture {
-                                    self.isConnectionAdjacentFloor = true
+                        Menu {
+                                Button(action: {
+                                    isUpdateOpenView = true
+                                }) {
+                                    Label("Update Room Position", systemImage: "pencil")
                                 }
-                        }
+                            } label: {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.system(size: 26))
+                                    .foregroundStyle(.white, .blue, .blue)
+                            }
+
+                        NavigationLink(destination: RoomPositionView(floor: floor, room: room),
+                                           isActive: $isUpdateOpenView) {
+                                EmptyView() // NavigationLink vuoto per il comportamento di isActive
+                            }
                     }
                     else if selectedTab == 3 {
                         ZStack{
@@ -358,7 +367,7 @@ struct RoomView: View {
                 Button("SAVE", action: {
                     if !newRoomName.isEmpty {
                         do {
-                            try floor.renameRoom(floor: floor, room: room, newName: newRoomName)
+                            try BuildingModel.getInstance().getBuilding(building)?.getFloor(floor)?.renameRoom(floor: floor, room: room, newName: newRoomName)
                         } catch {
                             print("Errore durante la rinomina: \(error.localizedDescription)")
                         }

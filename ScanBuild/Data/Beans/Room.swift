@@ -138,3 +138,43 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         return _transitionZones.compactMap { $0.connection }
     }
 }
+
+extension Room {
+    func debugPrintRoom() {
+        print("Room Debug Info:")
+        print("-----------------------------")
+        print("ID: \(_id)")
+        print("Name: \(_name)")
+        print("Last Update: \(_lastUpdate)")
+        print("Room URL: \(_roomURL.path)")
+        print("Reference Markers (\(_referenceMarkers.count)):")
+        
+        for marker in referenceMarkers {
+            print("\tMarker ID: \(marker.id), Coordinates: \(marker.coordinates)")
+        }
+        
+        print("Transition Zones (\(self.transitionZones.count)):")
+        for zone in transitionZones {
+            print("\tTransition Zone Name: \(zone.name), Area: \(zone.transitionArea)")
+        }
+        
+        print("Scene Objects (\(self.sceneObjects.count)):")
+        for object in sceneObjects {
+            print("\tObject Name: \(object.name ?? "Unnamed Object")")
+        }
+        
+        if let scene = scene {
+            print("Scene: \(scene.debugDescription)")
+        } else {
+            print("Scene: None")
+        }
+        
+        if let worldMap = worldMap {
+            print("World Map: \(worldMap)")
+        } else {
+            print("World Map: None")
+        }
+        
+        print("-----------------------------\n")
+    }
+}

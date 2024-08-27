@@ -5,7 +5,7 @@ import UniformTypeIdentifiers
 
 struct FloorView: View {
     
-    @EnvironmentObject var buildingModel: BuildingModel
+    @EnvironmentObject var buildingModel : BuildingModel
     @ObservedObject var floor: Floor
     @ObservedObject var building: Building
     @State private var searchText: String = ""
@@ -137,9 +137,6 @@ struct FloorView: View {
                                     borders: true
                                 )
                                 
-                                mapPositionView.handler.changeColorOfNode(nodeName: "Bagno", color: UIColor.orange)
-                                mapPositionView.handler.changeColorOfNode(nodeName: "Sala", color: UIColor.yellow)
-                                
                                 // Carica la mappa generale
                                 mapView.loadFloorPlanimetry(
                                     borders: true,
@@ -183,6 +180,12 @@ struct FloorView: View {
                                             RoomCardView(name: room.name, date: room.lastUpdate, position: isSelected, rowSize: 1, isSelected: false).padding()
                                         }
                                     }
+                                }
+                            }.onAppear {
+                                // Stampa di debug
+                                print("PRINT DEBUG ROOM")
+                                floor.rooms.forEach { room in
+                                    room.debugPrintRoom() // Stampa i dati delle stanze
                                 }
                             }
                             .padding()
@@ -313,7 +316,7 @@ struct FloorView: View {
             Button("SAVE", action: {
                 if !newFloorName.isEmpty {
                     do {
-                        try building.renameFloor(floor: floor, newName: newFloorName)
+                        try BuildingModel.getInstance().getBuilding(building)?.renameFloor(floor: floor, newName: newFloorName)
                     } catch {
                         print("Errore durante la rinomina: \(error.localizedDescription)")
                     }
@@ -327,46 +330,6 @@ struct FloorView: View {
         }, message: {
             Text("Enter a new name for the Floor.")
         })
-//        .sheet(isPresented: $isRenameSheetPresented) {
-//            VStack {
-//                Text("Rename Building")
-//                    .font(.system(size: 22))
-//                    .fontWeight(.bold)
-//                    .frame(maxWidth: .infinity, alignment: .leading)
-//                    .padding(.horizontal, 20)
-//                    .padding(.top, 20)
-//                    .foregroundColor(.white)
-//                TextField("New Building Name", text: $newBuildingName)
-//                    .padding()
-//                    .background(Color(.systemGray6))
-//                    .cornerRadius(8)
-//                    .padding(.horizontal, 20)
-//                    .padding(.top, 8)
-//                Spacer()
-//                Button(action: {
-//                    if !newBuildingName.isEmpty {
-//                        do {
-//                            try building.renameFloor(floor: floor, newName: newBuildingName)
-//                            print("Floor rinominato correttamente a \(newBuildingName)")
-//                        } catch {
-//                            print("Errore durante la rinomina del floor: \(error.localizedDescription)")
-//                        }
-//                    }
-//                }) {
-//                    Text("SAVE")
-//                        .font(.system(size: 22, weight: .heavy))
-//                        .foregroundColor(.white)
-//                        .frame(maxWidth: .infinity)
-//                        .padding()
-//                        .background(Color.blue)
-//                        .cornerRadius(10)
-//                }
-//                .padding(.horizontal, 20)
-//                .padding(.bottom, 20)
-//            }
-//            .padding()
-//            .background(Color.customBackground.ignoresSafeArea())
-//        }
         .sheet(isPresented: $isFloorPlanimetryUploadPicker) {
             FilePickerView { url in
                 selectedFileURL = url
@@ -462,12 +425,17 @@ struct FloorView: View {
     
     var filteredRooms: [Room] {
         if searchText.isEmpty {
+            print("PRINT DEBUG ROOM")
+            floor.rooms.forEach{ room in
+                room.debugPrintRoom()
+            }
             return floor.rooms
         } else {
             return floor.rooms.filter { $0.name.lowercased().contains(searchText.lowercased()) }
         }
     }
 }
+
 
 struct FloorView_Previews: PreviewProvider {
     static var previews: some View {

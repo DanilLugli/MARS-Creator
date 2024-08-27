@@ -8,8 +8,7 @@ struct BuildingView: View {
     @State private var isRenameSheetPresented = false
     @State private var newBuildingName: String = ""
     
-    @State private var showDeleteConfirmation = false // Stato per mostrare l'alert
-    //@Environment(\.dismiss) var dismiss // Accesso all'azione di dismiss
+    @State private var showDeleteConfirmation = false
     
     var body: some View {
         NavigationStack {
@@ -140,56 +139,22 @@ struct BuildingView: View {
         }, message: {
             Text("Enter a new name for the building.")
         })
-//        .sheet(isPresented: $isRenameSheetPresented) {
-//            VStack {
-//                Text("Rename Building")
-//                    .font(.system(size: 22))
-//                    .fontWeight(.bold)
-//                    .frame(maxWidth: .infinity, alignment: .leading)
-//                    .padding(.horizontal, 20)
-//                    .padding(.top, 20)
-//                    .foregroundColor(.white)
-//                TextField("New Building Name", text: $newBuildingName)
-//                    .padding()
-//                    .background(Color(.systemGray6))
-//                    .cornerRadius(8)
-//                    .padding(.horizontal, 20)
-//                    .padding(.top, 8)
-//                Spacer()
-//                Button(action: {
-//                    if !newBuildingName.isEmpty {
-//                        do {
-//                            try BuildingModel.getInstance().renameBuilding(building: building, newName: newBuildingName)
-//                        } catch {
-//                            print("Errore durante la rinomina: \(error.localizedDescription)")
-//                        }
-//                        isRenameSheetPresented = false
-//                    }
-//                }) {
-//                    Text("SAVE")
-//                        .font(.system(size: 22, weight: .heavy))
-//                        .foregroundColor(.white)
-//                        .frame(maxWidth: .infinity)
-//                        .padding()
-//                        .background(Color.blue)
-//                        .cornerRadius(10)
-//                }
-//                .padding(.horizontal, 20)
-//                .padding(.bottom, 20)
-//            }
-//            .padding()
-//            .background(Color.customBackground.ignoresSafeArea())
-//        }
+
     }
     
     var filteredFloors: [Floor] {
         if searchText.isEmpty {
+            building.floors.forEach{ building in
+                building.debugPrint()
+            }
             return building.floors
         } else {
             return building.floors.filter { $0.name.lowercased().contains(searchText.lowercased()) }
         }
     }
 }
+
+
 
 struct BuildingView_Previews: PreviewProvider {
     static var previews: some View {
