@@ -21,6 +21,7 @@ struct RoomView: View {
     @State private var isErrorAlertPresented = false
     @State private var isOptionsSheetPresented = false
     @State private var isUpdateOpenView = false
+    @State private var isCreateRoomPosition = false
 
     @State private var showUpdateOptionsAlert = false
     @State private var showUpdateAlert = false
@@ -31,6 +32,7 @@ struct RoomView: View {
     @State private var searchText: String = ""
     
     var mapView = SCNViewContainer()
+    var mapRoomPositionView = SCNViewMapContainer()
     
     var body: some View {
         NavigationStack {
@@ -95,6 +97,56 @@ struct RoomView: View {
                         .tag(0)
                         
                         VStack {
+                            if doesMatrixExist(for: room.name, in: floor.associationMatrix) {
+                                VStack {
+                                    mapRoomPositionView
+                                        .border(Color.white)
+                                        .cornerRadius(10)
+                                        .padding()
+                                        .shadow(color: Color.gray, radius: 3)
+                                    
+                                    let isSelected = floor.isMatrixPresent(named: room.name, inFileAt: floor.floorURL.appendingPathComponent("\(floor.name).json"))
+                                    MatrixCardView(floor: floor.name, room: room.name, exist: isSelected, date: Date(), rowSize: 1)
+                                }.onAppear {
+                                    // Definisci un array di URL
+                                    var roomURLs: [URL] = []
+                                    
+                                    roomURLs.append(room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"))
+//                                    floor.rooms.forEach { room in
+//                                        print(room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"))
+//                                        
+//                                    }
+                                    
+                                    mapRoomPositionView.handler.loadRoomMaps(
+                                        floor: floor,
+                                        roomURLs: roomURLs,
+                                        borders: true
+                                    )
+                                    
+                                    // Carica la mappa generale
+                                    mapView.loadFloorPlanimetry(
+                                        borders: true,
+                                        usdzURL: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz")
+                                    )
+                                    
+                                }
+                                .padding()
+                            } else {
+                                VStack {
+                                    let isSelected = floor.isMatrixPresent(named: room.name, inFileAt: floor.floorURL.appendingPathComponent("\(floor.name).json"))
+                                    MatrixCardView(floor: room.name, room: room.name, exist: isSelected, date: Date(), rowSize: 1)
+                                }
+                                .padding()
+                            }
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color.customBackground)
+                        .tabItem {
+                            Label("Room Position", systemImage: "sum")
+                        }
+                        .tag(1)
+                        
+                        VStack {
                             if room.referenceMarkers.isEmpty {
                                 VStack {
                                     Text("Add Marker with + icon")
@@ -123,28 +175,6 @@ struct RoomView: View {
                         .background(Color.customBackground)
                         .tabItem {
                             Label("Marker", systemImage: "mappin.and.ellipse")
-                        }
-                        .tag(1)
-                        
-                        VStack {
-                            if floor.associationMatrix.isEmpty {
-                                VStack {
-                                    let isSelected = floor.isMatrixPresent(named: room.name, inFileAt: floor.floorURL.appendingPathComponent("\(floor.name).json"))
-                                    MatrixCardView(floor: floor.name, room: room.name, exist: isSelected, date: Date(), rowSize: 1)
-                                }
-                                .padding()
-                            } else {
-                                VStack {
-                                    let isSelected = floor.isMatrixPresent(named: room.name, inFileAt: floor.floorURL.appendingPathComponent("\(floor.name).json"))
-                                    MatrixCardView(floor: room.name, room: room.name, exist: isSelected, date: Date(), rowSize: 1)
-                                }
-                                .padding()
-                            }
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color.customBackground)
-                        .tabItem {
-                            Label("Room Position", systemImage: "sum")
                         }
                         .tag(2)
                         
@@ -280,7 +310,7 @@ struct RoomView: View {
                             )
                         }
                     }
-                    else if selectedTab == 1 {
+                    else if selectedTab == 2 {
                         Button(action: {
                             isRoomPlanimetryUploadPicker = true
                         }) {
@@ -289,11 +319,41 @@ struct RoomView: View {
                                 .foregroundStyle(.white, .blue, .blue)
                         }
                     }
-                    else if selectedTab == 2 {
-                        NavigationLink(destination: RoomPositionView(floor: floor, room: room)) {
+                    else if selectedTab == 1 {
+//                        NavigationLink(destination: RoomPositionView(floor: floor, room: room)) {
+//                            Image(systemName: "plus.circle.fill")
+//                                .font(.system(size: 26))
+//                                .foregroundStyle(.white, .blue, .blue)
+//                        }
+                        Menu {
+                        
+                            Button(action: {
+                                isRoomPlanimetryUploadPicker = true
+                            }) {
+                                Label("Create Room Position Automatic Mode", systemImage: "mappin.and.ellipse")
+                            }.disabled(true)
+                            
+                            Button(action: {
+                                isCreateRoomPosition = true
+                                print("isNavigationActive set to true") // Aggiungi per debug
+                            }) {
+                                Label("Create Room Position Manual Mode", systemImage: "mappin")
+                            }
+                            
+                        } label: {
                             Image(systemName: "plus.circle.fill")
                                 .font(.system(size: 26))
+                                .symbolRenderingMode(.palette)
                                 .foregroundStyle(.white, .blue, .blue)
+                        }.background{
+                            NavigationLink(
+                                destination: RoomPositionView(floor: floor, room: room),
+                                isActive: $isCreateRoomPosition,
+                                label: {
+                                    EmptyView()
+                                }
+                            )
+
                         }
                     }
                     else if selectedTab == 3 {
@@ -317,7 +377,7 @@ struct RoomView: View {
                                     //TODO: Create in future Connection with Elevator
                                 }) {
                                     Label("Create Elevator Connection", systemImage: "arrow.up.and.line.horizontal.and.arrow.down")
-                                }
+                                }.disabled(true)
                                 
                             } label: {
                                 Image(systemName: "plus.circle.fill")

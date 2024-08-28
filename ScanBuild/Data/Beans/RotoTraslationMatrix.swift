@@ -103,3 +103,8 @@ func loadRoomPositionFromJson(from fileURL: URL) -> [String: RotoTraslationMatri
         return nil
     }
 }
+
+func doesMatrixExist(for roomName: String, in associationMatrix: [String: RotoTraslationMatrix]) -> Bool {
+    // Controlla se esiste una chiave nel dizionario che corrisponde alla stringa passata
+    return associationMatrix[roomName] != nil
+}

@@ -12,7 +12,6 @@ struct BuildingsView: View {
         NavigationStack {
             VStack {
                 
-                
                 if buildingsModel.getBuildings().isEmpty {
                     VStack {
                         Text("Add Building with + icon")
