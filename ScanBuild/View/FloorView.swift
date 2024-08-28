@@ -31,6 +31,8 @@ struct FloorView: View {
     @State private var alertMessage = ""
     @State private var errorMessage: String = ""
     
+
+    
     var mapView = SCNViewContainer()
     var mapPositionView = SCNViewMapContainer()
     

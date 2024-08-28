@@ -26,10 +26,13 @@ struct SCNViewContainer: UIViewRepresentable {
     var dimension = SCNVector3()
     
     var rotoTraslation: [RotoTraslationMatrix] = []
+    var origin = SCNNode()
     @State var rotoTraslationActive: Int = 0
     
     init() {
+        print("ESEGUO INIT SCNVVVV")
         massCenter.worldPosition = SCNVector3(0, 0, 0)
+        origin.simdWorldTransform = simd_float4x4([1.0,0,0,0],[0,1.0,0,0],[0,0,1.0,0],[0,0,0,1.0])
     }
     
     func RotoActivePlusMinus(_ plus: Bool) {

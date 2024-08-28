@@ -7,13 +7,16 @@ class SCNViewMapHandler: ObservableObject {
     
     var scnView: SCNView
     var cameraNode: SCNNode
-    var massCenter: SCNNode
-    
+    var massCenter: SCNNode = SCNNode()
+    var origin: SCNNode = SCNNode()
+
     init(scnView: SCNView, cameraNode: SCNNode, massCenter: SCNNode) {
         self.scnView = scnView
         self.cameraNode = cameraNode
-        self.massCenter = massCenter
+        self.massCenter.worldPosition = SCNVector3(0, 0, 0)
+        self.origin.simdWorldTransform = simd_float4x4([1.0,0,0,0], [0,1.0,0,0], [0,0,1.0,0], [0,0,0,1.0])
     }
+    
     
     func loadRoomMaps(floor: Floor, roomURLs: [URL], borders: Bool) {
         do {
@@ -45,15 +48,17 @@ class SCNViewMapHandler: ObservableObject {
                         print("Rotation matrix (r_Y): \(rotoTraslationMatrix.r_Y)")
                         
                         print("BEFORE POSITION: \nNode: \(roomNode.name ?? "Unnamed"), Position: \(roomNode.position)")
-                        // Applica la matrice di roto-traslazione al nodo
+                        
                         applyRotoTraslation(to: roomNode, with: rotoTraslationMatrix)
+                        
                         print("AFTER POSITION: \nNode: \(roomNode.name ?? "Unnamed"), Position: \(roomNode.position)")
 
                     } else {
                         print("No RotoTraslationMatrix found for room: \(roomName)")
                     }
                     
-                    // Imposta il nome del nodo in base al nome del file della stanza
+                    //Imposta il nome del nodo in base al nome del file della stanza
+                    
                     roomNode.name = roomName
                     print("RoomNode aggiunto: \(roomNode)")
                     
@@ -204,92 +209,89 @@ class SCNViewMapHandler: ObservableObject {
         scnView.scene?.rootNode.addChildNode(massCenter)
     }
     
+//    func applyRotoTraslation(to node: SCNNode, with rotoTraslation: RotoTraslationMatrix) {
+//        
+//        print("NODE: ")
+//        print(node)
+//        print("\n")
+//        print(node.simdWorldTransform.columns.3)
+//        print("\n")
+//        print(rotoTraslation.translation)
+//        print("\n\n\n\n\n")
+//        node.simdWorldTransform.columns.3 = node.simdWorldTransform.columns.3 * rotoTraslation.translation
+//        
+//        let r_Y = simd_float3x3([
+//            simd_float3(rotoTraslation.r_Y.columns.0.x, rotoTraslation.r_Y.columns.0.y, rotoTraslation.r_Y.columns.0.z),
+//            simd_float3(rotoTraslation.r_Y.columns.1.x, rotoTraslation.r_Y.columns.1.y, rotoTraslation.r_Y.columns.1.z),
+//            simd_float3(rotoTraslation.r_Y.columns.2.x, rotoTraslation.r_Y.columns.2.y, rotoTraslation.r_Y.columns.2.z),
+//        ])
+//        
+//        var rot = simd_float3x3([
+//            simd_float3(node.simdWorldTransform.columns.0.x, node.simdWorldTransform.columns.0.y, node.simdWorldTransform.columns.0.z),
+//            simd_float3(node.simdWorldTransform.columns.1.x, node.simdWorldTransform.columns.1.y, node.simdWorldTransform.columns.1.z),
+//            simd_float3(node.simdWorldTransform.columns.2.x, node.simdWorldTransform.columns.2.y, node.simdWorldTransform.columns.2.z),
+//        ])
+//        
+//        rot = r_Y * rot
+//        
+//        node.simdWorldTransform.columns.0 = simd_float4(
+//            rot.columns.0.x,
+//            rot.columns.0.y,
+//            rot.columns.0.z,
+//            node.simdWorldTransform.columns.0.w
+//        )
+//        node.simdWorldTransform.columns.1 = simd_float4(
+//            rot.columns.1.x,
+//            rot.columns.1.y,
+//            rot.columns.1.z,
+//            node.simdWorldTransform.columns.1.w
+//        )
+//        node.simdWorldTransform.columns.2 = simd_float4(
+//            rot.columns.2.x,
+//            rot.columns.2.y,
+//            rot.columns.2.z,
+//            node.simdWorldTransform.columns.2.w
+//        )
+//    }
+    
+    //TODO: FUNZIONE CREATA DA GPT- Controllare se è corretta
     func applyRotoTraslation(to node: SCNNode, with rotoTraslation: RotoTraslationMatrix) {
         
-        print("NODE: ")
-        print(node)
-        print("\n")
-        print(node.simdWorldTransform.columns.3)
-        print("\n")
-        print(rotoTraslation.translation)
-        print("\n\n\n\n\n")
-        node.simdWorldTransform.columns.3 = node.simdWorldTransform.columns.3 * rotoTraslation.translation
+        // Stampa informazioni di debug
+        print("NODE: \(node.name ?? "Unnamed Node")\n")
+        print("Current Node Position: \(node.simdWorldTransform.columns.3)\n")
+        print("RotoTraslation Translation Matrix: \(rotoTraslation.translation)\n")
         
+        // Step 1: Applica la traslazione al nodo
+        // La traslazione è contenuta nella quarta colonna della matrice rotoTraslation
+        print("AAA: \(rotoTraslation.translation.columns.3)")
+        node.simdWorldTransform.columns.3 = rotoTraslation.translation.columns.3
+        
+        // Step 2: Estrai la matrice di rotazione (simd_float3x3) dal parametro rotoTraslation
         let r_Y = simd_float3x3([
             simd_float3(rotoTraslation.r_Y.columns.0.x, rotoTraslation.r_Y.columns.0.y, rotoTraslation.r_Y.columns.0.z),
             simd_float3(rotoTraslation.r_Y.columns.1.x, rotoTraslation.r_Y.columns.1.y, rotoTraslation.r_Y.columns.1.z),
-            simd_float3(rotoTraslation.r_Y.columns.2.x, rotoTraslation.r_Y.columns.2.y, rotoTraslation.r_Y.columns.2.z),
+            simd_float3(rotoTraslation.r_Y.columns.2.x, rotoTraslation.r_Y.columns.2.y, rotoTraslation.r_Y.columns.2.z)
         ])
         
-        var rot = simd_float3x3([
+        // Step 3: Estrai la rotazione corrente del nodo e crea una matrice 3x3
+        var currentRotation = simd_float3x3([
             simd_float3(node.simdWorldTransform.columns.0.x, node.simdWorldTransform.columns.0.y, node.simdWorldTransform.columns.0.z),
             simd_float3(node.simdWorldTransform.columns.1.x, node.simdWorldTransform.columns.1.y, node.simdWorldTransform.columns.1.z),
-            simd_float3(node.simdWorldTransform.columns.2.x, node.simdWorldTransform.columns.2.y, node.simdWorldTransform.columns.2.z),
+            simd_float3(node.simdWorldTransform.columns.2.x, node.simdWorldTransform.columns.2.y, node.simdWorldTransform.columns.2.z)
         ])
         
-        rot = r_Y * rot
+        // Step 4: Combina la nuova rotazione con quella corrente
+        currentRotation = r_Y * currentRotation
         
-        node.simdWorldTransform.columns.0 = simd_float4(
-            rot.columns.0.x,
-            rot.columns.0.y,
-            rot.columns.0.z,
-            node.simdWorldTransform.columns.0.w
-        )
-        node.simdWorldTransform.columns.1 = simd_float4(
-            rot.columns.1.x,
-            rot.columns.1.y,
-            rot.columns.1.z,
-            node.simdWorldTransform.columns.1.w
-        )
-        node.simdWorldTransform.columns.2 = simd_float4(
-            rot.columns.2.x,
-            rot.columns.2.y,
-            rot.columns.2.z,
-            node.simdWorldTransform.columns.2.w
-        )
+        // Step 5: Aggiorna la matrice di trasformazione del nodo con la nuova rotazione
+        node.simdWorldTransform.columns.0 = simd_float4(currentRotation.columns.0, node.simdWorldTransform.columns.0.w)
+        node.simdWorldTransform.columns.1 = simd_float4(currentRotation.columns.1, node.simdWorldTransform.columns.1.w)
+        node.simdWorldTransform.columns.2 = simd_float4(currentRotation.columns.2, node.simdWorldTransform.columns.2.w)
+        
+        // Debug: Stampa il nuovo stato del nodo dopo la rototraslazione
+        print("Updated Node Position: \(node.simdWorldTransform.columns.3)")
     }
-    
-    //TODO: FUNZIONE CREATA DA GPT- Controllare se è corretta
-    //    func applyRotoTraslation(to node: SCNNode, with rotoTraslation: RotoTraslationMatrix) {
-    //
-    //        print("NODE: ")
-    //        print(node)
-    //        print("\n")
-    //        print(node.simdWorldTransform.columns.3)
-    //        print("\n")
-    //        print(rotoTraslation.translation)
-    //        print("\n\n\n\n\n")
-    //        node.simdWorldTransform = rotoTraslation.translation * node.simdWorldTransform
-    //
-    //        // Estrai la matrice di rotazione 3x3 da r_Y (matrice di rotazione)
-    //        let r_Y = simd_float3x3(
-    //            simd_float3(rotoTraslation.r_Y.columns.0.x, rotoTraslation.r_Y.columns.0.y, rotoTraslation.r_Y.columns.0.z),
-    //            simd_float3(rotoTraslation.r_Y.columns.1.x, rotoTraslation.r_Y.columns.1.y, rotoTraslation.r_Y.columns.1.z),
-    //            simd_float3(rotoTraslation.r_Y.columns.2.x, rotoTraslation.r_Y.columns.2.y, rotoTraslation.r_Y.columns.2.z)
-    //        )
-    //
-    //        // Estrai la matrice di rotazione corrente del nodo
-    //        var rot = simd_float3x3(
-    //            simd_float3(node.simdWorldTransform.columns.0.x, node.simdWorldTransform.columns.0.y, node.simdWorldTransform.columns.0.z),
-    //            simd_float3(node.simdWorldTransform.columns.1.x, node.simdWorldTransform.columns.1.y, node.simdWorldTransform.columns.1.z),
-    //            simd_float3(node.simdWorldTransform.columns.2.x, node.simdWorldTransform.columns.2.y, node.simdWorldTransform.columns.2.z)
-    //        )
-    //
-    //        // Combina la rotazione del nodo con la nuova rotazione
-    //        rot = r_Y * rot
-    //
-    //        // Applica la nuova rotazione al nodo
-    //        node.simdWorldTransform.columns.0 = simd_float4(
-    //            rot.columns.0.x, rot.columns.0.y, rot.columns.0.z, node.simdWorldTransform.columns.0.w
-    //        )
-    //        node.simdWorldTransform.columns.1 = simd_float4(
-    //            rot.columns.1.x, rot.columns.1.y, rot.columns.1.z, node.simdWorldTransform.columns.1.w
-    //        )
-    //        node.simdWorldTransform.columns.2 = simd_float4(
-    //            rot.columns.2.x, rot.columns.2.y, rot.columns.2.z, node.simdWorldTransform.columns.2.w
-    //        )
-    //    }
-    //
 }
 
 struct SCNViewMapContainer: UIViewRepresentable {
@@ -301,7 +303,7 @@ struct SCNViewMapContainer: UIViewRepresentable {
         let scnView = SCNView(frame: .zero)
         let cameraNode = SCNNode()
         let massCenter = SCNNode()
-        
+        let origin = SCNNode()
         massCenter.worldPosition = SCNVector3(0, 0, 0)
         
         self.handler = SCNViewMapHandler(scnView: scnView, cameraNode: cameraNode, massCenter: massCenter)

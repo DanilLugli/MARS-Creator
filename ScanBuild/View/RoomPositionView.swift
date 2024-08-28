@@ -275,6 +275,7 @@ struct RoomPositionView: View {
                     if matchingNodesForAPI.count >= 3 {
                         Button("Create Matrix") {
                             Task {
+                                print(matchingNodesForAPI)
                                 response = try await fetchAPIConversionLocalGlobal(localName: room.name, nodesList: matchingNodesForAPI)
                                 if let httpResponse = response.0 {
                                     print("Status code: \(httpResponse.statusCode)")
