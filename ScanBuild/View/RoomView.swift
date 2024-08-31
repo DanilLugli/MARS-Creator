@@ -22,6 +22,7 @@ struct RoomView: View {
     @State private var isOptionsSheetPresented = false
     @State private var isUpdateOpenView = false
     @State private var isCreateRoomPosition = false
+    @State private var isCreateManualRoomPosition = false
 
     @State private var showUpdateOptionsAlert = false
     @State private var showUpdateAlert = false
@@ -58,29 +59,73 @@ struct RoomView: View {
                                             .padding()
                                             .shadow(color: Color.gray, radius: 3)
                                         
-                                        VStack {
+                                        HStack{
                                             HStack {
-                                                Spacer() // Push buttons to the right
-                                                HStack {
-                                                    Button("+") {
-                                                        mapView.zoomIn()
-                                                    }
-                                                    .buttonStyle(.bordered)
-                                                    .bold()
-                                                    .background(Color.blue.opacity(0.4))
-                                                    .cornerRadius(8)
-                                                    
-                                                    Button("-") {
-                                                        mapView.zoomOut()
-                                                    }
-                                                    .buttonStyle(.bordered)
-                                                    .bold()
-                                                    .background(Color.blue.opacity(0.4))
-                                                    .cornerRadius(8).padding()
+                                                Button("+") {
+                                                    mapView.zoomIn()
                                                 }
-                                                .padding()
+                                                .buttonStyle(.bordered)
+                                                .bold()
+                                                .background(Color.blue.opacity(0.4))
+                                                .cornerRadius(8)
+                                                
+                                                Button("-") {
+                                                    mapView.zoomOut()
+                                                    
+                                                }
+                                                .buttonStyle(.bordered)
+                                                .bold()
+                                                .background(Color.blue.opacity(0.4))
+                                                .cornerRadius(8)
                                             }
-                                            Spacer() // Push buttons to the top
+                                            HStack {
+                                                Button(action: {
+                                                    mapView.moveMapRight()
+                                                }) {
+                                                    Image(systemName: "arrow.left")
+                                                        .bold()
+                                                        .foregroundColor(.white) // Colore del simbolo
+                                                }
+                                                .buttonStyle(.bordered)
+                                                .background(Color.blue.opacity(0.4))
+                                                .cornerRadius(8)
+                                                
+                                                Button(action: {
+                                                    mapView.moveMapLeft()
+                                                }) {
+                                                    Image(systemName: "arrow.right")
+                                                        .bold()
+                                                        .foregroundColor(.white) // Colore del simbolo
+                                                }
+                                                .buttonStyle(.bordered)
+                                                .background(Color.blue.opacity(0.4))
+                                                .cornerRadius(8)
+                                            }
+                                            .padding()
+                                            HStack {
+                                                Button(action: {
+                                                    mapView.moveMapUp()
+                                                }) {
+                                                    Image(systemName: "arrow.up")
+                                                        .bold()
+                                                        .foregroundColor(.white) // Colore del simbolo
+                                                }
+                                                .buttonStyle(.bordered)
+                                                .background(Color.blue.opacity(0.4))
+                                                .cornerRadius(8)
+                                                
+                                                Button(action: {
+                                                    mapView.moveMapDown()
+                                                }) {
+                                                    Image(systemName: "arrow.down")
+                                                        .bold()
+                                                        .foregroundColor(.white) // Colore del simbolo
+                                                }
+                                                .buttonStyle(.bordered)
+                                                .background(Color.blue.opacity(0.4))
+                                                .cornerRadius(8)
+                                            }
+                                            .padding()
                                         }
                                     }
                                 }
@@ -98,12 +143,81 @@ struct RoomView: View {
                         
                         VStack {
                             if doesMatrixExist(for: room.name, in: floor.associationMatrix) {
-                                VStack {
+                                ZStack {
                                     mapRoomPositionView
                                         .border(Color.white)
                                         .cornerRadius(10)
                                         .padding()
                                         .shadow(color: Color.gray, radius: 3)
+                                    
+                                    HStack{
+                                        HStack {
+                                            Button("+") {
+                                                mapRoomPositionView.handler.zoomIn()
+                                            }
+                                            .buttonStyle(.bordered)
+                                            .bold()
+                                            .background(Color.blue.opacity(0.4))
+                                            .cornerRadius(8)
+                                            
+                                            Button("-") {
+                                                mapRoomPositionView.handler.zoomOut()
+                                                
+                                            }
+                                            .buttonStyle(.bordered)
+                                            .bold()
+                                            .background(Color.blue.opacity(0.4))
+                                            .cornerRadius(8)
+                                        }
+                                        HStack {
+                                            Button(action: {
+                                                mapRoomPositionView.handler.moveFloorMapRight()
+                                            }) {
+                                                Image(systemName: "arrow.left")
+                                                    .bold()
+                                                    .foregroundColor(.white) // Colore del simbolo
+                                            }
+                                            .buttonStyle(.bordered)
+                                            .background(Color.blue.opacity(0.4))
+                                            .cornerRadius(8)
+                                            
+                                            Button(action: {
+                                                mapRoomPositionView.handler.moveFloorMapLeft()
+                                            }) {
+                                                Image(systemName: "arrow.right")
+                                                    .bold()
+                                                    .foregroundColor(.white) // Colore del simbolo
+                                            }
+                                            .buttonStyle(.bordered)
+                                            .background(Color.blue.opacity(0.4))
+                                            .cornerRadius(8)
+                                        }
+                                        .padding()
+                                        HStack {
+                                            Button(action: {
+                                                mapRoomPositionView.handler.moveFloorMapUp()
+                                            }) {
+                                                Image(systemName: "arrow.up")
+                                                    .bold()
+                                                    .foregroundColor(.white) // Colore del simbolo
+                                            }
+                                            .buttonStyle(.bordered)
+                                            .background(Color.blue.opacity(0.4))
+                                            .cornerRadius(8)
+                                            
+                                            Button(action: {
+                                                mapRoomPositionView.handler.moveFloorMapDown()
+                                            }) {
+                                                Image(systemName: "arrow.down")
+                                                    .bold()
+                                                    .foregroundColor(.white) // Colore del simbolo
+                                            }
+                                            .buttonStyle(.bordered)
+                                            .background(Color.blue.opacity(0.4))
+                                            .cornerRadius(8)
+                                        }
+                                        .padding()
+                                    }
                                     
                                     let isSelected = floor.isMatrixPresent(named: room.name, inFileAt: floor.floorURL.appendingPathComponent("\(floor.name).json"))
                                     MatrixCardView(floor: floor.name, room: room.name, exist: isSelected, date: Date(), rowSize: 1)
@@ -333,11 +447,20 @@ struct RoomView: View {
                                 Label("Create Room Position Automatic Mode", systemImage: "mappin.and.ellipse")
                             }.disabled(true)
                             
+                            Divider()
+                            
+                            Button(action: {
+                                isCreateManualRoomPosition = true
+                                print("isNavigationActive set to true") // Aggiungi per debug
+                            }) {
+                                Label("Create Room Position Manual Mode", systemImage: "mappin")
+                            }
+                            
                             Button(action: {
                                 isCreateRoomPosition = true
                                 print("isNavigationActive set to true") // Aggiungi per debug
                             }) {
-                                Label("Create Room Position Manual Mode", systemImage: "mappin")
+                                Label("Create Room Position Association Mode", systemImage: "mappin")
                             }
                             
                         } label: {
@@ -349,6 +472,14 @@ struct RoomView: View {
                             NavigationLink(
                                 destination: RoomPositionView(floor: floor, room: room),
                                 isActive: $isCreateRoomPosition,
+                                label: {
+                                    EmptyView()
+                                }
+                            )
+                            
+                            NavigationLink(
+                                destination: ManualRoomPositionView(),
+                                isActive: $isCreateManualRoomPosition,
                                 label: {
                                     EmptyView()
                                 }

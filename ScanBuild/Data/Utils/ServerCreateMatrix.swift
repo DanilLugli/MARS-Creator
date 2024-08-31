@@ -11,6 +11,12 @@ import SceneKit
 
 func fetchAPIConversionLocalGlobal(localName: String, nodesList: [(SCNNode, SCNNode)]) async throws -> (HTTPURLResponse?, [String: Any]) {
     //0 local, 1 global
+    for (node1, node2) in nodesList {
+        let name1 = await node1.name ?? "Unnamed"
+        let name2 = await node2.name ?? "Unnamed"
+        
+        print("\(name1):\(name2)")
+    }
     var jsonObj = [String: [Any]]()
     jsonObj[localName] = []
     

@@ -48,6 +48,8 @@
 		AA8E0A682C59480D0097BDCD /* MarkerCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA8E0A672C59480D0097BDCD /* MarkerCardView.swift */; };
 		AA8E0A6A2C5BA4D90097BDCD /* ServerCreateMatrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA8E0A692C5BA4D90097BDCD /* ServerCreateMatrix.swift */; };
 		AA8E0A6C2C5D02280097BDCD /* FilePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA8E0A6B2C5D02280097BDCD /* FilePickerView.swift */; };
+		AA92C4D82C83721C00637AF2 /* SCNViewUpdatePositionRoomContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA92C4D72C83721C00637AF2 /* SCNViewUpdatePositionRoomContainer.swift */; };
+		AA92C4DA2C8373D900637AF2 /* ManualRoomPositionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA92C4D92C8373D900637AF2 /* ManualRoomPositionView.swift */; };
 		AAA29E6A2C1711AA00CA267C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA29E692C1711AA00CA267C /* AppDelegate.swift */; };
 		AAA29E6C2C1711AA00CA267C /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = AAA29E6B2C1711AA00CA267C /* Shaders.metal */; };
 		AAA29E6F2C1711AA00CA267C /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA29E6E2C1711AA00CA267C /* Renderer.swift */; };
@@ -107,6 +109,8 @@
 		AA8E0A672C59480D0097BDCD /* MarkerCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkerCardView.swift; sourceTree = "<group>"; };
 		AA8E0A692C5BA4D90097BDCD /* ServerCreateMatrix.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerCreateMatrix.swift; sourceTree = "<group>"; };
 		AA8E0A6B2C5D02280097BDCD /* FilePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilePickerView.swift; sourceTree = "<group>"; };
+		AA92C4D72C83721C00637AF2 /* SCNViewUpdatePositionRoomContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SCNViewUpdatePositionRoomContainer.swift; sourceTree = "<group>"; };
+		AA92C4D92C8373D900637AF2 /* ManualRoomPositionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManualRoomPositionView.swift; sourceTree = "<group>"; };
 		AAA29E662C1711AA00CA267C /* ARL Creator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "ARL Creator.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AAA29E692C1711AA00CA267C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		AAA29E6B2C1711AA00CA267C /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
@@ -152,6 +156,7 @@
 				AAD778A82C528C600091181A /* FloorCaptureViewContainer.swift */,
 				AA2CA5562C3DB61E00C88C94 /* SCNViewContainer.swift */,
 				AA3A24F02C62599A00E162A3 /* SCNViewMapContainer.swift */,
+				AA92C4D72C83721C00637AF2 /* SCNViewUpdatePositionRoomContainer.swift */,
 				AA2CA5522C3DB60300C88C94 /* ARSCNViewContainer.swift */,
 				AA2CA5542C3DB61100C88C94 /* ExportRoomViewContainer.swift */,
 				AA8E0A632C57E50F0097BDCD /* VisualizeRoomViewContainer.swift */,
@@ -196,8 +201,10 @@
 				AA78F5DC2C2DB51D0044F825 /* BuildingView.swift */,
 				AAE57F9D2C3764FC00F0196F /* FloorView.swift */,
 				AA2CA55A2C3F07A500C88C94 /* RoomView.swift */,
+				AAD2F4462C7E2CCF009D52E2 /* FloorScanningView.swift */,
 				AAD778A62C5288A30091181A /* ScanningView.swift */,
 				AA2CA55C2C3FC62400C88C94 /* RoomPositionView.swift */,
+				AA92C4D92C8373D900637AF2 /* ManualRoomPositionView.swift */,
 				AA78F5E02C2DB6DE0044F825 /* AddBuildingView.swift */,
 				AAE57F9F2C376D0D00F0196F /* AddStairsConnectionView.swift */,
 				AA0FD83E2C750BC600DF6E20 /* AddSameConnectionView.swift */,
@@ -205,7 +212,6 @@
 				AA2CA5252C39FF3000C88C94 /* AddFloorView.swift */,
 				AAE57FA12C37FB6100F0196F /* Color.swift */,
 				AA8E0A6B2C5D02280097BDCD /* FilePickerView.swift */,
-				AAD2F4462C7E2CCF009D52E2 /* FloorScanningView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -408,8 +414,10 @@
 				AA3A24F12C62599A00E162A3 /* SCNViewMapContainer.swift in Sources */,
 				AA2CA5532C3DB60300C88C94 /* ARSCNViewContainer.swift in Sources */,
 				AA78F5F32C3430C80044F825 /* ServerManager.swift in Sources */,
+				AA92C4D82C83721C00637AF2 /* SCNViewUpdatePositionRoomContainer.swift in Sources */,
 				AAA29E712C1711AA00CA267C /* ViewController.swift in Sources */,
 				AA78F5ED2C3303910044F825 /* Logger.swift in Sources */,
+				AA92C4DA2C8373D900637AF2 /* ManualRoomPositionView.swift in Sources */,
 				AA2CA5572C3DB61E00C88C94 /* SCNViewContainer.swift in Sources */,
 				AAFB3A002C4DB6EF00DBC593 /* extensionNotificationName.swift in Sources */,
 				AAE57F9E2C3764FC00F0196F /* FloorView.swift in Sources */,

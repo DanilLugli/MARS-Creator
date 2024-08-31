@@ -1,10 +1,3 @@
-//
-//  SCNViewContainer.swift
-//  autoMapping
-//
-//  Created by Stefano di Terlizzi on 12/07/23.
-//
-
 
 import SwiftUI
 import SceneKit
@@ -35,33 +28,33 @@ struct SCNViewContainer: UIViewRepresentable {
         origin.simdWorldTransform = simd_float4x4([1.0,0,0,0],[0,1.0,0,0],[0,0,1.0,0],[0,0,0,1.0])
     }
     
-    func RotoActivePlusMinus(_ plus: Bool) {
-        if (plus) {
-            rotoTraslationActive = (rotoTraslationActive + 1) % rotoTraslation.count
-        } else {
-            rotoTraslationActive = (rotoTraslationActive - 1) % rotoTraslation.count
-        }
-    }
-    
     func setCamera() {
         scnView.scene?.rootNode.addChildNode(cameraNode)
-        cameraNode.camera = SCNCamera()
-        cameraNode.worldPosition = massCenter.worldPosition
         
-        cameraNode.worldPosition.y = 10
+        cameraNode.camera = SCNCamera()
+        
+        // Posiziona la camera sopra il massCenter
+        cameraNode.worldPosition = SCNVector3(massCenter.worldPosition.x, massCenter.worldPosition.y + 10, massCenter.worldPosition.z)
+        
+        // Configura la camera per la vista ortografica dall'alto
         cameraNode.camera?.usesOrthographicProjection = true
         cameraNode.camera?.orthographicScale = 10
-        // Create directional light
+        
+        // Ruota la camera per guardare verso il basso
+        cameraNode.eulerAngles = SCNVector3(-Double.pi / 2, 0, 0)
+        
+        // Crea una luce direzionale (opzionale)
         let directionalLight = SCNNode()
         directionalLight.light = SCNLight()
         directionalLight.light!.type = .ambient
         directionalLight.light!.color = UIColor(white: 1.0, alpha: 1.0)
         cameraNode.addChildNode(directionalLight)
         
+        // Imposta la camera come punto di vista
         scnView.pointOfView = cameraNode
-        let vConstraint = SCNLookAtConstraint(target: massCenter)
-        cameraNode.constraints = [vConstraint]
-        directionalLight.constraints = [vConstraint]
+        
+        // Rimuovi il LookAtConstraint per evitare che la camera ruoti
+        cameraNode.constraints = []
     }
     
     func setMassCenter() {
@@ -82,7 +75,7 @@ struct SCNViewContainer: UIViewRepresentable {
         scnView.scene?
             .rootNode
             .childNodes(passingTest: {
-                n,_ in n.name != nil && n.name! != "Room" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp" && n.name! != "__selected__"
+                n,_ in n.name != nil && n.name! != "Room" && n.name! != "Floor0" && n.name! !=  "Geom" && String(n.name!.suffix(4)) != "_grp" && n.name! != "__selected__"
             })
             .forEach{
                 let material = SCNMaterial()
@@ -91,7 +84,7 @@ struct SCNViewContainer: UIViewRepresentable {
                 } else {
                     material.diffuse.contents = UIColor.black
                     if ($0.name!.prefix(5) == "Floor") {material.diffuse.contents = UIColor.white.withAlphaComponent(0.2)}
-                    if ($0.name!.prefix(4) == "Door" || $0.name!.prefix(4) == "Open") {material.diffuse.contents = UIColor.red}
+                    if ($0.name!.prefix(4) == "Door" || $0.name!.prefix(4) == "Open") {material.diffuse.contents = UIColor.green}
                     material.lightingModel = .physicallyBased
                     $0.geometry?.materials = [material]
                     
@@ -110,16 +103,8 @@ struct SCNViewContainer: UIViewRepresentable {
             drawContent(borders: borders)
             setMassCenter()
             setCamera()
-//            NotificationCenter
-//                .default
-//                .post(name: .genericMessage,
-//                      object: "map loaded correctly")
         } catch {
             print("Error loading scene from URL: \(error)")
-//            NotificationCenter
-//                .default
-//                .post(name: .genericMessage,
-//                      object: "Error loading map")
         }
     }
 
@@ -129,17 +114,10 @@ struct SCNViewContainer: UIViewRepresentable {
             drawContent(borders: borders)
             setMassCenter()
             setCamera()
-//            NotificationCenter
-//                .default
-//                .post(name: .genericMessage, object: "map loaded correctly")
         } catch {
             print("Error loading scene from URL: \(error)")
-//            NotificationCenter
-//                .default
-//                .post(name: .genericMessage, object: "Error loading map")
         }
     }
-
 
 //    func drawOrigin(_ o: SCNVector3,_ color: UIColor, _ size: CGFloat, _ addY: Bool = false) {
 //        
@@ -164,6 +142,74 @@ struct SCNViewContainer: UIViewRepresentable {
     func zoomIn() {cameraNode.camera?.orthographicScale -= 0.5}
     
     func zoomOut() {cameraNode.camera?.orthographicScale += 0.5}
+    
+    func moveMapUp() {
+        
+        // Controllo se il cameraNode ha una camera associata
+        guard cameraNode.camera != nil else {
+            print("Errore: cameraNode non ha una camera associata.")
+            return
+        }
+
+        // Imposta il cameraNode come punto di vista della scena
+        scnView.pointOfView = cameraNode
+        
+        // Sposta la camera verso l'alto
+        cameraNode.simdWorldPosition.z += 1.0
+
+        // Log per debug
+        print("Nuova posizione della camera (verso l'alto): \(cameraNode.simdWorldPosition)")
+    }
+
+    func moveMapDown() {
+        
+        guard cameraNode.camera != nil else {
+            print("Errore: cameraNode non ha una camera associata.")
+            return
+        }
+
+        scnView.pointOfView = cameraNode
+      
+        cameraNode.simdWorldPosition.z -= 1.0
+
+        print("Nuova posizione della camera (verso il basso): \(cameraNode.simdWorldPosition)")
+    }
+    
+    func moveMapRight() {
+        
+        // Controllo se il cameraNode ha una camera associata
+        guard cameraNode.camera != nil else {
+            print("Errore: cameraNode non ha una camera associata.")
+            return
+        }
+
+        // Imposta il cameraNode come punto di vista della scena
+        scnView.pointOfView = cameraNode
+        
+        // Sposta la camera verso l'alto
+        cameraNode.simdWorldPosition.x += 1.0
+
+        // Log per debug
+        print("Nuova posizione della camera (verso l'alto): \(cameraNode.simdWorldPosition)")
+    }
+
+    func moveMapLeft() {
+        
+        // Controllo se il cameraNode ha una camera associata
+        guard cameraNode.camera != nil else {
+            print("Errore: cameraNode non ha una camera associata.")
+            return
+        }
+
+        // Imposta il cameraNode come punto di vista della scena
+        scnView.pointOfView = cameraNode
+        
+        // Sposta la camera verso il basso
+        cameraNode.simdWorldPosition.x -= 1.0
+
+        // Log per debug
+        print("Nuova posizione della camera (verso il basso): \(cameraNode.simdWorldPosition)")
+    }
     
     func findMassCenter(_ nodes: [SCNNode]) -> SCNNode {
         let massCenter = SCNNode()
@@ -290,36 +336,9 @@ struct SCNViewContainer: UIViewRepresentable {
     }
 }
 
-func generateSphereNode(_ color: UIColor, _ radius: CGFloat) -> SCNNode {
-    
-    let houseNode = SCNNode() //3 Sphere
-    let sphere = SCNSphere(radius: radius)
-    //let sphere = SCNPyramid(width: radius, height: radius*2, length: radius)
-    let sphereNode = SCNNode()
-    sphereNode.geometry = sphere
-    sphereNode.geometry?.firstMaterial?.diffuse.contents = color
-
-    let sphere2 = SCNSphere(radius: radius)
-    //let sphere = SCNPyramid(width: radius, height: radius*2, length: radius)
-    let sphereNode2 = SCNNode()
-    sphereNode2.geometry = sphere2
-    let color2 = color
-    sphereNode2.geometry?.firstMaterial?.diffuse.contents = color2.withAlphaComponent(color2.cgColor.alpha - 0.3)
-    sphereNode2.position = SCNVector3(0, 0, -1)
-    
-    let sphere3 = SCNSphere(radius: radius)
-    //let sphere = SCNPyramid(width: radius, height: radius*2, length: radius)
-    let sphereNode3 = SCNNode()
-    sphereNode3.geometry = sphere3
-    _ = color
-    sphereNode3.geometry?.firstMaterial?.diffuse.contents = color2.withAlphaComponent(color2.cgColor.alpha - 0.6)
-    sphereNode3.position = SCNVector3(-0.5, 0, 0)
-    
-    
-    houseNode.addChildNode(sphereNode)
-    houseNode.addChildNode(sphereNode2)
-    houseNode.addChildNode(sphereNode3)
-    return houseNode
+func buttonAction(_ index: Int) {
+print("Button \(index) pressed")
+// Aggiungi qui le azioni che desideri eseguire quando un bottone viene premuto
 }
 
 class HandleTap: UIViewController {
@@ -405,12 +424,4 @@ extension SCNNode {
     var halfCGHeight: CGFloat { height / 2.0 }
     var halfHeight: Float { Float(height / 2.0) }
     var halfScaledHeight: Float { halfHeight * self.scale.y  }
-}
-
-struct DictToRototraslation {
-    
-    let name: String
-    let traslation: simd_float4x4
-    let r_Y: simd_float4x4
-    
 }

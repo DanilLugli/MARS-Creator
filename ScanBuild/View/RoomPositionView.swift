@@ -3,37 +3,34 @@ import SwiftUI
 import SceneKit
 
 struct RoomPositionView: View {
-    
-    //@ObservedObject var building: Building
+
     @ObservedObject var floor: Floor
     @ObservedObject var room: Room
     
-    @State var selectedLocalNodeName = ""
-    @State var selectedGlobalNodeName = ""
+    @State var selectedRoomNode: SCNNode?
+    @State var selectedFloorNode: SCNNode?
     
-    @State var selectedLocalNode: SCNNode?
-    @State var selectedGlobalNode: SCNNode?
+    @State var selectedRoomNodeName = ""
+    @State var selectedFloorNodeName = ""
     
-    var globalView: SCNViewContainer
-    var localView: SCNViewContainer
-    var localMaps: [URL]?
+    var floorView: SCNViewContainer
+    var roomView: SCNViewContainer
+    var roomsMaps: [URL]?
     
-    @State var globalNodes: [String]
-    @State var localNodes: [String]
+    @State var floorNodes: [String]
+    @State var roomNodes: [String]
     
-    @State var matchingNodesForAPI: [(SCNNode, SCNNode)] = []
+    @State private var showButton1 = false
+    @State private var showButton2 = false
+    @State private var showAlert = false
+    @State private var showSheet = false
     
-//    @State var matchingNodesForAPI: [(SCNNode, SCNNode)] = [
-//        (SCNNode(), SCNNode()),
-//        (SCNNode(), SCNNode())
-//    ]
-    
-    @State var apiResponseCode = ""
+    @State private var selectedMap: URL = URL(fileURLWithPath: "")
+    @State private var filteredLocalMaps: [String] = []
     
     @State var responseFromServer = false {
         didSet {
             if responseFromServer {
-                // showAlert = true
                 showSheet = true
                 DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                     showAlert = false
@@ -43,19 +40,94 @@ struct RoomPositionView: View {
         }
     }
     @State var response: (HTTPURLResponse?, [String: Any]) = (nil, ["": ""])
+    @State var apiResponseCode = ""
+    @State var matchingNodesForAPI: [(SCNNode, SCNNode)] = []
     
-    @State private var showButton1 = false
-    @State private var showButton2 = false
-    
-    @State private var mapName: String = ""
-    
-    @State private var selectedMap: URL = URL(fileURLWithPath: "")
-    @State private var availableMaps: [String] = []
-    @State private var filteredLocalMaps: [String] = []
-    
-    @State private var showAlert = false
-    @State private var showSheet = false
-    
+    init(floor: Floor, room: Room) {
+        self.floor = floor
+        self.room = room
+        
+        floorView = SCNViewContainer()
+        roomView = SCNViewContainer()
+        
+        floorView.loadFloorPlanimetry(borders: false, usdzURL: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz"))
+        
+        roomView.loadRoomMaps(name: room.name, borders: false, usdzURL: room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"))
+        
+        if let rootNode = floorView.scnView.scene?.rootNode {
+            print("Printing all nodes in floorView's rootNode:")
+            rootNode.enumerateChildNodes { (node, _) in
+                let nodeName = node.name ?? "Unnamed Node"
+                let nodeSize = SCNVector3(
+                    node.boundingBox.max.x - node.boundingBox.min.x,
+                    node.boundingBox.max.y - node.boundingBox.min.y,
+                    node.boundingBox.max.z - node.boundingBox.min.z
+                )  // Dimensione del nodo
+                let nodePosition = node.position  // Posizione del nodo
+                
+                print("""
+                Node name: \(nodeName)
+                Node size: \(nodeSize)
+                Node position: \(nodePosition)
+                """)
+            }
+        } else {
+            print("No nodes found in floorView's rootNode.")
+        }
+        
+//        floorNodes = Array(Set(floorView
+//            .scnView
+//            .scene?
+//            .rootNode
+//            .childNodes(passingTest: {
+//                n, _ in n.name != nil &&
+//                n.name! != "Room" &&
+//                n.name! != "Geom" &&
+//                String(n.name!.suffix(4)) != "_grp"
+//            }).compactMap { node in node.name } ?? []))
+        
+        floorNodes = Array(Set(floorView
+            .scnView
+            .scene?
+            .rootNode
+            .childNodes(passingTest: { n, _ in
+                if let nodeName = n.name {
+                    return nodeName != "Room" &&
+                           nodeName != "Geom" &&
+                           !nodeName.hasSuffix("_grp") &&
+                           !nodeName.hasPrefix("unidentified")
+                }
+                return false
+            }).compactMap { node in node.name } ?? []))
+            .sorted()
+        
+        if let nodes = roomView.scnView.scene?.rootNode.childNodes(passingTest: { n, _ in
+            n.name != nil &&
+            n.name! != "Room" &&
+            n.name! != "Geom" &&
+            String(n.name!.suffix(4)) != "_grp"
+        }) {
+            let names = nodes.compactMap { $0.name }
+            print("Collected node names: \(names)")
+
+            // Rimuovere i duplicati utilizzando un dizionario per tracciare i nomi già visti
+            var uniqueNamesDict = [String: Bool]()
+            var uniqueNamesArray = [String]()
+
+            for name in names {
+                if uniqueNamesDict[name] == nil {
+                    uniqueNamesDict[name] = true
+                    uniqueNamesArray.append(name)
+                }
+            }
+            
+            roomNodes = uniqueNamesArray.sorted()
+
+            print("Unique node names: \(roomNodes)")
+        } else {
+            roomNodes = []
+        }
+    }
     
     func printOriginalDimensionsOfSelectedNode(selectedNode: SCNNode) {
         if let geometry = selectedNode.geometry {
@@ -77,57 +149,7 @@ struct RoomPositionView: View {
             print("Il nodo selezionato non ha una geometria associata.")
         }
     }
-    
-    init(floor: Floor, room: Room) {
-        self.floor = floor
-        self.room = room
-        
-        globalView = SCNViewContainer()
-        localView = SCNViewContainer()
-        
-        globalView.loadFloorPlanimetry(borders: false, usdzURL: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz"))
-        
-        localView.loadRoomMaps(name: room.name, borders: false, usdzURL: room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"))
-        
-        globalNodes = Array(Set(globalView
-            .scnView
-            .scene?
-            .rootNode
-            .childNodes(passingTest: {
-                n, _ in n.name != nil &&
-                n.name! != "Room" &&
-                n.name! != "Geom" &&
-                String(n.name!.suffix(4)) != "_grp"
-            }).compactMap { node in node.name } ?? []))
-        
-        if let nodes = localView.scnView.scene?.rootNode.childNodes(passingTest: { n, _ in
-            n.name != nil &&
-            n.name! != "Room" &&
-            n.name! != "Geom" &&
-            String(n.name!.suffix(4)) != "_grp"
-        }) {
-            let names = nodes.compactMap { $0.name }
-            print("Collected node names: \(names)")
 
-            // Rimuovere i duplicati utilizzando un dizionario per tracciare i nomi già visti
-            var uniqueNamesDict = [String: Bool]()
-            var uniqueNamesArray = [String]()
-
-            for name in names {
-                if uniqueNamesDict[name] == nil {
-                    uniqueNamesDict[name] = true
-                    uniqueNamesArray.append(name)
-                }
-            }
-
-            localNodes = uniqueNamesArray.sorted()
-
-            print("Unique node names: \(localNodes)")
-        } else {
-            localNodes = []
-        }
-    }
-    
     var body: some View {
         NavigationStack {
             VStack {
@@ -141,7 +163,7 @@ struct RoomPositionView: View {
                 }
                 
                 ZStack {
-                    globalView
+                    floorView
                         .border(Color.white)
                         .cornerRadius(10)
                         .padding()
@@ -152,7 +174,7 @@ struct RoomPositionView: View {
                             Spacer() // Push buttons to the right
                             HStack {
                                 Button("+") {
-                                    globalView.zoomIn()
+                                    floorView.zoomIn()
                                 }
                                 .buttonStyle(.bordered)
                                 .bold()
@@ -160,7 +182,7 @@ struct RoomPositionView: View {
                                 .cornerRadius(8)
                                 
                                 Button("-") {
-                                    globalView.zoomOut()
+                                    floorView.zoomOut()
                                 }
                                 .buttonStyle(.bordered)
                                 .bold()
@@ -174,21 +196,38 @@ struct RoomPositionView: View {
                 }
                 
                 HStack {
-                    Picker("Choose Floor Node", selection: $selectedGlobalNodeName) {
+                    Picker("Choose Floor Node", selection: $selectedFloorNodeName) {
                         Text("Choose Floor Node")
-                        ForEach(globalNodes, id: \.self) { Text($0) }
-                    }.onChange(of: selectedGlobalNodeName, perform: { _ in
-                        globalView.changeColorOfNode(nodeName: selectedGlobalNodeName, color: UIColor.green)
+                        ForEach(floorNodes, id: \.self) { Text($0) }
+                    }.onChange(of: selectedFloorNodeName, perform: { _ in
+                        floorView.changeColorOfNode(nodeName: selectedFloorNodeName, color: UIColor.green)
                         
-                        let firstTwoLetters = String(selectedGlobalNodeName.prefix(4))
+                        let firstTwoLetters = String(selectedFloorNodeName.prefix(4))
                         
-                        localNodes = localView.scnView.scene?.rootNode.childNodes(passingTest: {
+                        roomNodes = roomView.scnView.scene?.rootNode.childNodes(passingTest: {
                             n, _ in n.name != nil && n.name!.starts(with: firstTwoLetters) && n.name! != "Room" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp"
                         })
-                        .sorted(by: { a, b in a.scale.x > b.scale.x })
+                        .sorted(by: { a, b in
+                            let sizeA = SCNVector3(
+                                a.boundingBox.max.x - a.boundingBox.min.x,
+                                a.boundingBox.max.y - a.boundingBox.min.y,
+                                a.boundingBox.max.z - a.boundingBox.min.z
+                            )
+                            
+                            let sizeB = SCNVector3(
+                                b.boundingBox.max.x - b.boundingBox.min.x,
+                                b.boundingBox.max.y - b.boundingBox.min.y,
+                                b.boundingBox.max.z - b.boundingBox.min.z
+                            )
+                            
+                            // Ordina per la lunghezza, in questo caso consideriamo la lunghezza lungo l'asse X
+                            return sizeA.x > sizeB.x
+                        })
                         .map { node in node.name ?? "nil" } ?? []
                         
-                        selectedGlobalNode = globalView.scnView.scene?.rootNode.childNodes(passingTest: { n, _ in n.name != nil && n.name! == selectedGlobalNodeName }).first
+                        selectedFloorNode = floorView.scnView.scene?.rootNode.childNodes(passingTest: { n, _ in n.name != nil && n.name! == selectedFloorNodeName }).first
+                        
+                        print(selectedFloorNode)
                     })
                 }
                 
@@ -200,7 +239,7 @@ struct RoomPositionView: View {
                 
                 if room != nil {
                     ZStack {
-                        localView
+                        roomView
                             .border(Color.white)
                             .cornerRadius(10)
                             .padding()
@@ -211,7 +250,7 @@ struct RoomPositionView: View {
                                 Spacer() // Push buttons to the right
                                 HStack {
                                     Button("+") {
-                                        localView.zoomIn()
+                                        roomView.zoomIn()
                                     }
                                     .buttonStyle(.bordered)
                                     .bold()
@@ -219,7 +258,7 @@ struct RoomPositionView: View {
                                     .cornerRadius(8)
                                     
                                     Button("-") {
-                                        localView.zoomOut()
+                                        roomView.zoomOut()
                                     }
                                     .buttonStyle(.bordered)
                                     .bold()
@@ -233,21 +272,34 @@ struct RoomPositionView: View {
                     }
                     
                     HStack {
-                        Picker("Choose Room Node", selection: $selectedLocalNodeName) {
+                        Picker("Choose Room Node", selection: $selectedRoomNodeName) {
                             Text("Choose Room Node")
-                            ForEach(localNodes, id: \.self) { Text($0) }
-                        }.onChange(of: selectedLocalNodeName, perform: { _ in
-                            localView.changeColorOfNode(nodeName: selectedLocalNodeName, color: UIColor.green)
-                            selectedLocalNode = localView.scnView.scene?.rootNode.childNodes(passingTest: { n, _ in n.name != nil && n.name! == selectedLocalNodeName }).first
-                            let firstTwoLettersLocal = String(selectedLocalNodeName.prefix(2))
-                            globalNodes = globalView.scnView.scene?.rootNode.childNodes(passingTest: {
+                            //ForEach(roomNodes, id: \.self) { Text($0) }
+                            ForEach(roomNodes, id: \.self) { node in
+                                //print("Node ID: \(node.name)") // Debug output
+                                Text(node).tag(node)
+                            }
+                        }.onChange(of: selectedRoomNodeName, perform: { _ in
+                            
+                            roomView.changeColorOfNode(nodeName: selectedRoomNodeName, color: UIColor.green)
+                            
+                            selectedRoomNode = roomView.scnView.scene?.rootNode.childNodes(passingTest: {
+                                n, _ in n.name != nil && n.name! == selectedRoomNodeName
+                            }).first
+                            
+                            print(selectedRoomNode)
+                            
+                            let firstTwoLettersLocal = String(selectedRoomNodeName.prefix(2))
+                            
+                            floorNodes = floorView.scnView.scene?.rootNode.childNodes(passingTest: {
                                 n, _ in n.name != nil && n.name!.starts(with: firstTwoLettersLocal) && n.name! != "Room" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp"
                             })
                             .sorted(by: { a, b in a.scale.x > b.scale.x })
                             .map { node in node.name ?? "nil" } ?? []
-                            globalNodes = orderBySimilarity(
-                                node: selectedLocalNode!,
-                                listOfNodes: globalView.scnView.scene!.rootNode.childNodes(passingTest: {
+                            
+                            floorNodes = orderBySimilarity(
+                                node: selectedRoomNode!,
+                                listOfNodes: floorView.scnView.scene!.rootNode.childNodes(passingTest: {
                                     n, _ in n.name != nil && n.name! != "Room" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp" && n.name! != "selected"
                                 })
                             ).map { node in node.name ?? "nil" }
@@ -256,11 +308,13 @@ struct RoomPositionView: View {
                 }
                 
                 HStack {
-                    if let _selectedLocalNode = selectedLocalNode,
-                       let _selectedGlobalNode = selectedGlobalNode {
+                    if let _selectedLocalNode = selectedRoomNode,
+                       let _selectedGlobalNode = selectedFloorNode {
                         Button("Confirm Relation") {
                             matchingNodesForAPI.append((_selectedLocalNode, _selectedGlobalNode))
                             
+                            selectedRoomNode = nil
+                            selectedFloorNode = nil
                             print(_selectedLocalNode)
                             print(_selectedGlobalNode)
                             print(selectedMap.lastPathComponent)
@@ -271,7 +325,6 @@ struct RoomPositionView: View {
                             .cornerRadius(10))
                             .bold()
                     }
-                    //                    Text("matched nodes: \(matchingNodesForAPI.count)").foregroundColor(.white)
                     if matchingNodesForAPI.count >= 3 {
                         Button("Create Matrix") {
                             Task {
