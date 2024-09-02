@@ -23,7 +23,7 @@ struct RoomView: View {
     @State private var isUpdateOpenView = false
     @State private var isCreateRoomPosition = false
     @State private var isCreateManualRoomPosition = false
-
+    
     @State private var showUpdateOptionsAlert = false
     @State private var showUpdateAlert = false
     @State private var showDeleteConfirmation = false
@@ -222,14 +222,10 @@ struct RoomView: View {
                                             Spacer()
                                         }.padding(.top)
                                     }.onAppear {
-                                        // Definisci un array di URL
+                                        print("ESEGUO ON APPEAR ROOM POSITION")
                                         var roomURLs: [URL] = []
                                         
                                         roomURLs.append(room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"))
-    //                                    floor.rooms.forEach { room in
-    //                                        print(room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"))
-    //
-    //                                    }
                                         
                                         mapRoomPositionView.handler.loadRoomMaps(
                                             floor: floor,
@@ -245,8 +241,8 @@ struct RoomView: View {
                                         
                                     }
                                     
-//                                    let isSelected = floor.isMatrixPresent(named: room.name, inFileAt: floor.floorURL.appendingPathComponent("\(floor.name).json"))
-//                                    MatrixCardView(floor: floor.name, room: room.name, exist: isSelected, date: Date(), rowSize: 1)
+                                    //                                    let isSelected = floor.isMatrixPresent(named: room.name, inFileAt: floor.floorURL.appendingPathComponent("\(floor.name).json"))
+                                    //                                    MatrixCardView(floor: floor.name, room: room.name, exist: isSelected, date: Date(), rowSize: 1)
                                 }
                             } else {
                                 VStack {
@@ -363,14 +359,14 @@ struct RoomView: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     if selectedTab == 0 {
-//                        NavigationLink(destination: ScanningView(namedUrl: room)) {
-//                            Image(systemName: "plus.circle.fill")
-//                                .font(.system(size: 26))
-//                                .foregroundStyle(.white, .blue, .blue)
-//                        }
+                        //                        NavigationLink(destination: ScanningView(namedUrl: room)) {
+                        //                            Image(systemName: "plus.circle.fill")
+                        //                                .font(.system(size: 26))
+                        //                                .foregroundStyle(.white, .blue, .blue)
+                        //                        }
                         Menu {
                             Button(action: {
-                                 isRenameSheetPresented = true
+                                isRenameSheetPresented = true
                             }) {
                                 Label("Rename Room", systemImage: "pencil")
                             }
@@ -437,13 +433,13 @@ struct RoomView: View {
                         }
                     }
                     else if selectedTab == 1 {
-//                        NavigationLink(destination: RoomPositionView(floor: floor, room: room)) {
-//                            Image(systemName: "plus.circle.fill")
-//                                .font(.system(size: 26))
-//                                .foregroundStyle(.white, .blue, .blue)
-//                        }
+                        //                        NavigationLink(destination: RoomPositionView(floor: floor, room: room)) {
+                        //                            Image(systemName: "plus.circle.fill")
+                        //                                .font(.system(size: 26))
+                        //                                .foregroundStyle(.white, .blue, .blue)
+                        //                        }
                         Menu {
-                        
+                            
                             Button(action: {
                                 isRoomPlanimetryUploadPicker = true
                             }) {
@@ -487,7 +483,7 @@ struct RoomView: View {
                                     EmptyView()
                                 }
                             )
-
+                            
                         }
                     }
                     else if selectedTab == 3 {
@@ -540,6 +536,44 @@ struct RoomView: View {
                     }
                 }
             }
+            .confirmationDialog("Choose an option", isPresented: $isOptionsSheetPresented, titleVisibility: .visible) {
+                
+                Button("Create with AR") {
+                    let fileManager = FileManager.default
+                    let filePath = room.roomURL
+                        .appendingPathComponent("MapUsdz")
+                        .appendingPathComponent("\(room.name).usdz")
+                    
+                    do {
+                        try fileManager.removeItem(at: filePath)
+                        print("File eliminato correttamente")
+                    } catch {
+                        print("Errore durante l'eliminazione del file: \(error)")
+                    }
+                    
+                    // Chiudi il dialogo e avvia la navigazione
+                    self.isOptionsSheetPresented = false
+                    self.isNavigationActive = true
+                }
+                .font(.system(size: 20))
+                .bold()
+                
+                Button("Update From File") {
+                    // Chiudi il dialogo
+                    self.isOptionsSheetPresented = false
+                    
+                    // Apri la Sheet del file picker dopo aver chiuso quella corrente
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                        self.isRoomPlanimetryUploadPicker = true
+                    }
+                }
+                .font(.system(size: 20))
+                .bold()
+                
+                Button("Cancel", role: .cancel) {
+                    // Azione di annullamento, facoltativa
+                }
+            }
             .confirmationDialog("Are you sure to delete Room?", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
                 Button("Yes", role: .destructive) {
                     floor.deleteRoom(room: room)
@@ -554,7 +588,7 @@ struct RoomView: View {
             .alert("Rename Room", isPresented: $isRenameSheetPresented, actions: {
                 TextField("New Room Name", text: $newRoomName)
                     .padding()
-
+                
                 Button("SAVE", action: {
                     if !newRoomName.isEmpty {
                         do {
@@ -618,68 +652,6 @@ struct RoomView: View {
                     }
                 }
             }
-            .sheet(isPresented: $isOptionsSheetPresented) {
-                VStack {
-                    Text("Choose an option")
-                        .font(.system(size: 26))
-                        .fontWeight(.bold)
-
-
-                    Button(action: {
-                        let fileManager = FileManager.default
-                        let filePath = room.roomURL
-                                            .appendingPathComponent("MapUsdz")
-                                            .appendingPathComponent("\(room.name).usdz")
-
-                        do {
-                            try fileManager.removeItem(at: filePath)
-                            print("File eliminato correttamente")
-                        } catch {
-                            print("Errore durante l'eliminazione del file: \(error)")
-                        }
-                        self.isOptionsSheetPresented = false
-                        // Setta isNavigationActive su true
-                        self.isNavigationActive = true
-                        // Chiudi la Sheet
-
-                    }) {
-                        Text("Create with AR")
-                            .font(.system(size: 20))
-                            .bold()
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                            .padding(.horizontal, 20)
-                    }
-                    .padding(.bottom, 10)
-
-                    Button(action: {
-                        // Chiudi la Sheet delle opzioni
-                        self.isOptionsSheetPresented = false
-                        
-                        // Apri la Sheet del file picker dopo aver chiuso quella corrente
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                            self.isRoomPlanimetryUploadPicker = true
-                        }
-
-                    }) {
-                        Text("Update From File")
-                            .font(.system(size: 20))
-                            .bold()
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                            .padding(.horizontal, 20)
-                    }
-                    .padding(.bottom, 10)
-                }
-                .background(Color.customBackground)
-                .padding()
-            }
             .sheet(item: $selectedMarker) { marker in
                 VStack {
                     Text("Position Marker")
@@ -688,7 +660,7 @@ struct RoomView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 20)
                         .padding(.top, 20)
-                        .foregroundColor(.white)               
+                        .foregroundColor(.white)
                     mapView.border(Color.white).cornerRadius(10).padding().shadow(color: Color.gray, radius: 3)
                     Spacer()
                 }
@@ -697,60 +669,63 @@ struct RoomView: View {
             }
         }
     }
-    
-    var tabTitle: String {
-        switch selectedTab {
-        case 0: return "Planimentry"
-        case 1: return "Markers"
-        case 2: return "Room Position"
-        case 3: return "Transition Zone"
-        default: return ""
-        }
-    }
-    
-    var filteredMarker: [ReferenceMarker] {
-        if searchText.isEmpty {
-            return room.referenceMarkers
-        } else {
-            return room.referenceMarkers.filter { $0.imageName.lowercased().contains(searchText.lowercased()) }
-        }
-    }
-    
-    var filteredConnection: [TransitionZone] {
-        let filteredZones = room.transitionZones.filter { transitionZone in
-            transitionZone.connection != nil
+        
+        
+        var tabTitle: String {
+            switch selectedTab {
+            case 0: return "Planimentry"
+            case 1: return "Markers"
+            case 2: return "Room Position"
+            case 3: return "Transition Zone"
+            default: return ""
+            }
         }
         
-        if searchText.isEmpty {
-            return filteredZones
-        } else {
-            return filteredZones.filter { $0.name.lowercased().contains(searchText.lowercased()) }
+        var filteredMarker: [ReferenceMarker] {
+            if searchText.isEmpty {
+                return room.referenceMarkers
+            } else {
+                return room.referenceMarkers.filter { $0.imageName.lowercased().contains(searchText.lowercased()) }
+            }
+        }
+        
+        var filteredConnection: [TransitionZone] {
+            let filteredZones = room.transitionZones.filter { transitionZone in
+                transitionZone.connection != nil
+            }
+            
+            if searchText.isEmpty {
+                return filteredZones
+            } else {
+                return filteredZones.filter { $0.name.lowercased().contains(searchText.lowercased()) }
+            }
+        }
+        
+        func isDirectoryEmpty(url: URL) -> Bool {
+            let fileManager = FileManager.default
+            do {
+                let contents = try fileManager.contentsOfDirectory(at: url, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+                return contents.isEmpty
+            } catch {
+                print("Error checking directory contents: \(error)")
+                return true
+            }
+        }
+    }
+
+
+struct RoomView_Previews: PreviewProvider {
+        static var previews: some View {
+            let buildingModel = BuildingModel.getInstance()
+            let building = buildingModel.initTryData()
+            let floor = building.floors.first!
+            let room = floor.rooms.first!
+            return RoomView(room: room, building: building, floor: floor)
         }
     }
     
-    func isDirectoryEmpty(url: URL) -> Bool {
-        let fileManager = FileManager.default
-        do {
-            let contents = try fileManager.contentsOfDirectory(at: url, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
-            return contents.isEmpty
-        } catch {
-            print("Error checking directory contents: \(error)")
-            return true
-        }
-    }}
-
-struct RoomView_Previews: PreviewProvider {
-    static var previews: some View {
-        let buildingModel = BuildingModel.getInstance()
-        let building = buildingModel.initTryData()
-        let floor = building.floors.first!
-        let room = floor.rooms.first!
-        return RoomView(room: room, building: building, floor: floor)
-    }
-}
-
 private let dateFormatter: DateFormatter = {
-    let formatter = DateFormatter()
-    formatter.dateStyle = .medium
-    return formatter
-}()
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        return formatter
+    }()

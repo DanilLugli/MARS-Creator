@@ -16,6 +16,8 @@ struct ManualRoomPositionView: View {
     @ObservedObject var floor: Floor
     @ObservedObject var room: Room
     
+    @State private var showUpdateAlert = false
+    
     var mapPositionView = SCNViewUpdatePositionRoomContainer()
     
     var body: some View{
@@ -35,7 +37,7 @@ struct ManualRoomPositionView: View {
                                 mapPositionView.handler
                                     .moveRoomPositionRight()
                             }) {
-                                Image(systemName: "arrow.left")
+                                Image(systemName: "arrow.right")
                                     .bold()
                                     .foregroundColor(.white)
                             }
@@ -46,7 +48,7 @@ struct ManualRoomPositionView: View {
                             Button(action: {
                                 mapPositionView.handler.moveRoomPositionLeft()
                             }) {
-                                Image(systemName: "arrow.right")
+                                Image(systemName: "arrow.left")
                                     .bold()
                                     .foregroundColor(.white)
                             }
@@ -59,7 +61,7 @@ struct ManualRoomPositionView: View {
                             Button(action: {
                                 mapPositionView.handler.moveRoomPositionUp()
                             }) {
-                                Image(systemName: "arrow.up")
+                                Image(systemName: "arrow.down")
                                     .bold()
                                     .foregroundColor(.white)
                             }
@@ -70,7 +72,7 @@ struct ManualRoomPositionView: View {
                             Button(action: {
                                 mapPositionView.handler.moveRoomPositionDown()
                             }) {
-                                Image(systemName: "arrow.down")
+                                Image(systemName: "arrow.up")
                                     .bold()
                                     .foregroundColor(.white)
                             }
@@ -83,7 +85,7 @@ struct ManualRoomPositionView: View {
                             Button(action: {
                                 mapPositionView.handler.rotateClockwise()
                             }) {
-                                Image(systemName: "arrow.clockwise.up")
+                                Image(systemName: "arrow.clockwise")
                                     .bold()
                                     .foregroundColor(.white)
                             }
@@ -105,9 +107,7 @@ struct ManualRoomPositionView: View {
                     }
                     Spacer()
                 }.padding(.top)
-            }
-                .onAppear {
-                    // Definisci un array di URL
+            }.onAppear {
                     var roomURLs: URL
                     
                     roomURLs = room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz")
@@ -121,10 +121,8 @@ struct ManualRoomPositionView: View {
                 }
             
             Button(action: {
-//                mapPositionView.handler.updatePositionTranslation()
-//                mapPositionView.handler.updatePositionRY()
-//                updateJSONFile(floor.associationMatrix, floor.floorURL, floor)
                 floor.updateAssociationMatrixInJSON(for: room.name, fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"))
+                showUpdateAlert = true
             }) {
                 Text("Save Position")
                     .bold()
@@ -135,8 +133,9 @@ struct ManualRoomPositionView: View {
             .cornerRadius(8)
             .padding()
             
-        }.background(Color.customBackground)
-            .foregroundColor(.white)
+        }
+        .background(Color.customBackground)
+        .foregroundColor(.white)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .principal) {
@@ -144,6 +143,15 @@ struct ManualRoomPositionView: View {
                     .font(.system(size: 26, weight: .heavy))
                     .foregroundColor(.white)
             }
+        }
+        .alert(isPresented: $showUpdateAlert) {
+            Alert(
+                title: Text("ATTENTION").foregroundColor(.red),
+                message: Text("Room Position Saved"),
+                dismissButton: .default(Text("OK")){
+                    //
+                }
+            )
         }
     }
 }

@@ -1,16 +1,15 @@
 import SwiftUI
 import RoomPlan
 import ARKit
+import RealityKit
 
 struct CaptureViewContainer: UIViewRepresentable {
     typealias UIViewType = RoomCaptureView
     
-    private let roomCaptureView: RoomCaptureView
     var arSession = ARSession()
-    
     var sessionDelegate: SessionDelegate
-    
     private let configuration: RoomCaptureSession.Configuration
+    private let roomCaptureView: RoomCaptureView
     
     init(namedUrl: NamedURL) {
         print("Initializing CaptureViewContainer")
@@ -36,7 +35,8 @@ struct CaptureViewContainer: UIViewRepresentable {
     
     func updateUIView(_ uiView: RoomCaptureView, context: Context) {}
     
-    func stopCapture(pauseARSession: Bool) {
+    mutating func stopCapture(pauseARSession: Bool) {
+        print("CHIAMATA STOPCAPTURE")
         SessionDelegate.save = !pauseARSession
         sessionDelegate.currentMapName = sessionDelegate.namedUrl.name
         
@@ -47,7 +47,18 @@ struct CaptureViewContainer: UIViewRepresentable {
         }
         
         if !pauseARSession {
+            // Metti in pausa la sessione AR
             arSession.pause()
+            print("BIBBIIIBI")
+            // Azzera la configurazione e rimuovi le ancore per disattivare completamente la sessione AR
+            let emptyConfiguration = ARWorldTrackingConfiguration()
+            arSession.run(emptyConfiguration, options: [.resetTracking, .removeExistingAnchors])
+            
+            // Rimuovi il delegate se non ne hai più bisogno
+            arSession.delegate = nil
+            
+            // Imposta arSession a nil se non lo usi più
+            arSession = ARSession()
         }
     }
     
@@ -69,6 +80,7 @@ struct CaptureViewContainer: UIViewRepresentable {
         static var save = false
         var r: CaptureViewContainer?
         @State var namedUrl: NamedURL
+        var previewVisualizer: VisualizeRoomViewContainer!
         
         init(namedUrl: NamedURL) {
             self.namedUrl = namedUrl
@@ -119,7 +131,7 @@ struct CaptureViewContainer: UIViewRepresentable {
             Task {
                 do {
                     let name = currentMapName ?? "_\(DateFormatter.localizedString(from: Date(), dateStyle: .medium, timeStyle: .short))"
-                    let finalRoom = try await self.roomBuilder.capturedRoom(from: data)
+                    let finalRoom = try! await self.roomBuilder.capturedRoom(from: data)
                     
                     print(namedUrl.url)
                     
@@ -160,10 +172,14 @@ struct CaptureViewContainer: UIViewRepresentable {
         func captureSession(_ session: RoomCaptureSession, didRemove room: CapturedRoom) {}
         
         func captureView(shouldPresent roomDataForProcessing: CapturedRoomData, error: Error?) -> Bool {
+            print("captureView")
+            print(CapturedRoomData.self)
             return true
         }
         
         func captureView(didPresent processedResult: CapturedRoom, error: Error?) {
+            print("captureView 2")
+            print(CapturedRoom.self)
             self.finalResults = processedResult
         }
         

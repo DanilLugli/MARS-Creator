@@ -24,9 +24,9 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject {
     // Incremento di zoom
     var zoomStep: CGFloat = 0.1
     // Incremento di traslazione per ogni pressione del pulsante
-    var translationStep: CGFloat = 0.2
+    var translationStep: CGFloat = 0.1
     // Incremento dell'angolo di rotazione (in radianti)
-    var rotationStep: Float = .pi / 60 // 11.25 gradi
+    var rotationStep: Float = .pi / 100 // 11.25 gradi
     
     
     private let color: UIColor = UIColor.orange.withAlphaComponent(0.3)

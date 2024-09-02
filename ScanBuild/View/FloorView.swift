@@ -372,6 +372,45 @@ struct FloorView: View {
                 }
             }
         }
+
+        .confirmationDialog("Choose an option", isPresented: $isOptionsSheetPresented, titleVisibility: .visible) {
+            
+            Button("Create with AR") {
+                let fileManager = FileManager.default
+                let filePath = floor.floorURL
+                    .appendingPathComponent("MapUsdz")
+                    .appendingPathComponent("\(floor.name).usdz")
+                
+                do {
+                    try fileManager.removeItem(at: filePath)
+                    print("File eliminato correttamente")
+                } catch {
+                    print("Errore durante l'eliminazione del file: \(error)")
+                }
+                
+                // Chiudi il dialogo e avvia la navigazione
+                self.isOptionsSheetPresented = false
+                self.isNavigationActive = true
+            }
+            .font(.system(size: 20))
+            .bold()
+            
+            Button("Update From File") {
+                // Chiudi il dialogo
+                self.isOptionsSheetPresented = false
+                
+                // Apri la Sheet del file picker dopo aver chiuso quella corrente
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                    self.isFloorPlanimetryUploadPicker = true
+                }
+            }
+            .font(.system(size: 20))
+            .bold()
+
+            Button("Cancel", role: .cancel) {
+                // Azione di annullamento, facoltativa
+            }
+        }
         .confirmationDialog("Are you sure to delete Floor?", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
             Button("Yes", role: .destructive) {
                 building.deleteFloor(floor: floor)
@@ -454,67 +493,6 @@ struct FloorView: View {
                 }
             }
         }
-        .sheet(isPresented: $isOptionsSheetPresented) {
-            VStack {
-                Text("Choose an option")
-                    .font(.system(size: 26))
-                    .fontWeight(.bold)
-                    .padding()
-                
-                Button(action: {
-                    let fileManager = FileManager.default
-                    let filePath = floor.floorURL
-                        .appendingPathComponent("MapUsdz")
-                        .appendingPathComponent("\(floor.name).usdz")
-                    
-                    do {
-                        try fileManager.removeItem(at: filePath)
-                        print("File eliminato correttamente")
-                    } catch {
-                        print("Errore durante l'eliminazione del file: \(error)")
-                    }
-                    self.isOptionsSheetPresented = false
-                    // Setta isNavigationActive su true
-                    self.isNavigationActive = true
-                    // Chiudi la Sheet
-                    
-                }) {
-                    Text("Create with AR")
-                        .font(.system(size: 20))
-                        .bold()
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                        .padding(.horizontal, 20)
-                }
-                .padding(.bottom, 10)
-                
-                Button(action: {
-                    // Chiudi la Sheet delle opzioni
-                    self.isOptionsSheetPresented = false
-                    
-                    // Apri la Sheet del file picker dopo aver chiuso quella corrente
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                        self.isFloorPlanimetryUploadPicker = true
-                    }
-                    
-                }) {
-                    Text("Update From File")
-                        .font(.system(size: 20))
-                        .bold()
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                        .padding(.horizontal, 20)
-                }
-                .padding(.bottom, 10)
-            }
-            .padding()
-        }.background(Color.customBackground)
     }
     
     var filteredRooms: [Room] {

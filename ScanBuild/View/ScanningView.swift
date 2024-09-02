@@ -44,7 +44,8 @@ struct ScanningView: View {
                                 newFeatures: namedUrl is Room ? worldMapNewFeatures : nil,
                                 onSave: {
                                     isScanningRoom = false
-                                    let finalMapName = mapName.isEmpty ? "Map_\(Date().timeIntervalSince1970)" : mapName
+                                    //let finalMapName = mapName.isEmpty ? "Map_\(Date().timeIntervalSince1970)" : mapName
+                                    
                                     captureView?.stopCapture(pauseARSession: false)
                                 }
                             )
