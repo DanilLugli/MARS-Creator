@@ -15,11 +15,11 @@ class SCNViewMapHandler: ObservableObject {
         UIColor.yellow.withAlphaComponent(0.4),
         UIColor.green.withAlphaComponent(0.3),
         UIColor.red.withAlphaComponent(0.3),
-        //UIColor.cyan.withAlphaComponent(0.3),
         UIColor.orange.withAlphaComponent(0.3),
         UIColor.purple.withAlphaComponent(0.3),
         UIColor.brown.withAlphaComponent(0.3)
     ]
+    
     
     init(scnView: SCNView, cameraNode: SCNNode, massCenter: SCNNode) {
         self.scnView = scnView
@@ -90,7 +90,6 @@ class SCNViewMapHandler: ObservableObject {
         }
     }
     
-    // Funzione per determinare il colore in base all'array e all'indice
     func colorForRoom(named roomName: String) -> UIColor {
         let color = colors[colorIndex]
         colorIndex = (colorIndex + 1) % colors.count
@@ -128,21 +127,37 @@ class SCNViewMapHandler: ObservableObject {
         scnView.scene?
             .rootNode
             .childNodes(passingTest: {
-                n,_ in n.name != nil && n.name! != "Room" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp" && n.name! != "__selected__"
+                n, _ in
+                // Filtra i nodi che non devono essere esclusi
+                n.name != nil && n.name! != "Room" && n.name! != "Geom" && !n.name!.hasPrefix("Floor") && String(n.name!.suffix(4)) != "_grp" && n.name! != "__selected__"
             })
-            .forEach{
+            .forEach {
                 let material = SCNMaterial()
-                material.diffuse.contents = UIColor.black
-                if ($0.name!.prefix(5) == "Floor") { material.diffuse.contents = UIColor.white.withAlphaComponent(0.2) }
-                if ($0.name!.prefix(4) == "Door" || $0.name!.prefix(4) == "Open") { material.diffuse.contents = UIColor.red }
+                // Applica i materiali solo ai nodi rimanenti
+                if $0.name!.prefix(4) == "Door" || $0.name!.prefix(4) == "Open" {
+                    material.diffuse.contents = UIColor.red
+                } else {
+                    material.diffuse.contents = UIColor.black
+                }
                 material.lightingModel = .physicallyBased
                 $0.geometry?.materials = [material]
-                
+
+                // Applica le modifiche di scala se richiesto
                 if borders {
                     $0.scale.x = $0.scale.x < 0.2 ? $0.scale.x + 0.1 : $0.scale.x
                     $0.scale.z = $0.scale.z < 0.2 ? $0.scale.z + 0.1 : $0.scale.z
                     $0.scale.y = ($0.name!.prefix(4) == "Wall") ? 0.1 : $0.scale.y
                 }
+            }
+
+        // Rimuovi tutti i nodi con prefisso "Floor"
+        scnView.scene?
+            .rootNode
+            .childNodes(passingTest: {
+                n, _ in n.name?.hasPrefix("Floor") ?? false
+            })
+            .forEach { node in
+                node.removeFromParentNode()
             }
     }
     

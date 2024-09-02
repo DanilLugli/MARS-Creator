@@ -77,7 +77,6 @@ struct FloorView: View {
                                     
                                     VStack {
                                         HStack {
-                                            Spacer() // Push buttons to the right
                                             if showFloorMap{
                                                 HStack{
                                                     HStack {
@@ -97,7 +96,7 @@ struct FloorView: View {
                                                         .bold()
                                                         .background(Color.blue.opacity(0.4))
                                                         .cornerRadius(8)
-                                                    }
+                                                    }.padding()
                                                     HStack {
                                                         Button(action: {
                                                             mapPositionView.handler.moveFloorMapRight()
@@ -120,8 +119,7 @@ struct FloorView: View {
                                                         .buttonStyle(.bordered)
                                                         .background(Color.blue.opacity(0.4))
                                                         .cornerRadius(8)
-                                                    }
-                                                    .padding()
+                                                    }.padding()
                                                     HStack {
                                                         Button(action: {
                                                             mapPositionView.handler.moveFloorMapUp()
@@ -144,8 +142,7 @@ struct FloorView: View {
                                                         .buttonStyle(.bordered)
                                                         .background(Color.blue.opacity(0.4))
                                                         .cornerRadius(8)
-                                                    }
-                                                    .padding()
+                                                    }.padding()
                                                 }
                                             }else{
                                                 HStack{
@@ -166,7 +163,7 @@ struct FloorView: View {
                                                         .bold()
                                                         .background(Color.blue.opacity(0.4))
                                                         .cornerRadius(8)
-                                                    }
+                                                    }.padding()
                                                     HStack {
                                                         Button(action: {
                                                             mapView.moveMapRight()
@@ -189,8 +186,7 @@ struct FloorView: View {
                                                         .buttonStyle(.bordered)
                                                         .background(Color.blue.opacity(0.4))
                                                         .cornerRadius(8)
-                                                    }
-                                                    .padding()
+                                                    }.padding()
                                                     HStack {
                                                         Button(action: {
                                                             mapView.moveMapUp()
@@ -213,13 +209,12 @@ struct FloorView: View {
                                                         .buttonStyle(.bordered)
                                                         .background(Color.blue.opacity(0.4))
                                                         .cornerRadius(8)
-                                                    }
-                                                    .padding()
+                                                    }.padding()
                                                 }
                                             }
                                         }
                                         Spacer() // Push buttons to the top
-                                    }
+                                    }.padding(.top)
                                 }
                             }
                             .onAppear {
@@ -227,7 +222,6 @@ struct FloorView: View {
                                 var roomURLs: [URL] = []
                                 
                                 floor.rooms.forEach { room in
-                                    print(room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"))
                                     roomURLs.append(room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"))
                                 }
                                 

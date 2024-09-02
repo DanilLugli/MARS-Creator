@@ -3,8 +3,8 @@ import simd
 
 struct RotoTraslationMatrix: Codable {
     let name: String
-    let translation: simd_float4x4
-    let r_Y: simd_float4x4
+    var translation: simd_float4x4
+    var r_Y: simd_float4x4
 
     init(name: String, translation: simd_float4x4, r_Y: simd_float4x4) {
         self.name = name

@@ -1,6 +1,7 @@
 import Foundation
 import ARKit
 import SceneKit
+import SwiftUI
 
 class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     private var _id: UUID = UUID()
@@ -12,6 +13,7 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     @Published private var _scene: SCNScene?
     @Published private var _worldMap: ARWorldMap?
     private var _roomURL: URL
+    @Published private var _color: UIColor
     
     init(name: String, lastUpdate: Date, referenceMarkers: [ReferenceMarker], transitionZones: [TransitionZone], sceneObjects: [SCNNode], scene: SCNScene?, worldMap: ARWorldMap?, roomURL: URL) {
         self._name = name
@@ -22,6 +24,7 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         self._scene = scene
         self._worldMap = worldMap
         self._roomURL = roomURL
+        self._color = Room.randomColor().withAlphaComponent(0.3) // Genera un colore casuale con alpha 0.3
     }
     
     static func ==(lhs: Room, rhs: Room) -> Bool {
@@ -95,6 +98,14 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         }
     }
     
+    static func randomColor() -> UIColor {
+        let red = CGFloat(arc4random_uniform(256)) / 255.0
+        let green = CGFloat(arc4random_uniform(256)) / 255.0
+        let blue = CGFloat(arc4random_uniform(256)) / 255.0
+        return UIColor(red: red, green: green, blue: blue, alpha: 1.0)
+    }
+    
+    
     // Implementazione personalizzata di Encodable
     private enum CodingKeys: String, CodingKey {
         case name
@@ -124,7 +135,7 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     func addReferenceMarker(referenceMarker: ReferenceMarker) {
         _referenceMarkers.append(referenceMarker)
     }
-
+    
     func addTransitionZone(transitionZone: TransitionZone) throws {
         _transitionZones.append(transitionZone)
     }
@@ -132,7 +143,7 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     func deleteTransitionZone(transitionZone: TransitionZone) {
         _transitionZones.removeAll { $0.id == transitionZone.id }
     }
-
+    
     // Nuovo metodo per ottenere tutte le connessioni
     func getConnections() -> [Connection] {
         return _transitionZones.compactMap { $0.connection }

@@ -36,7 +36,6 @@ struct AddStairsConnectionView: View {
                     .fontWeight(.heavy)
                 
                 ConnectedDotsView(labels: ["1° Connection From", "2° Connection To", "Confirm"], progress: step == 1 ? 1 : (step == 2 ? 2 : 3))
-                    .padding(.top)
                 
                 HStack {
                     VStack {
@@ -99,7 +98,6 @@ struct AddStairsConnectionView: View {
                         }
                     }
                 }
-                .padding()
                 
                 VStack {
                     ZStack {
@@ -159,17 +157,21 @@ struct AddStairsConnectionView: View {
                         .foregroundColor(.white)
                         .cornerRadius(10)
                     }
-                    .padding(.top, 50) // Posiziona il pulsante in basso
                 }
-
+                
                 // Conferma finale
                 if step == 3 {
-                    Button("Confirm Connection") {
+                    Button(action: {
                         createConnection() // Crea la connessione
                         showConfirmView = true
+                    }) {
+                        Text("Confirm Connection")
+                            .font(.system(size: 20, weight: .bold))
+                            .padding()
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
                     }
-                    .padding()
-                    .buttonStyle(.borderedProminent)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
