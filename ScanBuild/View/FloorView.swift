@@ -218,7 +218,6 @@ struct FloorView: View {
                                 }
                             }
                             .onAppear {
-                                // Definisci un array di URL
                                 var roomURLs: [URL] = []
                                 
                                 floor.rooms.forEach { room in
@@ -231,7 +230,6 @@ struct FloorView: View {
                                     borders: true
                                 )
                                 
-                                // Carica la mappa generale
                                 mapView.loadFloorPlanimetry(
                                     borders: true,
                                     usdzURL: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz")
@@ -269,7 +267,7 @@ struct FloorView: View {
                             ScrollView {
                                 LazyVStack(spacing: 50) {
                                     ForEach(floor.rooms, id: \.id) { room in
-                                        NavigationLink(destination: RoomView(room: room, building: building, floor: floor)) {
+                                        NavigationLink(destination: RoomView(room: room, floor: floor, building: building )) {
                                             let isSelected = floor.isMatrixPresent(named: room.name, inFileAt: floor.floorURL.appendingPathComponent("\(floor.name).json"))
                                             RoomCardView(name: room.name, date: room.lastUpdate, position: isSelected, rowSize: 1, isSelected: false).padding()
                                         }

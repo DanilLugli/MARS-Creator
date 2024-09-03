@@ -1,12 +1,15 @@
 import SwiftUI
 import Foundation
+import Combine
+
 
 struct RoomView: View {
     
+    @EnvironmentObject var buildingModel : BuildingModel
     @ObservedObject var room: Room
-    @ObservedObject var building: Building
     @ObservedObject var floor: Floor
-    
+    @ObservedObject var building: Building
+
     @State private var newRoomName: String = ""
     @State private var selectedMarker: ReferenceMarker? = nil
     @State private var selectedConnection: TransitionZone? = nil
@@ -33,7 +36,47 @@ struct RoomView: View {
     @State private var searchText: String = ""
     
     var mapView = SCNViewContainer()
-    var mapRoomPositionView = SCNViewMapContainer()
+    @State var mapRoomPositionView = SCNViewMapContainer()
+    
+    
+//    init(room: Room, floor: Floor, building: Building) {
+//        self.room = room
+//        self.floor = floor
+//        self.building = building
+//        
+//        self.room.objectWillChange.sink { _ in
+//            print("Room has changed: \(room.name)")
+//        }.store(in: &cancellables)
+//        
+//        self.floor.objectWillChange.sink { _ in
+//            print("Floor has changed: \(floor.name)")
+//        }.store(in: &cancellables)
+//        
+//        self.building.objectWillChange.sink { _ in
+//            print("Building has changed: \(building.name)")
+//        }.store(in: &cancellables)
+//        
+//        // Setup the map views
+//        setupMapViews()
+//        
+//    }
+//    
+//    @State private var cancellables = Set<AnyCancellable>()
+//    
+//    func setupMapViews() {
+//        let roomURLs = [room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz")]
+//        
+//        mapRoomPositionView.handler.loadRoomMaps(
+//            floor: floor,
+//            roomURLs: roomURLs,
+//            borders: true
+//        )
+//        
+//        mapView.loadFloorPlanimetry(
+//            borders: true,
+//            usdzURL: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz")
+//        )
+//    }
     
     var body: some View {
         NavigationStack {
@@ -131,7 +174,9 @@ struct RoomView: View {
                                     }
                                 }
                                 .onAppear {
+                                    print("E")
                                     mapView.loadRoomMaps(name: room.name, borders: true, usdzURL: room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"))
+                                    print("F")
                                 }
                             }
                         }
@@ -221,28 +266,23 @@ struct RoomView: View {
                                             }
                                             Spacer()
                                         }.padding(.top)
-                                    }.onAppear {
-                                        print("ESEGUO ON APPEAR ROOM POSITION")
-                                        var roomURLs: [URL] = []
-                                        
-                                        roomURLs.append(room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"))
-                                        
-                                        mapRoomPositionView.handler.loadRoomMaps(
-                                            floor: floor,
-                                            roomURLs: roomURLs,
-                                            borders: true
-                                        )
-                                        
-                                        // Carica la mappa generale
-                                        mapView.loadFloorPlanimetry(
-                                            borders: true,
-                                            usdzURL: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz")
-                                        )
-                                        
+                                        .onAppear {
+                                            
+                                            //mapRoomPositionView = SCNViewMapContainer()
+                                            
+                                            var roomURLs: [URL] = []
+                                            
+                                            print("A")
+                                            roomURLs.append(room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"))
+                                            print("B")
+                                            mapRoomPositionView.handler.loadRoomMaps(
+                                                floor: floor,
+                                                roomURLs: roomURLs,
+                                                borders: true
+                                            )
+                                            print("D")
+                                        }
                                     }
-                                    
-                                    //                                    let isSelected = floor.isMatrixPresent(named: room.name, inFileAt: floor.floorURL.appendingPathComponent("\(floor.name).json"))
-                                    //                                    MatrixCardView(floor: floor.name, room: room.name, exist: isSelected, date: Date(), rowSize: 1)
                                 }
                             } else {
                                 VStack {
@@ -469,7 +509,7 @@ struct RoomView: View {
                                 .foregroundStyle(.white, .blue, .blue)
                         }.background{
                             NavigationLink(
-                                destination: RoomPositionView(floor: floor, room: room),
+                                destination: RoomPositionView(floor: self.floor, room: self.room),
                                 isActive: $isCreateRoomPosition,
                                 label: {
                                     EmptyView()
@@ -477,13 +517,12 @@ struct RoomView: View {
                             )
                             
                             NavigationLink(
-                                destination: ManualRoomPositionView(floor: floor, room: room),
+                                destination: ManualRoomPositionView(floor: self.floor, room: self.room),
                                 isActive: $isCreateManualRoomPosition,
                                 label: {
                                     EmptyView()
                                 }
                             )
-                            
                         }
                     }
                     else if selectedTab == 3 {
@@ -574,7 +613,7 @@ struct RoomView: View {
                     // Azione di annullamento, facoltativa
                 }
             }
-            .confirmationDialog("Are you sure to delete Room?", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
+            .confirmationDialog("Are you sure to delete Room?", isPresented: $showDeleteConfirmation, titleVisibility: .visible){
                 Button("Yes", role: .destructive) {
                     floor.deleteRoom(room: room)
                     print("Room eliminata")
@@ -720,7 +759,7 @@ struct RoomView_Previews: PreviewProvider {
             let building = buildingModel.initTryData()
             let floor = building.floors.first!
             let room = floor.rooms.first!
-            return RoomView(room: room, building: building, floor: floor)
+            return RoomView(room: room, floor: floor, building: building).environmentObject(buildingModel)
         }
     }
     

@@ -18,7 +18,7 @@ struct ManualRoomPositionView: View {
     
     @State private var showUpdateAlert = false
     
-    var mapPositionView = SCNViewUpdatePositionRoomContainer()
+    @State var mapPositionView = SCNViewUpdatePositionRoomContainer()
     
     var body: some View{
         VStack{
@@ -109,10 +109,7 @@ struct ManualRoomPositionView: View {
                 }.padding(.top)
             }.onAppear {
                     var roomURLs: URL
-                    
                     roomURLs = room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz")
-                    
-                    
                     mapPositionView.handler.loadRoomMapsPosition(
                         floor: floor,
                         roomURL: roomURLs,
@@ -122,6 +119,7 @@ struct ManualRoomPositionView: View {
             
             Button(action: {
                 floor.updateAssociationMatrixInJSON(for: room.name, fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"))
+                floor.objectWillChange.send()  // Forza RoomView a rilevare il cambiamento
                 showUpdateAlert = true
             }) {
                 Text("Save Position")
@@ -149,7 +147,7 @@ struct ManualRoomPositionView: View {
                 title: Text("ATTENTION").foregroundColor(.red),
                 message: Text("Room Position Saved"),
                 dismissButton: .default(Text("OK")){
-                    //
+                    floor.objectWillChange.send()  
                 }
             )
         }

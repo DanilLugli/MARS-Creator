@@ -4,20 +4,18 @@ import SceneKit
 class SCNViewUpdatePositionRoomHandler: ObservableObject {
     
     private let identityMatrix = matrix_identity_float4x4
-    
-    
-    // Variabile @Published con valore iniziale
+
     @Published var rotoTraslation: RotoTraslationMatrix = RotoTraslationMatrix(
         name: "",
         translation: matrix_identity_float4x4,
         r_Y: matrix_identity_float4x4
     )
     
-    var scnView: SCNView
+    @Published var scnView: SCNView
     var cameraNode: SCNNode
     var massCenter: SCNNode = SCNNode()
     var origin: SCNNode = SCNNode()
-    var floor: Floor?
+    @Published var floor: Floor?
     var roomName: String?
    
     
@@ -29,7 +27,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject {
     var rotationStep: Float = .pi / 100 // 11.25 gradi
     
     
-    private let color: UIColor = UIColor.orange.withAlphaComponent(0.3)
+    private let color: UIColor = UIColor.green.withAlphaComponent(0.3)
     
     // Nodo per la stanza caricata
     var roomNode: SCNNode?
@@ -41,7 +39,8 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject {
         self.origin.simdWorldTransform = simd_float4x4([1.0,0,0,0], [0,1.0,0,0], [0,0,1.0,0], [0,0,0,1.0])
     }
     
-    func loadRoomMapsPosition(floor: Floor, roomURL: URL, borders: Bool) {
+    
+    @MainActor func loadRoomMapsPosition(floor: Floor, roomURL: URL, borders: Bool) {
         do {
             self.floor = floor
             self.roomName = roomURL.deletingPathExtension().lastPathComponent
@@ -53,13 +52,13 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject {
             setMassCenter()
             setCamera()
             
-            rotoTraslation = floor.associationMatrix[roomURL.deletingPathExtension().lastPathComponent] ?? RotoTraslationMatrix(
+            self.rotoTraslation = floor.associationMatrix[roomURL.deletingPathExtension().lastPathComponent] ?? RotoTraslationMatrix(
                 name: "",
-                translation: matrix_identity_float4x4,
-                r_Y: matrix_identity_float4x4
+                translation: floor.associationMatrix[roomURL.deletingPathExtension().lastPathComponent]?.translation ?? matrix_identity_float4x4,
+                r_Y: floor.associationMatrix[roomURL.deletingPathExtension().lastPathComponent]?.r_Y ?? matrix_identity_float4x4
             )
             
-            
+            print(self.rotoTraslation)
             print("\n\nProcessing room URL: \(roomURL)")
             let roomScene = try SCNScene(url: roomURL)
             
@@ -76,7 +75,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject {
                     print("Translation matrix: \(rotoTraslationMatrix.translation)")
                     print("Rotation matrix (r_Y): \(rotoTraslationMatrix.r_Y)")
                     print("BEFORE POSITION: \nNode: \(loadedRoomNode.name ?? "Unnamed"), Position: \(loadedRoomNode.position)")
-                    
+
                     applyRotoTraslation(to: loadedRoomNode, with: rotoTraslationMatrix)
                     
                     print("AFTER POSITION: \nNode: \(loadedRoomNode.name ?? "Unnamed"), Position: \(loadedRoomNode.position)")
@@ -93,11 +92,9 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject {
                 let material = SCNMaterial()
                 material.diffuse.contents = color
                 loadedRoomNode.geometry?.materials = [material]
-                
-                // Aggiungi il nodo della stanza alla scena principale
+
                 scnView.scene?.rootNode.addChildNode(loadedRoomNode)
                 
-                // Memorizza il nodo della stanza per applicare trasformazioni successive
                 self.roomNode = loadedRoomNode
             } else {
                 print("Node 'Floor0' not found in scene: \(roomURL)")
@@ -108,56 +105,73 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject {
         }
     }
     
+    @MainActor
+    func normalizeNodeOrientationPreservingScale(_ node: SCNNode) {
+        // Salva la scala originale
+        let originalScale = node.scale
+        
+        // Reset della trasformazione (posizione e rotazione)
+        node.transform = SCNMatrix4Identity
+        
+        // Ripristina la scala originale
+        node.scale = originalScale
+    }
     
+    @MainActor
     func moveRoomPositionUp() {
         guard let roomNode = roomNode else {
             print("No room node available for movement")
             return
         }
         roomNode.position.z += Float(translationStep)
-        rotoTraslation.translation[3][2] += Float(translationStep)
+        floor?.associationMatrix[roomName!]?.translation[3][2] += Float(translationStep)
     }
     
+    @MainActor
     func moveRoomPositionDown() {
         guard let roomNode = roomNode else {
             print("No room node available for movement")
             return
         }
         roomNode.position.z -= Float(translationStep)
-        rotoTraslation.translation[3][2] -= Float(translationStep)
+        floor?.associationMatrix[roomName!]?.translation[3][2] -= Float(translationStep)
     }
     
+    @MainActor
     func moveRoomPositionRight() {
         guard let roomNode = roomNode else {
             print("No room node available for movement")
             return
         }
         roomNode.position.x += Float(translationStep)
-        rotoTraslation.translation[3][0] += Float(translationStep)
-        
+        floor?.associationMatrix[roomName!]?.translation[3][0] += Float(translationStep)
+        print(floor?.associationMatrix[roomName!]?.translation[3][0])
     }
     
+    @MainActor
     func moveRoomPositionLeft() {
         guard let roomNode = roomNode else {
             print("No room node available for movement")
             return
         }
         roomNode.position.x -= Float(translationStep)
-        rotoTraslation.translation[3][0] -= Float(translationStep)
+        floor?.associationMatrix[roomName!]?.translation[3][0] -= Float(translationStep)
     }
     
-    // Funzioni di rotazione
+    @MainActor
     func rotateClockwise() {
         guard let roomNode = roomNode else {
             print("No room node available for rotation")
             return
         }
         roomNode.eulerAngles.y -= rotationStep
-        // Aggiorna la matrice di rotazione
+
         let rotationMatrix = simd_float4x4(SCNMatrix4MakeRotation(-rotationStep, 0, 1, 0))
-        rotoTraslation.r_Y = matrix_multiply(rotoTraslation.r_Y, rotationMatrix)
+        // Applica la rotazione direttamente alla matrice r_Y all'interno dell'associationMatrix
+        floor?.associationMatrix[roomName ?? ""]?.r_Y = matrix_multiply(floor?.associationMatrix[roomName ?? ""]?.r_Y ?? matrix_identity_float4x4, rotationMatrix)
     }
     
+    @MainActor
     func rotateCounterClockwise() {
         guard let roomNode = roomNode else {
             print("No room node available for rotation")
@@ -165,122 +179,10 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject {
         }
         roomNode.eulerAngles.y += rotationStep
         let rotationMatrix = simd_float4x4(SCNMatrix4MakeRotation(rotationStep, 0, 1, 0))
-        rotoTraslation.r_Y = matrix_multiply(rotoTraslation.r_Y, rotationMatrix)
+        floor?.associationMatrix[roomName ?? ""]?.r_Y = matrix_multiply(floor?.associationMatrix[roomName ?? ""]?.r_Y ?? matrix_identity_float4x4, rotationMatrix)
+        print("PINO: \(floor?.associationMatrix[roomName ?? ""]?.r_Y )")
     }
 
-//    
-//    func updatePositionTranslation() {
-//        // Assicurati di avere sia il floor che il roomName
-//        guard let floor = self.floor, let roomName = self.roomName else {
-//            print("Floor or roomName is nil")
-//            return
-//        }
-//        
-//        // Seleziona il roomMatrix
-//        if var roomMatrix = floor.associationMatrix[roomName] {
-//            // Modifica il valore
-//            roomMatrix.translation = rotoTraslation.translation
-//            
-//            // Aggiorna il valore nel dizionario
-//            floor.associationMatrix[roomName] = roomMatrix
-//            
-//            // Stampa per debug
-//            print("Updated translation matrix:")
-//            print(floor.associationMatrix[roomName]?.translation)
-//            print("Function executed successfully")
-//        } else {
-//            print("No roomMatrix found for room \(roomName)")
-//        }
-//        
-//        do {
-//            try self.floor?.updateTranslationMatrixInJSON(for: self.roomName ?? "", newTranslationMatrix:rotoTraslation.translation ,jsonURL: self.floor?.floorURL.appendingPathComponent("\(self.floor?.name ?? "defaultName").json") ?? URL(fileURLWithPath: ""))
-//        } catch {
-//            print("Errore: \(error.localizedDescription)")
-//        }
-//    }
-//    
-//    func updatePositionRY() {
-//        // Assicurati di avere sia il floor che il roomName
-//        guard let floor = self.floor, let roomName = self.roomName else {
-//            print("Floor or roomName is nil")
-//            return
-//        }
-//        
-//        // Seleziona il roomMatrix
-//        if var roomMatrix = floor.associationMatrix[roomName] {
-//            // Modifica il valore
-//            roomMatrix.r_Y = rotoTraslation.r_Y
-//            
-//            // Aggiorna il valore nel dizionario
-//            floor.associationMatrix[roomName] = roomMatrix
-//            
-//            // Stampa per debug
-//            print("Updated translation matrix:")
-//            print(floor.associationMatrix[roomName]?.r_Y ?? "")
-//            print("Function executed successfully")
-//        } else {
-//            print("No roomMatrix found for room \(roomName)")
-//        }
-//        
-//        do{
-//            try self.floor?.updateRYMatrixInJSON(for: self.roomName ?? "", newRYMatrix: rotoTraslation.r_Y ,jsonURL: self.floor?.floorURL.appendingPathComponent("\(self.floor?.name ?? "defaultName").json") ?? URL(fileURLWithPath: ""))
-//            
-//        }
-//        catch{
-//            print("Errore: \(error.localizedDescription)")
-//        }
-//        
-//    }
-
-    
-//    func moveRoomPositionUp() {
-//        guard let roomNode = roomNode else {
-//            print("No room node available for movement")
-//            return
-//        }
-//        roomNode.position.z += Float(translationStep)
-//    }
-//    
-//    func moveRoomPositionDown() {
-//        guard let roomNode = roomNode else {
-//            print("No room node available for movement")
-//            return
-//        }
-//        roomNode.position.z -= Float(translationStep)
-//    }
-//    
-//    func moveRoomPositionRight() {
-//        guard let roomNode = roomNode else {
-//            print("No room node available for movement")
-//            return
-//        }
-//        roomNode.position.x += Float(translationStep)
-//    }
-//    
-//    func moveRoomPositionLeft() {
-//        guard let roomNode = roomNode else {
-//            print("No room node available for movement")
-//            return
-//        }
-//        roomNode.position.x -= Float(translationStep)
-//    }
-//    
-//    // Funzioni di rotazione
-//    func rotateClockwise() {
-//        guard let roomNode = roomNode else {
-//            print("No room node available for rotation")
-//            return
-//        }
-//        roomNode.eulerAngles.y -= rotationStep
-//    }
-//    
-//    func rotateCounterClockwise() {
-//        guard let roomNode = roomNode else {
-//            print("No room node available for rotation")
-//            return
-//        }
-//        roomNode.eulerAngles.y += rotationStep
-//    }
     
     private func setCamera() {
         scnView.scene?.rootNode.addChildNode(cameraNode)
@@ -350,7 +252,25 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject {
             }
     }
     
+    @MainActor
     func applyRotoTraslation(to node: SCNNode, with rotoTraslation: RotoTraslationMatrix) {
+        // Normalizza l'orientamento del nodo mantenendo la scala
+        //normalizeNodeOrientationPreservingScale(node)
+        
+        print("Node Transform: \(node.transform)")
+        print("Scale of the node: \(node.scale)")
+        print("Euler angles of the node: \(node.eulerAngles)")
+        print("Rotation of the node: \(node.rotation)")
+        
+        
+        if let parentNode = node.parent {
+            print("Parent Node: \(parentNode)")
+            print("Parent's Transform: \(parentNode.transform)")
+            print("Parent's Scale: \(parentNode.scale)")
+            print("Parent's Euler Angles: \(parentNode.eulerAngles)")
+        }
+        
+        // Applica le trasformazioni di traslazione e rotazione
         node.simdWorldTransform.columns.3 = rotoTraslation.translation.columns.3 + node.simdWorldTransform.columns.3
         
         let r_Y = simd_float3x3([
@@ -370,12 +290,14 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject {
         node.simdWorldTransform.columns.0 = simd_float4(currentRotation.columns.0, node.simdWorldTransform.columns.0.w)
         node.simdWorldTransform.columns.1 = simd_float4(currentRotation.columns.1, node.simdWorldTransform.columns.1.w)
         node.simdWorldTransform.columns.2 = simd_float4(currentRotation.columns.2, node.simdWorldTransform.columns.2.w)
+        
+        print("Updated Node Position: \(node.simdWorldTransform.columns.3)")
     }
 }
 
 struct SCNViewUpdatePositionRoomContainer: UIViewRepresentable {
     typealias UIViewType = SCNView
-    @ObservedObject var handler: SCNViewUpdatePositionRoomHandler
+    var handler: SCNViewUpdatePositionRoomHandler
     
     init() {
         let scnView = SCNView(frame: .zero)

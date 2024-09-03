@@ -9,7 +9,7 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     @Published private var _name: String
     private var _lastUpdate: Date
     private var _planimetry: SCNViewContainer?
-    @Published private var _associationMatrix: [String: RotoTraslationMatrix]
+    @Published var _associationMatrix: [String: RotoTraslationMatrix]
     @Published private var _rooms: [Room]
     @Published private var _sceneObjects: [SCNNode]?
     @Published private var _scene: SCNScene?
@@ -116,6 +116,10 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         try container.encode(_lastUpdate, forKey: .lastUpdate)
         try container.encode(_rooms, forKey: .rooms)
         try container.encode(_associationMatrix, forKey: .associationMatrix)
+    }
+    
+    func getRoomByName(_ name: String) -> Room? {
+        return rooms.first { $0.name == name }
     }
     
     func addRoom(room: Room) {
@@ -288,9 +292,8 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     func loadAssociationMatrixFromJSON(fileURL: URL) {
         do {
             let data = try Data(contentsOf: fileURL)
-            let jsonDecoder = JSONDecoder()
             let jsonObject = try JSONSerialization.jsonObject(with: data, options: [])
-            guard let dictionary = jsonObject as? [String: [String: [[Float]]]] else {
+            guard let dictionary = jsonObject as? [String: [String: [[Double]]]] else {
                 print("Error: Cannot convert JSON data to dictionary")
                 return
             }
@@ -302,13 +305,16 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
                     continue
                 }
                 
-                let translationMatrix = simd_float4x4(rows: translationArray.map { simd_float4($0) })
-                let r_YMatrix = simd_float4x4(rows: r_YArray.map { simd_float4($0) })
+                let translationMatrix = simd_float4x4(rows: translationArray.map { simd_float4($0.map { Float($0) }) })
+                let r_YMatrix = simd_float4x4(rows: r_YArray.map { simd_float4($0.map { Float($0) }) })
                 
                 let rotoTranslationMatrix = RotoTraslationMatrix(name: key, translation: translationMatrix, r_Y: r_YMatrix)
                 
                 self._associationMatrix[key] = rotoTranslationMatrix
             }
+            
+            print("Association matrix loaded successfully from JSON file")
+            
         } catch {
             print("Error loading JSON data: \(error)")
         }
@@ -322,12 +328,12 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
             // Itera su tutte le chiavi e valori nell'association matrix
             for (key, value) in _associationMatrix {
                 // Converti la matrice translation in un array di array di Double
-                let translationArray = (0..<4).map { index in
+                let translationArray: [[Double]] = (0..<4).map { index in
                     [Double(value.translation[index, 0]), Double(value.translation[index, 1]), Double(value.translation[index, 2]), Double(value.translation[index, 3])]
                 }
 
                 // Converti la matrice r_Y in un array di array di Double
-                let r_YArray = (0..<4).map { index in
+                let r_YArray: [[Double]] = (0..<4).map { index in
                     [Double(value.r_Y[index, 0]), Double(value.r_Y[index, 1]), Double(value.r_Y[index, 2]), Double(value.r_Y[index, 3])]
                 }
 
@@ -345,11 +351,12 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
             try jsonData.write(to: fileURL)
 
             print("Association matrix saved successfully to JSON file")
-
+            
         } catch {
             print("Error saving association matrix to JSON: \(error)")
         }
     }
+    
     
     func updateAssociationMatrixInJSON(for roomName: String, fileURL: URL) {
         do {
@@ -368,12 +375,12 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
 
             // Converti la matrice translation in un array di array di Double
             let translationArray = (0..<4).map { index in
-                [Double(value.translation[index, 0]), Double(value.translation[index, 1]), Double(value.translation[index, 2]), Double(value.translation[index, 3])]
+                [Double(value.translation[0, index]), Double(value.translation[1, index]), Double(value.translation[2, index]), Double(value.translation[3, index])]
             }
 
             // Converti la matrice r_Y in un array di array di Double
             let r_YArray = (0..<4).map { index in
-                [Double(value.r_Y[index, 0]), Double(value.r_Y[index, 1]), Double(value.r_Y[index, 2]), Double(value.r_Y[index, 3])]
+                [Double(value.r_Y[0, index]), Double(value.r_Y[1, index]), Double(value.r_Y[2, index]), Double(value.r_Y[3, index])]
             }
 
             // Aggiorna le matrici nel dizionario JSON per la chiave specificata

@@ -146,7 +146,7 @@ class BuildingModel: ObservableObject {
                     if fileManager.fileExists(atPath: associationMatrixURL.path) {
                         if let loadedMatrix = loadRoomPositionFromJson(from: associationMatrixURL) {
                             associationMatrix = loadedMatrix
-                            print("Matrix loaded for floor \(floorURL.lastPathComponent): \(associationMatrix)")
+                            print("Matrix loaded for floor \(floorURL.lastPathComponent): \(associationMatrix)\n")
                         } else {
                             print("Failed to load RotoTraslationMatrix from JSON file for floor \(floorURL.lastPathComponent)")
                         }
@@ -164,11 +164,6 @@ class BuildingModel: ObservableObject {
                                       sceneConfiguration: sceneConfiguration,
                                       floorURL: floorURL)
                     
-//                    let associationMatrixURL = floorURL.appendingPathComponent("\(floor.name).json")
-//                    if fileManager.fileExists(atPath: associationMatrixURL.path) {
-//                        floor.loadAssociationMatrixFromJSON(fileURL: associationMatrixURL)
-//                        print("Matrix: \(floor.associationMatrix)")
-//                    }
                     
                     floors.append(floor)
                 }
@@ -230,45 +225,6 @@ class BuildingModel: ObservableObject {
                     )
                     transitionZones.append(transitionZone)
                         
-                        // Salva la TransitionZone casuale come file JSON
-//                        let jsonData = try JSONEncoder().encode(transitionZone)
-//                        try jsonData.write(to: roomURL.appendingPathComponent("TransitionZone"))
-                    
-                    
-                    // Load TransitionZone data
-//                    let transitionZoneURL = roomURL.appendingPathComponent("TransitionZone")
-//                    if fileManager.fileExists(atPath: transitionZoneURL.path) {
-//                        let transitionZoneContents = try fileManager.contentsOfDirectory(at: transitionZoneURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
-//                        for fileURL in transitionZoneContents {
-////                            if fileURL.pathExtension == "json" {
-////                                let jsonData = try Data(contentsOf: fileURL)
-////                                let decodedZones = try JSONDecoder().decode([TransitionZone].self, from: jsonData)
-////                                transitionZones.append(contentsOf: decodedZones)
-////                            }
-////                            else {
-//
-//                          //  }
-//                        }
-//                    }
-
-//                    let transitionZoneURL = roomURL.appendingPathComponent("TransitionZone/TransitionZone.json")
-//                    if fileManager.fileExists(atPath: transitionZoneURL.path) {
-//                        let jsonData = try Data(contentsOf: transitionZoneURL)
-//                        let decodedZones = try JSONDecoder().decode([TransitionZone].self, from: jsonData)
-//                        transitionZones.append(contentsOf: decodedZones)
-//                    }
-                    
-                    //                    // Load sceneObjects and scene from MapUsdz
-                    //                    let mapUsdzURL = roomURL.appendingPathComponent("MapUsdz")
-                    //                    if fileManager.fileExists(atPath: mapUsdzURL.path) {
-                    //                        let mapUsdzContents = try fileManager.contentsOfDirectory(at: mapUsdzURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
-                    //                        for fileURL in mapUsdzContents {
-                    //                            if fileURL.pathExtension == "usdz" {
-                    //                                scene = try SCNScene(url: fileURL, options: nil)
-                    //                                sceneObjects.append(contentsOf: scene!.rootNode.childNodes)
-                    //                            }
-                    //                        }
-                    //                    }
                     
                     let room = Room(name: roomURL.lastPathComponent, lastUpdate: lastModifiedDate, referenceMarkers: referenceMarkers, transitionZones: transitionZones, sceneObjects: sceneObjects, scene: scene, worldMap: worldMap, roomURL: roomURL)
                     rooms.append(room)

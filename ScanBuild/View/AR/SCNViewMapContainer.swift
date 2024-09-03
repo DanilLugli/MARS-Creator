@@ -9,18 +9,7 @@ class SCNViewMapHandler: ObservableObject {
     var massCenter: SCNNode = SCNNode()
     var origin: SCNNode = SCNNode()
     
-    private var colorIndex = 0
-    private let colors: [UIColor] = [
-        UIColor.blue.withAlphaComponent(0.3),
-        UIColor.yellow.withAlphaComponent(0.4),
-        UIColor.green.withAlphaComponent(0.3),
-        UIColor.red.withAlphaComponent(0.3),
-        UIColor.orange.withAlphaComponent(0.3),
-        UIColor.purple.withAlphaComponent(0.3),
-        UIColor.brown.withAlphaComponent(0.3)
-    ]
-    
-    
+
     init(scnView: SCNView, cameraNode: SCNNode, massCenter: SCNNode) {
         self.scnView = scnView
         self.cameraNode = cameraNode
@@ -29,7 +18,7 @@ class SCNViewMapHandler: ObservableObject {
         setCamera()
     }
     
-    func loadRoomMaps(floor: Floor, roomURLs: [URL], borders: Bool) {
+    @MainActor func loadRoomMaps(floor: Floor, roomURLs: [URL], borders: Bool) {
         do {
             let floorFileURL = floor.floorURL.appendingPathComponent("MapUsdz")
                 .appendingPathComponent("\(floor.name).usdz")
@@ -54,8 +43,8 @@ class SCNViewMapHandler: ObservableObject {
                     // Cerca la matrice di trasformazione per la stanza nel dizionario associationMatrix
                     if let rotoTraslationMatrix = floor.associationMatrix[roomName] {
                         print("Applying transformation for room: \(roomName)")
-                        print("Translation matrix: \(rotoTraslationMatrix.translation)")
-                        print("Rotation matrix (r_Y): \(rotoTraslationMatrix.r_Y)")
+                        print("Translation matrix: \(rotoTraslationMatrix.translation)\n")
+                        print("Rotation matrix (r_Y): \(rotoTraslationMatrix.r_Y)\n")
                         print("BEFORE POSITION: \nNode: \(roomNode.name ?? "Unnamed"), Position: \(roomNode.position)")
                         
                         applyRotoTraslation(to: roomNode, with: rotoTraslationMatrix)
@@ -72,7 +61,7 @@ class SCNViewMapHandler: ObservableObject {
                     
                     // Aggiungi un materiale per colorare il nodo
                     let material = SCNMaterial()
-                    material.diffuse.contents = colorForRoom(named: roomName) // Ottieni il colore per la stanza
+                    material.diffuse.contents = floor.getRoomByName(roomName)?.color
                     roomNode.geometry?.materials = [material]
                     
                     // Aggiungi il nodo della stanza alla scena principale
@@ -89,13 +78,6 @@ class SCNViewMapHandler: ObservableObject {
             print("Error loading scene from URL: \(error)")
         }
     }
-    
-    func colorForRoom(named roomName: String) -> UIColor {
-        let color = colors[colorIndex]
-        colorIndex = (colorIndex + 1) % colors.count
-        return color
-    }
-    
     
     func printAllNodes(in node: SCNNode?, indent: String = "") {
         guard let node = node else { return }
@@ -175,9 +157,11 @@ class SCNViewMapHandler: ObservableObject {
         }
     }
     
-    func zoomIn() { cameraNode.camera?.orthographicScale -= 0.5 }
+    func zoomIn() { cameraNode.camera?.orthographicScale -= 0.5
+    print("IN")}
     
-    func zoomOut() { cameraNode.camera?.orthographicScale += 0.5 }
+    func zoomOut() { cameraNode.camera?.orthographicScale += 0.5
+    print("OUT")}
     
     func moveFloorMapUp() {
         guard cameraNode.camera != nil else {
@@ -220,27 +204,22 @@ class SCNViewMapHandler: ObservableObject {
         
         cameraNode.camera = SCNCamera()
         
-        // Posiziona la camera sopra il massCenter
         cameraNode.worldPosition = SCNVector3(massCenter.worldPosition.x, massCenter.worldPosition.y + 10, massCenter.worldPosition.z)
-        
-        // Configura la camera per la vista ortografica dall'alto
+
         cameraNode.camera?.usesOrthographicProjection = true
         cameraNode.camera?.orthographicScale = 10
-        
-        // Ruota la camera per guardare verso il basso
+
         cameraNode.eulerAngles = SCNVector3(-Double.pi / 2, 0, 0)
         
-        // Crea una luce direzionale (opzionale)
+
         let directionalLight = SCNNode()
         directionalLight.light = SCNLight()
         directionalLight.light!.type = .ambient
         directionalLight.light!.color = UIColor(white: 1.0, alpha: 1.0)
         cameraNode.addChildNode(directionalLight)
-        
-        // Imposta la camera come punto di vista
+print("1")
         scnView.pointOfView = cameraNode
-        
-        // Rimuovi il LookAtConstraint per evitare che la camera ruoti
+print("2")
         cameraNode.constraints = []
     }
     
@@ -302,6 +281,7 @@ class SCNViewMapHandler: ObservableObject {
     //        )
     //    }
     
+    @MainActor
     func applyRotoTraslation(to node: SCNNode, with rotoTraslation: RotoTraslationMatrix) {
         
         print("NODE: \(node.name ?? "Unnamed Node")\n")

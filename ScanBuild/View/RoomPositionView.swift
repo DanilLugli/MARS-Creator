@@ -64,12 +64,6 @@ struct RoomPositionView: View {
                     node.boundingBox.max.z - node.boundingBox.min.z
                 )  // Dimensione del nodo
                 let nodePosition = node.position  // Posizione del nodo
-                
-                print("""
-                Node name: \(nodeName)
-                Node size: \(nodeSize)
-                Node position: \(nodePosition)
-                """)
             }
         } else {
             print("No nodes found in floorView's rootNode.")
@@ -129,26 +123,26 @@ struct RoomPositionView: View {
         }
     }
     
-    func printOriginalDimensionsOfSelectedNode(selectedNode: SCNNode) {
-        if let geometry = selectedNode.geometry {
-            switch geometry {
-            case let box as SCNBox:
-                print("Nodo: \(selectedNode.name ?? "sconosciuto"), Tipo: Box, Dimensioni originali: larghezza: \(box.width), altezza: \(box.height), lunghezza: \(box.length)")
-            case let sphere as SCNSphere:
-                print("Nodo: \(selectedNode.name ?? "sconosciuto"), Tipo: Sphere, Diametro originale: \(sphere.radius * 2)")
-            case let cylinder as SCNCylinder:
-                print("Nodo: \(selectedNode.name ?? "sconosciuto"), Tipo: Cylinder, Altezza originale: \(cylinder.height), Diametro originale: \(cylinder.radius * 2)")
-            case let cone as SCNCone:
-                print("Nodo: \(selectedNode.name ?? "sconosciuto"), Tipo: Cone, Altezza originale: \(cone.height), Diametro alla base originale: \(cone.topRadius * 2)")
-            case let plane as SCNPlane:
-                print("Nodo: \(selectedNode.name ?? "sconosciuto"), Tipo: Plane, Dimensioni originali: larghezza: \(plane.width), altezza: \(plane.height)")
-            default:
-                print("Geometria non supportata per il calcolo delle dimensioni.")
-            }
-        } else {
-            print("Il nodo selezionato non ha una geometria associata.")
-        }
-    }
+//    func printOriginalDimensionsOfSelectedNode(selectedNode: SCNNode) {
+//        if let geometry = selectedNode.geometry {
+//            switch geometry {
+//            case let box as SCNBox:
+//                print("Nodo: \(selectedNode.name ?? "sconosciuto"), Tipo: Box, Dimensioni originali: larghezza: \(box.width), altezza: \(box.height), lunghezza: \(box.length)")
+//            case let sphere as SCNSphere:
+//                print("Nodo: \(selectedNode.name ?? "sconosciuto"), Tipo: Sphere, Diametro originale: \(sphere.radius * 2)")
+//            case let cylinder as SCNCylinder:
+//                print("Nodo: \(selectedNode.name ?? "sconosciuto"), Tipo: Cylinder, Altezza originale: \(cylinder.height), Diametro originale: \(cylinder.radius * 2)")
+//            case let cone as SCNCone:
+//                print("Nodo: \(selectedNode.name ?? "sconosciuto"), Tipo: Cone, Altezza originale: \(cone.height), Diametro alla base originale: \(cone.topRadius * 2)")
+//            case let plane as SCNPlane:
+//                print("Nodo: \(selectedNode.name ?? "sconosciuto"), Tipo: Plane, Dimensioni originali: larghezza: \(plane.width), altezza: \(plane.height)")
+//            default:
+//                print("Geometria non supportata per il calcolo delle dimensioni.")
+//            }
+//        } else {
+//            print("Il nodo selezionato non ha una geometria associata.")
+//        }
+//    }
 
     var body: some View {
         NavigationStack {
@@ -171,25 +165,76 @@ struct RoomPositionView: View {
                     
                     VStack {
                         HStack {
-                            Spacer() // Push buttons to the right
                             HStack {
-                                Button("+") {
+                                Button(action: {
                                     floorView.zoomIn()
+                                }) {
+                                    Image(systemName: "plus")
+                                        .bold()
+                                        .foregroundColor(.white) // Colore del simbolo
                                 }
                                 .buttonStyle(.bordered)
-                                .bold()
                                 .background(Color.blue.opacity(0.4))
                                 .cornerRadius(8)
                                 
-                                Button("-") {
+                                Button(action: {
                                     floorView.zoomOut()
+                                }) {
+                                    Image(systemName: "minus")
+                                        .bold()
+                                        .foregroundColor(.white) // Colore del simbolo
                                 }
                                 .buttonStyle(.bordered)
-                                .bold()
                                 .background(Color.blue.opacity(0.4))
-                                .cornerRadius(8).padding()
-                            }
-                            .padding()
+                                .cornerRadius(8)
+                                
+                            }.padding()
+                            HStack {
+                                Button(action: {
+                                    floorView.moveMapRight()
+                                }) {
+                                    Image(systemName: "arrow.left")
+                                        .bold()
+                                        .foregroundColor(.white) // Colore del simbolo
+                                }
+                                .buttonStyle(.bordered)
+                                .background(Color.blue.opacity(0.4))
+                                .cornerRadius(8)
+                                
+                                Button(action: {
+                                    floorView.moveMapLeft()
+                                }) {
+                                    Image(systemName: "arrow.right")
+                                        .bold()
+                                        .foregroundColor(.white) // Colore del simbolo
+                                }
+                                .buttonStyle(.bordered)
+                                .background(Color.blue.opacity(0.4))
+                                .cornerRadius(8)
+                            }.padding()
+                            HStack {
+                                Button(action: {
+                                    floorView.moveMapUp()
+                                }) {
+                                    Image(systemName: "arrow.up")
+                                        .bold()
+                                        .foregroundColor(.white) // Colore del simbolo
+                                }
+                                .buttonStyle(.bordered)
+                                .background(Color.blue.opacity(0.4))
+                                .cornerRadius(8)
+                                
+                                Button(action: {
+                                    floorView.moveMapDown()
+                                }) {
+                                    Image(systemName: "arrow.down")
+                                        .bold()
+                                        .foregroundColor(.white) // Colore del simbolo
+                                }
+                                .buttonStyle(.bordered)
+                                .background(Color.blue.opacity(0.4))
+                                .cornerRadius(8)
+                            }.padding()
                         }
                         Spacer() // Push buttons to the top
                     }
@@ -247,25 +292,76 @@ struct RoomPositionView: View {
                         
                         VStack {
                             HStack {
-                                Spacer() // Push buttons to the right
                                 HStack {
-                                    Button("+") {
+                                    Button(action: {
                                         roomView.zoomIn()
+                                    }) {
+                                        Image(systemName: "plus")
+                                            .bold()
+                                            .foregroundColor(.white) // Colore del simbolo
                                     }
                                     .buttonStyle(.bordered)
-                                    .bold()
                                     .background(Color.blue.opacity(0.4))
                                     .cornerRadius(8)
                                     
-                                    Button("-") {
+                                    Button(action: {
                                         roomView.zoomOut()
+                                    }) {
+                                        Image(systemName: "minus")
+                                            .bold()
+                                            .foregroundColor(.white) // Colore del simbolo
                                     }
                                     .buttonStyle(.bordered)
-                                    .bold()
                                     .background(Color.blue.opacity(0.4))
-                                    .cornerRadius(8).padding()
-                                }
-                                .padding()
+                                    .cornerRadius(8)
+                                    
+                                }.padding()
+                                HStack {
+                                    Button(action: {
+                                        roomView.moveMapRight()
+                                    }) {
+                                        Image(systemName: "arrow.left")
+                                            .bold()
+                                            .foregroundColor(.white) // Colore del simbolo
+                                    }
+                                    .buttonStyle(.bordered)
+                                    .background(Color.blue.opacity(0.4))
+                                    .cornerRadius(8)
+                                    
+                                    Button(action: {
+                                        roomView.moveMapLeft()
+                                    }) {
+                                        Image(systemName: "arrow.right")
+                                            .bold()
+                                            .foregroundColor(.white) // Colore del simbolo
+                                    }
+                                    .buttonStyle(.bordered)
+                                    .background(Color.blue.opacity(0.4))
+                                    .cornerRadius(8)
+                                }.padding()
+                                HStack {
+                                    Button(action: {
+                                        roomView.moveMapUp()
+                                    }) {
+                                        Image(systemName: "arrow.up")
+                                            .bold()
+                                            .foregroundColor(.white) // Colore del simbolo
+                                    }
+                                    .buttonStyle(.bordered)
+                                    .background(Color.blue.opacity(0.4))
+                                    .cornerRadius(8)
+                                    
+                                    Button(action: {
+                                        roomView.moveMapDown()
+                                    }) {
+                                        Image(systemName: "arrow.down")
+                                            .bold()
+                                            .foregroundColor(.white) // Colore del simbolo
+                                    }
+                                    .buttonStyle(.bordered)
+                                    .background(Color.blue.opacity(0.4))
+                                    .cornerRadius(8)
+                                }.padding()
                             }
                             Spacer() // Push buttons to the top
                         }
