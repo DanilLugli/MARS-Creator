@@ -6,7 +6,7 @@ import RoomPlan
 import CoreMotion
 import ComplexModule
 
-struct SCNViewContainer: UIViewRepresentable {
+struct SCNViewTransitionZoneContainer: UIViewRepresentable {
     
     typealias UIViewType = SCNView
     
@@ -71,49 +71,33 @@ struct SCNViewContainer: UIViewRepresentable {
     func drawContent(borders: Bool) {
         print(borders)
         
-        // Crea un set per tracciare gli oggetti già disegnati
-        var drawnNodes = Set<String>()
-        
         scnView.scene?
             .rootNode
-            .childNodes(passingTest: { n, _ in
-                n.name != nil && n.name! != "Room" && n.name! != "Floor0" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp" && n.name! != "__selected__"
+            .childNodes(passingTest: {
+                n,_ in n.name != nil && n.name! != "Room" && n.name! != "Floor0" && n.name! !=  "Geom" && String(n.name!.suffix(4)) != "_grp" && n.name! != "__selected__"
             })
-            .forEach {
-                // Verifica se il nodo è già stato disegnato
-                guard let nodeName = $0.name, !drawnNodes.contains(nodeName) else {
-                    return // Se l'oggetto è già stato disegnato, passa al successivo
-                }
-                
+            .forEach{
                 let material = SCNMaterial()
-                if nodeName == "Floor0" {
+                if $0.name == "Floor0" {
                     material.diffuse.contents = UIColor.green
                 } else {
                     material.diffuse.contents = UIColor.black
-                    if nodeName.prefix(5) == "Floor" {
-                        material.diffuse.contents = UIColor.white.withAlphaComponent(0.2)
+                    if ($0.name!.prefix(5) == "Floor") {material.diffuse.contents = UIColor.white.withAlphaComponent(0.2)}
+                    if ($0.name!.prefix(6) == "Transi") {
+                        print("Disegno \($0.name)")
+                        material.diffuse.contents = UIColor.red // Colore per il perimetro
+                        material.fillMode = .lines  // Questo renderà solo il contorno (wireframe) del nodo
                     }
-                    if nodeName.prefix(6) == "Transi" {
-                        print("Disegno: \(nodeName)")
-                        print("Tipo: \($0.geometry)")
-                        material.diffuse.contents = UIColor.red
-                        material.fillMode = .lines
-                    }
-                    if nodeName.prefix(4) == "Door" || nodeName.prefix(4) == "Open" {
-                        material.diffuse.contents = UIColor.green
-                    }
+                    if ($0.name!.prefix(4) == "Door" || $0.name!.prefix(4) == "Open") {material.diffuse.contents = UIColor.green}
                     material.lightingModel = .physicallyBased
                     $0.geometry?.materials = [material]
                     
                     if borders {
                         $0.scale.x = $0.scale.x < 0.2 ? $0.scale.x + 0.1 : $0.scale.x
                         $0.scale.z = $0.scale.z < 0.2 ? $0.scale.z + 0.1 : $0.scale.z
-                        $0.scale.y = (nodeName.prefix(4) == "Wall") ? 0.1 : $0.scale.y
+                        $0.scale.y = ($0.name!.prefix(4) == "Wall") ? 0.1 : $0.scale.y
                     }
                 }
-                
-                // Aggiungi il nome del nodo al set dopo averlo disegnato
-                drawnNodes.insert(nodeName)
             }
     }
     
@@ -318,59 +302,21 @@ struct SCNViewContainer: UIViewRepresentable {
         }
     }
     
-    // Aggiunta della SCNBox alla scena nel punto selezionato
-    func addBox(at position: SCNVector3) {
-        let box = SCNBox(width: 1.0, height: 2.0, length: 1.0, chamferRadius: 0.0)
-        let boxNode = SCNNode(geometry: box)
-        boxNode.position = position
-        boxNode.geometry?.firstMaterial?.diffuse.contents = UIColor.blue // Colore della scatola
-        print("Aggiungo SCNBox alla posizione: \(position)")
-        scnView.scene?.rootNode.addChildNode(boxNode)
-    }
-    
-    // Metodo per gestire l'interazione e posizionare la scatola
-    func handleTap(at location: CGPoint) {
-        print("Tap rilevato in posizione: \(location)")
-        
-        let hitResults = scnView.hitTest(location, options: nil)
-        if let hitResult = hitResults.first {
-            let position = hitResult.worldCoordinates // Ottieni le coordinate del punto toccato
-            print("Punto toccato nella scena: \(position)")
-            
-            // Aggiungi la scatola alla posizione toccata
-            addBox(at: position)
-        } else {
-            // Se non c'è un nodo rilevato, aggiungi la scatola in una posizione predefinita
-            print("Nessun nodo trovato, aggiungo scatola alla posizione 0,0,0")
-            addBox(at: SCNVector3(0, 0, 0))
-        }
-    }
-    
     func makeUIView(context: Context) -> SCNView {
-        print("Creazione di SCNView e aggiunta dei riconoscitori di gesti")
-        
+        print("add a tap gesture recognizer")
         handler.scnView = scnView
-        
-        // Aggiunta del riconoscitore di tap
-        let tapGesture = UITapGestureRecognizer(target: context.coordinator, action: #selector(context.coordinator.handleTap(_:)))
+        let tapGesture = UIGestureRecognizer(
+            target: self,
+            action: #selector(self.handler.handleTap(_:))
+        )
         scnView.addGestureRecognizer(tapGesture)
-        
-        // Aggiunta del riconoscitore di pinch
-        let pinchGesture = UIPinchGestureRecognizer(target: context.coordinator, action: #selector(context.coordinator.handlePinch(_:)))
-        scnView.addGestureRecognizer(pinchGesture)
-        
-        // Configura lo sfondo della scena
-        scnView.backgroundColor = UIColor.black
-        
         return scnView
     }
     
-    func updateUIView(_ uiView: SCNView, context: Context) {
-        // Qui puoi implementare eventuali aggiornamenti necessari per la vista.
-    }
+    func updateUIView(_ uiView: SCNView, context: Context) {}
     
-    func makeCoordinator() -> SCNViewContainerCoordinator {
-        SCNViewContainerCoordinator(self)
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
     }
     
     func addDoorNodesBasedOnExistingDoors(room: Room) {
@@ -422,21 +368,18 @@ struct SCNViewContainer: UIViewRepresentable {
         }
     }
     
-    class SCNViewContainerCoordinator: NSObject {
-        var parent: SCNViewContainer
+    class Coordinator: NSObject {
+        var parent: SCNViewTransitionZoneContainer
         
-        init(_ parent: SCNViewContainer) {
+        init(_ parent: SCNViewTransitionZoneContainer) {
             self.parent = parent
         }
         
         @objc func handlePinch(_ gesture: UIPinchGestureRecognizer) {
             guard let camera = parent.cameraNode.camera else { return }
-            
-            if gesture.state == .changed {
-                let newScale = camera.orthographicScale / Double(gesture.scale)
-                camera.orthographicScale = max(5.0, min(newScale, 50.0))
-                gesture.scale = 1
-            }
+            let scale = gesture.scale
+            camera.orthographicScale /= Double(scale)
+            gesture.scale = 1
         }
         
         @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
@@ -445,85 +388,33 @@ struct SCNViewContainer: UIViewRepresentable {
             parent.cameraNode.position.z += Float(translation.y) * 0.01
             gesture.setTranslation(.zero, in: parent.scnView)
         }
+    }
+}
+
+func buttonAction(_ index: Int) {
+    print("Button \(index) pressed")
+    // Aggiungi qui le azioni che desideri eseguire quando un bottone viene premuto
+}
+
+class HandleTap: UIViewController {
+    var scnView: SCNView?
+    
+    @objc func handleTap(_ gestureRecognize: UITapGestureRecognizer) {
+        print("handleTap")
         
-        // Gestore del tap per identificare il punto nella mappa
-        @objc func handleTap(_ gesture: UITapGestureRecognizer) {
-            let location = gesture.location(in: parent.scnView)
-            print("LOCATION TAP: \(location)")
-            parent.handleTap(at: location)
+        let p = gestureRecognize.location(in: scnView)
+        let hitResults = scnView!.hitTest(p, options: nil)
+        if let tappedNode = hitResults.first?.node {
+            print(tappedNode)
         }
     }
 }
 
-
-
 @available(iOS 17.0, *)
-struct SCNViewContainer_Previews: PreviewProvider {
+struct SCNViewTransitionZoneContainer_Previews: PreviewProvider {
     static var previews: some View {
-        SCNViewContainer()
+        SCNViewTransitionZoneContainer()
     }
 }
 
-extension SCNQuaternion {
-    func difference(_ other: SCNQuaternion) -> SCNQuaternion{
-        return SCNQuaternion(
-            self.x - other.x,
-            self.y - other.y,
-            self.z - other.z,
-            self.w - other.w
-        )
-    }
-    
-    func sum(_ other: SCNQuaternion) -> SCNQuaternion{
-        return SCNQuaternion(
-            self.x + other.x,
-            self.y + other.y,
-            self.z + other.z,
-            self.w + other.w
-        )
-    }
-}
 
-extension SCNVector3 {
-    func difference(_ other: SCNVector3) -> SCNVector3 {
-        return SCNVector3(
-            self.x - other.x,
-            self.y - other.y,
-            self.z - other.z
-        )
-    }
-    
-    func sum(_ other: SCNVector3) -> SCNVector3 {
-        return SCNVector3(
-            self.x + other.x,
-            self.y + other.y,
-            self.z + other.z
-        )
-    }
-    
-    func rotateAroundOrigin(_ angle: Float) -> SCNVector3 {
-        var a = Complex<Float>.i
-        a.real = cos(angle)
-        a.imaginary = sin(angle)
-        var b = Complex<Float>.i
-        b.real = self.x
-        b.imaginary = self.z
-        var position = a*b
-        return SCNVector3(
-            position.real,
-            self.y,
-            position.imaginary
-        )
-    }
-}
-
-extension SCNNode {
-    
-    var height: CGFloat { CGFloat(self.boundingBox.max.y - self.boundingBox.min.y) }
-    var width: CGFloat { CGFloat(self.boundingBox.max.x - self.boundingBox.min.x) }
-    var length: CGFloat { CGFloat(self.boundingBox.max.z - self.boundingBox.min.z) }
-    
-    var halfCGHeight: CGFloat { height / 2.0 }
-    var halfHeight: Float { Float(height / 2.0) }
-    var halfScaledHeight: Float { halfHeight * self.scale.y  }
-}

@@ -48,7 +48,7 @@ struct FloorView: View {
                     VStack {
                         
                         Toggle(isOn: $showFloorMap) {
-                            Text("Show Local Map")
+                            Text("Show Rooms")
                                 .font(.system(size: 20)).bold()
                         }.toggleStyle(SwitchToggleStyle()).padding()
                         
@@ -269,7 +269,7 @@ struct FloorView: View {
                                     ForEach(floor.rooms, id: \.id) { room in
                                         NavigationLink(destination: RoomView(room: room, floor: floor, building: building )) {
                                             let isSelected = floor.isMatrixPresent(named: room.name, inFileAt: floor.floorURL.appendingPathComponent("\(floor.name).json"))
-                                            RoomCardView(name: room.name, date: room.lastUpdate, position: isSelected, rowSize: 1, isSelected: false).padding()
+                                            RoomCardView(name: room.name, date: room.lastUpdate, position: isSelected, color: room.color, rowSize: 1, isSelected: false).padding()
                                         }
                                     }
                                 }
@@ -280,7 +280,7 @@ struct FloorView: View {
                                     room.debugPrintRoom() // Stampa i dati delle stanze
                                 }
                             }
-                            .padding()
+                            .padding(.top, 15)
                         }
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)

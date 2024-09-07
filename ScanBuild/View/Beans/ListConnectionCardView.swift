@@ -40,51 +40,49 @@ struct ListConnectionCardView: View {
                     VStack{
                         VStack{
                             HStack{
-                                Text(floor)
-                                    .font(.system(size: 20, weight: .bold))
-                                    .foregroundColor(.black)
+                                ConnectionCardView(name: floor, isSelected: false)
+                                    
                                 Text(Image(systemName: "arrow.right"))
                                     .font(.system(size: 15, weight: .bold))
                                     .foregroundColor(.black)
-                                Text(room)
-                                    .font(.system(size: 20, weight: .bold))
+                                ConnectionCardView(name: room, isSelected: false)
+                                    
+                                Text(Image(systemName: "arrow.right"))
+                                    .font(.system(size: 15, weight: .bold))
                                     .foregroundColor(.black)
+                                ConnectionCardView(name: floor, isSelected: false)
+     
                             }.padding(.top, -8)
                             
-                            Text("Has a connection To:").font(.system(size: 14, weight: .bold))
+                            Text("Has a connection To:").font(.system(size: 18, weight: .bold))
                                 .foregroundColor(.green)
-                                .padding(.top, -8)
+                                .padding(.top, 8)
                             
                             HStack{
-                                Text(targetFloor)
-                                    .font(.system(size: 20, weight: .bold))
-                                    .foregroundColor(.black)
+                                ConnectionCardView(name: targetFloor, isSelected: false)
+                                
                                 Text(Image(systemName: "arrow.right"))
                                     .font(.system(size: 15, weight: .bold))
                                     .foregroundColor(.black)
-                                Text(targetRoom)
-                                    .font(.system(size: 20, weight: .bold))
-                                    .foregroundColor(.black)
+                                ConnectionCardView(name: targetRoom, isSelected: false)
+                                    
                                 Text(Image(systemName: "arrow.right"))
                                     .font(.system(size: 15, weight: .bold))
                                     .foregroundColor(.black)
-                                Text(transitionZone)
-                                    .font(.system(size: 20, weight: .bold))
-                                    .foregroundColor(.black)
-                            }.padding(.top, -8)
+                                ConnectionCardView(name: transitionZone, isSelected: false)
+                                    
+                            }.padding(.top, 8)
                         }
-
                     }
                     Text("Created: \(dateFormatter.string(from: date))")
                         .font(.system(size: 14))
                         .foregroundColor(.gray)
-                        .padding(.top, 5)
+                        .padding(10)
                 }
             }
-            .frame(width: geometry.size.width / CGFloat(rowSize), height: 150)
+            .frame(width: (geometry.size.width / CGFloat(rowSize)) , height: 300)
             .cornerRadius(10)
             .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 2)
-            
         }
     }
 }

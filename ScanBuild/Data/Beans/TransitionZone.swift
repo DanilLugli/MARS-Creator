@@ -1,17 +1,16 @@
 import Foundation
+import SceneKit
 import SwiftUI
 
-class TransitionZone: Codable, Identifiable, Equatable {
-    private var _id: UUID = UUID()
-    private var _name: String
-    private var _connection: Connection?
-    private var _transitionArea: Coordinates
+class TransitionZone: Codable, Identifiable, Equatable, ObservableObject {
+    @Published private var _id: UUID = UUID()
+    @Published private var _name: String
+    @Published private var _connection: Connection?
     
 
-    init(name: String, connection: Connection?, transitionArea: Coordinates) {
+    init(name: String, connection: Connection?) {
         self._name = name
         self._connection = connection
-        self._transitionArea = transitionArea
     }
     
     static func ==(lhs: TransitionZone, rhs: TransitionZone) -> Bool {
@@ -41,19 +40,11 @@ class TransitionZone: Codable, Identifiable, Equatable {
         }
     }
     
-    var transitionArea: Coordinates {
-        get {
-            return _transitionArea
-        }
-    }
-
-    
     // Implementazione personalizzata di Codable
     private enum CodingKeys: String, CodingKey {
         case id
         case name
         case connection
-        case transitionArea
         case tzJsonURL
     }
     
@@ -62,7 +53,6 @@ class TransitionZone: Codable, Identifiable, Equatable {
         try container.encode(_id, forKey: .id)
         try container.encode(_name, forKey: .name)
         try container.encode(_connection, forKey: .connection)
-        try container.encode(_transitionArea, forKey: .transitionArea)
     }
     
     required init(from decoder: Decoder) throws {
@@ -70,10 +60,5 @@ class TransitionZone: Codable, Identifiable, Equatable {
         _id = try container.decode(UUID.self, forKey: .id)
         _name = try container.decode(String.self, forKey: .name)
         _connection = try container.decodeIfPresent(Connection.self, forKey: .connection)
-        _transitionArea = try container.decode(Coordinates.self, forKey: .transitionArea)
-    }
-    
-    func overlapWith(rectangle: Rectangle) {
-        
     }
 }

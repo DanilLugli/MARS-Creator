@@ -102,13 +102,30 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         get{
             return _color
         }
+        set{
+            _color = newValue
+        }
+    }
+    
+    func hasConnections() -> Bool {
+        return _transitionZones.contains { $0.connection != nil }
     }
     
     static func randomColor() -> UIColor {
-        let red = CGFloat(arc4random_uniform(256)) / 255.0
-        let green = CGFloat(arc4random_uniform(256)) / 255.0
-        let blue = CGFloat(arc4random_uniform(256)) / 255.0
-        return UIColor(red: red, green: green, blue: blue, alpha: 1.0)
+        let colors: [UIColor] = [
+            UIColor(red: 1.0, green: 0.35, blue: 0.0, alpha: 1.0),    // #FF5800
+            UIColor(red: 1.0, green: 0.84, blue: 0.0, alpha: 1.0),    // #FFD700
+            UIColor(red: 1.0, green: 0.27, blue: 0.0, alpha: 1.0),    // #FF4500
+            UIColor(red: 0.0, green: 0.75, blue: 1.0, alpha: 1.0),    // #00BFFF
+            UIColor(red: 0.13, green: 0.55, blue: 0.13, alpha: 1.0),  // #228B22
+            UIColor(red: 0.42, green: 0.35, blue: 0.8, alpha: 1.0),   // #6A5ACD
+            UIColor(red: 1.0, green: 0.41, blue: 0.71, alpha: 1.0),   // #FF69B4
+            UIColor(red: 0.55, green: 0.27, blue: 0.07, alpha: 1.0),  // #8B4513
+            UIColor(red: 0.87, green: 0.63, blue: 0.87, alpha: 1.0),  // #DDA0DD
+            UIColor(red: 0.27, green: 0.51, blue: 0.71, alpha: 1.0)   // #4682B4
+        ]
+        
+        return colors[Int(arc4random_uniform(UInt32(colors.count)))]
     }
     
     
@@ -142,7 +159,7 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         _referenceMarkers.append(referenceMarker)
     }
     
-    func addTransitionZone(transitionZone: TransitionZone) throws {
+    func addTransitionZone(transitionZone: TransitionZone){
         _transitionZones.append(transitionZone)
     }
     
@@ -172,7 +189,7 @@ extension Room {
         
         print("Transition Zones (\(self.transitionZones.count)):")
         for zone in transitionZones {
-            print("\tTransition Zone Name: \(zone.name), Area: \(zone.transitionArea)")
+            print("\tTransition Zone Name: \(zone.name)")
         }
         
         print("Scene Objects (\(self.sceneObjects.count)):")

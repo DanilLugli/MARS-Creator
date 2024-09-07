@@ -19,7 +19,7 @@ struct AddStairsConnectionView: View {
     @State var mapView = SCNViewContainer()
 
     @State private var step: Int = 1
-    @State private var showConfirmView = false
+    @State private var showConfirmDialog = false
 
     @State private var showActionSheetFloor = false
     @State private var showActionSheetRoom = false
@@ -30,10 +30,6 @@ struct AddStairsConnectionView: View {
     var body: some View {
         NavigationStack {
             VStack {
-                
-                Text("\(building.name) > New Connection")
-                    .font(.system(size: 14))
-                    .fontWeight(.heavy)
                 
                 ConnectedDotsView(labels: ["1° Connection From", "2° Connection To", "Confirm"], progress: step == 1 ? 1 : (step == 2 ? 2 : 3))
                 
@@ -103,34 +99,32 @@ struct AddStairsConnectionView: View {
                     ZStack {
                         mapView
                             .border(Color.white)
-                            .frame(width: 360, height: 420)
+                            .frame(width: 360, height: 360)
                             .cornerRadius(10)
                             .padding()
                             .shadow(color: Color.gray, radius: 3)
                         
                         VStack {
                             HStack {
-                                HStack {
-                                    Button("+") {
-                                        mapView.zoomIn()
-                                    }
-                                    .buttonStyle(.bordered)
-                                    .bold()
-                                    .background(Color.blue.opacity(0.4))
-                                    .cornerRadius(8)
-                                    
-                                    Button("-") {
-                                        mapView.zoomOut()
-                                    }
-                                    .buttonStyle(.bordered)
-                                    .bold()
-                                    .background(Color.blue.opacity(0.4))
-                                    .cornerRadius(8).padding()
+                                Button("+") {
+                                    mapView.zoomIn()
                                 }
-                                .padding()
+                                .buttonStyle(.bordered)
+                                .bold()
+                                .background(Color.blue.opacity(0.4))
+                                .cornerRadius(8)
+                                
+                                Button("-") {
+                                    mapView.zoomOut()
+                                }
+                                .buttonStyle(.bordered)
+                                .bold()
+                                .background(Color.blue.opacity(0.4))
+                                .cornerRadius(8).padding()
                             }
-                            Spacer()
+                            .padding()
                         }
+                        Spacer()
                     }
                 }
                 .onChange(of: selectedRoom) { newRoom in
@@ -140,7 +134,6 @@ struct AddStairsConnectionView: View {
                     loadMap(for: selectedRoom)
                 }
 
-                // Aggiunta del pulsante con freccia destra per confermare la selezione della prima T.Z.
                 if step == 1 && fromTransitionZone != nil {
                     Button(action: {
                         step = 2
@@ -163,7 +156,7 @@ struct AddStairsConnectionView: View {
                 if step == 3 {
                     Button(action: {
                         createConnection() // Crea la connessione
-                        showConfirmView = true
+                        showConfirmDialog = true
                     }) {
                         Text("Confirm Connection")
                             .font(.system(size: 20, weight: .bold))
@@ -171,6 +164,13 @@ struct AddStairsConnectionView: View {
                             .background(Color.blue)
                             .foregroundColor(.white)
                             .cornerRadius(10)
+                    }
+                    .confirmationDialog("Do you confirm this connection?", isPresented: $showConfirmDialog) {
+                        Button("Confirm") {
+                            insertConnection()
+                            dismiss()
+                        }
+                        Button("Cancel", role: .cancel) {}
                     }
                 }
             }
@@ -183,12 +183,6 @@ struct AddStairsConnectionView: View {
                 }
                 if selectedRoom == nil {
                     selectedRoom = initialSelectedRoom
-                }
-            }
-            .sheet(isPresented: $showConfirmView) {
-                ConfirmConnectionView {
-                    insertConnection()
-                    dismiss()
                 }
             }
         }
@@ -204,11 +198,11 @@ struct AddStairsConnectionView: View {
     
     // Funzione per caricare la mappa
     private func loadMap(for room: Room?) {
-        if let roomName = room?.name, let roomURL = room?.roomURL {
+        if let room = room {
             mapView.loadRoomMaps(
-                name: roomName,
+                room: room,
                 borders: true,
-                usdzURL: roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(roomName).usdz")
+                usdzURL: room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz")
             )
         }
     }
@@ -320,31 +314,6 @@ struct AddStairsConnectionView: View {
         // Inserisci la connessione nel modello, salva o invia al server
     }
 }
-
-struct ConfirmConnectionView: View {
-    var onConfirm: () -> Void
-    
-    var body: some View {
-        VStack {
-            Text("Do you confirm this connection?")
-                .font(.title2)
-                .padding()
-            
-            Button("Confirm") {
-                onConfirm()
-            }
-            .buttonStyle(.borderedProminent)
-            .padding()
-            
-            Button("Cancel") {
-                // Chiudi la vista
-            }
-            .buttonStyle(.bordered)
-            .padding()
-        }
-    }
-}
-
 
 struct AddConnection_Preview: PreviewProvider {
     static var previews: some View {

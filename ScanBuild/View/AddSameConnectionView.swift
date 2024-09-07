@@ -17,7 +17,7 @@ struct AddSameConnectionView: View {
     @State private var fromRoom: Room?
 
     @State private var step: Int = 1  // Step of the connection creation process
-    @State private var showConfirmView = false
+    @State private var showConfirmDialog = false
 
     @State private var showActionSheetFloor = false
     @State private var showActionSheetRoom = false
@@ -31,10 +31,6 @@ struct AddSameConnectionView: View {
         NavigationStack {
             VStack {
                 
-                Text("\(selectedBuilding.name) > New Connection")
-                    .font(.system(size: 14))
-                    .fontWeight(.heavy)
-                
                 ConnectedDotsView(labels: ["1° Connection From", "2° Connection To", "Confirm"], progress: step == 1 ? 1 : (step == 2 ? 2 : 3))
                     .padding(.top)
                 
@@ -43,7 +39,6 @@ struct AddSameConnectionView: View {
                         Text("Floor")
                             .font(.system(size: 22))
                             .fontWeight(.heavy)
-                        
                         HStack {
                             ConnectionCardView(name: selectedFloor?.name ?? "Choose\nFloor", isSelected: selectedFloor != nil)
                                 .padding()
@@ -99,41 +94,37 @@ struct AddSameConnectionView: View {
                         }
                     }
                 }
-                .padding()
-                
                 
                 VStack {
                     ZStack {
                         mapView
                             .border(Color.white)
-                            .frame(width: 360, height: 420)
+                            .frame(width: 360, height: 360)
                             .cornerRadius(10)
                             .padding()
                             .shadow(color: Color.gray, radius: 3)
                         
                         VStack {
                             HStack {
-                                HStack {
-                                    Button("+") {
-                                        mapView.zoomIn()
-                                    }
-                                    .buttonStyle(.bordered)
-                                    .bold()
-                                    .background(Color.blue.opacity(0.4))
-                                    .cornerRadius(8)
-                                    
-                                    Button("-") {
-                                        mapView.zoomOut()
-                                    }
-                                    .buttonStyle(.bordered)
-                                    .bold()
-                                    .background(Color.blue.opacity(0.4))
-                                    .cornerRadius(8).padding()
+                                Button("+") {
+                                    mapView.zoomIn()
                                 }
-                                .padding()
+                                .buttonStyle(.bordered)
+                                .bold()
+                                .background(Color.blue.opacity(0.4))
+                                .cornerRadius(8)
+                                
+                                Button("-") {
+                                    mapView.zoomOut()
+                                }
+                                .buttonStyle(.bordered)
+                                .bold()
+                                .background(Color.blue.opacity(0.4))
+                                .cornerRadius(8).padding()
                             }
-                            Spacer()
+                            .padding()
                         }
+                        Spacer()
                     }
                 }
                 .onChange(of: selectedRoom) { newRoom in
@@ -143,11 +134,9 @@ struct AddSameConnectionView: View {
                     loadMap(for: selectedRoom)
                 }
 
-                // Aggiunta del pulsante con freccia destra per confermare la selezione della prima T.Z.
                 if step == 1 && fromTransitionZone != nil {
                     Button(action: {
                         step = 2
-                        //selectedFloor = nil
                         selectedRoom = nil
                     }) {
                         HStack {
@@ -160,17 +149,28 @@ struct AddSameConnectionView: View {
                         .foregroundColor(.white)
                         .cornerRadius(10)
                     }
-                    .padding(.top, 50) // Posiziona il pulsante in basso
                 }
 
                 // Conferma finale
                 if step == 3 {
-                    Button("Confirm Connection") {
+                    Button(action: {
                         createConnection() // Crea la connessione
-                        showConfirmView = true
+                        showConfirmDialog = true
+                    }) {
+                        Text("Confirm Connection")
+                            .font(.system(size: 20, weight: .bold))
+                            .padding()
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
                     }
-                    .padding()
-                    .buttonStyle(.borderedProminent)
+                    .confirmationDialog("Do you confirm this connection?", isPresented: $showConfirmDialog) {
+                        Button("Confirm") {
+                            insertConnection()
+                            dismiss()
+                        }
+                        Button("Cancel", role: .cancel) {}
+                    }
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -182,13 +182,6 @@ struct AddSameConnectionView: View {
                 }
                 if selectedRoom == nil {
                     selectedRoom = initialSelectedRoom
-                }
-            }
-            .sheet(isPresented: $showConfirmView) {
-                ConfirmConnectionView {
-                    // Azione di conferma finale
-                    insertConnection()
-                    dismiss()
                 }
             }
         }
@@ -204,7 +197,7 @@ struct AddSameConnectionView: View {
     
     // Funzioni per gestire i pulsanti dell'ActionSheet
     func actionSheetFloorButtons() -> [ActionSheet.Button] {
-        // Escludi il piano selezionato nello step precedente
+        
         var buttons: [ActionSheet.Button] = selectedBuilding.floors
             .filter { floor in
                 // Filtra se è lo stesso piano selezionato nello step precedente (per esempio, `fromFloor`)
@@ -272,11 +265,11 @@ struct AddSameConnectionView: View {
     }
     
     private func loadMap(for room: Room?) {
-        if let roomName = room?.name, let roomURL = room?.roomURL {
+        if let room = room {
             mapView.loadRoomMaps(
-                name: roomName,
+                room: room,
                 borders: true,
-                usdzURL: roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(roomName).usdz")
+                usdzURL: room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz")
             )
         }
     }

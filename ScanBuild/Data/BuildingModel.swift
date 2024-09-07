@@ -58,7 +58,7 @@ class BuildingModel: ObservableObject {
                     for z in 1...2 {
                         let xMin = Float.random(in: 0...10)
                         let yMin = Float.random(in: 0...10)
-                        let transitionZone = TransitionZone(name: "Scala \(z)", connection: nil, transitionArea: Coordinates(x: xMin, y: yMin))
+                        let transitionZone = TransitionZone(name: "Scala \(z)", connection: nil)
                         do {
                             try room.addTransitionZone(transitionZone: transitionZone)
                         } catch {
@@ -216,14 +216,6 @@ class BuildingModel: ObservableObject {
                             }
                         }
                     }
-                    
-                    
-                    let transitionZone = TransitionZone(
-                        name: "Scale",
-                        connection: nil,
-                        transitionArea: Coordinates(x: Float(Double.random(in: -90...90)), y: Float(Double.random(in: -180...180)))
-                    )
-                    transitionZones.append(transitionZone)
                         
                     
                     let room = Room(name: roomURL.lastPathComponent, lastUpdate: lastModifiedDate, referenceMarkers: referenceMarkers, transitionZones: transitionZones, sceneObjects: sceneObjects, scene: scene, worldMap: worldMap, roomURL: roomURL)

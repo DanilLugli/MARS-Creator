@@ -11,15 +11,17 @@ struct RoomCardView: View {
     var name: String
     var date: Date
     var position: Bool
+    var color : UIColor?
     var rowSize: Int
     var isSelected: Bool
     
     @State private var showAlert = false
     
-    init(name: String, date: Date, position: Bool, rowSize: Int, isSelected: Bool) {
+    init(name: String, date: Date, position: Bool, color: UIColor, rowSize: Int, isSelected: Bool) {
         self.name = name
         self.date = date
         self.position = position
+        self.color = color.withAlphaComponent(0.4)
         self.rowSize = rowSize
         self.isSelected = isSelected
     }
@@ -53,6 +55,12 @@ struct RoomCardView: View {
                             .onTapGesture {
                                 showAlert = true // Mostra l'alert quando premi l'immagine
                             }
+                    }else{
+                        Image(systemName: "circle.fill")
+                            .foregroundColor(Color(color ?? UIColor.white)) // Usa il colore specificato
+                            .font(.system(size: 30))
+                            .padding(.trailing)
+                            .padding(20)
                     }
                 }
                
@@ -74,7 +82,7 @@ struct RoomCardView: View {
 
 struct RoomCardView_Previews: PreviewProvider {
     static var previews: some View {
-        RoomCardView(name: "Room", date: Date(), position: false, rowSize: 1, isSelected: true)
+        RoomCardView(name: "Room", date: Date(), position: true, color: UIColor.green, rowSize: 1, isSelected: true)
     }
 }
 private let dateFormatter: DateFormatter = {

@@ -47,7 +47,7 @@ struct BuildingView: View {
                                 }
                             }
                         }
-                        .padding()
+                        .padding(.top, 15)
                     }
                 }
             }

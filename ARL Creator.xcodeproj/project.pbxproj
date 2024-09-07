@@ -8,10 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		AA0FD83F2C750BC600DF6E20 /* AddSameConnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0FD83E2C750BC600DF6E20 /* AddSameConnectionView.swift */; };
+		AA2289452C8CE834008452D8 /* SCNViewTransitionZoneContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2289442C8CE834008452D8 /* SCNViewTransitionZoneContainer.swift */; };
+		AA2289472C8CEB63008452D8 /* AddTransitionZoneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2289462C8CEB63008452D8 /* AddTransitionZoneView.swift */; };
 		AA2CA5262C39FF3000C88C94 /* AddFloorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA5252C39FF3000C88C94 /* AddFloorView.swift */; };
 		AA2CA54C2C3D7ABA00C88C94 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA54B2C3D7ABA00C88C94 /* ContentView.swift */; };
 		AA2CA5512C3DB5F400C88C94 /* CaptureViewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA5502C3DB5F400C88C94 /* CaptureViewContainer.swift */; };
-		AA2CA5532C3DB60300C88C94 /* ARSCNViewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA5522C3DB60300C88C94 /* ARSCNViewContainer.swift */; };
 		AA2CA5552C3DB61100C88C94 /* ExportRoomViewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA5542C3DB61100C88C94 /* ExportRoomViewContainer.swift */; };
 		AA2CA5572C3DB61E00C88C94 /* SCNViewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA5562C3DB61E00C88C94 /* SCNViewContainer.swift */; };
 		AA2CA5592C3EF87A00C88C94 /* ReferenceMarker.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA5582C3EF87A00C88C94 /* ReferenceMarker.swift */; };
@@ -59,6 +60,7 @@
 		AAD2F4472C7E2CCF009D52E2 /* FloorScanningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD2F4462C7E2CCF009D52E2 /* FloorScanningView.swift */; };
 		AAD778A72C5288A40091181A /* ScanningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD778A62C5288A30091181A /* ScanningView.swift */; };
 		AAD778A92C528C600091181A /* FloorCaptureViewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD778A82C528C600091181A /* FloorCaptureViewContainer.swift */; };
+		AAE1C8752C8B3BCF009A933B /* TransitionZoneCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE1C8742C8B3BCF009A933B /* TransitionZoneCardView.swift */; };
 		AAE57F9E2C3764FC00F0196F /* FloorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE57F9D2C3764FC00F0196F /* FloorView.swift */; };
 		AAE57FA02C376D0D00F0196F /* AddStairsConnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE57F9F2C376D0D00F0196F /* AddStairsConnectionView.swift */; };
 		AAE57FA22C37FB6100F0196F /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE57FA12C37FB6100F0196F /* Color.swift */; };
@@ -72,10 +74,11 @@
 
 /* Begin PBXFileReference section */
 		AA0FD83E2C750BC600DF6E20 /* AddSameConnectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddSameConnectionView.swift; sourceTree = "<group>"; };
+		AA2289442C8CE834008452D8 /* SCNViewTransitionZoneContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SCNViewTransitionZoneContainer.swift; sourceTree = "<group>"; };
+		AA2289462C8CEB63008452D8 /* AddTransitionZoneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddTransitionZoneView.swift; sourceTree = "<group>"; };
 		AA2CA5252C39FF3000C88C94 /* AddFloorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddFloorView.swift; sourceTree = "<group>"; };
 		AA2CA54B2C3D7ABA00C88C94 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		AA2CA5502C3DB5F400C88C94 /* CaptureViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureViewContainer.swift; sourceTree = "<group>"; };
-		AA2CA5522C3DB60300C88C94 /* ARSCNViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARSCNViewContainer.swift; sourceTree = "<group>"; };
 		AA2CA5542C3DB61100C88C94 /* ExportRoomViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportRoomViewContainer.swift; sourceTree = "<group>"; };
 		AA2CA5562C3DB61E00C88C94 /* SCNViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SCNViewContainer.swift; sourceTree = "<group>"; };
 		AA2CA5582C3EF87A00C88C94 /* ReferenceMarker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReferenceMarker.swift; sourceTree = "<group>"; };
@@ -123,6 +126,7 @@
 		AAD2F4462C7E2CCF009D52E2 /* FloorScanningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloorScanningView.swift; sourceTree = "<group>"; };
 		AAD778A62C5288A30091181A /* ScanningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanningView.swift; sourceTree = "<group>"; };
 		AAD778A82C528C600091181A /* FloorCaptureViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloorCaptureViewContainer.swift; sourceTree = "<group>"; };
+		AAE1C8742C8B3BCF009A933B /* TransitionZoneCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitionZoneCardView.swift; sourceTree = "<group>"; };
 		AAE57F9D2C3764FC00F0196F /* FloorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloorView.swift; sourceTree = "<group>"; };
 		AAE57F9F2C376D0D00F0196F /* AddStairsConnectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddStairsConnectionView.swift; sourceTree = "<group>"; };
 		AAE57FA12C37FB6100F0196F /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
@@ -157,7 +161,7 @@
 				AA2CA5562C3DB61E00C88C94 /* SCNViewContainer.swift */,
 				AA3A24F02C62599A00E162A3 /* SCNViewMapContainer.swift */,
 				AA92C4D72C83721C00637AF2 /* SCNViewUpdatePositionRoomContainer.swift */,
-				AA2CA5522C3DB60300C88C94 /* ARSCNViewContainer.swift */,
+				AA2289442C8CE834008452D8 /* SCNViewTransitionZoneContainer.swift */,
 				AA2CA5542C3DB61100C88C94 /* ExportRoomViewContainer.swift */,
 				AA8E0A632C57E50F0097BDCD /* VisualizeRoomViewContainer.swift */,
 			);
@@ -206,6 +210,7 @@
 				AA2CA55C2C3FC62400C88C94 /* RoomPositionView.swift */,
 				AA92C4D92C8373D900637AF2 /* ManualRoomPositionView.swift */,
 				AA78F5E02C2DB6DE0044F825 /* AddBuildingView.swift */,
+				AA2289462C8CEB63008452D8 /* AddTransitionZoneView.swift */,
 				AAE57F9F2C376D0D00F0196F /* AddStairsConnectionView.swift */,
 				AA0FD83E2C750BC600DF6E20 /* AddSameConnectionView.swift */,
 				AAB619092C502995008F77EE /* AddRoomView.swift */,
@@ -291,6 +296,7 @@
 				AA3A24F22C62924200E162A3 /* ConnectionCardView.swift */,
 				AA3A24F42C62942300E162A3 /* ListConnectionCardView.swift */,
 				AA4D2CDA2C7358EE000312A7 /* RoomCardView.swift */,
+				AAE1C8742C8B3BCF009A933B /* TransitionZoneCardView.swift */,
 			);
 			path = Beans;
 			sourceTree = "<group>";
@@ -391,6 +397,7 @@
 				AAD778A72C5288A40091181A /* ScanningView.swift in Sources */,
 				AA3A24F32C62924200E162A3 /* ConnectionCardView.swift in Sources */,
 				AA64CC7C2C47F8EE005C883B /* SameFloorConnection.swift in Sources */,
+				AAE1C8752C8B3BCF009A933B /* TransitionZoneCardView.swift in Sources */,
 				AA8E0A662C5944D70097BDCD /* MatrixCardView.swift in Sources */,
 				AAD778A92C528C600091181A /* FloorCaptureViewContainer.swift in Sources */,
 				AAA29E6C2C1711AA00CA267C /* Shaders.metal in Sources */,
@@ -412,7 +419,6 @@
 				AA8E0A5B2C52C69D0097BDCD /* NamedURL.swift in Sources */,
 				AAD2F4472C7E2CCF009D52E2 /* FloorScanningView.swift in Sources */,
 				AA3A24F12C62599A00E162A3 /* SCNViewMapContainer.swift in Sources */,
-				AA2CA5532C3DB60300C88C94 /* ARSCNViewContainer.swift in Sources */,
 				AA78F5F32C3430C80044F825 /* ServerManager.swift in Sources */,
 				AA92C4D82C83721C00637AF2 /* SCNViewUpdatePositionRoomContainer.swift in Sources */,
 				AAA29E712C1711AA00CA267C /* ViewController.swift in Sources */,
@@ -420,9 +426,11 @@
 				AA92C4DA2C8373D900637AF2 /* ManualRoomPositionView.swift in Sources */,
 				AA2CA5572C3DB61E00C88C94 /* SCNViewContainer.swift in Sources */,
 				AAFB3A002C4DB6EF00DBC593 /* extensionNotificationName.swift in Sources */,
+				AA2289452C8CE834008452D8 /* SCNViewTransitionZoneContainer.swift in Sources */,
 				AAE57F9E2C3764FC00F0196F /* FloorView.swift in Sources */,
 				AA78F5EA2C33006F0044F825 /* BuildingModel.swift in Sources */,
 				AA8E0A6C2C5D02280097BDCD /* FilePickerView.swift in Sources */,
+				AA2289472C8CEB63008452D8 /* AddTransitionZoneView.swift in Sources */,
 				AAA29E6A2C1711AA00CA267C /* AppDelegate.swift in Sources */,
 				AA64CC7E2C47F903005C883B /* AdjacentFloorsConnection.swift in Sources */,
 				AA8E0A6A2C5BA4D90097BDCD /* ServerCreateMatrix.swift in Sources */,
@@ -561,6 +569,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = D8V8DB2CZM;
@@ -596,6 +605,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = D8V8DB2CZM;

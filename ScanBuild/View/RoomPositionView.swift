@@ -13,12 +13,12 @@ struct RoomPositionView: View {
     @State var selectedRoomNodeName = ""
     @State var selectedFloorNodeName = ""
     
-    var floorView: SCNViewContainer
-    var roomView: SCNViewContainer
+    var floorView: SCNViewContainer = SCNViewContainer()
+    var roomView: SCNViewContainer = SCNViewContainer()
     var roomsMaps: [URL]?
     
-    @State var floorNodes: [String]
-    @State var roomNodes: [String]
+    @State var floorNodes: [String] = []
+    @State var roomNodes: [String] = []
     
     @State private var showButton1 = false
     @State private var showButton2 = false
@@ -43,85 +43,67 @@ struct RoomPositionView: View {
     @State var apiResponseCode = ""
     @State var matchingNodesForAPI: [(SCNNode, SCNNode)] = []
     
-    init(floor: Floor, room: Room) {
-        self.floor = floor
-        self.room = room
-        
-        floorView = SCNViewContainer()
-        roomView = SCNViewContainer()
-        
-        floorView.loadFloorPlanimetry(borders: false, usdzURL: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz"))
-        
-        roomView.loadRoomMaps(name: room.name, borders: false, usdzURL: room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"))
-        
-        if let rootNode = floorView.scnView.scene?.rootNode {
-            print("Printing all nodes in floorView's rootNode:")
-            rootNode.enumerateChildNodes { (node, _) in
-                let nodeName = node.name ?? "Unnamed Node"
-                let nodeSize = SCNVector3(
-                    node.boundingBox.max.x - node.boundingBox.min.x,
-                    node.boundingBox.max.y - node.boundingBox.min.y,
-                    node.boundingBox.max.z - node.boundingBox.min.z
-                )  // Dimensione del nodo
-                let nodePosition = node.position  // Posizione del nodo
-            }
-        } else {
-            print("No nodes found in floorView's rootNode.")
-        }
-        
-//        floorNodes = Array(Set(floorView
-//            .scnView
-//            .scene?
-//            .rootNode
-//            .childNodes(passingTest: {
-//                n, _ in n.name != nil &&
-//                n.name! != "Room" &&
-//                n.name! != "Geom" &&
-//                String(n.name!.suffix(4)) != "_grp"
-//            }).compactMap { node in node.name } ?? []))
-        
-        floorNodes = Array(Set(floorView
-            .scnView
-            .scene?
-            .rootNode
-            .childNodes(passingTest: { n, _ in
-                if let nodeName = n.name {
-                    return nodeName != "Room" &&
-                           nodeName != "Geom" &&
-                           !nodeName.hasSuffix("_grp") &&
-                           !nodeName.hasPrefix("unidentified")
-                }
-                return false
-            }).compactMap { node in node.name } ?? []))
-            .sorted()
-        
-        if let nodes = roomView.scnView.scene?.rootNode.childNodes(passingTest: { n, _ in
-            n.name != nil &&
-            n.name! != "Room" &&
-            n.name! != "Geom" &&
-            String(n.name!.suffix(4)) != "_grp"
-        }) {
-            let names = nodes.compactMap { $0.name }
-            print("Collected node names: \(names)")
-
-            // Rimuovere i duplicati utilizzando un dizionario per tracciare i nomi già visti
-            var uniqueNamesDict = [String: Bool]()
-            var uniqueNamesArray = [String]()
-
-            for name in names {
-                if uniqueNamesDict[name] == nil {
-                    uniqueNamesDict[name] = true
-                    uniqueNamesArray.append(name)
-                }
-            }
-            
-            roomNodes = uniqueNamesArray.sorted()
-
-            print("Unique node names: \(roomNodes)")
-        } else {
-            roomNodes = []
-        }
-    }
+//    init(floor: Floor, room: Room) {
+//        self.floor = floor
+//        self.room = room
+//        
+////        floorView = SCNViewContainer()
+////        roomView = SCNViewContainer()
+////        
+//
+//        
+////        floorNodes = Array(Set(floorView
+////            .scnView
+////            .scene?
+////            .rootNode
+////            .childNodes(passingTest: {
+////                n, _ in n.name != nil &&
+////                n.name! != "Room" &&
+////                n.name! != "Geom" &&
+////                String(n.name!.suffix(4)) != "_grp"
+////            }).compactMap { node in node.name } ?? []))
+//        
+////        floorNodes = Array(Set(floorView
+////            .scnView
+////            .scene?
+////            .rootNode
+////            .childNodes(passingTest: { n, _ in
+////                if let nodeName = n.name {
+////                    return nodeName != "Room" &&
+////                           nodeName != "Geom" &&
+////                           !nodeName.hasSuffix("_grp") &&
+////                           !nodeName.hasPrefix("unidentified")
+////                }
+////                return false
+////            }).compactMap { node in node.name } ?? []))
+////            .sorted()
+////        
+////        if let nodes = roomView.scnView.scene?.rootNode.childNodes(passingTest: { n, _ in
+////            n.name != nil &&
+////            n.name! != "Room" &&
+////            n.name! != "Geom" &&
+////            String(n.name!.suffix(4)) != "_grp"
+////        }) {
+////            let names = nodes.compactMap { $0.name }
+////            print("Collected node names: \(names)")
+////
+////            var uniqueNamesDict = [String: Bool]()
+////            var uniqueNamesArray = [String]()
+////
+////            for name in names {
+////                if uniqueNamesDict[name] == nil {
+////                    uniqueNamesDict[name] = true
+////                    uniqueNamesArray.append(name)
+////                }
+////            }
+////            
+////            roomNodes = uniqueNamesArray.sorted()
+////
+////            print("Unique node names: \(roomNodes)")
+////        } else {
+////            roomNodes = []
+////        }
+//    }
     
 //    func printOriginalDimensionsOfSelectedNode(selectedNode: SCNNode) {
 //        if let geometry = selectedNode.geometry {
@@ -238,8 +220,27 @@ struct RoomPositionView: View {
                         }
                         Spacer() // Push buttons to the top
                     }
-                }
+                }.onAppear{
+                    
+                    floorNodes = Array(Set(floorView
+                        .scnView
+                        .scene?
+                        .rootNode
+                        .childNodes(passingTest: { n, _ in
+                            if let nodeName = n.name {
+                                return nodeName != "Room" &&
+                                       nodeName != "Geom" &&
+                                       !nodeName.hasSuffix("_grp") &&
+                                       !nodeName.hasPrefix("unidentified")
+                            }
+                            return false
+                        }).compactMap { node in node.name } ?? []))
+                        .sorted()
+                    
+                    floorView.loadFloorPlanimetry(borders: false, usdzURL: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz"))
                 
+                }
+                   
                 HStack {
                     Picker("Choose Floor Node", selection: $selectedFloorNodeName) {
                         Text("Choose Floor Node")
@@ -365,6 +366,34 @@ struct RoomPositionView: View {
                             }
                             Spacer() // Push buttons to the top
                         }
+                    }.onAppear{
+                        if let nodes = roomView.scnView.scene?.rootNode.childNodes(passingTest: { n, _ in
+                            n.name != nil &&
+                            n.name! != "Room" &&
+                            n.name! != "Geom" &&
+                            String(n.name!.suffix(4)) != "_grp"
+                        }) {
+                            let names = nodes.compactMap { $0.name }
+                            print("Collected node names: \(names)")
+
+                            var uniqueNamesDict = [String: Bool]()
+                            var uniqueNamesArray = [String]()
+
+                            for name in names {
+                                if uniqueNamesDict[name] == nil {
+                                    uniqueNamesDict[name] = true
+                                    uniqueNamesArray.append(name)
+                                }
+                            }
+                            
+                            roomNodes = uniqueNamesArray.sorted()
+
+                            print("Unique node names: \(roomNodes)")
+                        } else {
+                            roomNodes = []
+                        }
+                        
+                        roomView.loadRoomMaps(room: room, borders: false, usdzURL: room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"))
                     }
                     
                     HStack {

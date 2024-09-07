@@ -39,10 +39,8 @@ struct BuildingsView: View {
                                     }
                                 }
                             }
-                        }.padding(.top, 30)
+                        }.padding(.top, 15)
                     }
-                    
-
                 }
             }
             .foregroundColor(.white)
