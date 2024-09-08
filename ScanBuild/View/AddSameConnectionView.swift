@@ -103,28 +103,6 @@ struct AddSameConnectionView: View {
                             .cornerRadius(10)
                             .padding()
                             .shadow(color: Color.gray, radius: 3)
-                        
-                        VStack {
-                            HStack {
-                                Button("+") {
-                                    mapView.zoomIn()
-                                }
-                                .buttonStyle(.bordered)
-                                .bold()
-                                .background(Color.blue.opacity(0.4))
-                                .cornerRadius(8)
-                                
-                                Button("-") {
-                                    mapView.zoomOut()
-                                }
-                                .buttonStyle(.bordered)
-                                .bold()
-                                .background(Color.blue.opacity(0.4))
-                                .cornerRadius(8).padding()
-                            }
-                            .padding()
-                        }
-                        Spacer()
                     }
                 }
                 .onChange(of: selectedRoom) { newRoom in

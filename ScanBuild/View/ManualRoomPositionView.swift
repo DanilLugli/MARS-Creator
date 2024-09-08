@@ -126,10 +126,11 @@ struct ManualRoomPositionView: View {
                     .bold()
                     .foregroundColor(.white)
             }
-            .buttonStyle(.bordered)
-            .background(Color.blue.opacity(0.6))
-            .cornerRadius(8)
+            .font(.system(size: 20))
             .padding()
+            .background(Color.blue)
+            .foregroundColor(.white)
+            .cornerRadius(10)
             
         }
         .background(Color.customBackground)

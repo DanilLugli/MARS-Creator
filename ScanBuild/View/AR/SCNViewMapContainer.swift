@@ -9,7 +9,7 @@ class SCNViewMapHandler: ObservableObject {
     var massCenter: SCNNode = SCNNode()
     var origin: SCNNode = SCNNode()
     
-
+    
     init(scnView: SCNView, cameraNode: SCNNode, massCenter: SCNNode) {
         self.scnView = scnView
         self.cameraNode = cameraNode
@@ -123,7 +123,7 @@ class SCNViewMapHandler: ObservableObject {
                 }
                 material.lightingModel = .physicallyBased
                 $0.geometry?.materials = [material]
-
+                
                 // Applica le modifiche di scala se richiesto
                 if borders {
                     $0.scale.x = $0.scale.x < 0.2 ? $0.scale.x + 0.1 : $0.scale.x
@@ -131,7 +131,7 @@ class SCNViewMapHandler: ObservableObject {
                     $0.scale.y = ($0.name!.prefix(4) == "Wall") ? 0.1 : $0.scale.y
                 }
             }
-
+        
         // Rimuovi tutti i nodi con prefisso "Floor"
         scnView.scene?
             .rootNode
@@ -158,10 +158,10 @@ class SCNViewMapHandler: ObservableObject {
     }
     
     func zoomIn() { cameraNode.camera?.orthographicScale -= 0.5
-    print("IN")}
+        print("IN")}
     
     func zoomOut() { cameraNode.camera?.orthographicScale += 0.5
-    print("OUT")}
+        print("OUT")}
     
     func moveFloorMapUp() {
         guard cameraNode.camera != nil else {
@@ -171,7 +171,7 @@ class SCNViewMapHandler: ObservableObject {
         // Muove la fotocamera verso il basso nel piano x-z (per spostare la mappa verso l'alto)
         cameraNode.position.z -= 1.0
     }
-
+    
     func moveFloorMapDown() {
         guard cameraNode.camera != nil else {
             print("Errore: cameraNode non ha una camera associata.")
@@ -180,7 +180,7 @@ class SCNViewMapHandler: ObservableObject {
         // Muove la fotocamera verso l'alto nel piano x-z (per spostare la mappa verso il basso)
         cameraNode.position.z += 1.0
     }
-
+    
     func moveFloorMapRight() {
         guard cameraNode.camera != nil else {
             print("Errore: cameraNode non ha una camera associata.")
@@ -189,7 +189,7 @@ class SCNViewMapHandler: ObservableObject {
         // Muove la fotocamera verso sinistra nel piano x-z (per spostare la mappa verso destra)
         cameraNode.position.x -= 1.0
     }
-
+    
     func moveFloorMapLeft() {
         guard cameraNode.camera != nil else {
             print("Errore: cameraNode non ha una camera associata.")
@@ -205,21 +205,18 @@ class SCNViewMapHandler: ObservableObject {
         cameraNode.camera = SCNCamera()
         
         cameraNode.worldPosition = SCNVector3(massCenter.worldPosition.x, massCenter.worldPosition.y + 10, massCenter.worldPosition.z)
-
+        
         cameraNode.camera?.usesOrthographicProjection = true
         cameraNode.camera?.orthographicScale = 10
-
-        cameraNode.eulerAngles = SCNVector3(-Double.pi / 2, 0, 0)
+        cameraNode.eulerAngles = SCNVector3(-Double.pi / 2, 0, 0) // Vista dall'alto
         
-
         let directionalLight = SCNNode()
         directionalLight.light = SCNLight()
         directionalLight.light!.type = .ambient
         directionalLight.light!.color = UIColor(white: 1.0, alpha: 1.0)
         cameraNode.addChildNode(directionalLight)
-print("1")
+        
         scnView.pointOfView = cameraNode
-print("2")
         cameraNode.constraints = []
     }
     
@@ -323,7 +320,6 @@ struct SCNViewMapContainer: UIViewRepresentable {
         let scnView = SCNView(frame: .zero)
         let cameraNode = SCNNode()
         let massCenter = SCNNode()
-        let origin = SCNNode()
         massCenter.worldPosition = SCNVector3(0, 0, 0)
         
         self.handler = SCNViewMapHandler(scnView: scnView, cameraNode: cameraNode, massCenter: massCenter)
@@ -331,6 +327,19 @@ struct SCNViewMapContainer: UIViewRepresentable {
     
     func makeUIView(context: Context) -> SCNView {
         handler.scnView
+        
+        // Aggiunta del riconoscitore di pinch per lo zoom
+        let pinchGesture = UIPinchGestureRecognizer(target: context.coordinator, action: #selector(context.coordinator.handlePinch(_:)))
+        handler.scnView.addGestureRecognizer(pinchGesture)
+        
+        // Aggiunta del riconoscitore di pan per lo spostamento
+        let panGesture = UIPanGestureRecognizer(target: context.coordinator, action: #selector(context.coordinator.handlePan(_:)))
+        handler.scnView.addGestureRecognizer(panGesture)
+        
+        // Configura lo sfondo della scena
+        handler.scnView.backgroundColor = UIColor.white
+        
+        return handler.scnView
     }
     
     func updateUIView(_ uiView: SCNView, context: Context) {}
@@ -340,6 +349,29 @@ struct SCNViewMapContainer: UIViewRepresentable {
         
         init(_ parent: SCNViewMapContainer) {
             self.parent = parent
+        }
+        
+        // Gestione dello zoom tramite pinch
+        @objc func handlePinch(_ gesture: UIPinchGestureRecognizer) {
+            guard let camera = parent.handler.cameraNode.camera else { return }
+            
+            if gesture.state == .changed {
+                let newScale = camera.orthographicScale / Double(gesture.scale)
+                camera.orthographicScale = max(5.0, min(newScale, 50.0)) // Limita lo zoom tra 5x e 50x
+                gesture.scale = 1
+            }
+        }
+        
+        // Gestione dello spostamento tramite pan
+        @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
+            let translation = gesture.translation(in: parent.handler.scnView)
+            
+            // Regola la posizione della camera in base alla direzione del pan
+            parent.handler.cameraNode.position.x -= Float(translation.x) * 0.01 // Spostamento orizzontale
+            parent.handler.cameraNode.position.z += Float(translation.y) * 0.01 // Spostamento verticale
+            
+            // Resetta la traduzione dopo ogni movimento
+            gesture.setTranslation(.zero, in: parent.handler.scnView)
         }
     }
     

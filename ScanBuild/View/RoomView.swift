@@ -66,76 +66,7 @@ struct RoomView: View {
                                             .cornerRadius(10)
                                             .padding()
                                             .shadow(color: Color.gray, radius: 3)
-                                        
-                                        VStack{
-                                            HStack{
-                                                HStack {
-                                                    Button("+") {
-                                                        mapView.zoomIn()
-                                                    }
-                                                    .buttonStyle(.bordered)
-                                                    .bold()
-                                                    .background(Color.blue.opacity(0.4))
-                                                    .cornerRadius(8)
-                                                    
-                                                    Button("-") {
-                                                        mapView.zoomOut()
-                                                        
-                                                    }
-                                                    .buttonStyle(.bordered)
-                                                    .bold()
-                                                    .background(Color.blue.opacity(0.4))
-                                                    .cornerRadius(8)
-                                                }.padding()
-                                                HStack {
-                                                    Button(action: {
-                                                        mapView.moveMapRight()
-                                                    }) {
-                                                        Image(systemName: "arrow.left")
-                                                            .bold()
-                                                            .foregroundColor(.white) // Colore del simbolo
-                                                    }
-                                                    .buttonStyle(.bordered)
-                                                    .background(Color.blue.opacity(0.4))
-                                                    .cornerRadius(8)
-                                                    
-                                                    Button(action: {
-                                                        mapView.moveMapLeft()
-                                                    }) {
-                                                        Image(systemName: "arrow.right")
-                                                            .bold()
-                                                            .foregroundColor(.white) // Colore del simbolo
-                                                    }
-                                                    .buttonStyle(.bordered)
-                                                    .background(Color.blue.opacity(0.4))
-                                                    .cornerRadius(8)
-                                                }.padding()
-                                                HStack {
-                                                    Button(action: {
-                                                        mapView.moveMapUp()
-                                                    }) {
-                                                        Image(systemName: "arrow.up")
-                                                            .bold()
-                                                            .foregroundColor(.white) // Colore del simbolo
-                                                    }
-                                                    .buttonStyle(.bordered)
-                                                    .background(Color.blue.opacity(0.4))
-                                                    .cornerRadius(8)
-                                                    
-                                                    Button(action: {
-                                                        mapView.moveMapDown()
-                                                    }) {
-                                                        Image(systemName: "arrow.down")
-                                                            .bold()
-                                                            .foregroundColor(.white) // Colore del simbolo
-                                                    }
-                                                    .buttonStyle(.bordered)
-                                                    .background(Color.blue.opacity(0.4))
-                                                    .cornerRadius(8)
-                                                }.padding()
-                                            }
-                                            Spacer()
-                                        }.padding(.top)
+    
                                     }
                                 }
                                 .onAppear {
@@ -159,89 +90,19 @@ struct RoomView: View {
                                             .cornerRadius(10)
                                             .padding()
                                             .shadow(color: Color.gray, radius: 3)
+                                           
+                                    } .onAppear {
+                                        var roomURLs: [URL] = []
                                         
-                                        VStack{
-                                            HStack{
-                                                HStack {
-                                                    Button("+") {
-                                                        mapRoomPositionView.handler.zoomIn()
-                                                    }
-                                                    .buttonStyle(.bordered)
-                                                    .bold()
-                                                    .background(Color.blue.opacity(0.4))
-                                                    .cornerRadius(8)
-                                                    
-                                                    Button("-") {
-                                                        mapRoomPositionView.handler.zoomOut()
-                                                        
-                                                    }
-                                                    .buttonStyle(.bordered)
-                                                    .bold()
-                                                    .background(Color.blue.opacity(0.4))
-                                                    .cornerRadius(8)
-                                                }.padding()
-                                                HStack {
-                                                    Button(action: {
-                                                        mapRoomPositionView.handler.moveFloorMapRight()
-                                                    }) {
-                                                        Image(systemName: "arrow.left")
-                                                            .bold()
-                                                            .foregroundColor(.white) // Colore del simbolo
-                                                    }
-                                                    .buttonStyle(.bordered)
-                                                    .background(Color.blue.opacity(0.4))
-                                                    .cornerRadius(8)
-                                                    
-                                                    Button(action: {
-                                                        mapRoomPositionView.handler.moveFloorMapLeft()
-                                                    }) {
-                                                        Image(systemName: "arrow.right")
-                                                            .bold()
-                                                            .foregroundColor(.white) // Colore del simbolo
-                                                    }
-                                                    .buttonStyle(.bordered)
-                                                    .background(Color.blue.opacity(0.4))
-                                                    .cornerRadius(8)
-                                                }.padding()
-                                                HStack {
-                                                    Button(action: {
-                                                        mapRoomPositionView.handler.moveFloorMapUp()
-                                                    }) {
-                                                        Image(systemName: "arrow.up")
-                                                            .bold()
-                                                            .foregroundColor(.white) // Colore del simbolo
-                                                    }
-                                                    .buttonStyle(.bordered)
-                                                    .background(Color.blue.opacity(0.4))
-                                                    .cornerRadius(8)
-                                                    
-                                                    Button(action: {
-                                                        mapRoomPositionView.handler.moveFloorMapDown()
-                                                    }) {
-                                                        Image(systemName: "arrow.down")
-                                                            .bold()
-                                                            .foregroundColor(.white) // Colore del simbolo
-                                                    }
-                                                    .buttonStyle(.bordered)
-                                                    .background(Color.blue.opacity(0.4))
-                                                    .cornerRadius(8)
-                                                }.padding()
-                                            }
-                                            Spacer()
-                                        }.padding(.top)
-                                            .onAppear {
-                                                var roomURLs: [URL] = []
-                                                
-                                                print("A")
-                                                roomURLs.append(room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"))
-                                                print("B")
-                                                mapRoomPositionView.handler.loadRoomMaps(
-                                                    floor: floor,
-                                                    roomURLs: roomURLs,
-                                                    borders: true
-                                                )
-                                                print("D")
-                                            }
+                                        print("A")
+                                        roomURLs.append(room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"))
+                                        print("B")
+                                        mapRoomPositionView.handler.loadRoomMaps(
+                                            floor: floor,
+                                            roomURLs: roomURLs,
+                                            borders: true
+                                        )
+                                        print("D")
                                     }
                                 }
                             } else {
@@ -316,7 +177,10 @@ struct RoomView: View {
                                             }
                                         }
                                     }
-                                }.padding(.top, 15)
+                                } .safeAreaInset(edge: .bottom, spacing: 0) {
+                                    Color.clear.frame(height: 80) // Inserisci uno spazio di 80 punti sotto la scroll view
+                                }
+                                .padding(.top, 15)
                             }
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -328,7 +192,7 @@ struct RoomView: View {
                         
                         
                         VStack {
-                            if !room.hasConnections() {
+                            if room.hasConnections() {
                                 VStack {
                                     Text("Add Connection for \(room.name) with + icon")
                                         .foregroundColor(.gray)
@@ -564,7 +428,7 @@ struct RoomView: View {
                     }
                     else if selectedTab == 4 {
                         HStack{
-                            NavigationLink(destination: AddTransitionZoneView()) {
+                            NavigationLink(destination: AddTransitionZoneView(floor: floor, room: room)) {
                                 Image(systemName: "plus.circle.fill")
                                     .font(.system(size: 26))
                                     .foregroundStyle(.white, .blue, .blue)

@@ -1,4 +1,3 @@
-
 import SwiftUI
 import SceneKit
 import ARKit
@@ -7,7 +6,7 @@ import CoreMotion
 import ComplexModule
 
 struct SCNViewTransitionZoneContainer: UIViewRepresentable {
-    
+
     typealias UIViewType = SCNView
     
     var scnView = SCNView(frame: .zero)
@@ -104,117 +103,12 @@ struct SCNViewTransitionZoneContainer: UIViewRepresentable {
     func loadRoomMaps(room: Room, borders: Bool, usdzURL: URL) {
         do {
             scnView.scene = try SCNScene(url: usdzURL)
-            print("PIPPo")
-            addDoorNodesBasedOnExistingDoors(room: room)
             drawContent(borders: borders)
             setMassCenter()
             setCamera()
         } catch {
             print("Error loading scene from URL: \(error)")
         }
-    }
-    
-    func loadFloorPlanimetry(borders: Bool, usdzURL: URL) {
-        do {
-            scnView.scene = try SCNScene(url: usdzURL)
-            drawContent(borders: borders)
-            setMassCenter()
-            setCamera()
-        } catch {
-            print("Error loading scene from URL: \(error)")
-        }
-    }
-    
-    //    func drawOrigin(_ o: SCNVector3,_ color: UIColor, _ size: CGFloat, _ addY: Bool = false) {
-    //
-    //        let sphere = generateSphereNode(color, size)
-    //        sphere.name = "Origin"
-    //
-    //        print("Origin Drawn")
-    //        print(sphere.worldTransform)
-    //
-    //        sphere.simdWorldPosition = simd_float3(o.x, o.y, o.z)
-    //
-    //        print(sphere.worldTransform)
-    //
-    //        if let r = Model.shared.actualRoto{sphere.simdWorldTransform = simd_mul(sphere.simdWorldTransform, r.traslation)}
-    //        sphere.worldPosition.y -= 1
-    //        if addY {sphere.worldPosition.y += 1}
-    //
-    //        scnView.scene?.rootNode.addChildNode(sphere)
-    //
-    //    }
-    
-    func zoomIn() {cameraNode.camera?.orthographicScale -= 0.5}
-    
-    func zoomOut() {cameraNode.camera?.orthographicScale += 0.5}
-    
-    func moveMapUp() {
-        
-        // Controllo se il cameraNode ha una camera associata
-        guard cameraNode.camera != nil else {
-            print("Errore: cameraNode non ha una camera associata.")
-            return
-        }
-        
-        // Imposta il cameraNode come punto di vista della scena
-        scnView.pointOfView = cameraNode
-        
-        // Sposta la camera verso l'alto
-        cameraNode.simdWorldPosition.z += 1.0
-        
-        // Log per debug
-        print("Nuova posizione della camera (verso l'alto): \(cameraNode.simdWorldPosition)")
-    }
-    
-    func moveMapDown() {
-        
-        guard cameraNode.camera != nil else {
-            print("Errore: cameraNode non ha una camera associata.")
-            return
-        }
-        
-        scnView.pointOfView = cameraNode
-        
-        cameraNode.simdWorldPosition.z -= 1.0
-        
-        print("Nuova posizione della camera (verso il basso): \(cameraNode.simdWorldPosition)")
-    }
-    
-    func moveMapRight() {
-        
-        // Controllo se il cameraNode ha una camera associata
-        guard cameraNode.camera != nil else {
-            print("Errore: cameraNode non ha una camera associata.")
-            return
-        }
-        
-        // Imposta il cameraNode come punto di vista della scena
-        scnView.pointOfView = cameraNode
-        
-        // Sposta la camera verso l'alto
-        cameraNode.simdWorldPosition.x += 1.0
-        
-        // Log per debug
-        print("Nuova posizione della camera (verso l'alto): \(cameraNode.simdWorldPosition)")
-    }
-    
-    func moveMapLeft() {
-        
-        // Controllo se il cameraNode ha una camera associata
-        guard cameraNode.camera != nil else {
-            print("Errore: cameraNode non ha una camera associata.")
-            return
-        }
-        
-        // Imposta il cameraNode come punto di vista della scena
-        scnView.pointOfView = cameraNode
-        
-        // Sposta la camera verso il basso
-        cameraNode.simdWorldPosition.x -= 1.0
-        
-        // Log per debug
-        print("Nuova posizione della camera (verso il basso): \(cameraNode.simdWorldPosition)")
     }
     
     func findMassCenter(_ nodes: [SCNNode]) -> SCNNode {
@@ -240,7 +134,6 @@ struct SCNViewTransitionZoneContainer: UIViewRepresentable {
                 n,_ in n.name != nil && n.name! == "Wall0"
             })[0]
         
-        print("root/Node -> \(scnView.scene!.rootNode.worldOrientation)")
         var X: [Float] = [1000000.0, -1000000.0]
         var Z: [Float] = [1000000.0, -1000000.0]
         
@@ -251,7 +144,6 @@ struct SCNViewTransitionZoneContainer: UIViewRepresentable {
                 n,_ in n.name != nil && n.name! != "Room" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp"
             })
             .forEach{
-                
                 let material = SCNMaterial()
                 material.diffuse.contents = ($0.name!.prefix(4) == "Door" || $0.name!.prefix(4) == "Open") ? UIColor.white : UIColor.black
                 material.lightingModel = .physicallyBased
@@ -260,7 +152,6 @@ struct SCNViewTransitionZoneContainer: UIViewRepresentable {
                 if ($0.worldPosition.x > X[1]) {X[1] = $0.worldPosition.x}
                 if ($0.worldPosition.z < Z[0]) {Z[0] = $0.worldPosition.z}
                 if ($0.worldPosition.z > Z[1]) {Z[1] = $0.worldPosition.z}
-                print("\(String(describing: $0.name)), \($0.worldPosition)")
             }
         massCenter.worldPosition = SCNVector3((X[0]+X[1])/2, 0, (Z[0]+Z[1])/2)
         cameraNode.worldPosition = massCenter.worldPosition
@@ -269,7 +160,7 @@ struct SCNViewTransitionZoneContainer: UIViewRepresentable {
         cameraNode.camera?.orthographicScale = 20
         cameraNode.rotation.y = wall!.rotation.y
         cameraNode.rotation.w = wall!.rotation.w
-        // Create directional light
+        
         let directionalLight = SCNNode()
         directionalLight.light = SCNLight()
         directionalLight.light!.type = .ambient
@@ -283,92 +174,41 @@ struct SCNViewTransitionZoneContainer: UIViewRepresentable {
         let vConstraint = SCNLookAtConstraint(target: massCenter)
         cameraNode.constraints = [vConstraint]
         directionalLight.constraints = [vConstraint]
-        
     }
     
-    func changeColorOfNode(nodeName: String, color: UIColor) {
-        drawContent(borders: false)
-        if let _node = scnView.scene?.rootNode.childNodes(passingTest: { n,_ in n.name != nil && n.name! == nodeName }).first {
-            let copy = _node.copy() as! SCNNode
-            copy.name = "__selected__"
-            let material = SCNMaterial()
-            material.diffuse.contents = color
-            material.lightingModel = .physicallyBased
-            copy.geometry?.materials = [material]
-            copy.worldPosition.y += 4
-            copy.scale.x = _node.scale.x < 0.2 ? _node.scale.x + 0.1 : _node.scale.x
-            copy.scale.z = _node.scale.z < 0.2 ? _node.scale.z + 0.1 : _node.scale.z
-            scnView.scene?.rootNode.addChildNode(copy)
-        }
+    func addBox(at position: SCNVector3) {
+        let box = SCNBox(width: 1.0, height: 2.0, length: 1.0, chamferRadius: 0.0)
+        let boxNode = SCNNode(geometry: box)
+        boxNode.position = position
+        boxNode.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
+        scnView.scene?.rootNode.addChildNode(boxNode)
     }
-    
+
     func makeUIView(context: Context) -> SCNView {
-        print("add a tap gesture recognizer")
         handler.scnView = scnView
-        let tapGesture = UIGestureRecognizer(
-            target: self,
-            action: #selector(self.handler.handleTap(_:))
-        )
+        
+        // Aggiunta del riconoscitore di pinch per lo zoom
+        let pinchGesture = UIPinchGestureRecognizer(target: context.coordinator, action: #selector(context.coordinator.handlePinch(_:)))
+        scnView.addGestureRecognizer(pinchGesture)
+        
+        // Aggiunta del riconoscitore di pan per lo spostamento
+        let panGesture = UIPanGestureRecognizer(target: context.coordinator, action: #selector(context.coordinator.handlePan(_:)))
+        scnView.addGestureRecognizer(panGesture)
+        
+        // Aggiunta del riconoscitore di tap per aggiungere SCNBox
+        let tapGesture = UITapGestureRecognizer(target: context.coordinator, action: #selector(context.coordinator.handleTap(_:)))
         scnView.addGestureRecognizer(tapGesture)
+        
         return scnView
     }
     
     func updateUIView(_ uiView: SCNView, context: Context) {}
     
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
+    func makeCoordinator() -> SCNViewContainerCoordinator {
+        SCNViewContainerCoordinator(self)
     }
     
-    func addDoorNodesBasedOnExistingDoors(room: Room) {
-        
-        let doorNodes = scnView.scene?.rootNode.childNodes(passingTest: { node, _ in
-            if let nodeName = node.name {
-                return (nodeName.hasPrefix("Door") || nodeName.hasPrefix("Opening")) && !nodeName.hasSuffix("_grp")
-            }
-            return false
-        }) ?? []
-        
-        for doorNode in doorNodes {
-            
-            let doorWidth = doorNode.width
-            let doorHeight = doorNode.height
-            var doorDepth = doorNode.length
-            
-            let depthExtension: CGFloat = 0.6
-            doorDepth += depthExtension
-            
-            let newDoorGeometry = SCNBox(width: doorWidth, height: doorHeight, length: doorDepth, chamferRadius: 0.0)
-            
-            let newDoorNode = SCNNode(geometry: newDoorGeometry)
-            
-            newDoorNode.transform = doorNode.transform
-            
-            let doorDirection = doorNode.simdWorldFront
-            let inwardTranslation = SIMD3<Float>(doorDirection * Float(doorDepth / 2))
-            
-            newDoorNode.simdPosition = doorNode.simdPosition - inwardTranslation
-            
-            let nodeName = doorNode.name != nil ? "TransitionZone_\(doorNode.name!)" : "TransitionZone_Door"
-            
-            newDoorNode.name = nodeName
-            
-            scnView.scene?.rootNode.addChildNode(newDoorNode)
-            
-            let updateName = newDoorNode.name!.replacingOccurrences(of: "TransitionZone_", with: "")
-            
-            if !room.transitionZones.contains(where: { $0.name == updateName }) {
-                print("AGGIUNGO \(updateName)")
-                let transitionZones = TransitionZone(name: updateName, connection: Connection(name: ""))
-                room.addTransitionZone(transitionZone: transitionZones)
-                
-            } else {
-                print("Una TransitionZone con il nome \(nodeName) esiste già.")
-            }
-            print("Nuova porta aggiunta alla scena con nome \(newDoorNode.name!).")
-        }
-    }
-    
-    class Coordinator: NSObject {
+    class SCNViewContainerCoordinator: NSObject {
         var parent: SCNViewTransitionZoneContainer
         
         init(_ parent: SCNViewTransitionZoneContainer) {
@@ -388,12 +228,20 @@ struct SCNViewTransitionZoneContainer: UIViewRepresentable {
             parent.cameraNode.position.z += Float(translation.y) * 0.01
             gesture.setTranslation(.zero, in: parent.scnView)
         }
+        
+        // Gestione del tap per aggiungere SCNBox alla scena
+        @objc func handleTap(_ gesture: UITapGestureRecognizer) {
+            let location = gesture.location(in: parent.scnView)
+            let hitResults = parent.scnView.hitTest(location, options: nil)
+            
+            if let hitResult = hitResults.first {
+                let position = hitResult.worldCoordinates
+                parent.addBox(at: position)
+            } else {
+                parent.addBox(at: SCNVector3(0, 0, 0)) // Posizione di default se non c'è un hit
+            }
+        }
     }
-}
-
-func buttonAction(_ index: Int) {
-    print("Button \(index) pressed")
-    // Aggiungi qui le azioni che desideri eseguire quando un bottone viene premuto
 }
 
 class HandleTap: UIViewController {
@@ -416,5 +264,3 @@ struct SCNViewTransitionZoneContainer_Previews: PreviewProvider {
         SCNViewTransitionZoneContainer()
     }
 }
-
-
