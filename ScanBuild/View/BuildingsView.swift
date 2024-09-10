@@ -59,7 +59,7 @@ struct BuildingsView: View {
                     HStack {
                         NavigationLink(destination: AddBuildingView()) {
                             Image(systemName: "plus.circle.fill")
-                                .font(.system(size: 26))
+                                .font(.system(size: 22))
                                 .foregroundStyle(.white, .blue, .blue)
                         }
                     }

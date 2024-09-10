@@ -65,7 +65,7 @@ struct BuildingView: View {
                 HStack {
                     NavigationLink(destination: AddFloorView(building: building)) {
                         Image(systemName: "plus.circle.fill")
-                            .font(.system(size: 26))
+                            .font(.system(size: 22))
                             .foregroundStyle(.white, .blue, .blue)
                     }
                     Menu {
@@ -97,7 +97,7 @@ struct BuildingView: View {
                         }
                     } label: {
                         Image(systemName: "ellipsis.circle.fill")
-                            .font(.system(size: 26))
+                            .font(.system(size: 22))
                             .symbolRenderingMode(.palette)
                             .foregroundStyle(.white, .blue, .blue)
                     }
@@ -106,10 +106,8 @@ struct BuildingView: View {
         }
         .confirmationDialog("Confirm Deletion", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
             Button("Delete", role: .destructive) {
-                // Azione per confermare l'eliminazione
                 BuildingModel.getInstance().deleteBuilding(building: building)
                 print("Building eliminato")
-                //dismiss()
             }
             
             Button("Cancel", role: .cancel) {

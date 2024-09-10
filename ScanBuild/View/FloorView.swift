@@ -25,7 +25,7 @@ struct FloorView: View {
     @State private var isOptionsSheetPresented = false
     
     @State private var showUpdateOptionsAlert = false
-    @State private var showDeleteConfirmation = false // Stato per mostrare l'alert
+    @State private var showDeleteConfirmation = false
     @State private var showUpdateAlert = false
     
     @State private var alertMessage = ""
@@ -172,19 +172,12 @@ struct FloorView: View {
                             
                             Button(action: {
                                 
-                                self.isNavigationActive = true
+                                self.isOptionsSheetPresented = true
                                 
                             }) {
                                 Label("Create Planimetry", systemImage: "plus")
                             }.disabled(FileManager.default.fileExists(atPath: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz").path))
-                            
-                            Button(action: {
-                                isFloorPlanimetryUploadPicker = true
-                            }) {
-                                Label("Upload Planimetry from File", systemImage: "square.and.arrow.down")
-                            }.disabled(FileManager.default.fileExists(atPath: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz").path))
-                            
-                            Divider()
+
                             
                             Button(action: {
                                 alertMessage = "If you proceed with the update:\n1. Current floor plan\n2. All rooms position\nWill be deleted.\nThis action is irreversible, are you sure you want to continue?"
@@ -207,7 +200,7 @@ struct FloorView: View {
                             
                         } label: {
                             Image(systemName: "ellipsis.circle.fill")
-                                .font(.system(size: 26))
+                                .font(.system(size: 22))
                                 .foregroundStyle(.white, .blue, .blue)
                         }
                         NavigationLink(destination: FloorScanningView(namedUrl: floor), isActive: $isNavigationActive) {
@@ -217,7 +210,7 @@ struct FloorView: View {
                     else if selectedTab == 1 {
                         NavigationLink(destination: AddRoomView(floor: floor), isActive: $isNavigationActive) {
                             Image(systemName: "plus.circle.fill")
-                                .font(.system(size: 26))
+                                .font(.system(size: 22))
                                 .foregroundStyle(.white, .blue, .blue)
                                 .onTapGesture {
                                     let newRoom = Room(name: "New Room", lastUpdate: Date(), referenceMarkers: [], transitionZones: [], sceneObjects: [], scene: nil, worldMap: nil, roomURL: URL(fileURLWithPath: ""))
@@ -230,9 +223,9 @@ struct FloorView: View {
             }
         }
 
-        .confirmationDialog("Choose an option", isPresented: $isOptionsSheetPresented, titleVisibility: .visible) {
+        .confirmationDialog("How do you want to create the \(floor.name) planimetry?", isPresented: $isOptionsSheetPresented, titleVisibility: .visible) {
             
-            Button("Create with AR") {
+            Button("Create With AR") {
                 let fileManager = FileManager.default
                 let filePath = floor.floorURL
                     .appendingPathComponent("MapUsdz")

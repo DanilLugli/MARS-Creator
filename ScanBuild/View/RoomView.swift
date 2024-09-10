@@ -10,7 +10,6 @@ struct RoomView: View {
     @ObservedObject var floor: Floor
     @ObservedObject var building: Building
     
-    
     @State private var newRoomName: String = ""
     @State private var selectedMarker: ReferenceMarker? = nil
     @State private var selectedConnection: TransitionZone? = nil
@@ -30,10 +29,17 @@ struct RoomView: View {
     @State private var isCreateRoomPosition = false
     @State private var isCreateManualRoomPosition = false
     @State private var isReferenceMarkerUploadPicker = false
+    @State private var isColorPickerPopoverPresented = false
     
     @State private var showUpdateOptionsAlert = false
     @State private var showUpdateAlert = false
     @State private var showDeleteConfirmation = false
+    
+    @State private var selectedColor = Color(
+        .sRGB,
+        red: 0.98,
+        green: 0.9,
+        blue: 0.2)
     
     @State private var errorMessage: String = ""
     @State private var alertMessage = ""
@@ -269,19 +275,12 @@ struct RoomView: View {
                             Divider()
                             
                             Button(action: {
-                                isNavigationActive = true
+                                isOptionsSheetPresented = true
                                 print("isNavigationActive set to true") // Aggiungi per debug
                             }) {
                                 Label("Create Planimetry", systemImage: "plus")
                             }.disabled(FileManager.default.fileExists(atPath: room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz").path))
-                            
-                            Button(action: {
-                                isRoomPlanimetryUploadPicker = true
-                            }) {
-                                Label("Upload Planimetry from File", systemImage: "square.and.arrow.down")
-                            }.disabled(FileManager.default.fileExists(atPath: room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz").path))
-                            
-                            Divider()
+
                             
                             Button(action: {
                                 alertMessage = "If you proceed with the update, the current floor plan will be deleted.\nThis action is irreversible, are you sure you want to continue?"
@@ -292,6 +291,13 @@ struct RoomView: View {
                             
                             Divider()
                             
+                            Button(action: {
+                                isColorPickerPopoverPresented = true
+                            }) {
+                                Label("Select Room Color", systemImage: "paintpalette")
+                            }
+                            
+                            Divider()
                             
                             Button(role: .destructive, action: {
                                 showDeleteConfirmation = true
@@ -306,7 +312,7 @@ struct RoomView: View {
                             
                         } label: {
                             Image(systemName: "ellipsis.circle.fill")
-                                .font(.system(size: 26))
+                                .font(.system(size: 22))
                                 .symbolRenderingMode(.palette)
                                 .foregroundStyle(.white, .blue, .blue)
                         }.background{
@@ -348,7 +354,7 @@ struct RoomView: View {
                             
                         } label: {
                             Image(systemName: "plus.circle.fill")
-                                .font(.system(size: 26))
+                                .font(.system(size: 22))
                                 .symbolRenderingMode(.palette)
                                 .foregroundStyle(.white, .blue, .blue)
                         }.background{
@@ -374,7 +380,7 @@ struct RoomView: View {
                             isReferenceMarkerUploadPicker = true
                         }) {
                             Image(systemName: "plus.circle.fill")
-                                .font(.system(size: 26))
+                                .font(.system(size: 22))
                                 .foregroundStyle(.white, .blue, .blue)
                         }
                     }
@@ -403,7 +409,7 @@ struct RoomView: View {
                                 
                             } label: {
                                 Image(systemName: "plus.circle.fill")
-                                    .font(.system(size: 26))
+                                    .font(.system(size: 22))
                                     .foregroundStyle(.white, .blue, .blue)
                             }
                             
@@ -430,13 +436,26 @@ struct RoomView: View {
                         HStack{
                             NavigationLink(destination: AddTransitionZoneView(floor: floor, room: room)) {
                                 Image(systemName: "plus.circle.fill")
-                                    .font(.system(size: 26))
+                                    .font(.system(size: 22))
                                     .foregroundStyle(.white, .blue, .blue)
                             }
                         }
                     }
                 }
+            }.popover(isPresented: $isColorPickerPopoverPresented) {
+                ColorPicker("Pick a color", selection: $selectedColor)
+                    .padding()
             }
+//            .sheet(isPresented: $isColorPickerPresented) {
+//                VStack {
+//                    Text("Select Room Color")
+//                        .font(.title)
+//                        .padding()
+//                    
+//                    ColorPicker("Pick a color", selection: $selectedColor)
+//                        .padding()
+//                }
+//            }
             .sheet(isPresented: $isReferenceMarkerUploadPicker) {
                 FilePickerView { url in
                     selectedFileURL = url
@@ -483,9 +502,9 @@ struct RoomView: View {
                     }
                 }
             }
-            .confirmationDialog("Choose an option", isPresented: $isOptionsSheetPresented, titleVisibility: .visible) {
+            .confirmationDialog("How do you want to create the \(room.name) planimetry?", isPresented: $isOptionsSheetPresented, titleVisibility: .visible) {
                 
-                Button("Create with AR") {
+                Button("Create With AR") {
                     let fileManager = FileManager.default
                     let filePath = room.roomURL
                         .appendingPathComponent("MapUsdz")
