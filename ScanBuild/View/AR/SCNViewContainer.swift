@@ -116,13 +116,29 @@ struct SCNViewContainer: UIViewRepresentable {
             }
     }
     
-    func loadRoomMaps(room: Room, borders: Bool, usdzURL: URL) {
+    func loadRoomPlanimetry(room: Room, borders: Bool) {
         do {
+            let usdzURL = room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz")
+            
             scnView.scene = try SCNScene(url: usdzURL)
             addDoorNodesBasedOnExistingDoors(room: room)
             drawContent(borders: borders)
             setMassCenter()
             setCamera()
+        } catch {
+            print("Error loading scene from URL: \(error)")
+        }
+    }
+    
+    func loadFloorPlanimetry(borders: Bool, floor: Floor) {
+        do {
+            let usdzURL = floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz")
+            scnView.scene = try SCNScene(url: usdzURL)
+            drawContent(borders: borders)
+            setMassCenter()
+            setCamera()
+            
+            floor.isPlanimetryLoaded = true
         } catch {
             print("Error loading scene from URL: \(error)")
         }
@@ -177,20 +193,6 @@ struct SCNViewContainer: UIViewRepresentable {
         }
     }
     
-    func loadFloorPlanimetry(borders: Bool, floor: Floor) {
-        do {
-            let usdzURL = floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz")
-            scnView.scene = try SCNScene(url: usdzURL)
-            drawContent(borders: borders)
-            setMassCenter()
-            setCamera()
-            
-            floor.isPlanimetryLoaded = true
-        } catch {
-            print("Error loading scene from URL: \(error)")
-        }
-    }
-    
     //    func drawOrigin(_ o: SCNVector3,_ color: UIColor, _ size: CGFloat, _ addY: Bool = false) {
     //
     //        let sphere = generateSphereNode(color, size)
@@ -211,77 +213,6 @@ struct SCNViewContainer: UIViewRepresentable {
     //
     //    }
     
-    func zoomIn() {cameraNode.camera?.orthographicScale -= 0.5}
-    
-    func zoomOut() {cameraNode.camera?.orthographicScale += 0.5}
-    
-    func moveMapUp() {
-        
-        // Controllo se il cameraNode ha una camera associata
-        guard cameraNode.camera != nil else {
-            print("Errore: cameraNode non ha una camera associata.")
-            return
-        }
-        
-        // Imposta il cameraNode come punto di vista della scena
-        scnView.pointOfView = cameraNode
-        
-        // Sposta la camera verso l'alto
-        cameraNode.simdWorldPosition.z += 1.0
-        
-        // Log per debug
-        print("Nuova posizione della camera (verso l'alto): \(cameraNode.simdWorldPosition)")
-    }
-    
-    func moveMapDown() {
-        
-        guard cameraNode.camera != nil else {
-            print("Errore: cameraNode non ha una camera associata.")
-            return
-        }
-        
-        scnView.pointOfView = cameraNode
-        
-        cameraNode.simdWorldPosition.z -= 1.0
-        
-        print("Nuova posizione della camera (verso il basso): \(cameraNode.simdWorldPosition)")
-    }
-    
-    func moveMapRight() {
-        
-        // Controllo se il cameraNode ha una camera associata
-        guard cameraNode.camera != nil else {
-            print("Errore: cameraNode non ha una camera associata.")
-            return
-        }
-        
-        // Imposta il cameraNode come punto di vista della scena
-        scnView.pointOfView = cameraNode
-        
-        // Sposta la camera verso l'alto
-        cameraNode.simdWorldPosition.x += 1.0
-        
-        // Log per debug
-        print("Nuova posizione della camera (verso l'alto): \(cameraNode.simdWorldPosition)")
-    }
-    
-    func moveMapLeft() {
-        
-        // Controllo se il cameraNode ha una camera associata
-        guard cameraNode.camera != nil else {
-            print("Errore: cameraNode non ha una camera associata.")
-            return
-        }
-        
-        // Imposta il cameraNode come punto di vista della scena
-        scnView.pointOfView = cameraNode
-        
-        // Sposta la camera verso il basso
-        cameraNode.simdWorldPosition.x -= 1.0
-        
-        // Log per debug
-        print("Nuova posizione della camera (verso il basso): \(cameraNode.simdWorldPosition)")
-    }
     
     func findMassCenter(_ nodes: [SCNNode]) -> SCNNode {
         let massCenter = SCNNode()
@@ -368,8 +299,6 @@ struct SCNViewContainer: UIViewRepresentable {
         }
     }
     
-    
-    
     func makeUIView(context: Context) -> SCNView {
         print("Creazione di SCNView e aggiunta dei riconoscitori di gesti")
         
@@ -389,9 +318,7 @@ struct SCNViewContainer: UIViewRepresentable {
         return scnView
     }
     
-    func updateUIView(_ uiView: SCNView, context: Context) {
-        // Qui puoi implementare eventuali aggiornamenti necessari per la vista.
-    }
+    func updateUIView(_ uiView: SCNView, context: Context) {}
     
     func makeCoordinator() -> SCNViewContainerCoordinator {
         SCNViewContainerCoordinator(self)
@@ -428,8 +355,6 @@ struct SCNViewContainer: UIViewRepresentable {
         }
     }
 }
-
-
 
 @available(iOS 17.0, *)
 struct SCNViewContainer_Previews: PreviewProvider {

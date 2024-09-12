@@ -8,8 +8,8 @@ struct FloorView: View {
     @EnvironmentObject var buildingModel : BuildingModel
     @ObservedObject var floor: Floor
     @ObservedObject var building: Building
-    @State private var searchText: String = ""
     
+    @State private var searchText: String = ""
     @State private var newFloorName: String = ""
     @State private var selectedTab: Int = 0
     @State private var animateRooms: Bool = false
@@ -41,7 +41,6 @@ struct FloorView: View {
                 
                 
                 TabView(selection: $selectedTab) {
-                    
                     VStack {
                         
                         Toggle(isOn: $showFloorMap) {
@@ -72,25 +71,6 @@ struct FloorView: View {
                                             .shadow(color: Color.gray, radius: 3)
                                     }
                                 }
-                            }
-                            .onAppear {
-                                var roomURLs: [URL] = []
-                                
-//                                floor.rooms.forEach { room in
-//                                    roomURLs.append(room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"))
-//                                }
-//                                
-//                                mapPositionView.handler.loadRoomMaps(
-//                                    floor: floor,
-//                                    roomURLs: roomURLs,
-//                                    borders: true
-//                                )
-                                
-//                                mapView.loadFloorPlanimetry(
-//                                    borders: true,
-//                                    usdzURL: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz")
-//                                )
-                                
                             }
                         }
                     }
@@ -129,14 +109,7 @@ struct FloorView: View {
                                         }
                                     }
                                 }
-                            }.onAppear {
-                                // Stampa di debug
-                                print("PRINT DEBUG ROOM")
-                                floor.rooms.forEach { room in
-                                    room.debugPrintRoom() // Stampa i dati delle stanze
-                                }
                             }
-                            .padding(.top, 15)
                         }
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -175,14 +148,12 @@ struct FloorView: View {
                                 Label("Create Planimetry", systemImage: "plus")
                             }.disabled(FileManager.default.fileExists(atPath: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz").path))
 
-                            
                             Button(action: {
                                 alertMessage = "If you proceed with the update:\n1. Current floor plan\n2. All rooms position\nWill be deleted.\nThis action is irreversible, are you sure you want to continue?"
                                 showUpdateAlert = true
                             }) {
                                 Label("Update Planimetry", systemImage: "arrow.clockwise")
                             }.disabled(!FileManager.default.fileExists(atPath: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz").path))
-                            
                             
                             Divider()
                             
@@ -209,7 +180,7 @@ struct FloorView: View {
                                 .font(.system(size: 22))
                                 .foregroundStyle(.white, .blue, .blue)
                                 .onTapGesture {
-                                    let newRoom = Room(name: "New Room", lastUpdate: Date(), referenceMarkers: [], transitionZones: [], sceneObjects: [], scene: nil, worldMap: nil, roomURL: URL(fileURLWithPath: ""))
+                                    let newRoom = Room(_name: "New Room", _lastUpdate: Date(), _planimetry: SCNViewContainer(), _referenceMarkers: [], _transitionZones: [], _sceneObjects: [], _roomURL: URL(fileURLWithPath:""))
                                     self.newRoom = newRoom
                                     self.isNavigationActive = true
                                 }
@@ -218,7 +189,6 @@ struct FloorView: View {
                 }
             }
         }
-
         .confirmationDialog("How do you want to create the \(floor.name) planimetry?", isPresented: $isOptionsSheetPresented, titleVisibility: .visible) {
             
             Button("Create With AR") {
@@ -234,7 +204,6 @@ struct FloorView: View {
                     print("Errore durante l'eliminazione del file: \(error)")
                 }
                 
-                // Chiudi il dialogo e avvia la navigazione
                 self.isOptionsSheetPresented = false
                 self.isNavigationActive = true
             }
@@ -295,10 +264,13 @@ struct FloorView: View {
             Button("SAVE", action: {
                 if !newFloorName.isEmpty {
                     do {
-                        try BuildingModel.getInstance().getBuilding(building)?.renameFloor(floor: floor, newName: newFloorName)
-                    } catch {
-                        print("Errore durante la rinomina: \(error.localizedDescription)")
+                        if ((try? building.renameFloor(floor: floor, newName: newFloorName)) != nil){
+                            print("Piano rinominato con successo.")
+                        } else {
+                            print("Errore durante la rinomina del piano.")
+                        }
                     }
+                    
                     isRenameSheetPresented = false
                 }
             })
@@ -313,12 +285,10 @@ struct FloorView: View {
             FilePickerView { url in
                 selectedFileURL = url
                 
-                // Definisci il percorso di destinazione per il file selezionato
                 let destinationURL = floor.floorURL
                     .appendingPathComponent("MapUsdz")
                     .appendingPathComponent("\(floor.name).usdz")
                 
-                // Crea la directory "MapUsdz" se non esiste già
                 let fileManager = FileManager.default
                 let mapUsdzDirectory = floor.floorURL.appendingPathComponent("MapUsdz")
                 

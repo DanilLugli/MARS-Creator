@@ -12,7 +12,7 @@ struct CaptureViewContainer: UIViewRepresentable {
     private let roomCaptureView: RoomCaptureView
     
     init(namedUrl: NamedURL) {
-        print("Initializing CaptureViewContainer")
+        
         sessionDelegate = SessionDelegate(namedUrl: namedUrl)
         configuration = RoomCaptureSession.Configuration()
         
@@ -36,7 +36,7 @@ struct CaptureViewContainer: UIViewRepresentable {
     func updateUIView(_ uiView: RoomCaptureView, context: Context) {}
     
     mutating func stopCapture(pauseARSession: Bool) {
-        print("CHIAMATA STOPCAPTURE")
+        print("CALL STOPCAPTURE CaptureViewContainer")
         SessionDelegate.save = !pauseARSession
         sessionDelegate.currentMapName = sessionDelegate.namedUrl.name
         
@@ -49,7 +49,7 @@ struct CaptureViewContainer: UIViewRepresentable {
         if !pauseARSession {
             // Metti in pausa la sessione AR
             arSession.pause()
-            print("BIBBIIIBI")
+
             // Azzera la configurazione e rimuovi le ancore per disattivare completamente la sessione AR
             let emptyConfiguration = ARWorldTrackingConfiguration()
             arSession.run(emptyConfiguration, options: [.resetTracking, .removeExistingAnchors])
@@ -201,7 +201,7 @@ struct CaptureViewContainer: UIViewRepresentable {
 
 struct CaptureViewContainer_Previews: PreviewProvider {
     static var previews: some View {
-        CaptureViewContainer(namedUrl: Room(name: "Sample Room", lastUpdate: Date(), referenceMarkers: [], transitionZones: [], sceneObjects: [], scene: nil, worldMap: nil, roomURL: URL(fileURLWithPath:"")))
+        CaptureViewContainer(namedUrl: Room(_name: "Sample Room", _lastUpdate: Date(), _referenceMarkers: [], _transitionZones: [], _sceneObjects: [], _roomURL: URL(fileURLWithPath:"")))
     }
 }
 

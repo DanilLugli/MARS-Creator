@@ -45,7 +45,7 @@ struct RoomView: View {
     @State private var alertMessage = ""
     @State private var searchText: String = ""
     
-    var mapView = SCNViewContainer()
+//    var mapView = SCNViewContainer()
     @State var mapRoomPositionView = SCNViewMapContainer()
     
     var body: some View {
@@ -59,24 +59,26 @@ struct RoomView: View {
                     TabView(selection: $selectedTab) {
                         
                         VStack {
-                            if isDirectoryEmpty(url: room.roomURL.appendingPathComponent("MapUsdz")) {
+                            //if isDirectoryEmpty(url: room.roomURL.appendingPathComponent("MapUsdz")) {
+                            if room.planimetry == nil{
+                                
                                 Text("Add Planimetry with + icon")
                                     .foregroundColor(.gray)
                                     .font(.headline)
                                     .padding()
+                                
                             } else {
                                 VStack {
                                     ZStack {
-                                        mapView
+                                        room.planimetry
                                             .border(Color.white)
                                             .cornerRadius(10)
                                             .padding()
                                             .shadow(color: Color.gray, radius: 3)
-    
                                     }
                                 }
                                 .onAppear {
-                                    mapView.loadRoomMaps(room: room, borders: true, usdzURL: room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"))
+                                    print("PINO: \(room.planimetry)")
                                 }
                             }
                         }
@@ -98,17 +100,15 @@ struct RoomView: View {
                                             .shadow(color: Color.gray, radius: 3)
                                            
                                     } .onAppear {
-                                        var roomURLs: [URL] = []
+                                        var floorRooms: [Room] = []
                                         
-                                        print("A")
-                                        roomURLs.append(room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"))
-                                        print("B")
+                                        floorRooms.append(room)
+                                        
                                         mapRoomPositionView.handler.loadRoomsMaps(
                                             floor: floor,
-                                            roomURLs: roomURLs,
+                                            rooms: floorRooms,
                                             borders: true
                                         )
-                                        print("D")
                                     }
                                 }
                             } else {
@@ -460,9 +460,16 @@ struct RoomView: View {
                             .padding()
                             .foregroundColor(.white)
                             .bold()
-                            .onChange(of: selectedColor) { newColor in
-                                let uiColor = newColor.toUIColor()
+                            .onChange(of: selectedColor) {
+                                let uiColor = UIColor(selectedColor)
                                 room.color = uiColor.withAlphaComponent(0.3)
+                                
+                                var floorRooms: [Room] = []
+                                floor.rooms.forEach { room in
+                                    floorRooms.append(room)
+                                }
+                                
+                                floor.planimetryRooms.handler.loadRoomsMaps(floor: floor, rooms: floorRooms, borders: true)
                             }
                     }
                     .padding()
@@ -602,21 +609,6 @@ struct RoomView: View {
                     }
                 )
             }
-            .sheet(item: $selectedMarker) { marker in
-                VStack {
-                    Text("Position Marker")
-                        .font(.system(size: 22))
-                        .fontWeight(.bold)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 20)
-                        .padding(.top, 20)
-                        .foregroundColor(.white)
-                    mapView.border(Color.white).cornerRadius(10).padding().shadow(color: Color.gray, radius: 3)
-                    Spacer()
-                }
-                .padding()
-                .background(Color.customBackground.ignoresSafeArea())
-            }
         }
     }
     
@@ -668,11 +660,14 @@ struct RoomView: View {
     
     func isDirectoryEmpty(url: URL) -> Bool {
         let fileManager = FileManager.default
+        
+        let correctedURL = URL(fileURLWithPath: url.path)
+        print("CorrectedURL: \(correctedURL)")
         do {
-            let contents = try fileManager.contentsOfDirectory(at: url, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+            let contents = try fileManager.contentsOfDirectory(at: correctedURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
             return contents.isEmpty
         } catch {
-            print("Error checking directory contents: \(error)")
+            print("WE PINO: Error checking directory contents at \(correctedURL): \(error.localizedDescription)")
             return true
         }
     }

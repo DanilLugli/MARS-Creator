@@ -158,7 +158,7 @@ struct RoomPositionView: View {
                             roomNodes = []
                         }
                         
-                        roomView.loadRoomMaps(room: room, borders: false, usdzURL: room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"))
+                        roomView.loadRoomPlanimetry(room: room, borders: false)
                     }
                     
                     HStack {

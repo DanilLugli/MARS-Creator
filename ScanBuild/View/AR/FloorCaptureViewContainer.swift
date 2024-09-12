@@ -13,7 +13,7 @@ struct FloorCaptureViewContainer: UIViewRepresentable {
     private let configuration: RoomCaptureSession.Configuration
     
     init(namedUrl: NamedURL) {
-        print("Initializing FloorCaptureViewContainer")
+        
         sessionDelegate = SessionDelegate(namedUrl: namedUrl)
         configuration = RoomCaptureSession.Configuration()
         
@@ -27,7 +27,7 @@ struct FloorCaptureViewContainer: UIViewRepresentable {
         roomCaptureView.delegate = sessionDelegate
         roomCaptureView.captureSession.arSession.delegate = sessionDelegate
         
-        sessionDelegate.setCaptureView(self) // Non è necessario il cast
+        sessionDelegate.setCaptureView(self)
     }
     
     func makeUIView(context: Context) -> RoomCaptureView {
@@ -79,7 +79,6 @@ struct FloorCaptureViewContainer: UIViewRepresentable {
                     let name = currentMapName ?? "ScannedRoom_\(DateFormatter.localizedString(from: Date(), dateStyle: .medium, timeStyle: .short))"
                     let finalRoom = try await self.roomBuilder.capturedRoom(from: data)
                     
-                    // Salvataggio in formato USDZ
                     saveUSDZMap(finalRoom, name, at: namedUrl.url)
                     print("Room saved as USDZ at \(namedUrl.url)")
                     
@@ -89,7 +88,6 @@ struct FloorCaptureViewContainer: UIViewRepresentable {
             }
         }
         
-        // Le altre funzioni delegate non necessarie sono state rimosse per semplificazione
         func captureSession(_ session: RoomCaptureSession, didUpdate room: CapturedRoom) {}
         func captureSession(_ session: RoomCaptureSession, didProvide instruction: RoomCaptureSession.Instruction) {}
         func captureSession(_ session: RoomCaptureSession, didStartWith configuration: RoomCaptureSession.Configuration) {}
@@ -107,6 +105,6 @@ struct FloorCaptureViewContainer: UIViewRepresentable {
 
 struct FloorCaptureViewContainer_Previews: PreviewProvider {
     static var previews: some View {
-        FloorCaptureViewContainer(namedUrl: Room(name: "Sample Room", lastUpdate: Date(), referenceMarkers: [], transitionZones: [], sceneObjects: [], scene: nil, worldMap: nil, roomURL: URL(fileURLWithPath: "")))
+        FloorCaptureViewContainer(namedUrl: Room(_name: "Sample Room", _lastUpdate: Date(), _planimetry: SCNViewContainer(), _referenceMarkers: [], _transitionZones: [], _sceneObjects: [], _roomURL: URL(fileURLWithPath: "")))
     }
 }

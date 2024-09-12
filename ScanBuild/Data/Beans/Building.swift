@@ -13,7 +13,7 @@ class Building: Encodable, ObservableObject {
     @Published private var _name: String
     private var _lastUpdate: Date
     @Published private var _floors: [Floor]
-    private var _buildingURL: URL
+    @Published private var _buildingURL: URL
     
     init(name: String, lastUpdate: Date, floors: [Floor], buildingURL: URL) {
         self._name = name

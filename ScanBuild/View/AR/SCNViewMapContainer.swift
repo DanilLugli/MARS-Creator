@@ -9,7 +9,6 @@ class SCNViewMapHandler: ObservableObject {
     var massCenter: SCNNode = SCNNode()
     var origin: SCNNode = SCNNode()
     
-    
     init(scnView: SCNView, cameraNode: SCNNode, massCenter: SCNNode) {
         self.scnView = scnView
         self.cameraNode = cameraNode
@@ -18,61 +17,49 @@ class SCNViewMapHandler: ObservableObject {
         setCamera()
     }
     
-    @MainActor func loadRoomsMaps(floor: Floor, roomURLs: [URL], borders: Bool) {
+    @MainActor func loadRoomsMaps(floor: Floor, rooms: [Room], borders: Bool) {
         do {
             let floorFileURL = floor.floorURL.appendingPathComponent("MapUsdz")
                 .appendingPathComponent("\(floor.name).usdz")
+            
+            // Prima rimuovi la scena corrente
+            scnView.scene = nil
+            
+            // Ora carica la nuova scena
             scnView.scene = try SCNScene(url: floorFileURL)
             
             drawContent(borders: borders)
             setMassCenter()
             setCamera()
-            
-            // Itera attraverso ogni stanza (roomURL)
-            for roomURL in roomURLs {
-                print("\n\nProcessing room URL: \(roomURL)")
-                let roomScene = try SCNScene(url: roomURL)
+
+            for room in rooms {
+                print("\n\nProcessing room URL: \(room.roomURL)")
+                let roomMap = room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz")
                 
-                // Trova il nodo chiamato "Floor0" all'interno della stanza
+                let roomScene = try SCNScene(url: URL(fileURLWithPath: roomMap.path))
+                
                 if let roomNode = roomScene.rootNode.childNode(withName: "Floor0", recursively: true) {
-                    print("Found 'Floor0' node for room at: \(roomURL)")
-                    
-                    // Estrai il nome della stanza dal nome del file
-                    let roomName = roomURL.deletingPathExtension().lastPathComponent
-                    
-                    // Cerca la matrice di trasformazione per la stanza nel dizionario associationMatrix
+                    print("Found 'Floor0' node for room at: \(roomMap)")
+
+                    let roomName = room.name
+
                     if let rotoTraslationMatrix = floor.associationMatrix[roomName] {
-                        print("Applying transformation for room: \(roomName)")
-                        print("Translation matrix: \(rotoTraslationMatrix.translation)\n")
-                        print("Rotation matrix (r_Y): \(rotoTraslationMatrix.r_Y)\n")
-                        print("BEFORE POSITION: \nNode: \(roomNode.name ?? "Unnamed"), Position: \(roomNode.position)")
-                        
                         applyRotoTraslation(to: roomNode, with: rotoTraslationMatrix)
-                        
-                        print("AFTER POSITION: \nNode: \(roomNode.name ?? "Unnamed"), Position: \(roomNode.position)")
-                        
                     } else {
                         print("No RotoTraslationMatrix found for room: \(roomName)")
                     }
-                    
-                    // Imposta il nome del nodo in base al nome del file della stanza
+
                     roomNode.name = roomName
-                    print("RoomNode aggiunto: \(roomNode)")
-                    
-                    // Aggiungi un materiale per colorare il nodo
+
                     let material = SCNMaterial()
                     material.diffuse.contents = floor.getRoomByName(roomName)?.color
                     roomNode.geometry?.materials = [material]
-                    
-                    // Aggiungi il nodo della stanza alla scena principale
+
                     scnView.scene?.rootNode.addChildNode(roomNode)
                 } else {
-                    print("Node 'Floor0' not found in scene: \(roomURL)")
+                    print("Node 'Floor0' not found in scene: \(roomMap)")
                 }
             }
-            
-            // Dopo aver aggiunto i nodi, stampa tutti i nodi della scena
-            printAllNodes(in: scnView.scene?.rootNode)
             
         } catch {
             print("Error loading scene from URL: \(error)")

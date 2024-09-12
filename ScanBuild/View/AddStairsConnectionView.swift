@@ -177,10 +177,9 @@ struct AddStairsConnectionView: View {
     // Funzione per caricare la mappa
     private func loadMap(for room: Room?) {
         if let room = room {
-            mapView.loadRoomMaps(
+            mapView.loadRoomPlanimetry(
                 room: room,
-                borders: true,
-                usdzURL: room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz")
+                borders: true
             )
         }
     }

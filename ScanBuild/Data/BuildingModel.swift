@@ -10,7 +10,7 @@ class BuildingModel: ObservableObject {
     
     static var SCANBUILD_ROOT: URL {
         let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-        return documentsDirectory.appendingPathComponent("ScanBuild")
+        return documentsDirectory.appendingPathComponent("ARLCreator")
     }
     static let FLOOR_DATA_FOLDER = "Data"
     static let FLOOR_ROOMS_FOLDER = "Rooms"
@@ -18,7 +18,6 @@ class BuildingModel: ObservableObject {
     
     @Published var buildings: [Building]
     
-    // Costruttore
     private init() {
         self.buildings = []
         Task {
@@ -53,7 +52,7 @@ class BuildingModel: ObservableObject {
                 
                 for k in 1...5 {
 
-                    let room = Room(name: "Room \(k)", lastUpdate: Date(), referenceMarkers: [], transitionZones: [], sceneObjects: [], scene: nil, worldMap: nil, roomURL: URL(fileURLWithPath: ""))
+                    let room = Room(_name: "Room \(k)", _lastUpdate: Date(), _planimetry: SCNViewContainer(), _referenceMarkers: [], _transitionZones: [], _sceneObjects: [], _roomURL: URL(fileURLWithPath: ""))
                     
                     for z in 1...2 {
                         _ = Float.random(in: 0...10)
@@ -158,9 +157,9 @@ class BuildingModel: ObservableObject {
                     
                     let rooms = try loadRooms(from: floorURL)
                     
-                    var roomURLs: [URL] = []
+                    var floorRooms: [Room] = []
                     rooms.forEach { room in
-                        roomURLs.append(room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"))
+                        floorRooms.append(room)
                     }
                     
                     let floor = Floor(_name: floorURL.lastPathComponent,
@@ -184,7 +183,7 @@ class BuildingModel: ObservableObject {
                     
                     planimetryRooms.handler.loadRoomsMaps(
                         floor: floor,
-                        roomURLs: roomURLs,
+                        rooms: floorRooms,
                         borders: true
                     )
                     
@@ -210,11 +209,9 @@ class BuildingModel: ObservableObject {
                 if let lastModifiedDate = attributes[.modificationDate] as? Date {
                     
                     var referenceMarkers: [ReferenceMarker] = []
-                    var transitionZones: [TransitionZone] = []
-                    var sceneObjects: [SCNNode] = []
-                    var scene: SCNScene? = nil
-                    var worldMap: ARWorldMap? = nil
-                    
+                    let transitionZones: [TransitionZone] = []
+                    let sceneObjects: [SCNNode] = []
+                    let planimetry: SCNViewContainer = SCNViewContainer()
 
                     let referenceMarkerURL = roomURL.appendingPathComponent("ReferenceMarker")
                     if fileManager.fileExists(atPath: referenceMarkerURL.path) {
@@ -237,9 +234,20 @@ class BuildingModel: ObservableObject {
                             }
                         }
                     }
-                        
                     
-                    let room = Room(name: roomURL.lastPathComponent, lastUpdate: lastModifiedDate, referenceMarkers: referenceMarkers, transitionZones: transitionZones, sceneObjects: sceneObjects, scene: scene, worldMap: worldMap, roomURL: roomURL)
+                    let room = Room(_name: roomURL.lastPathComponent,
+                                    _lastUpdate: lastModifiedDate,
+                                    _planimetry: planimetry,
+                                    _referenceMarkers: referenceMarkers,
+                                    _transitionZones: transitionZones,
+                                    _sceneObjects: sceneObjects,
+                                    _roomURL: roomURL
+                    )
+                    
+                    if FileManager.default.fileExists(atPath: roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz").path){
+                        planimetry.loadRoomPlanimetry(room: room, borders: true)
+                    }
+                    
                     rooms.append(room)
                 }
             }
@@ -271,13 +279,18 @@ class BuildingModel: ObservableObject {
     @MainActor func renameBuilding(building: Building, newName: String) throws -> Bool {
         let fileManager = FileManager.default
         let oldBuildingURL = building.buildingURL
-        let newBuildingURL = BuildingModel.SCANBUILD_ROOT.appendingPathComponent(newName)
-
-        // Verifica se esiste già un building con il nuovo nome
+        
+        // Aggiorniamo il nome del building
+        building.name = newName
+        
+        let newBuildingURL = BuildingModel.SCANBUILD_ROOT.appendingPathComponent(building.name)
+        building.buildingURL = newBuildingURL
+        
+        // Verifica se esiste già una cartella con il nuovo nome
         guard !fileManager.fileExists(atPath: newBuildingURL.path) else {
             throw NSError(domain: "com.example.ScanBuild", code: 3, userInfo: [NSLocalizedDescriptionKey: "Esiste già un building con il nome \(newName)"])
         }
-
+        
         // Rinomina la cartella del building
         do {
             try fileManager.moveItem(at: oldBuildingURL, to: newBuildingURL)
@@ -285,19 +298,41 @@ class BuildingModel: ObservableObject {
             throw NSError(domain: "com.example.ScanBuild", code: 4, userInfo: [NSLocalizedDescriptionKey: "Errore durante la rinomina della cartella del building: \(error.localizedDescription)"])
         }
         
-        // Aggiorna l'oggetto building
-        building.buildingURL = newBuildingURL
-        building.name = newName
-        
-        self.buildings = []
-        
-        do {
-            try self.loadBuildingsFromRoot()
-        } catch {
-            BuildingModel.LOGGER.log("Errore durante il caricamento dei buildings: \(error)")
+        // Aggiorna gli URL per floors e rooms, e verifica l'esistenza delle cartelle
+        for floor in building.floors {
+            floor.floorURL = newBuildingURL.appendingPathComponent(floor.name)
+            print("NEW FLOOR URL: \(floor.floorURL)")
+            
+            // Verifica l'esistenza della cartella del piano (floor)
+            if fileManager.fileExists(atPath: floor.floorURL.path) {
+                print("Floor directory exists at: \(floor.floorURL.path)")
+            } else {
+                print("Floor directory does not exist at: \(floor.floorURL.path)")
+            }
+            
+            // Itera su ogni stanza e aggiorna il suo URL
+            for room in floor.rooms {
+                room.roomURL = floor.floorURL.appendingPathComponent("Rooms").appendingPathComponent(room.name)
+                print("NEW ROOM URL: \(room.roomURL)")
+                
+                // Verifica l'esistenza della cartella della stanza (room)
+                if fileManager.fileExists(atPath: room.roomURL.path) {
+                    print("Room directory exists at: \(room.roomURL.path)")
+                } else {
+                    print("Room directory does not exist at: \(room.roomURL.path)")
+                }
+                
+                // Verifica l'esistenza del file specifico "MapUsdz" nella stanza
+                let mapUsdzURL = room.roomURL.appendingPathComponent("MapUsdz")
+                if fileManager.fileExists(atPath: mapUsdzURL.path) {
+                    print("MapUsdz file found at: \(mapUsdzURL.path)")
+                } else {
+                    print("MapUsdz file not found at: \(mapUsdzURL.path)")
+                }
+            }
         }
 
-        // Log the rename
+        // Log dell'operazione
         BuildingModel.LOGGER.log("Building rinominato da \(building.name) a \(newName)")
         
         return true

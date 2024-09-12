@@ -33,7 +33,7 @@ struct AddRoomView: View {
                     dateFormatter.timeStyle = .none
                     let currentDate = dateFormatter.string(from: Date())
                     
-                    let newRoom = Room(name: roomName, lastUpdate: Date(), referenceMarkers: [], transitionZones: [], sceneObjects: [], scene: nil, worldMap: nil, roomURL: URL(fileURLWithPath: ""))
+                    let newRoom = Room(_name: roomName, _lastUpdate: Date(), _planimetry: SCNViewContainer(), _referenceMarkers: [], _transitionZones: [], _sceneObjects: [], _roomURL: URL(fileURLWithPath: ""))
                     
                     floor.addRoom(room: newRoom)
                     

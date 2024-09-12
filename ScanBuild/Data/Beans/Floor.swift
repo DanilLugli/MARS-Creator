@@ -13,7 +13,7 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     @Published var _associationMatrix: [String: RotoTraslationMatrix]
     @Published private var _rooms: [Room]
     @Published private var _sceneObjects: [SCNNode]? = nil
-    @Published private var _scene: SCNScene? = nil 
+    @Published private var _scene: SCNScene? = nil
     @Published private var _sceneConfiguration: SCNScene?
     @Published var isPlanimetryLoaded: Bool = false
     private var _floorURL: URL
@@ -46,7 +46,7 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         set {
             _name = newValue
             objectWillChange.send() // Forza la notifica di cambiamento
-                
+            
         }
     }
     
@@ -154,7 +154,7 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
             print("Error creating folder for room \(room.name): \(error)")
         }
     }
-
+    
     func deleteRoom(room: Room) {
         // Rimuovi la room dall'array _rooms
         _rooms.removeAll { $0.id == room.id }
@@ -180,12 +180,12 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         let oldRoomURL = room.roomURL
         let oldRoomName = room.name
         let newRoomURL = oldRoomURL.deletingLastPathComponent().appendingPathComponent(newName)
-
+        
         // Verifica se esiste già una stanza con il nuovo nome
         guard !fileManager.fileExists(atPath: newRoomURL.path) else {
             throw NSError(domain: "com.example.ScanBuild", code: 3, userInfo: [NSLocalizedDescriptionKey: "Esiste già una stanza con il nome \(newName)"])
         }
-
+        
         // Rinomina la cartella della stanza
         do {
             try fileManager.moveItem(at: oldRoomURL, to: newRoomURL)
@@ -210,49 +210,39 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         } catch {
             print("Errore durante l'aggiornamento del contenuto del file JSON nel floor: \(error.localizedDescription)")
         }
-
+        
         DispatchQueue.main.async {
             self.objectWillChange.send() // Notifica SwiftUI del cambiamento
         }
-
-        
-        // Ricarica i buildings dal file system per aggiornare i percorsi automaticamente
-        BuildingModel.getInstance().buildings = []
-
-        do {
-            try BuildingModel.getInstance().loadBuildingsFromRoot()
-        } catch {
-            print("Errore durante il caricamento dei buildings: \(error)")
-        }
-
     }
     
     func updateRoomInFloorJSON(floor: Floor, oldRoomName: String, newRoomName: String) throws {
-        _ = FileManager.default
-
-        // Trova il file JSON del floor che contiene i nomi delle room
+        let fileManager = FileManager.default
+        
         let jsonFileURL = floor.floorURL.appendingPathComponent("\(floor.name).json")
-
-        // Aggiorna il contenuto del file .json cambiando il nome della stanza
+        
         do {
             let jsonData = try Data(contentsOf: jsonFileURL)
             var jsonDict = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any]
-
-            // Verifica se il vecchio nome esiste nel file JSON
+            
             guard let roomData = jsonDict?[oldRoomName] as? [String: Any] else {
                 throw NSError(domain: "com.example.ScanBuild", code: 8, userInfo: [NSLocalizedDescriptionKey: "Il nome della stanza \(oldRoomName) non esiste nel file JSON del floor."])
             }
-
-            // Aggiorna il nome della stanza nel file JSON
+            
             jsonDict?.removeValue(forKey: oldRoomName)
             jsonDict?[newRoomName] = roomData
-
-            // Scrivi il nuovo contenuto nel file JSON
+            
+            
             let updatedJsonData = try JSONSerialization.data(withJSONObject: jsonDict as Any, options: .prettyPrinted)
             try updatedJsonData.write(to: jsonFileURL)
-
-            print("Contenuto del file JSON nel floor aggiornato con il nuovo nome della stanza \(newRoomName).")
-
+            
+            
+            if let oldMatrix = floor._associationMatrix[oldRoomName] {
+                floor._associationMatrix.removeValue(forKey: oldRoomName)
+                floor._associationMatrix[newRoomName] = oldMatrix
+            } else {
+                print("Nessuna matrice trovata per la stanza \(oldRoomName) nella _associationMatrix.")
+            }
         } catch {
             throw NSError(domain: "com.example.ScanBuild", code: 9, userInfo: [NSLocalizedDescriptionKey: "Errore durante l'aggiornamento del contenuto del file JSON nel floor: \(error.localizedDescription)"])
         }
@@ -260,13 +250,11 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     
     func renameRoomFilesInDirectories(room: Room, newRoomName: String) throws {
         let fileManager = FileManager.default
-        let directories = ["PlistMetadata", "MapUsdz", "JsonParametric", "Maps"]
-        print("ENTRATO\n\n\n")
-
+        let directories = ["PlistMetadata", "MapUsdz", "JsonParametric", "Maps", "JsonMaps"]
+        
         let roomDirectoryURL = room.roomURL
         print("RoomDirectoryURL: \(roomDirectoryURL)\n")
         
-        // Itera su ciascuna delle cartelle (PlistMetadata, MapUsdz, JsonParametric)
         for directory in directories {
             let directoryURL = roomDirectoryURL.appendingPathComponent(directory)
             print("directoryURL: \(directoryURL)\n")
@@ -275,17 +263,17 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
                 print("La directory \(directory) non esiste per la stanza \(room.name).")
                 continue
             }
-
+            
             // Ottieni tutti i file all'interno della directory
             let fileURLs = try fileManager.contentsOfDirectory(at: directoryURL, includingPropertiesForKeys: nil)
-
+            
             // Itera su ciascun file per rinominarlo
             for oldFileURL in fileURLs {
                 let oldFileName = oldFileURL.lastPathComponent
                 let fileExtension = oldFileURL.pathExtension
                 let newFileName = "\(newRoomName).\(fileExtension)"
                 let newFileURL = oldFileURL.deletingLastPathComponent().appendingPathComponent(newFileName)
-
+                
                 do {
                     try fileManager.moveItem(at: oldFileURL, to: newFileURL)
                     print("File rinominato da \(oldFileName) a \(newFileName) nella directory \(directory).")
@@ -331,32 +319,32 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         do {
             // Crea un dizionario per contenere i dati da salvare in JSON
             var dictionary: [String: [String: [[Double]]]] = [:]
-
+            
             // Itera su tutte le chiavi e valori nell'association matrix
             for (key, value) in _associationMatrix {
                 // Converti la matrice translation in un array di array di Double
                 let translationArray: [[Double]] = (0..<4).map { index in
                     [Double(value.translation[index, 0]), Double(value.translation[index, 1]), Double(value.translation[index, 2]), Double(value.translation[index, 3])]
                 }
-
+                
                 // Converti la matrice r_Y in un array di array di Double
                 let r_YArray: [[Double]] = (0..<4).map { index in
                     [Double(value.r_Y[index, 0]), Double(value.r_Y[index, 1]), Double(value.r_Y[index, 2]), Double(value.r_Y[index, 3])]
                 }
-
+                
                 // Crea un dizionario per contenere le matrici per questa stanza
                 dictionary[key] = [
                     "translation": translationArray,
                     "R_Y": r_YArray
                 ]
             }
-
+            
             // Converti il dizionario in JSON
             let jsonData = try JSONSerialization.data(withJSONObject: dictionary, options: .prettyPrinted)
-
+            
             // Scrivi i dati JSON nel file
             try jsonData.write(to: fileURL)
-
+            
             print("Association matrix saved successfully to JSON file")
             
         } catch {
@@ -372,35 +360,35 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
                 print("Error: Cannot convert JSON data to dictionary")
                 return
             }
-
+            
             // Assicurati che la chiave esista nel dizionario JSON
             guard let value = _associationMatrix[roomName] else {
                 print("Room name \(roomName) not found in the association matrix")
                 return
             }
-
+            
             // Converti la matrice translation in un array di array di Double
             let translationArray = (0..<4).map { index in
                 [Double(value.translation[0, index]), Double(value.translation[1, index]), Double(value.translation[2, index]), Double(value.translation[3, index])]
             }
-
+            
             // Converti la matrice r_Y in un array di array di Double
             let r_YArray = (0..<4).map { index in
                 [Double(value.r_Y[0, index]), Double(value.r_Y[1, index]), Double(value.r_Y[2, index]), Double(value.r_Y[3, index])]
             }
-
+            
             // Aggiorna le matrici nel dizionario JSON per la chiave specificata
             jsonDict[roomName]?["translation"] = translationArray
             jsonDict[roomName]?["R_Y"] = r_YArray
-
+            
             // Converti il dizionario aggiornato in JSON
             jsonData = try JSONSerialization.data(withJSONObject: jsonDict, options: .prettyPrinted)
-
+            
             // Scrivi i dati JSON nel file
             try jsonData.write(to: fileURL)
-
+            
             print("Updated association matrix for room \(roomName) in JSON file")
-
+            
         } catch {
             print("Error updating association matrix in JSON: \(error)")
         }
