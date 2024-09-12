@@ -183,10 +183,7 @@ struct AddStairsConnectionView: View {
             )
         }
     }
-    
-    // Funzioni per gestire i pulsanti dell'ActionSheet
-    
-    // Funzioni per gestire i pulsanti dell'ActionSheet
+
     func actionSheetFloorButtons() -> [ActionSheet.Button] {
         // Filtra i piani per escludere il piano già selezionato nel primo passaggio (fromFloor)
         var buttons: [ActionSheet.Button] = building.floors
