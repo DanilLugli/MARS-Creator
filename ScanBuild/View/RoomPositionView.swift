@@ -42,89 +42,6 @@ struct RoomPositionView: View {
     @State var response: (HTTPURLResponse?, [String: Any]) = (nil, ["": ""])
     @State var apiResponseCode = ""
     @State var matchingNodesForAPI: [(SCNNode, SCNNode)] = []
-    
-//    init(floor: Floor, room: Room) {
-//        self.floor = floor
-//        self.room = room
-//        
-////        floorView = SCNViewContainer()
-////        roomView = SCNViewContainer()
-////        
-//
-//        
-////        floorNodes = Array(Set(floorView
-////            .scnView
-////            .scene?
-////            .rootNode
-////            .childNodes(passingTest: {
-////                n, _ in n.name != nil &&
-////                n.name! != "Room" &&
-////                n.name! != "Geom" &&
-////                String(n.name!.suffix(4)) != "_grp"
-////            }).compactMap { node in node.name } ?? []))
-//        
-////        floorNodes = Array(Set(floorView
-////            .scnView
-////            .scene?
-////            .rootNode
-////            .childNodes(passingTest: { n, _ in
-////                if let nodeName = n.name {
-////                    return nodeName != "Room" &&
-////                           nodeName != "Geom" &&
-////                           !nodeName.hasSuffix("_grp") &&
-////                           !nodeName.hasPrefix("unidentified")
-////                }
-////                return false
-////            }).compactMap { node in node.name } ?? []))
-////            .sorted()
-////        
-////        if let nodes = roomView.scnView.scene?.rootNode.childNodes(passingTest: { n, _ in
-////            n.name != nil &&
-////            n.name! != "Room" &&
-////            n.name! != "Geom" &&
-////            String(n.name!.suffix(4)) != "_grp"
-////        }) {
-////            let names = nodes.compactMap { $0.name }
-////            print("Collected node names: \(names)")
-////
-////            var uniqueNamesDict = [String: Bool]()
-////            var uniqueNamesArray = [String]()
-////
-////            for name in names {
-////                if uniqueNamesDict[name] == nil {
-////                    uniqueNamesDict[name] = true
-////                    uniqueNamesArray.append(name)
-////                }
-////            }
-////            
-////            roomNodes = uniqueNamesArray.sorted()
-////
-////            print("Unique node names: \(roomNodes)")
-////        } else {
-////            roomNodes = []
-////        }
-//    }
-    
-//    func printOriginalDimensionsOfSelectedNode(selectedNode: SCNNode) {
-//        if let geometry = selectedNode.geometry {
-//            switch geometry {
-//            case let box as SCNBox:
-//                print("Nodo: \(selectedNode.name ?? "sconosciuto"), Tipo: Box, Dimensioni originali: larghezza: \(box.width), altezza: \(box.height), lunghezza: \(box.length)")
-//            case let sphere as SCNSphere:
-//                print("Nodo: \(selectedNode.name ?? "sconosciuto"), Tipo: Sphere, Diametro originale: \(sphere.radius * 2)")
-//            case let cylinder as SCNCylinder:
-//                print("Nodo: \(selectedNode.name ?? "sconosciuto"), Tipo: Cylinder, Altezza originale: \(cylinder.height), Diametro originale: \(cylinder.radius * 2)")
-//            case let cone as SCNCone:
-//                print("Nodo: \(selectedNode.name ?? "sconosciuto"), Tipo: Cone, Altezza originale: \(cone.height), Diametro alla base originale: \(cone.topRadius * 2)")
-//            case let plane as SCNPlane:
-//                print("Nodo: \(selectedNode.name ?? "sconosciuto"), Tipo: Plane, Dimensioni originali: larghezza: \(plane.width), altezza: \(plane.height)")
-//            default:
-//                print("Geometria non supportata per il calcolo delle dimensioni.")
-//            }
-//        } else {
-//            print("Il nodo selezionato non ha una geometria associata.")
-//        }
-//    }
 
     var body: some View {
         NavigationStack {
@@ -161,7 +78,7 @@ struct RoomPositionView: View {
                         }).compactMap { node in node.name } ?? []))
                         .sorted()
                     
-                    floorView.loadFloorPlanimetry(borders: false, usdzURL: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz"))
+                    floorView.loadFloorPlanimetry(borders: false, floor: floor)
                 
                 }
                    

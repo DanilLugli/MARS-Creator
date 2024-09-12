@@ -25,7 +25,7 @@ class VisualizeRoomViewContainer: UIView {
                 n,_ in n.name != nil && n.name! != "Room" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp"
             })
            
-        let _wall = scene.rootNode
+        _ = scene.rootNode
             .childNodes(passingTest: {
                 n,_ in n.name != nil && n.name! != "Room" && n.name! == "Wall0"
             })[0]

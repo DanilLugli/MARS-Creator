@@ -145,7 +145,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject {
         }
         roomNode.position.x += Float(translationStep)
         floor?.associationMatrix[roomName!]?.translation[3][0] += Float(translationStep)
-        print(floor?.associationMatrix[roomName!]?.translation[3][0])
+        print(floor?.associationMatrix[roomName!]?.translation[3][0] ?? 0)
     }
     
     @MainActor
@@ -180,7 +180,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject {
         roomNode.eulerAngles.y += rotationStep
         let rotationMatrix = simd_float4x4(SCNMatrix4MakeRotation(rotationStep, 0, 1, 0))
         floor?.associationMatrix[roomName ?? ""]?.r_Y = matrix_multiply(floor?.associationMatrix[roomName ?? ""]?.r_Y ?? matrix_identity_float4x4, rotationMatrix)
-        print("PINO: \(floor?.associationMatrix[roomName ?? ""]?.r_Y )")
+        print("rotateCounterClockwise: \(String(describing: floor?.associationMatrix[roomName ?? ""]?.r_Y) )")
     }
     
     // Metodo per gestire il tap e posizionare un SCNBox

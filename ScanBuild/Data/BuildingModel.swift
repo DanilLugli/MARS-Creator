@@ -4,9 +4,6 @@ import SceneKit
 import SwiftUI
 
 class BuildingModel: ObservableObject {
-    //TODO: Fare Dump
-    //TODO: Creare percorsi relativi
-    //TODO: Creare fromARFile
     
     private static var _instance: BuildingModel?
     private static let LOGGER = Logger(tag: String(describing: BuildingModel.self))
@@ -19,15 +16,22 @@ class BuildingModel: ObservableObject {
     static let FLOOR_ROOMS_FOLDER = "Rooms"
     static let ASSASSOCIATION_MATRIX_FILE = ""
     
-    
     @Published var buildings: [Building]
     
+    // Costruttore
     private init() {
         self.buildings = []
+        Task {
+            await loadBuildings()
+        }
+    }
+    
+    @MainActor
+    func loadBuildings() async {
         do {
-            try self.loadBuildingsFromRoot()
+            try loadBuildingsFromRoot()
         } catch {
-            BuildingModel.LOGGER.log("Errore durante il caricamento dei buildings: \(error)")
+            BuildingModel.LOGGER.log("Errore durante il caricamento degli edifici: \(error)")
         }
     }
     
@@ -37,32 +41,26 @@ class BuildingModel: ObservableObject {
         }
         return _instance!
     }
-    
+ 
     func initTryData() -> Building {
         self.buildings = []
-        
-        //Aggiungi 10 building
+
         for i in 1...3 {
             let building = Building(name: "Building \(i)", lastUpdate: Date(), floors: [], buildingURL: URL(fileURLWithPath: ""))
-            
-            // Aggiungi 5 piani al primo edificio
+
             for j in 1...5 {
-                let floor = Floor(name: "Floor \(j)", lastUpdate: Date(), planimetry: SCNViewContainer(), associationMatrix: [String : RotoTraslationMatrix](), rooms: [], sceneObjects: nil, scene: nil, sceneConfiguration: nil, floorURL: URL(fileURLWithPath: ""))
-                
+                let floor = Floor(_name: "Floor \(j)", _lastUpdate: Date(), _planimetry: SCNViewContainer(), _planimetryRooms: SCNViewMapContainer(), _associationMatrix: [String : RotoTraslationMatrix](), _rooms: [], _sceneObjects: nil, _scene: nil, _sceneConfiguration: nil, _floorURL: URL(fileURLWithPath: ""))
                 
                 for k in 1...5 {
-                    //Aggiungi 5 Room al primo piano
+
                     let room = Room(name: "Room \(k)", lastUpdate: Date(), referenceMarkers: [], transitionZones: [], sceneObjects: [], scene: nil, worldMap: nil, roomURL: URL(fileURLWithPath: ""))
                     
-                    //Aggiungi 2 TransitionZone alla Room
                     for z in 1...2 {
-                        let xMin = Float.random(in: 0...10)
-                        let yMin = Float.random(in: 0...10)
+                        _ = Float.random(in: 0...10)
+                        _ = Float.random(in: 0...10)
                         let transitionZone = TransitionZone(name: "Scala \(z)", connection: nil)
                         do {
-                            try room.addTransitionZone(transitionZone: transitionZone)
-                        } catch {
-                            print("Errore durante l'aggiunta della TransitionZone \(transitionZone.name): \(error)")
+                             room.addTransitionZone(transitionZone: transitionZone)
                         }
                     }
                     floor.addRoom(room: room)
@@ -75,10 +73,10 @@ class BuildingModel: ObservableObject {
         return self.getBuildings()[0]
     }
     
+    @MainActor
     func loadBuildingsFromRoot() throws {
         let fileManager = FileManager.default
         
-        // Verifica se la cartella root esiste
         if !fileManager.fileExists(atPath: BuildingModel.SCANBUILD_ROOT.path) {
             
             do {
@@ -106,7 +104,7 @@ class BuildingModel: ObservableObject {
         }
     }
     
-    private func loadFloors(from buildingURL: URL) throws -> [Floor] {
+    @MainActor func loadFloors(from buildingURL: URL) throws -> [Floor] {
         let fileManager = FileManager.default
         let floorURLs = try fileManager.contentsOfDirectory(at: buildingURL, includingPropertiesForKeys: [.isDirectoryKey], options: .skipsHiddenFiles)
         
@@ -117,12 +115,14 @@ class BuildingModel: ObservableObject {
                 let attributes = try fileManager.attributesOfItem(atPath: floorURL.path)
                 if let lastModifiedDate = attributes[.modificationDate] as? Date {
                     
-                    let floorDataURL = floorURL//.appendingPathComponent(BuildingModel.FLOOR_DATA_FOLDER)
+                    let floorDataURL = floorURL
                     
                     var sceneObjects: [SCNNode] = []
                     var scene: SCNScene? = nil
                     var sceneConfiguration: SCNScene? = nil
                     var associationMatrix: [String : RotoTraslationMatrix]?
+                    let planimetry: SCNViewContainer = SCNViewContainer()
+                    let planimetryRooms: SCNViewMapContainer = SCNViewMapContainer()
                     
                     if fileManager.fileExists(atPath: floorDataURL.path) {
                         let floorDataContents = try fileManager.contentsOfDirectory(at: floorDataURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
@@ -138,15 +138,19 @@ class BuildingModel: ObservableObject {
                                     sceneConfiguration = try SCNScene(url: fileURL, options: nil)
                                 }
                             }
+                            
                         }
                     }
                     
-                    // Carica l'associationMatrix dal file JSON se esiste
+//                    if FileManager.default.fileExists(atPath: floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floorURL.lastPathComponent).usdz").path){
+//                        planimetry.loadFloorPlanimetry(borders: true, usdzURL: floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floorURL.lastPathComponent).usdz"))
+//                    }
+//                    
                     let associationMatrixURL = floorURL.appendingPathComponent("\(floorURL.lastPathComponent).json")
                     if fileManager.fileExists(atPath: associationMatrixURL.path) {
                         if let loadedMatrix = loadRoomPositionFromJson(from: associationMatrixURL) {
                             associationMatrix = loadedMatrix
-                            print("Matrix loaded for floor \(floorURL.lastPathComponent): \(associationMatrix)\n")
+                            print("Matrix loaded for floor \(floorURL.lastPathComponent): \(String(describing: associationMatrix))\n")
                         } else {
                             print("Failed to load RotoTraslationMatrix from JSON file for floor \(floorURL.lastPathComponent)")
                         }
@@ -154,16 +158,35 @@ class BuildingModel: ObservableObject {
                     
                     let rooms = try loadRooms(from: floorURL)
                     
-                    let floor = Floor(name: floorURL.lastPathComponent,
-                                      lastUpdate: lastModifiedDate,
-                                      planimetry: SCNViewContainer(),
-                                      associationMatrix: associationMatrix ?? [:],
-                                      rooms: rooms,
-                                      sceneObjects: sceneObjects,
-                                      scene: scene,
-                                      sceneConfiguration: sceneConfiguration,
-                                      floorURL: floorURL)
+                    var roomURLs: [URL] = []
+                    rooms.forEach { room in
+                        roomURLs.append(room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"))
+                    }
                     
+                    let floor = Floor(_name: floorURL.lastPathComponent,
+                                      _lastUpdate: lastModifiedDate,
+                                      _planimetry: planimetry,
+                                      _planimetryRooms: planimetryRooms,
+                                      _associationMatrix: associationMatrix ?? [:],
+                                      _rooms: rooms,
+                                      _sceneObjects: sceneObjects,
+                                      _scene: scene,
+                                      _sceneConfiguration: sceneConfiguration,
+                                      _floorURL: floorURL)
+                    
+                    if FileManager.default.fileExists(atPath: floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floorURL.lastPathComponent).usdz").path){
+                        
+                        planimetry.loadFloorPlanimetry(borders: true, floor: floor)
+                        
+                    }else{
+                        print("File .usdz for \(floor.name) planimetry is not available.")
+                    }
+                    
+                    planimetryRooms.handler.loadRoomsMaps(
+                        floor: floor,
+                        roomURLs: roomURLs,
+                        borders: true
+                    )
                     
                     floors.append(floor)
                 }
@@ -175,10 +198,8 @@ class BuildingModel: ObservableObject {
     private func loadRooms(from floorURL: URL) throws -> [Room] {
         let fileManager = FileManager.default
         
-        // Modifica il percorso per puntare alla directory "<floor_name>_Rooms"
         let roomsDirectoryURL = floorURL.appendingPathComponent(BuildingModel.FLOOR_ROOMS_FOLDER)
         
-        // Ottieni l'elenco delle directory delle stanze
         let roomURLs = try fileManager.contentsOfDirectory(at: roomsDirectoryURL, includingPropertiesForKeys: [.isDirectoryKey], options: .skipsHiddenFiles)
         
         var rooms: [Room] = []
@@ -194,7 +215,7 @@ class BuildingModel: ObservableObject {
                     var scene: SCNScene? = nil
                     var worldMap: ARWorldMap? = nil
                     
-                    // Load ReferenceMarker data
+
                     let referenceMarkerURL = roomURL.appendingPathComponent("ReferenceMarker")
                     if fileManager.fileExists(atPath: referenceMarkerURL.path) {
                         let referenceMarkerContents = try fileManager.contentsOfDirectory(at: referenceMarkerURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
@@ -247,7 +268,7 @@ class BuildingModel: ObservableObject {
         }
     }
     
-    func renameBuilding(building: Building, newName: String) throws -> Bool {
+    @MainActor func renameBuilding(building: Building, newName: String) throws -> Bool {
         let fileManager = FileManager.default
         let oldBuildingURL = building.buildingURL
         let newBuildingURL = BuildingModel.SCANBUILD_ROOT.appendingPathComponent(newName)

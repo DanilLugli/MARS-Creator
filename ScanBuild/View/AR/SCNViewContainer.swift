@@ -70,8 +70,7 @@ struct SCNViewContainer: UIViewRepresentable {
     
     func drawContent(borders: Bool) {
         print(borders)
-        
-        // Crea un set per tracciare gli oggetti già disegnati
+
         var drawnNodes = Set<String>()
         
         scnView.scene?
@@ -95,7 +94,7 @@ struct SCNViewContainer: UIViewRepresentable {
                     }
                     if nodeName.prefix(6) == "Transi" {
                         print("Disegno: \(nodeName)")
-                        print("Tipo: \($0.geometry)")
+                        print("Tipo: \($0.geometry ?? SCNGeometry())")
                         material.diffuse.contents = UIColor.red
                         material.fillMode = .lines
                     }
@@ -120,7 +119,6 @@ struct SCNViewContainer: UIViewRepresentable {
     func loadRoomMaps(room: Room, borders: Bool, usdzURL: URL) {
         do {
             scnView.scene = try SCNScene(url: usdzURL)
-            print("PIPPo")
             addDoorNodesBasedOnExistingDoors(room: room)
             drawContent(borders: borders)
             setMassCenter()
@@ -179,12 +177,15 @@ struct SCNViewContainer: UIViewRepresentable {
         }
     }
     
-    func loadFloorPlanimetry(borders: Bool, usdzURL: URL) {
+    func loadFloorPlanimetry(borders: Bool, floor: Floor) {
         do {
+            let usdzURL = floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz")
             scnView.scene = try SCNScene(url: usdzURL)
             drawContent(borders: borders)
             setMassCenter()
             setCamera()
+            
+            floor.isPlanimetryLoaded = true
         } catch {
             print("Error loading scene from URL: \(error)")
         }
@@ -481,7 +482,7 @@ extension SCNVector3 {
         var b = Complex<Float>.i
         b.real = self.x
         b.imaginary = self.z
-        var position = a*b
+        let position = a*b
         return SCNVector3(
             position.real,
             self.y,

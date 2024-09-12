@@ -18,7 +18,7 @@ class SCNViewMapHandler: ObservableObject {
         setCamera()
     }
     
-    @MainActor func loadRoomMaps(floor: Floor, roomURLs: [URL], borders: Bool) {
+    @MainActor func loadRoomsMaps(floor: Floor, roomURLs: [URL], borders: Bool) {
         do {
             let floorFileURL = floor.floorURL.appendingPathComponent("MapUsdz")
                 .appendingPathComponent("\(floor.name).usdz")
@@ -328,15 +328,15 @@ struct SCNViewMapContainer: UIViewRepresentable {
     func makeUIView(context: Context) -> SCNView {
         handler.scnView
         
-        // Aggiunta del riconoscitore di pinch per lo zoom
+        // Zoom
         let pinchGesture = UIPinchGestureRecognizer(target: context.coordinator, action: #selector(context.coordinator.handlePinch(_:)))
         handler.scnView.addGestureRecognizer(pinchGesture)
         
-        // Aggiunta del riconoscitore di pan per lo spostamento
+        // Move
         let panGesture = UIPanGestureRecognizer(target: context.coordinator, action: #selector(context.coordinator.handlePan(_:)))
         handler.scnView.addGestureRecognizer(panGesture)
         
-        // Configura lo sfondo della scena
+        // Background Color
         handler.scnView.backgroundColor = UIColor.white
         
         return handler.scnView
@@ -351,7 +351,6 @@ struct SCNViewMapContainer: UIViewRepresentable {
             self.parent = parent
         }
         
-        // Gestione dello zoom tramite pinch
         @objc func handlePinch(_ gesture: UIPinchGestureRecognizer) {
             guard let camera = parent.handler.cameraNode.camera else { return }
             

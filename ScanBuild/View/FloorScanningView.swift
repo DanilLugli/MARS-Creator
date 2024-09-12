@@ -114,6 +114,6 @@ struct FloorScanningView: View {
 
 struct FloorScanningView_Previews: PreviewProvider {
     static var previews: some View {
-        FloorScanningView(namedUrl: Floor(name: "Sample Floor", lastUpdate: Date(), planimetry: SCNViewContainer(), associationMatrix: [:], rooms: [], sceneObjects: [], scene: nil, sceneConfiguration: nil, floorURL: URL(fileURLWithPath: "")))
+        FloorScanningView(namedUrl: Floor(_name: "Sample Floor", _lastUpdate: Date(), _planimetry: SCNViewContainer(), _associationMatrix: [:], _rooms: [], _sceneObjects: [], _scene: nil, _sceneConfiguration: nil, _floorURL: URL(fileURLWithPath: "")))
     }
 }

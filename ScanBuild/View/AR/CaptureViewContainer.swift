@@ -159,9 +159,7 @@ struct CaptureViewContainer: UIViewRepresentable {
                             print("Error getting world map: \(error.localizedDescription)")
                         }
                     }
-                } catch {
-                    print("Error during room capturing or saving: \(error)")
-                }
+                } 
             }
         }
         

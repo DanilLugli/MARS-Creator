@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUICore
 
 class Building: Encodable, ObservableObject {
     private var _id = UUID()
@@ -19,6 +20,19 @@ class Building: Encodable, ObservableObject {
         self._lastUpdate = lastUpdate
         self._floors = floors
         self._buildingURL = buildingURL
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case name
+        case lastUpdate
+        case floors
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(_name, forKey: .name)
+        try container.encode(_lastUpdate, forKey: .lastUpdate)
+        try container.encode(_floors, forKey: .floors)
     }
     
     var id: UUID {
@@ -48,10 +62,6 @@ class Building: Encodable, ObservableObject {
         }
     }
     
-    func getFloor(_ floor: Floor) -> Floor? {
-        return floors.first { $0.id == floor.id }
-    }
-    
     var buildingURL: URL {
         get {
             return _buildingURL
@@ -61,18 +71,8 @@ class Building: Encodable, ObservableObject {
         }
     }
     
-    // Implementazione personalizzata di Encodable
-    private enum CodingKeys: String, CodingKey {
-        case name
-        case lastUpdate
-        case floors
-    }
-    
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(_name, forKey: .name)
-        try container.encode(_lastUpdate, forKey: .lastUpdate)
-        try container.encode(_floors, forKey: .floors)
+    func getFloor(_ floor: Floor) -> Floor? {
+        return floors.first { $0.id == floor.id }
     }
     
     func addFloor(floor: Floor) {
@@ -147,40 +147,42 @@ class Building: Encodable, ObservableObject {
         }
     }
     
-    func renameFloor(floor: Floor, newName: String) throws -> Bool {
+    @MainActor func renameFloor(floor: Floor, newName: String) throws -> Bool {
+        // Aggiorna l'oggetto floor
+        floor.name = newName
+        
         let fileManager = FileManager.default
         let oldFloorURL = floor.floorURL
         let newFloorURL = oldFloorURL.deletingLastPathComponent().appendingPathComponent(newName)
 
-        // Verifica se esiste già un floor con il nuovo nome
         guard !fileManager.fileExists(atPath: newFloorURL.path) else {
             throw NSError(domain: "com.example.ScanBuild", code: 3, userInfo: [NSLocalizedDescriptionKey: "Esiste già un floor con il nome \(newName)"])
         }
 
-        // Rinomina la cartella del floor
         do {
             try fileManager.moveItem(at: oldFloorURL, to: newFloorURL)
         } catch {
             throw NSError(domain: "com.example.ScanBuild", code: 4, userInfo: [NSLocalizedDescriptionKey: "Errore durante la rinomina della cartella del floor: \(error.localizedDescription)"])
         }
-        
-        // Aggiorna l'oggetto floor
-        floor.floorURL = newFloorURL
-        floor.name = newName
        
-        // Forza l'aggiornamento della vista
+        floor.floorURL = newFloorURL
+        
+        for room in floor.rooms {
+            print("OLD: \(room.roomURL) ")
+            room.roomURL = floor.floorURL.appendingPathComponent(BuildingModel.FLOOR_ROOMS_FOLDER).appendingPathComponent("\(room.name)")
+            print("NEW: \(room.roomURL) ")
+        }
+        
         DispatchQueue.main.async {
-            self.objectWillChange.send() // Notifica SwiftUI del cambiamento
+            self.objectWillChange.send()
         }
 
-        
         do {
             try renameFilesInFloorDirectoriesAndJSON(floor: floor, newName: newName)
         } catch {
             print("Errore durante la rinomina dei file: \(error.localizedDescription)")
         }
         
-        // Ricarica i buildings dal file system per aggiornare i percorsi automaticamente
         BuildingModel.getInstance().buildings = []
 
         do {

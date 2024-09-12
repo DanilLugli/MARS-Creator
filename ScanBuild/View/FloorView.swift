@@ -31,9 +31,6 @@ struct FloorView: View {
     @State private var alertMessage = ""
     @State private var errorMessage: String = ""
     
-    var mapView = SCNViewContainer()
-    var mapPositionView = SCNViewMapContainer()
-    
     var body: some View {
         
         NavigationStack {
@@ -62,13 +59,13 @@ struct FloorView: View {
                             VStack {
                                 ZStack {
                                     if showFloorMap{
-                                        mapPositionView
+                                        floor.planimetryRooms
                                             .border(Color.white)
                                             .cornerRadius(10)
                                             .padding()
                                             .shadow(color: Color.gray, radius: 3)
                                     } else {
-                                        mapView
+                                        floor.planimetry
                                             .border(Color.white)
                                             .cornerRadius(10)
                                             .padding()
@@ -79,20 +76,20 @@ struct FloorView: View {
                             .onAppear {
                                 var roomURLs: [URL] = []
                                 
-                                floor.rooms.forEach { room in
-                                    roomURLs.append(room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"))
-                                }
+//                                floor.rooms.forEach { room in
+//                                    roomURLs.append(room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"))
+//                                }
+//                                
+//                                mapPositionView.handler.loadRoomMaps(
+//                                    floor: floor,
+//                                    roomURLs: roomURLs,
+//                                    borders: true
+//                                )
                                 
-                                mapPositionView.handler.loadRoomMaps(
-                                    floor: floor,
-                                    roomURLs: roomURLs,
-                                    borders: true
-                                )
-                                
-                                mapView.loadFloorPlanimetry(
-                                    borders: true,
-                                    usdzURL: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz")
-                                )
+//                                mapView.loadFloorPlanimetry(
+//                                    borders: true,
+//                                    usdzURL: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz")
+//                                )
                                 
                             }
                         }
@@ -197,7 +194,6 @@ struct FloorView: View {
                                     Text("Delete Floor")
                                 }
                             }
-                            
                         } label: {
                             Image(systemName: "ellipsis.circle.fill")
                                 .font(.system(size: 22))

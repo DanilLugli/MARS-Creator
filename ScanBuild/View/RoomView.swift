@@ -103,7 +103,7 @@ struct RoomView: View {
                                         print("A")
                                         roomURLs.append(room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"))
                                         print("B")
-                                        mapRoomPositionView.handler.loadRoomMaps(
+                                        mapRoomPositionView.handler.loadRoomsMaps(
                                             floor: floor,
                                             roomURLs: roomURLs,
                                             borders: true
@@ -293,8 +293,10 @@ struct RoomView: View {
                             
                             Button(action: {
                                 isColorPickerPopoverPresented = true
+//                                ColorPicker("Choose a color", selection: $selectedColor)
+//                                    .padding()
                             }) {
-                                Label("Select Room Color", systemImage: "paintpalette")
+                                Label("Change Room Color", systemImage: "paintpalette")
                             }
                             
                             Divider()
@@ -442,20 +444,32 @@ struct RoomView: View {
                         }
                     }
                 }
-            }.popover(isPresented: $isColorPickerPopoverPresented) {
-                ColorPicker("Pick a color", selection: $selectedColor)
+            }.sheet(isPresented: $isColorPickerPopoverPresented) {
+                ZStack {
+                    // Rettangolo che riempie l'intera sheet
+                    Color.customBackground
+                        .edgesIgnoringSafeArea(.all)  // Assicura che lo sfondo copra tutta l'area
+                    
+                    VStack {
+                        Text("Change Room Color")
+                            .font(.title)
+                            .bold()
+                            .foregroundColor(.white)
+                        
+                        ColorPicker("Choose a color", selection: $selectedColor)
+                            .padding()
+                            .foregroundColor(.white)
+                            .bold()
+                            .onChange(of: selectedColor) { newColor in
+                                let uiColor = newColor.toUIColor()
+                                room.color = uiColor.withAlphaComponent(0.3)
+                            }
+                    }
                     .padding()
+                }
+                .presentationDetents([.height(200)])
+                .presentationDragIndicator(.visible)
             }
-//            .sheet(isPresented: $isColorPickerPresented) {
-//                VStack {
-//                    Text("Select Room Color")
-//                        .font(.title)
-//                        .padding()
-//                    
-//                    ColorPicker("Pick a color", selection: $selectedColor)
-//                        .padding()
-//                }
-//            }
             .sheet(isPresented: $isReferenceMarkerUploadPicker) {
                 FilePickerView { url in
                     selectedFileURL = url

@@ -328,9 +328,9 @@ class SCNViewModel: ObservableObject {
                     material.diffuse.contents = UIColor.black
                     if ($0.name!.prefix(5) == "Floor") {material.diffuse.contents = UIColor.white.withAlphaComponent(0.2)}
                     if ($0.name!.prefix(6) == "Transi") {
-                        print("Disegno \($0.name)")
-                        material.diffuse.contents = UIColor.red // Colore per il perimetro
-                        material.fillMode = .lines  // Questo renderà solo il contorno (wireframe) del nodo
+                        print("Disegno \($0.name ?? "Error: No name for TZ node.")")
+                        material.diffuse.contents = UIColor.red
+                        material.fillMode = .lines
                     }
                     if ($0.name!.prefix(4) == "Door" || $0.name!.prefix(4) == "Open") {material.diffuse.contents = UIColor.green}
                     material.lightingModel = .physicallyBased

@@ -8,24 +8,27 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     private var _id = UUID()
     @Published private var _name: String
     private var _lastUpdate: Date
-    private var _planimetry: SCNViewContainer?
+    @Published private var _planimetry: SCNViewContainer?
+    @Published private var _planimetryRooms: SCNViewMapContainer?
     @Published var _associationMatrix: [String: RotoTraslationMatrix]
     @Published private var _rooms: [Room]
-    @Published private var _sceneObjects: [SCNNode]?
-    @Published private var _scene: SCNScene?
+    @Published private var _sceneObjects: [SCNNode]? = nil
+    @Published private var _scene: SCNScene? = nil 
     @Published private var _sceneConfiguration: SCNScene?
+    @Published var isPlanimetryLoaded: Bool = false
     private var _floorURL: URL
     
-    init(name: String, lastUpdate: Date, planimetry: SCNViewContainer?, associationMatrix: [String: RotoTraslationMatrix], rooms: [Room], sceneObjects: [SCNNode]?, scene: SCNScene?, sceneConfiguration: SCNScene?, floorURL: URL) {
-        self._name = name
-        self._lastUpdate = lastUpdate
-        self._planimetry = planimetry
-        self._associationMatrix = associationMatrix
-        self._rooms = rooms
-        self._sceneObjects = sceneObjects
-        self._scene = scene
-        self._sceneConfiguration = sceneConfiguration
-        self._floorURL = floorURL
+    init(_id: UUID = UUID(), _name: String, _lastUpdate: Date, _planimetry: SCNViewContainer? = nil, _planimetryRooms: SCNViewMapContainer? = nil, _associationMatrix: [String : RotoTraslationMatrix], _rooms: [Room], _sceneObjects: [SCNNode]? = nil, _scene: SCNScene? = nil, _sceneConfiguration: SCNScene? = nil, _floorURL: URL) {
+        self._name = _name
+        self._lastUpdate = _lastUpdate
+        self._planimetry = _planimetry
+        self._planimetryRooms = _planimetryRooms
+        self._associationMatrix = _associationMatrix
+        self._rooms = _rooms
+        self._sceneObjects = _sceneObjects
+        self._scene = _scene
+        self._sceneConfiguration = _sceneConfiguration
+        self._floorURL = _floorURL
     }
     
     static func ==(lhs: Floor, rhs: Floor) -> Bool {
@@ -53,6 +56,10 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     
     var planimetry: SCNViewContainer {
         return _planimetry ?? SCNViewContainer()
+    }
+    
+    var planimetryRooms: SCNViewMapContainer {
+        return _planimetryRooms ?? SCNViewMapContainer()
     }
     
     var associationMatrix: [String: RotoTraslationMatrix] {
@@ -168,7 +175,7 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         }
     }
     
-    func renameRoom(floor: Floor, room: Room, newName: String) throws {
+    @MainActor func renameRoom(floor: Floor, room: Room, newName: String) throws {
         let fileManager = FileManager.default
         let oldRoomURL = room.roomURL
         let oldRoomName = room.name
@@ -221,7 +228,7 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     }
     
     func updateRoomInFloorJSON(floor: Floor, oldRoomName: String, newRoomName: String) throws {
-        let fileManager = FileManager.default
+        _ = FileManager.default
 
         // Trova il file JSON del floor che contiene i nomi delle room
         let jsonFileURL = floor.floorURL.appendingPathComponent("\(floor.name).json")
@@ -357,7 +364,6 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         }
     }
     
-    
     func updateAssociationMatrixInJSON(for roomName: String, fileURL: URL) {
         do {
             // Leggi il contenuto del file JSON
@@ -423,7 +429,7 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     }
     
     private func simd_float4x4(rows: [simd_float4]) -> simd_float4x4 {
-        return simd_float4x4(rows: rows)
+        return simd.simd_float4x4(rows[0], rows[1], rows[2], rows[3])
     }
 }
 
@@ -434,7 +440,7 @@ extension Floor {
         print("ID: \(_id)")
         print("Name: \(_name)")
         print("Last Update: \(_lastUpdate)")
-        print("Planimetry: \(_planimetry)")
+        print("Planimetry: \(String(describing: _planimetry))")
         print("Association Matrix: \(_associationMatrix)")
         
         print("\nRooms: \(_rooms.count) room(s)")
