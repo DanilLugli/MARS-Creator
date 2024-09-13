@@ -1,7 +1,7 @@
 import SwiftUI
 import SceneKit
 
-class SCNViewUpdatePositionRoomHandler: ObservableObject {
+class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
     
     private let identityMatrix = matrix_identity_float4x4
 
@@ -40,7 +40,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject {
     }
     
     
-    @MainActor func loadRoomMapsPosition(floor: Floor, roomURL: URL, borders: Bool) {
+    func loadRoomMapsPosition(floor: Floor, roomURL: URL, borders: Bool) {
         do {
             self.floor = floor
             self.roomName = roomURL.deletingPathExtension().lastPathComponent
@@ -105,7 +105,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject {
         }
     }
     
-    @MainActor
+
     func normalizeNodeOrientationPreservingScale(_ node: SCNNode) {
         // Salva la scala originale
         let originalScale = node.scale
@@ -117,7 +117,30 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject {
         node.scale = originalScale
     }
     
-    @MainActor
+    func rotateClockwise() {
+        self.rotateRight()
+    }
+
+    func rotateCounterClockwise() {
+        self.rotateLeft()
+    }
+
+    func moveUp() {
+        self.moveRoomPositionUp()
+    }
+
+    func moveDown() {
+        self.moveRoomPositionDown()
+    }
+
+    func moveLeft() {
+        self.moveRoomPositionLeft()
+    }
+
+    func moveRight() {
+        self.moveRoomPositionRight()
+    }
+
     func moveRoomPositionUp() {
         guard let roomNode = roomNode else {
             print("No room node available for movement")
@@ -126,8 +149,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject {
         roomNode.position.z += Float(translationStep)
         floor?.associationMatrix[roomName!]?.translation[3][2] += Float(translationStep)
     }
-    
-    @MainActor
+
     func moveRoomPositionDown() {
         guard let roomNode = roomNode else {
             print("No room node available for movement")
@@ -136,8 +158,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject {
         roomNode.position.z -= Float(translationStep)
         floor?.associationMatrix[roomName!]?.translation[3][2] -= Float(translationStep)
     }
-    
-    @MainActor
+
     func moveRoomPositionRight() {
         guard let roomNode = roomNode else {
             print("No room node available for movement")
@@ -147,8 +168,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject {
         floor?.associationMatrix[roomName!]?.translation[3][0] += Float(translationStep)
         print(floor?.associationMatrix[roomName!]?.translation[3][0] ?? 0)
     }
-    
-    @MainActor
+
     func moveRoomPositionLeft() {
         guard let roomNode = roomNode else {
             print("No room node available for movement")
@@ -157,9 +177,8 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject {
         roomNode.position.x -= Float(translationStep)
         floor?.associationMatrix[roomName!]?.translation[3][0] -= Float(translationStep)
     }
-    
-    @MainActor
-    func rotateClockwise() {
+
+    func rotateRight() {
         guard let roomNode = roomNode else {
             print("No room node available for rotation")
             return
@@ -167,12 +186,10 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject {
         roomNode.eulerAngles.y -= rotationStep
 
         let rotationMatrix = simd_float4x4(SCNMatrix4MakeRotation(-rotationStep, 0, 1, 0))
-        // Applica la rotazione direttamente alla matrice r_Y all'interno dell'associationMatrix
         floor?.associationMatrix[roomName ?? ""]?.r_Y = matrix_multiply(floor?.associationMatrix[roomName ?? ""]?.r_Y ?? matrix_identity_float4x4, rotationMatrix)
     }
-    
-    @MainActor
-    func rotateCounterClockwise() {
+
+    func rotateLeft() {
         guard let roomNode = roomNode else {
             print("No room node available for rotation")
             return
@@ -295,7 +312,6 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject {
             }
     }
     
-    @MainActor
     func applyRotoTraslation(to node: SCNNode, with rotoTraslation: RotoTraslationMatrix) {
         // Normalizza l'orientamento del nodo mantenendo la scala
         //normalizeNodeOrientationPreservingScale(node)

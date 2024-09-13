@@ -15,8 +15,12 @@ struct AddTransitionZoneView: View {
     
     @State private var showUpdateAlert = false
     @State private var showOptions = false
-    
+    @State private var showMenu1 = false
+    @State private var showMenu2 = false
+    @State private var showMenu3 = false
+
     @StateObject var viewModel = SCNViewModel()  // Cambiato a ViewModel
+    
     
     var body: some View{
         VStack{
@@ -30,243 +34,43 @@ struct AddTransitionZoneView: View {
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding([.leading, .trailing, .bottom])
             
-            HStack{
-                VStack {
-                    Button(action: {
-                        // Mostra o nascondi il menu quando si preme su "Options"
-                        showOptions.toggle()
-                    }) {
-                        Text("Options 1")
-                            .font(.headline)
-                            .foregroundColor(.blue) // Colore del testo
-                            .frame(width: 150, height: 50) // Dimensione del bottone
-                            .background(Color.gray.opacity(0.2)) // Colore di sfondo
-                            .cornerRadius(25) // Bordi arrotondati
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 25)
-                                    .stroke(Color.gray, lineWidth: 1) // Bordo del bottone
-                            )
-                            .shadow(color: .gray, radius: 2, x: 0, y: 2) // Aggiungi ombra
-                    }
-                    .padding()
-
-                    if showOptions {
-                        // Menu personalizzato con i pulsanti
-                        VStack {
-                            Button("Order Now") {
-                                //placeOrder()
-                            }
-                            .padding()
-
-                            Button("Adjust Order") {
-                                //
-                            }
-                            .padding()
-                        }
-                        .background(Color.gray.opacity(0.2)) // Opzionale, per dare un po' di stile
-                        .cornerRadius(10)
-                    }
-                }.padding()
-                VStack {
-                    Button(action: {
-                        // Mostra o nascondi il menu quando si preme su "Options"
-                        showOptions.toggle()
-                    }) {
-                        Text("Options 2")
-                            .font(.headline)
-                            .foregroundColor(.blue) // Colore del testo
-                            .frame(width: 150, height: 50) // Dimensione del bottone
-                            .background(Color.gray.opacity(0.2)) // Colore di sfondo
-                            .cornerRadius(25) // Bordi arrotondati
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 25)
-                                    .stroke(Color.gray, lineWidth: 1) // Bordo del bottone
-                            )
-                            .shadow(color: .gray, radius: 2, x: 0, y: 2) // Aggiungi ombra
-                    }
-                    .padding()
-
-                    if showOptions {
-                        // Menu personalizzato con i pulsanti
-                        VStack {
-                            Button("Order Now") {
-                                //placeOrder()
-                            }
-                            .padding()
-
-                            Button("Adjust Order") {
-                                //
-                            }
-                            .padding()
-                        }
-                        .background(Color.gray.opacity(0.2)) // Opzionale, per dare un po' di stile
-                        .cornerRadius(10)
-                    }
-                }.padding()
-                VStack {
-                    Button(action: {
-                        // Mostra o nascondi il menu quando si preme su "Options"
-                        showOptions.toggle()
-                    }) {
-                        Text("Options 3")
-                            .font(.headline)
-                            .foregroundColor(.blue) // Colore del testo
-                            .frame(width: 150, height: 50) // Dimensione del bottone
-                            .background(Color.gray.opacity(0.2)) // Colore di sfondo
-                            .cornerRadius(25) // Bordi arrotondati
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 25)
-                                    .stroke(Color.gray, lineWidth: 1) // Bordo del bottone
-                            )
-                            .shadow(color: .gray, radius: 2, x: 0, y: 2) // Aggiungi ombra
-                    }
-                    .padding()
-
-                    if showOptions {
-                        // Menu personalizzato con i pulsanti
-                        VStack {
-                            Button("Order Now") {
-                                //placeOrder()
-                            }
-                            .padding()
-
-                            Button("Adjust Order") {
-                                //
-                            }
-                            .padding()
-                        }
-                        .background(Color.gray.opacity(0.2)) // Opzionale, per dare un po' di stile
-                        .cornerRadius(10)
-                    }
-                }.padding()
-            }
-            
-            
             ZStack{
-                SCNViewTransitionZoneContainer(viewModel: viewModel)  // Passa il ViewModel
+                 SCNViewTransitionZoneContainer(viewModel: viewModel)
                     .border(Color.white)
                     .cornerRadius(10)
                     .padding()
                     .shadow(color: Color.gray, radius: 3)
-//                VStack{
-//                    HStack {
-//                        Button("Ruota Orario") {
-//                            viewModel.rotateBoxClockwise()
-//                        }.font(.system(size: 6))
-//                            .padding()
-//                            .background(Color.blue)
-//                            .foregroundColor(.white)
-//                            .cornerRadius(10)
-//                        
-//                        Button("Ruota Anti-orario") {
-//                            viewModel.rotateBoxCounterClockwise()
-//                        }
-//                        .font(.system(size: 6))
-//                        .padding()
-//                        .background(Color.blue)
-//                        .foregroundColor(.white)
-//                        .cornerRadius(10)
-//                    }
-//                    
-//                    VStack {
-//                        Button("Allunga in Larghezza") {
-//                            viewModel.stretchBoxWidth()
-//                        }
-//                        .font(.system(size: 6))
-//                        .padding()
-//                        .background(Color.blue)
-//                        .foregroundColor(.white)
-//                        .cornerRadius(10)
-//                    }
-//                    
-//                    HStack {
-//                        Button("Muovi Sinistra") {
-//                            viewModel.moveBoxLeft()
-//                        }
-//                        .font(.system(size: 6))
-//                        .padding()
-//                        .background(Color.blue)
-//                        .foregroundColor(.white)
-//                        .cornerRadius(10)
-//                        
-//                        Button("Muovi Destra") {
-//                            viewModel.moveBoxRight()
-//                        }
-//                        .font(.system(size: 6))
-//                        .padding()
-//                        .background(Color.blue)
-//                        .foregroundColor(.white)
-//                        .cornerRadius(10)
-//                    }
-//                    
-//                    HStack {
-//                        Button("Muovi Su") {
-//                            viewModel.moveBoxUp()
-//                        }
-//                        .font(.system(size: 6))
-//                        .padding()
-//                        .background(Color.blue)
-//                        .foregroundColor(.white)
-//                        .cornerRadius(10)
-//                        
-//                        Button("Muovi Giù") {
-//                            viewModel.moveBoxDown()
-//                        }
-//                        .font(.system(size: 6))
-//                        .padding()
-//                        .background(Color.blue)
-//                        .foregroundColor(.white)
-//                        .cornerRadius(10)
-//                    }
-//                    Spacer()
-//                }
-                
+                VStack {
+                    Spacer()
+                    
+                    MapControllerView(moveObject: viewModel)
+                        .padding()
+                        .background(
+                            Color.white.opacity(0.8)
+                                //.blur(radius: 2)
+                        )
+                        .cornerRadius(10) // BorderRadius
+                        .shadow(radius: 4) // Shadow valore 4
+                }.padding(26)
                 
             }.onAppear {
                 viewModel.loadRoomMaps(room: room, borders: true, usdzURL: room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"))
             }
-            HStack{
-                Button(action: {
-                    viewModel.removeLastBox()
-                }) {
-                    Text("Cancel")
-                        .bold()
-                        .foregroundColor(.white)
-                }
-                .font(.system(size: 20))
-                .padding()
-                .background(Color.red)
-                .foregroundColor(.white)
-                .cornerRadius(10)
-                
-                Button(action: {
-                    
-                    guard !transitionZoneName.isEmpty else {
-                        showUpdateAlert = true
-                        return
-                    }
-                    
-                    addTransitionZoneToScene()
-                    showUpdateAlert = true
-                    
-                }) {
-                    Text("Save")
-                        .bold()
-                        .foregroundColor(.white)
-                }
-                .font(.system(size: 20))
-                .padding()
-                .background(Color.blue)
-                .foregroundColor(.white)
-                .cornerRadius(10)
-            }
-           
-            
         }
         .background(Color.customBackground)
         .foregroundColor(.white)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button(action: {
+                    addTransitionZoneToScene()
+                }) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 24))  // Dimensione dell'icona
+                        .foregroundStyle(.white, .green, .green)
+                }
+            }
+            
             ToolbarItem(placement: .principal) {
                 Text("ADD TRANSITION ZOOM")
                     .font(.system(size: 26, weight: .heavy))

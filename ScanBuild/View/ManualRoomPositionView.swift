@@ -29,84 +29,19 @@ struct ManualRoomPositionView: View {
                     .padding()
                     .shadow(color: Color.gray, radius: 3)
                 
-                VStack{
-                    HStack{
-                        //Left And Right
-                        HStack {
-                            Button(action: {
-                                mapPositionView.handler
-                                    .moveRoomPositionRight()
-                            }) {
-                                Image(systemName: "arrow.right")
-                                    .bold()
-                                    .foregroundColor(.white)
-                            }
-                            .buttonStyle(.bordered)
-                            .background(Color.blue.opacity(0.4))
-                            .cornerRadius(8)
-                            
-                            Button(action: {
-                                mapPositionView.handler.moveRoomPositionLeft()
-                            }) {
-                                Image(systemName: "arrow.left")
-                                    .bold()
-                                    .foregroundColor(.white)
-                            }
-                            .buttonStyle(.bordered)
-                            .background(Color.blue.opacity(0.4))
-                            .cornerRadius(8)
-                        }.padding()
-                        //Up And Down
-                        HStack {
-                            Button(action: {
-                                mapPositionView.handler.moveRoomPositionUp()
-                            }) {
-                                Image(systemName: "arrow.down")
-                                    .bold()
-                                    .foregroundColor(.white)
-                            }
-                            .buttonStyle(.bordered)
-                            .background(Color.blue.opacity(0.4))
-                            .cornerRadius(8)
-                            
-                            Button(action: {
-                                mapPositionView.handler.moveRoomPositionDown()
-                            }) {
-                                Image(systemName: "arrow.up")
-                                    .bold()
-                                    .foregroundColor(.white)
-                            }
-                            .buttonStyle(.bordered)
-                            .background(Color.blue.opacity(0.4))
-                            .cornerRadius(8)
-                        }.padding()
-                        //Clock
-                        HStack {
-                            Button(action: {
-                                mapPositionView.handler.rotateClockwise()
-                            }) {
-                                Image(systemName: "arrow.clockwise")
-                                    .bold()
-                                    .foregroundColor(.white)
-                            }
-                            .buttonStyle(.bordered)
-                            .background(Color.blue.opacity(0.4))
-                            .cornerRadius(8)
-                            
-                            Button(action: {
-                                mapPositionView.handler.rotateCounterClockwise()
-                            }) {
-                                Image(systemName: "arrow.counterclockwise")
-                                    .bold()
-                                    .foregroundColor(.white)
-                            }
-                            .buttonStyle(.bordered)
-                            .background(Color.blue.opacity(0.4))
-                            .cornerRadius(8)
-                        }.padding()
-                    }
+                VStack {
                     Spacer()
-                }.padding(.top)
+                    
+                    MapControllerView(moveObject: mapPositionView.handler)
+                        .padding()
+                        .background(
+                            Color.white.opacity(0.8)
+                                
+                        )
+                        .cornerRadius(10) // BorderRadius
+                        .shadow(radius: 4) // Shadow valore 4
+                }.padding(26)
+                
             }.onAppear {
                     var roomURLs: URL
                     roomURLs = room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz")
@@ -116,27 +51,23 @@ struct ManualRoomPositionView: View {
                         borders: true
                     )
                 }
-            
-            Button(action: {
-                floor.updateAssociationMatrixInJSON(for: room.name, fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"))
-                floor.objectWillChange.send()  // Forza RoomView a rilevare il cambiamento
-                showUpdateAlert = true
-            }) {
-                Text("Save Position")
-                    .bold()
-                    .foregroundColor(.white)
-            }
-            .font(.system(size: 20))
-            .padding()
-            .background(Color.blue)
-            .foregroundColor(.white)
-            .cornerRadius(10)
-            
         }
         .background(Color.customBackground)
         .foregroundColor(.white)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
+            
+            ToolbarItem(placement: .topBarTrailing) {
+                Button(action: {
+                    floor.updateAssociationMatrixInJSON(for: room.name, fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"))
+                    showUpdateAlert = true
+                }) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 24))  // Dimensione dell'icona
+                        .foregroundStyle(.white, .green, .green)
+                }
+            }
+            
             ToolbarItem(placement: .principal) {
                 Text("POSITIONING ROOM")
                     .font(.system(size: 26, weight: .heavy))

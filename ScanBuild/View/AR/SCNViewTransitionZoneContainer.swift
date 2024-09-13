@@ -5,7 +5,8 @@ import RoomPlan
 import CoreMotion
 import ComplexModule
 
-class SCNViewModel: ObservableObject {
+class SCNViewModel: ObservableObject, MoveDimensionObject{
+    
     @Published var scnView = SCNView(frame: .zero)
     @Published var lastAddedBoxNode: SCNNode? = nil
     var cameraNode = SCNNode()
@@ -21,15 +22,15 @@ class SCNViewModel: ObservableObject {
     }
     
     func removeLastBox() {
-            if let boxNode = lastAddedBoxNode {
-                boxNode.removeFromParentNode()  // Rimuovi il nodo dalla scena
-                lastAddedBoxNode = nil  // Resetta il riferimento
-                print("Last SCNBox removed.")
-            } else {
-                print("No SCNBox to remove.")
-            }
+        if let boxNode = lastAddedBoxNode {
+            boxNode.removeFromParentNode()  // Rimuovi il nodo dalla scena
+            lastAddedBoxNode = nil  // Resetta il riferimento
+            print("Last SCNBox removed.")
+        } else {
+            print("No SCNBox to remove.")
         }
-        
+    }
+    
     func setCamera() {
         scnView.scene?.rootNode.addChildNode(cameraNode)
         
@@ -91,7 +92,6 @@ class SCNViewModel: ObservableObject {
         scnView.scene?.rootNode.addChildNode(massCenter)
     }
     
-    
     func loadRoomMaps(room: Room, borders: Bool, usdzURL: URL) {
         do {
             scnView.scene = try SCNScene(url: usdzURL)
@@ -102,6 +102,7 @@ class SCNViewModel: ObservableObject {
             print("Error loading scene from URL: \(error)")
         }
     }
+    
     func findMassCenter(_ nodes: [SCNNode]) -> SCNNode {
         let massCenter = SCNNode()
         var X: [Float] = [Float.greatestFiniteMagnitude, -Float.greatestFiniteMagnitude]
@@ -117,6 +118,12 @@ class SCNViewModel: ObservableObject {
     }
     
     func addBox(at position: SCNVector3) {
+        
+        if lastAddedBoxNode != nil {
+            print("A box has already been added. Remove it before adding a new one.")
+            return  // Esci dalla funzione se esiste già un box
+        }
+        
         let box = SCNBox(width: 1.0, height: 2.0, length: 1.0, chamferRadius: 0.0)
         let boxNode = SCNNode(geometry: box)
         boxNode.position = position
@@ -125,48 +132,114 @@ class SCNViewModel: ObservableObject {
         lastAddedBoxNode = boxNode
     }
     
-    func rotateBoxClockwise() {
-        guard let boxNode = lastAddedBoxNode else { return }
-        let rotation = SCNAction.rotateBy(x: 0, y: CGFloat.pi / 2, z: 0, duration: 0.5)
-        boxNode.runAction(rotation)
+    func handleTap(at location: CGPoint) {
+        print("Tap rilevato in posizione: \(location)")
+        
+        let hitResults = scnView.hitTest(location, options: nil)
+        if let hitResult = hitResults.first {
+            let position = hitResult.worldCoordinates
+            print("Punto toccato nella scena: \(position)")
+            
+            // Aggiungi il nodo SCNBox alla posizione toccata
+            addBox(at: position)
+        } else {
+            // Se non viene trovato alcun punto, posiziona la scatola in una posizione di default
+            print("Nessun nodo trovato, aggiungo scatola alla posizione 0,0,0")
+            addBox(at: SCNVector3(0, 0, 0))
+        }
     }
     
+    func incrementWidht(by: Int) {
+        self.stretchBoxWidth(widthFactor: by)
+    }
+    
+    func rotateClockwise() {
+        self.rotateBoxClockwise()
+    }
+    
+    func rotateCounterClockwise() {
+        self.rotateBoxCounterClockwise()
+    }
+    
+    func moveUp() {
+        self.moveBoxUp()
+    }
+    
+    func moveDown() {
+        self.moveBoxDown()
+    }
+    
+    func moveLeft() {
+        self.moveBoxLeft()
+    }
+    
+    func moveRight() {
+        self.moveBoxRight()
+    }
+    
+    func rotateBoxClockwise() {
+        guard let boxNode = lastAddedBoxNode else { return }
+        
+        // 1 grado in radianti (positivi per rotazione in senso orario)
+        let oneDegreeInRadians = CGFloat.pi / 180
+        
+        // Aggiorna manualmente l'angolo di rotazione del nodo sull'asse Y
+        boxNode.eulerAngles.y += Float(oneDegreeInRadians)
+        
+        print("Box rotated 1 degree clockwise.")
+    }
+
     func rotateBoxCounterClockwise() {
         guard let boxNode = lastAddedBoxNode else { return }
-        let rotation = SCNAction.rotateBy(x: 0, y: -CGFloat.pi / 2, z: 0, duration: 0.5)
-        boxNode.runAction(rotation)
+        
+        // 1 grado in radianti (negativi per rotazione in senso antiorario)
+        let oneDegreeInRadians = CGFloat.pi / 180
+        
+        // Aggiorna manualmente l'angolo di rotazione del nodo sull'asse Y
+        boxNode.eulerAngles.y -= Float(oneDegreeInRadians)
+        
+        print("Box rotated 1 degree counter-clockwise.")
     }
-
-    func stretchBoxWidth() {
+    
+    func stretchBoxWidth(widthFactor: Int) {
         guard let boxNode = lastAddedBoxNode else { return }
-        boxNode.scale.x += 0.1
-        print("Box stretched in width.")
+        
+        // Assicurati che l'input sia compreso tra 0 e 100
+        let clampedWidthFactor = max(0, min(widthFactor, 100))
+        
+        // La larghezza iniziale è sempre 1.0, quindi si basa su questo valore
+        let newWidth = 1.0 * (1.0 + (Float(clampedWidthFactor) / 100.0) * 7.0)
+        
+        // Applica la nuova larghezza al nodo
+        boxNode.scale.x = newWidth
+        
+        print("Box stretched to widthFactor \(clampedWidthFactor) with new width \(newWidth).")
+        
     }
-
+    
     func moveBoxLeft() {
         guard let boxNode = lastAddedBoxNode else { return }
         boxNode.position.x -= 0.5
         print("Box moved left.")
     }
-
+    
     func moveBoxRight() {
         guard let boxNode = lastAddedBoxNode else { return }
         boxNode.position.x += 0.5
         print("Box moved right.")
     }
-
+    
     func moveBoxUp() {
         guard let boxNode = lastAddedBoxNode else { return }
         boxNode.position.z -= 0.5
         print("Box moved up.")
     }
-
+    
     func moveBoxDown() {
         guard let boxNode = lastAddedBoxNode else { return }
         boxNode.position.z += 0.5
         print("Box moved down.")
     }
-    
 }
 
 struct SCNViewTransitionZoneContainer: UIViewRepresentable {
