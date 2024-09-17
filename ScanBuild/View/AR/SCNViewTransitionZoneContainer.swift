@@ -219,25 +219,25 @@ class SCNViewModel: ObservableObject, MoveDimensionObject{
     
     func moveBoxLeft() {
         guard let boxNode = lastAddedBoxNode else { return }
-        boxNode.position.x -= 0.5
+        boxNode.position.x -= 0.1
         print("Box moved left.")
     }
     
     func moveBoxRight() {
         guard let boxNode = lastAddedBoxNode else { return }
-        boxNode.position.x += 0.5
+        boxNode.position.x += 0.1
         print("Box moved right.")
     }
     
     func moveBoxUp() {
         guard let boxNode = lastAddedBoxNode else { return }
-        boxNode.position.z -= 0.5
+        boxNode.position.z -= 0.1
         print("Box moved up.")
     }
     
     func moveBoxDown() {
         guard let boxNode = lastAddedBoxNode else { return }
-        boxNode.position.z += 0.5
+        boxNode.position.z += 0.1
         print("Box moved down.")
     }
 }

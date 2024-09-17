@@ -14,6 +14,8 @@ struct AddTransitionZoneView: View {
     @State private var transitionZoneName: String = ""
     
     @State private var showUpdateAlert = false
+    @State private var showNameErrorAlert = false
+    
     @State private var showOptions = false
     @State private var showMenu1 = false
     @State private var showMenu2 = false
@@ -24,7 +26,8 @@ struct AddTransitionZoneView: View {
     
     var body: some View{
         VStack{
-            Text("Insert the name of the Transition Zone")
+            Text("Insert the name of the Transition Zone:")
+                .bold()
                 .font(.title3)
                 .padding(.top)
             
@@ -63,10 +66,15 @@ struct AddTransitionZoneView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button(action: {
-                    addTransitionZoneToScene()
+                    if !transitionZoneName.isEmpty {
+                        showUpdateAlert = true
+                    }else{
+                        showNameErrorAlert = true
+                    }
+                    
                 }) {
                     Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 24))  // Dimensione dell'icona
+                        .font(.system(size: 24))  
                         .foregroundStyle(.white, .green, .green)
                 }
             }
@@ -82,7 +90,17 @@ struct AddTransitionZoneView: View {
                 title: Text("ATTENTION").foregroundColor(.red),
                 message: Text("Are you sure to add and save this Transition Zone?"),
                 dismissButton: .default(Text("Yes")){
+                    addTransitionZoneToScene()
                     floor.objectWillChange.send()
+                }
+            )
+        }
+        .alert(isPresented: $showNameErrorAlert) {
+            Alert(
+                title: Text("ATTENTION").foregroundColor(.red),
+                message: Text("There is no Transition Zone name."),
+                dismissButton: .destructive(Text("OK")){
+                    showNameErrorAlert = false
                 }
             )
         }

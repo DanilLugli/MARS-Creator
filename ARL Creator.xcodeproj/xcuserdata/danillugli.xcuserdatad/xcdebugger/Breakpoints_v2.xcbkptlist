@@ -190,8 +190,8 @@
             filePath = "ScanBuild/Data/BuildingModel.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "190"
-            endingLineNumber = "190"
+            startingLineNumber = "211"
+            endingLineNumber = "211"
             landmarkName = "loadFloors(from:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -206,8 +206,8 @@
             filePath = "ScanBuild/Data/Beans/Floor.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "257"
-            endingLineNumber = "257"
+            startingLineNumber = "271"
+            endingLineNumber = "271"
             landmarkName = "renameRoomFilesInDirectories(room:newRoomName:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -222,8 +222,8 @@
             filePath = "ScanBuild/Data/Beans/Floor.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "324"
-            endingLineNumber = "324"
+            startingLineNumber = "338"
+            endingLineNumber = "338"
             landmarkName = "saveAssociationMatrixToJSON(fileURL:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -238,8 +238,8 @@
             filePath = "ScanBuild/Data/Beans/Floor.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "336"
-            endingLineNumber = "336"
+            startingLineNumber = "350"
+            endingLineNumber = "350"
             landmarkName = "saveAssociationMatrixToJSON(fileURL:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -254,8 +254,8 @@
             filePath = "ScanBuild/Data/Beans/Floor.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "359"
-            endingLineNumber = "359"
+            startingLineNumber = "373"
+            endingLineNumber = "373"
             landmarkName = "updateAssociationMatrixInJSON(for:fileURL:)"
             landmarkType = "7">
          </BreakpointContent>
@@ -270,8 +270,8 @@
             filePath = "ScanBuild/Data/Beans/Floor.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "374"
-            endingLineNumber = "374"
+            startingLineNumber = "388"
+            endingLineNumber = "388"
             landmarkName = "updateAssociationMatrixInJSON(for:fileURL:)"
             landmarkType = "7">
          </BreakpointContent>

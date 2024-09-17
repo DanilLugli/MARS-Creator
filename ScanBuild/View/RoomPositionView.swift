@@ -3,17 +3,16 @@ import SwiftUI
 import SceneKit
 
 struct RoomPositionView: View {
-
+    
     @ObservedObject var floor: Floor
     @ObservedObject var room: Room
     
     @State var selectedRoomNode: SCNNode?
     @State var selectedFloorNode: SCNNode?
     
-    @State var selectedRoomNodeName = ""
-    @State var selectedFloorNodeName = ""
+    @State var selectedRoomNodeName: String = ""
+    @State var selectedFloorNodeName: String = ""
     
-    var floorView: SCNViewContainer = SCNViewContainer()
     var roomView: SCNViewContainer = SCNViewContainer()
     var roomsMaps: [URL]?
     
@@ -51,80 +50,71 @@ struct RoomPositionView: View {
                     progress: min(matchingNodesForAPI.count + 1, 4)
                 )
                 
-                VStack {
-                    Text("Floor: \(floor.name)").bold().font(.title3).foregroundColor(.white)
-                }
-                
-                ZStack {
-                    floorView
-                        .border(Color.white)
-                        .cornerRadius(10)
-                        .padding()
-                        .shadow(color: Color.gray, radius: 3)
-                }.onAppear{
+                VStack{
+                    VStack {
+                        Text("Floor: \(floor.name)").bold().font(.title3).foregroundColor(.white)
+                    }
                     
-                    floorNodes = Array(Set(floorView
-                        .scnView
-                        .scene?
-                        .rootNode
-                        .childNodes(passingTest: { n, _ in
-                            if let nodeName = n.name {
-                                return nodeName != "Room" &&
-                                       nodeName != "Geom" &&
-                                       !nodeName.hasSuffix("_grp") &&
-                                       !nodeName.hasPrefix("unidentified")
+                    ZStack {
+                        floor.planimetry
+                            .border(Color.white)
+                            .cornerRadius(10)
+                            .padding()
+                            .shadow(color: Color.gray, radius: 3)
+                    }
+                       
+                    HStack {
+                        Picker("Choose Floor Node", selection: $selectedFloorNodeName) {
+                            ForEach(floor.sceneObjects ?? [], id: \.self) { node in
+                                Text(node.name ?? "Unnamed").tag(node.name ?? "")
                             }
-                            return false
-                        }).compactMap { node in node.name } ?? []))
-                        .sorted()
-                    
-                    floorView.loadFloorPlanimetry(borders: false, floor: floor)
-                
-                }
-                   
-                HStack {
-                    Picker("Choose Floor Node", selection: $selectedFloorNodeName) {
-                        Text("Choose Floor Node")
-                        ForEach(floorNodes, id: \.self) { Text($0) }
-                    }.onChange(of: selectedFloorNodeName, perform: { _ in
-                        floorView.changeColorOfNode(nodeName: selectedFloorNodeName, color: UIColor.green)
-                        
-                        let firstTwoLetters = String(selectedFloorNodeName.prefix(4))
-                        
-                        roomNodes = roomView.scnView.scene?.rootNode.childNodes(passingTest: {
-                            n, _ in n.name != nil && n.name!.starts(with: firstTwoLetters) && n.name! != "Room" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp"
-                        })
-                        .sorted(by: { a, b in
-                            let sizeA = SCNVector3(
-                                a.boundingBox.max.x - a.boundingBox.min.x,
-                                a.boundingBox.max.y - a.boundingBox.min.y,
-                                a.boundingBox.max.z - a.boundingBox.min.z
-                            )
+                        }
+                        .onAppear {
+                            print("Floor Scene Objects onAppear: \(floor.sceneObjects?.compactMap { $0.name } ?? [])")
+                            if let firstNodeName = floor.sceneObjects?.first?.name {
+                                selectedFloorNodeName = firstNodeName
+                            }
+                        }
+                        .onChange(of: selectedFloorNodeName) {newValue in
+                            print("New NAME NODE: \(newValue)")
+                            floor.planimetry.changeColorOfNode(nodeName: newValue, color: UIColor.red)
                             
-                            let sizeB = SCNVector3(
-                                b.boundingBox.max.x - b.boundingBox.min.x,
-                                b.boundingBox.max.y - b.boundingBox.min.y,
-                                b.boundingBox.max.z - b.boundingBox.min.z
-                            )
+                            let firstLetter = String(newValue.prefix(4))
                             
-                            // Ordina per la lunghezza, in questo caso consideriamo la lunghezza lungo l'asse X
-                            return sizeA.x > sizeB.x
-                        })
-                        .map { node in node.name ?? "nil" } ?? []
-                        
-                        selectedFloorNode = floorView.scnView.scene?.rootNode.childNodes(passingTest: { n, _ in n.name != nil && n.name! == selectedFloorNodeName }).first
-                        
-                        print(selectedFloorNode)
-                    })
+//                            roomNodes = roomView.scnView.scene?.rootNode.childNodes(passingTest: {
+//                                n, _ in n.name != nil && n.name!.starts(with: firstLetter) && n.name! != "Room" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp"
+//                            })
+//                            .sorted(by: { a, b in
+//                                let sizeA = SCNVector3(
+//                                    a.boundingBox.max.x - a.boundingBox.min.x,
+//                                    a.boundingBox.max.y - a.boundingBox.min.y,
+//                                    a.boundingBox.max.z - a.boundingBox.min.z
+//                                )
+//                                
+//                                let sizeB = SCNVector3(
+//                                    b.boundingBox.max.x - b.boundingBox.min.x,
+//                                    b.boundingBox.max.y - b.boundingBox.min.y,
+//                                    b.boundingBox.max.z - b.boundingBox.min.z
+//                                )
+//                                return sizeA.x > sizeB.x
+//                            })
+//                            .map { node in node.name ?? "nil" } ?? []
+//                            
+                            selectedFloorNode = floor.sceneObjects?.first(where: { node in
+                                node.name == newValue
+                            })
+                        }
+                    }
                 }
                 
                 Divider().background(Color.black).shadow(radius: 100)
                 
-                HStack {
-                    Text("Room: \(room.name)").bold().font(.title3).foregroundColor(.white)
-                }
-                
-                if room != nil {
+                VStack{
+                    HStack {
+                        Text("Room: \(room.name)").bold().font(.title3).foregroundColor(.white)
+                    }
+                    
+
                     ZStack {
                         roomView
                             .border(Color.white)
@@ -132,34 +122,10 @@ struct RoomPositionView: View {
                             .padding()
                             .shadow(color: Color.gray, radius: 3)
                     }.onAppear{
-                        if let nodes = roomView.scnView.scene?.rootNode.childNodes(passingTest: { n, _ in
-                            n.name != nil &&
-                            n.name! != "Room" &&
-                            n.name! != "Geom" &&
-                            String(n.name!.suffix(4)) != "_grp"
-                        }) {
-                            let names = nodes.compactMap { $0.name }
-                            print("Collected node names: \(names)")
-
-                            var uniqueNamesDict = [String: Bool]()
-                            var uniqueNamesArray = [String]()
-
-                            for name in names {
-                                if uniqueNamesDict[name] == nil {
-                                    uniqueNamesDict[name] = true
-                                    uniqueNamesArray.append(name)
-                                }
-                            }
-                            
-                            roomNodes = uniqueNamesArray.sorted()
-
-                            print("Unique node names: \(roomNodes)")
-                        } else {
-                            roomNodes = []
-                        }
-                        
+                        //roomView.loadRoomPlanimetry(room: room, borders: true)
                         roomView.loadRoomPlanimetry(room: room, borders: false)
                     }
+                    
                     
                     HStack {
                         Picker("Choose Room Node", selection: $selectedRoomNodeName) {
@@ -169,31 +135,14 @@ struct RoomPositionView: View {
                                 //print("Node ID: \(node.name)") // Debug output
                                 Text(node).tag(node)
                             }
-                        }.onChange(of: selectedRoomNodeName, perform: { _ in
+                        }.onChange(of: selectedRoomNodeName){
                             
                             roomView.changeColorOfNode(nodeName: selectedRoomNodeName, color: UIColor.green)
                             
                             selectedRoomNode = roomView.scnView.scene?.rootNode.childNodes(passingTest: {
                                 n, _ in n.name != nil && n.name! == selectedRoomNodeName
                             }).first
-                            
-                            print(selectedRoomNode)
-                            
-                            let firstTwoLettersLocal = String(selectedRoomNodeName.prefix(2))
-                            
-                            floorNodes = floorView.scnView.scene?.rootNode.childNodes(passingTest: {
-                                n, _ in n.name != nil && n.name!.starts(with: firstTwoLettersLocal) && n.name! != "Room" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp"
-                            })
-                            .sorted(by: { a, b in a.scale.x > b.scale.x })
-                            .map { node in node.name ?? "nil" } ?? []
-                            
-                            floorNodes = orderBySimilarity(
-                                node: selectedRoomNode!,
-                                listOfNodes: floorView.scnView.scene!.rootNode.childNodes(passingTest: {
-                                    n, _ in n.name != nil && n.name! != "Room" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp" && n.name! != "selected"
-                                })
-                            ).map { node in node.name ?? "nil" }
-                        })
+                        }
                     }
                 }
                 
@@ -242,7 +191,6 @@ struct RoomPositionView: View {
                             .bold()
                     }
                 }
-            
             }
             .background(Color.customBackground)
             .toolbar {
@@ -267,6 +215,11 @@ struct RoomPositionView: View {
             }
         }
     }
+    
+    func getSceneNodeNames(from sceneObjects: [SCNNode]?) -> [String] {
+        // Verifica se sceneObjects non è nil e lo trasforma in un array di nomi, altrimenti ritorna un array vuoto
+        return sceneObjects?.compactMap { $0.name ?? "Unnamed Node" } ?? []
+    }
 }
 
 func orderBySimilarity(node: SCNNode, listOfNodes: [SCNNode]) -> [SCNNode] {
@@ -278,15 +231,15 @@ func orderBySimilarity(node: SCNNode, listOfNodes: [SCNNode]) -> [SCNNode] {
     return result.sorted(by: { a, b in a.1 < b.1 }).map { $0.0 }
 }
 
-
-struct RoomPositionView_Preview: PreviewProvider {
-    static var previews: some View {
-        let buildingModel = BuildingModel.getInstance()
-        let firstBuildingIndex = buildingModel.initTryData()
-        let floor = firstBuildingIndex.floors.first!
-        let room = floor.rooms.first!
-        
-        return RoomPositionView(floor: floor, room: room)
-    }
-}
+//
+//struct RoomPositionView_Preview: PreviewProvider {
+//    static var previews: some View {
+//        let buildingModel = BuildingModel.getInstance()
+//        let firstBuildingIndex = buildingModel.initTryData()
+//        let floor = firstBuildingIndex.floors.first!
+//        let room = floor.rooms.first!
+//        
+//        return RoomPositionView(floor: floor, room: room)
+//    }
+//}
 

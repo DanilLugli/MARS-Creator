@@ -38,8 +38,8 @@ struct ManualRoomPositionView: View {
                             Color.white.opacity(0.8)
                                 
                         )
-                        .cornerRadius(10) // BorderRadius
-                        .shadow(radius: 4) // Shadow valore 4
+                        .cornerRadius(10)
+                        .shadow(radius: 4)
                 }.padding(26)
                 
             }.onAppear {

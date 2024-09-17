@@ -38,7 +38,7 @@ struct AddFloorView: View {
                     let dateFormatter = DateFormatter()
                     dateFormatter.dateStyle = .medium
                     dateFormatter.timeStyle = .none
-                    let currentDate = dateFormatter.string(from: Date())
+                    _ = dateFormatter.string(from: Date())
                     
                     let newFloor = Floor(_name: floorName, _lastUpdate: Date(), _planimetry: SCNViewContainer(), _planimetryRooms: SCNViewMapContainer(), _associationMatrix: [String : RotoTraslationMatrix](), _rooms: [], _sceneObjects: nil, _scene: nil, _sceneConfiguration: nil, _floorURL: URL(fileURLWithPath: ""))
                     

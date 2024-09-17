@@ -1,0 +1,285 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.7.8 Chrome/128.0.6613.36 Electron/32.0.1 Safari/537.36" version="24.7.8">
+  <diagram id="C5RBs43oDa-KdzZeNtuy" name="Page-1">
+    <mxGraphModel dx="1592" dy="823" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="WIyWlLk6GJQsqaUBKTNV-0" />
+        <mxCell id="WIyWlLk6GJQsqaUBKTNV-1" parent="WIyWlLk6GJQsqaUBKTNV-0" />
+        <mxCell id="zkfFHV4jXpPFQw0GAbJ--0" value="LocationManagar" style="swimlane;fontStyle=2;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeLast=0;collapsible=1;marginBottom=0;rounded=0;shadow=0;strokeWidth=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
+          <mxGeometry x="40" y="40" width="400" height="294" as="geometry">
+            <mxRectangle x="230" y="140" width="160" height="26" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="zkfFHV4jXpPFQw0GAbJ--2" value="sceneView: ARSCNView()" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rounded=0;shadow=0;html=0;" parent="zkfFHV4jXpPFQw0GAbJ--0" vertex="1">
+          <mxGeometry y="26" width="400" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="zkfFHV4jXpPFQw0GAbJ--3" value="configuration: ARWorldTrackingConfiguration()" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rounded=0;shadow=0;html=0;" parent="zkfFHV4jXpPFQw0GAbJ--0" vertex="1">
+          <mxGeometry y="52" width="400" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-124" value="delegate: ARSCNDelegate()" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rounded=0;shadow=0;html=0;" vertex="1" parent="zkfFHV4jXpPFQw0GAbJ--0">
+          <mxGeometry y="78" width="400" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-123" value="position: Position()" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rounded=0;shadow=0;html=0;" vertex="1" parent="zkfFHV4jXpPFQw0GAbJ--0">
+          <mxGeometry y="104" width="400" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-0" value="mapView: MapView()" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rounded=0;shadow=0;html=0;" vertex="1" parent="zkfFHV4jXpPFQw0GAbJ--0">
+          <mxGeometry y="130" width="400" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="zkfFHV4jXpPFQw0GAbJ--4" value="" style="line;html=1;strokeWidth=1;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;" parent="zkfFHV4jXpPFQw0GAbJ--0" vertex="1">
+          <mxGeometry y="156" width="400" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-27" value="init()" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="zkfFHV4jXpPFQw0GAbJ--0">
+          <mxGeometry y="164" width="400" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-1" value="private func getMap(url: URL) -&gt; ARWorldMap? " style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="zkfFHV4jXpPFQw0GAbJ--0">
+          <mxGeometry y="190" width="400" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="zkfFHV4jXpPFQw0GAbJ--5" value="private func loadMap(worldMap: ARWorldMap, _ filename: String) -&gt; Void" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" parent="zkfFHV4jXpPFQw0GAbJ--0" vertex="1">
+          <mxGeometry y="216" width="400" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-12" value="func makeUIView(context: Context) -&gt; ARSCNView" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="zkfFHV4jXpPFQw0GAbJ--0">
+          <mxGeometry y="242" width="400" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-13" value="func updateUIView(_ uiView: ARSCNView, context: Context) -&gt; Void" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="zkfFHV4jXpPFQw0GAbJ--0">
+          <mxGeometry y="268" width="400" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-2" value="ARSCNDelegate" style="swimlane;fontStyle=2;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeLast=0;collapsible=1;marginBottom=0;rounded=0;shadow=0;strokeWidth=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="40" y="400" width="610" height="268" as="geometry">
+            <mxRectangle x="230" y="140" width="160" height="26" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-3" value="sceneView: ARSCNView()" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rounded=0;shadow=0;html=0;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-2">
+          <mxGeometry y="26" width="610" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-4" value="trackingState: ARCamera.TrackingState" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rounded=0;shadow=0;html=0;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-2">
+          <mxGeometry y="52" width="610" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-117" value="position: simd_float4x4" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rounded=0;shadow=0;html=0;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-2">
+          <mxGeometry y="78" width="610" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-17" value=" private var observers = [Observer]()" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rounded=0;shadow=0;html=0;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-2">
+          <mxGeometry y="104" width="610" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-6" value="" style="line;html=1;strokeWidth=1;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-2">
+          <mxGeometry y="130" width="610" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-7" value="renderer(_ renderer: SCNSceneRenderer, didAdd node: SCNNode, for anchor: ARAnchor) -&gt; Void" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-2">
+          <mxGeometry y="138" width="610" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-118" value="renderer(_ renderer: SCNSceneRenderer, didUpdate node: SCNNode, for anchor: ARAnchor) -&gt; Void&#xa;" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-2">
+          <mxGeometry y="164" width="610" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-120" value="func attach(_ observer: Observer)&#xa;" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-2">
+          <mxGeometry y="190" width="610" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-119" value="func detach(_ observer: Observer) &#xa;" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-2">
+          <mxGeometry y="216" width="610" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-8" value="private func notifyObservers(position: simd_float4x4, trackingState: ARCamera.TrackingState) &#xa;" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-2">
+          <mxGeometry y="242" width="610" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-18" value="Mockup - Use" style="swimlane;fontStyle=2;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeLast=0;collapsible=1;marginBottom=0;rounded=0;shadow=0;strokeWidth=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="1261" y="40" width="370" height="120" as="geometry">
+            <mxRectangle x="230" y="140" width="160" height="26" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-21" value="map = ARSCNViewContainer(url: FileARLCreator)" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rounded=0;shadow=0;html=0;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-18">
+          <mxGeometry y="26" width="370" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-25" value="position = Position(Map)&#xa;" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rounded=0;shadow=0;html=0;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-18">
+          <mxGeometry y="52" width="370" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-22" value="" style="line;html=1;strokeWidth=1;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-18">
+          <mxGeometry y="78" width="370" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-24" value="Utilizzo Metodi Position" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-18">
+          <mxGeometry y="86" width="370" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-28" value="Position: Observer" style="swimlane;fontStyle=2;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeLast=0;collapsible=1;marginBottom=0;rounded=0;shadow=0;strokeWidth=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="40" y="1080" width="560" height="380" as="geometry">
+            <mxRectangle x="230" y="140" width="160" height="26" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-31" value="position: simd_float4x4" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rounded=0;shadow=0;html=0;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-28">
+          <mxGeometry y="26" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-38" value="trackingState: ARCamera.TrackingState?" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rounded=0;shadow=0;html=0;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-28">
+          <mxGeometry y="52" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-32" value="" style="line;html=1;strokeWidth=1;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-28">
+          <mxGeometry y="78" width="560" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-127" value="init()" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-28">
+          <mxGeometry y="86" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-121" value="private func update(position: simd_float4x4, trackingState: ARCamera.TrackingState)&#xa;" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-28">
+          <mxGeometry y="112" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-37" value="func startNavigation() -&gt; position" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-28">
+          <mxGeometry y="138" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-40" value="private func getPositionFromReferenceMarker() -&gt; position" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-28">
+          <mxGeometry y="164" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-57" value="func getStatusPosition() -&gt; String" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-28">
+          <mxGeometry y="190" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-41" value="func getTrackingState(position: Position) -&gt; String" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-28">
+          <mxGeometry y="216" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-42" value="private func findReferenceMarker(trackingState) -&gt; String" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-28">
+          <mxGeometry y="242" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-43" value="func pauseNavigation() -&gt; Void" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-28">
+          <mxGeometry y="268" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-44" value="func resumeNavigation() -&gt; Void" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-28">
+          <mxGeometry y="294" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-46" value="func setAccurancy(int: Int) -&gt; Void" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-28">
+          <mxGeometry y="320" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-45" value="func getAccurancy() -&gt; Int" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-28">
+          <mxGeometry y="346" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-58" value="MapView: Observer" style="swimlane;fontStyle=2;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeLast=0;collapsible=1;marginBottom=0;rounded=0;shadow=0;strokeWidth=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="630" y="1080" width="560" height="658" as="geometry">
+            <mxRectangle x="230" y="140" width="160" height="26" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-59" value="scnView: SCNView" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rounded=0;shadow=0;html=0;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-58">
+          <mxGeometry y="26" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-82" value="handler: HandleTap()" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rounded=0;shadow=0;html=0;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-58">
+          <mxGeometry y="52" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-83" value="camera: SCNNode" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rounded=0;shadow=0;html=0;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-58">
+          <mxGeometry y="78" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-84" value="massCenter: SCNNode" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rounded=0;shadow=0;html=0;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-58">
+          <mxGeometry y="104" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-126" value="positionNode: SCNNode" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rounded=0;shadow=0;html=0;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-58">
+          <mxGeometry y="130" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-61" value="" style="line;html=1;strokeWidth=1;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-58">
+          <mxGeometry y="156" width="560" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-125" value="private init() &#xa;" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-58">
+          <mxGeometry y="164" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-122" value="private func update(position: simd_float4x4, trackingState: ARCamera.TrackingState)" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-58">
+          <mxGeometry y="190" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-62" value="private func loadFloorMap(borders: Bool, map: SCNView) -&gt; Bool" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-58">
+          <mxGeometry y="216" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-93" value="private func loadRoomsMap(borders: Bool, map: [SCNView]) -&gt; Bool" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-58">
+          <mxGeometry y="242" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-88" value="private func getPosition(position: simd_float4x4) -&gt; Void" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-58">
+          <mxGeometry y="268" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-85" value="func setCamera() -&gt; Void" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-58">
+          <mxGeometry y="294" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-86" value="func setMassCenter() -&gt; Void" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-58">
+          <mxGeometry y="320" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-87" value="func drawObjectsMap() -&gt; Void" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-58">
+          <mxGeometry y="346" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-91" value="func showObjectsMap(showObjects: [SCNNode]) -&gt; Void" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-58">
+          <mxGeometry y="372" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-92" value="func changePositionIndicator(positionIndicator: SCNNode) -&gt; Void" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-58">
+          <mxGeometry y="398" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-90" value="private makeUIView(context: Context) -&gt; SCNView" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-58">
+          <mxGeometry y="424" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-89" value="private func updateUIView(_ uiView: SCNView, context: Context) -&gt; Void" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-58">
+          <mxGeometry y="450" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-50" value="private func setNextRoom(position: position) -&gt; NEW MAP" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-58">
+          <mxGeometry y="476" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-49" value="private func changeRoom(position: position, ???? NEW MAP) -&gt; Bool" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-58">
+          <mxGeometry y="502" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-51" value="private func setNextFloor(position: position, connection: Connection) -&gt; NEW MAP" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-58">
+          <mxGeometry y="528" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-52" value="private func changeFloor(position: position, connection: Connection, , ???? NEW MAP) -&gt; Bool" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-58">
+          <mxGeometry y="554" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-47" value="private func inTransitionZone(position: position) -&gt; Bool" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-58">
+          <mxGeometry y="580" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-56" value="func handlePositionOutOfMap() -&gt; Void" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-58">
+          <mxGeometry y="606" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-39" value="private func identifyReferenceMarker() -&gt; bool" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-58">
+          <mxGeometry y="632" width="560" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-94" value="protocol Subject" style="swimlane;fontStyle=2;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeLast=0;collapsible=1;marginBottom=0;rounded=0;shadow=0;strokeWidth=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="1241" y="1080" width="390" height="170" as="geometry">
+            <mxRectangle x="230" y="140" width="160" height="26" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-95" value=" var observers: [Observer] { get set }" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;rounded=0;shadow=0;html=0;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-94">
+          <mxGeometry y="26" width="390" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-99" value="" style="line;html=1;strokeWidth=1;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-94">
+          <mxGeometry y="52" width="390" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-100" value=" func attach(_ observer: Observer)" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-94">
+          <mxGeometry y="60" width="390" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-101" value="private func loadRoomsMap(borders: Bool, map: [SCNView]) -&gt; Bool" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-94">
+          <mxGeometry y="86" width="390" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-102" value=" func detach(_ observer: Observer)" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-94">
+          <mxGeometry y="112" width="390" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-103" value=" func notify()" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-94">
+          <mxGeometry y="138" width="390" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-110" value="protocol Observer&#xa;" style="swimlane;fontStyle=2;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeLast=0;collapsible=1;marginBottom=0;rounded=0;shadow=0;strokeWidth=1;" vertex="1" parent="WIyWlLk6GJQsqaUBKTNV-1">
+          <mxGeometry x="1241" y="1280" width="390" height="70" as="geometry">
+            <mxRectangle x="230" y="140" width="160" height="26" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-112" value="" style="line;html=1;strokeWidth=1;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-110">
+          <mxGeometry y="26" width="390" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-113" value="func update()" style="text;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;" vertex="1" parent="3LcCXB0-MEF8qwTpBidP-110">
+          <mxGeometry y="34" width="390" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-129" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.392;entryY=-0.016;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" target="3LcCXB0-MEF8qwTpBidP-2">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="280" y="340" as="sourcePoint" />
+            <mxPoint x="640" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-130" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.393;exitY=1.077;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.43;entryY=-0.003;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" source="3LcCXB0-MEF8qwTpBidP-8" target="3LcCXB0-MEF8qwTpBidP-28">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="640" y="1000" as="sourcePoint" />
+            <mxPoint x="282" y="1070" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="280" y="880" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="3LcCXB0-MEF8qwTpBidP-131" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="WIyWlLk6GJQsqaUBKTNV-1" target="3LcCXB0-MEF8qwTpBidP-58">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="280" y="880" as="sourcePoint" />
+            <mxPoint x="690" y="1050" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="910" y="880" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

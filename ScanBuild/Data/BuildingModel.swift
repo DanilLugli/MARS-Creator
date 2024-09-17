@@ -177,6 +177,27 @@ class BuildingModel: ObservableObject {
                         
                         planimetry.loadFloorPlanimetry(borders: true, floor: floor)
                         
+                        floor.scene = planimetry.scnView.scene
+                        
+                        floor.sceneObjects = floor.scene?.rootNode.childNodes(passingTest: { n, _ in
+                            if let nodeName = n.name {
+                                return nodeName != "Room" &&
+                                       nodeName != "Geom" &&
+                                       !nodeName.hasSuffix("_grp") &&
+                                       !nodeName.hasPrefix("unidentified")
+                            }
+                            return false
+                        })
+                        
+                        if let sceneObjects = floor.sceneObjects {
+                            print("Printing all valid nodes for \(floor.name):")
+                                for node in sceneObjects {
+                                    print("Node name: \(node.name ?? "Unnamed")")
+                                }
+                            } else {
+                                print("No valid nodes found.")
+                            }
+                        
                     }else{
                         print("File .usdz for \(floor.name) planimetry is not available.")
                     }
@@ -280,49 +301,41 @@ class BuildingModel: ObservableObject {
         let fileManager = FileManager.default
         let oldBuildingURL = building.buildingURL
         
-        // Aggiorniamo il nome del building
         building.name = newName
         
         let newBuildingURL = BuildingModel.SCANBUILD_ROOT.appendingPathComponent(building.name)
         building.buildingURL = newBuildingURL
         
-        // Verifica se esiste già una cartella con il nuovo nome
         guard !fileManager.fileExists(atPath: newBuildingURL.path) else {
             throw NSError(domain: "com.example.ScanBuild", code: 3, userInfo: [NSLocalizedDescriptionKey: "Esiste già un building con il nome \(newName)"])
         }
-        
-        // Rinomina la cartella del building
+
         do {
             try fileManager.moveItem(at: oldBuildingURL, to: newBuildingURL)
         } catch {
             throw NSError(domain: "com.example.ScanBuild", code: 4, userInfo: [NSLocalizedDescriptionKey: "Errore durante la rinomina della cartella del building: \(error.localizedDescription)"])
         }
-        
-        // Aggiorna gli URL per floors e rooms, e verifica l'esistenza delle cartelle
+
         for floor in building.floors {
             floor.floorURL = newBuildingURL.appendingPathComponent(floor.name)
             print("NEW FLOOR URL: \(floor.floorURL)")
             
-            // Verifica l'esistenza della cartella del piano (floor)
             if fileManager.fileExists(atPath: floor.floorURL.path) {
                 print("Floor directory exists at: \(floor.floorURL.path)")
             } else {
                 print("Floor directory does not exist at: \(floor.floorURL.path)")
             }
-            
-            // Itera su ogni stanza e aggiorna il suo URL
+
             for room in floor.rooms {
                 room.roomURL = floor.floorURL.appendingPathComponent("Rooms").appendingPathComponent(room.name)
                 print("NEW ROOM URL: \(room.roomURL)")
-                
-                // Verifica l'esistenza della cartella della stanza (room)
+
                 if fileManager.fileExists(atPath: room.roomURL.path) {
                     print("Room directory exists at: \(room.roomURL.path)")
                 } else {
                     print("Room directory does not exist at: \(room.roomURL.path)")
                 }
-                
-                // Verifica l'esistenza del file specifico "MapUsdz" nella stanza
+
                 let mapUsdzURL = room.roomURL.appendingPathComponent("MapUsdz")
                 if fileManager.fileExists(atPath: mapUsdzURL.path) {
                     print("MapUsdz file found at: \(mapUsdzURL.path)")
@@ -332,20 +345,17 @@ class BuildingModel: ObservableObject {
             }
         }
 
-        // Log dell'operazione
         BuildingModel.LOGGER.log("Building rinominato da \(building.name) a \(newName)")
         
         return true
     }
     
     func deleteBuilding(building: Building) {
-        // Rimuovi il building dall'array
+        
         buildings.removeAll { $0.id == building.id }
-        
-        // Ottieni il percorso del building
+
         let buildingURL = BuildingModel.SCANBUILD_ROOT.appendingPathComponent(building.name)
-        
-        // Elimina la cartella del building
+
         do {
             try FileManager.default.removeItem(at: buildingURL)
             print("Folder deleted at: \(buildingURL.path)")

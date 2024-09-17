@@ -105,7 +105,7 @@ struct AddSameConnectionView: View {
                             .shadow(color: Color.gray, radius: 3)
                     }
                 }
-                .onChange(of: selectedRoom) { newRoom in
+                .onChange(of: selectedRoom) { oldRoom, newRoom in
                     loadMap(for: newRoom)
                 }
                 .onAppear {

@@ -62,7 +62,7 @@ func fetchAPIConversionLocalGlobal(localName: String, nodesList: [(SCNNode, SCNN
     //print(jsonObj)
     
     do {
-        var data = try JSONSerialization.data(withJSONObject: jsonObj, options: .prettyPrinted)
+        let data = try JSONSerialization.data(withJSONObject: jsonObj, options: .prettyPrinted)
         let s:String = String(data: data, encoding: .utf8)!
         //create the new url
         let url = URL(string: "https://develop.ewlab.di.unimi.it/musajapan/navigation/api/ransacalignment".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "")
@@ -77,10 +77,10 @@ func fetchAPIConversionLocalGlobal(localName: String, nodesList: [(SCNNode, SCNN
         //run the request and retrieve both the data and the response of the call
         let (bodyres, response) = try await URLSession.shared.data(for: request)
         //print(response)
-        guard let httpResponse = response as? HTTPURLResponse else {return (nil, ["err":"error converting -> response as? HTTPURLResponse"])}
+        guard response is HTTPURLResponse else {return (nil, ["err":"error converting -> response as? HTTPURLResponse"])}
         let res = response as! HTTPURLResponse
         do {
-            let _d = String(data: bodyres, encoding: .utf8)!.data(using: .utf8)!
+            _ = String(data: bodyres, encoding: .utf8)!.data(using: .utf8)!
             let resJson = try JSONSerialization.jsonObject(with: bodyres, options : .allowFragments) as! [String: Any]
             return (res, resJson)
         } catch {

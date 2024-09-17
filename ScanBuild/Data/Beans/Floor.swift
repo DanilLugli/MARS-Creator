@@ -3,7 +3,7 @@ import SceneKit
 import simd
 import SwiftUI
 
-class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
+class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Hashable {
     
     private var _id = UUID()
     @Published private var _name: String
@@ -32,11 +32,15 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     }
     
     static func ==(lhs: Floor, rhs: Floor) -> Bool {
-        return lhs.id == rhs.id // Compara gli ID, o qualsiasi altra proprietà unica
+        return lhs.id == rhs.id 
     }
     
     var id: UUID {
         return _id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
     
     var name: String {
@@ -84,11 +88,21 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     }
     
     var sceneObjects: [SCNNode]? {
-        return _sceneObjects
+        get{
+            return _sceneObjects
+        }
+        set{
+            _sceneObjects = newValue
+        }
     }
     
     var scene: SCNScene? {
-        return _scene
+        get{
+            return _scene
+        }
+        set{
+            _scene = newValue
+        }
     }
     
     var sceneConfiguration: SCNScene? {
@@ -217,7 +231,7 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     }
     
     func updateRoomInFloorJSON(floor: Floor, oldRoomName: String, newRoomName: String) throws {
-        let fileManager = FileManager.default
+        _ = FileManager.default
         
         let jsonFileURL = floor.floorURL.appendingPathComponent("\(floor.name).json")
         

@@ -47,17 +47,13 @@ struct CaptureViewContainer: UIViewRepresentable {
         }
         
         if !pauseARSession {
-            // Metti in pausa la sessione AR
             arSession.pause()
 
-            // Azzera la configurazione e rimuovi le ancore per disattivare completamente la sessione AR
             let emptyConfiguration = ARWorldTrackingConfiguration()
             arSession.run(emptyConfiguration, options: [.resetTracking, .removeExistingAnchors])
             
-            // Rimuovi il delegate se non ne hai più bisogno
             arSession.delegate = nil
             
-            // Imposta arSession a nil se non lo usi più
             arSession = ARSession()
         }
     }

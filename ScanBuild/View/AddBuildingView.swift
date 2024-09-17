@@ -30,7 +30,7 @@ struct AddBuildingView: View {
                     let dateFormatter = DateFormatter()
                     dateFormatter.dateStyle = .medium
                     dateFormatter.timeStyle = .none
-                    let currentDate = dateFormatter.string(from: Date())
+                    _ = dateFormatter.string(from: Date())
                     
                     let newBuilding = Building(name: buildingName, lastUpdate: Date(), floors: [], buildingURL: URL(fileURLWithPath: "") )
                     buildingsModel.addBuilding(building: newBuilding)
