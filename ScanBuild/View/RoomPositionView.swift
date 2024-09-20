@@ -228,15 +228,15 @@ func orderBySimilarity(node: SCNNode, listOfNodes: [SCNNode]) -> [SCNNode] {
     return result.sorted(by: { a, b in a.1 < b.1 }).map { $0.0 }
 }
 
-//
-//struct RoomPositionView_Preview: PreviewProvider {
-//    static var previews: some View {
-//        let buildingModel = BuildingModel.getInstance()
-//        let firstBuildingIndex = buildingModel.initTryData()
-//        let floor = firstBuildingIndex.floors.first!
-//        let room = floor.rooms.first!
-//        
-//        return RoomPositionView(floor: floor, room: room)
-//    }
-//}
+
+struct RoomPositionView_Preview: PreviewProvider {
+    static var previews: some View {
+        let buildingModel = BuildingModel.getInstance()
+        let firstBuildingIndex = buildingModel.initTryData()
+        let floor = firstBuildingIndex.floors.first!
+        let room = floor.rooms.first!
+        
+        return RoomPositionView(floor: floor, room: room)
+    }
+}
 
