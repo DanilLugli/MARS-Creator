@@ -10,24 +10,25 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     @Published private var _planimetry: SCNViewContainer?
     @Published private var _referenceMarkers: [ReferenceMarker]
     @Published private var _transitionZones: [TransitionZone]
-    @Published private var _sceneObjects: [SCNNode]
+    @Published private var _scene: SCNScene?
+    @Published private var _sceneObjects: [SCNNode]?
     private var _roomURL: URL
     @Published private var _color: UIColor
     
-    init(_id: UUID = UUID(), _name: String, _lastUpdate: Date, _planimetry: SCNViewContainer? = nil, _referenceMarkers: [ReferenceMarker], _transitionZones: [TransitionZone], _sceneObjects: [SCNNode], _roomURL: URL) {
+    init(_id: UUID = UUID(), _name: String, _lastUpdate: Date, _planimetry: SCNViewContainer? = nil, _referenceMarkers: [ReferenceMarker], _transitionZones: [TransitionZone], _scene: SCNScene? = SCNScene(), _sceneObjects: [SCNNode]? = nil, _roomURL: URL) {
         self._name = _name
         self._lastUpdate = _lastUpdate
         self._planimetry = _planimetry
         self._referenceMarkers = _referenceMarkers
         self._transitionZones = _transitionZones
+        self._scene = _scene ?? SCNScene()
         self._sceneObjects = _sceneObjects
         self._roomURL = _roomURL
         self._color = Room.randomColor().withAlphaComponent(0.3)
     }
     
-    
     static func ==(lhs: Room, rhs: Room) -> Bool {
-        return lhs.id == rhs.id // Compara gli ID, o qualsiasi altra proprietà unica
+        return lhs.id == rhs.id
     }
     
     var id: UUID {
@@ -65,9 +66,21 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         }
     }
     
-    var sceneObjects: [SCNNode] {
+    var scene: SCNScene? {
+        get{
+            return _scene
+        }
+        set{
+            _scene = newValue
+        }
+    }
+    
+    var sceneObjects: [SCNNode]? {
         get {
             return _sceneObjects
+        }
+        set{
+            _sceneObjects = newValue
         }
     }
     
@@ -183,8 +196,8 @@ extension Room {
             print("\tTransition Zone Name: \(zone.name)")
         }
         
-        print("Scene Objects (\(self.sceneObjects.count)):")
-        for object in sceneObjects {
+        print("Scene Objects (\(self.sceneObjects?.count)):")
+        for object in sceneObjects! {
             print("\tObject Name: \(object.name ?? "Unnamed Object")")
         }
         

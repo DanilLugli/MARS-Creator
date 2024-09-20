@@ -200,35 +200,6 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         print("rotateCounterClockwise: \(String(describing: floor?.associationMatrix[roomName ?? ""]?.r_Y) )")
     }
     
-    // Metodo per gestire il tap e posizionare un SCNBox
-        func handleTap(at location: CGPoint) {
-            print("Tap rilevato in posizione: \(location)")
-            
-            let hitResults = scnView.hitTest(location, options: nil)
-            if let hitResult = hitResults.first {
-                let position = hitResult.worldCoordinates
-                print("Punto toccato nella scena: \(position)")
-                
-                // Aggiungi il nodo SCNBox alla posizione toccata
-                addBox(at: position)
-            } else {
-                // Se non viene trovato alcun punto, posiziona la scatola in una posizione di default
-                print("Nessun nodo trovato, aggiungo scatola alla posizione 0,0,0")
-                addBox(at: SCNVector3(0, 0, 0))
-            }
-        }
-
-        // Aggiungi una SCNBox alla scena
-        func addBox(at position: SCNVector3) {
-            let box = SCNBox(width: 1.0, height: 2.0, length: 1.0, chamferRadius: 0.0)
-            let boxNode = SCNNode(geometry: box)
-            boxNode.position = position
-            boxNode.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
-            print("Aggiungo SCNBox alla posizione: \(position)")
-            scnView.scene?.rootNode.addChildNode(boxNode)
-        }
-
-    
     func setCamera() {
             scnView.scene?.rootNode.addChildNode(cameraNode)
             cameraNode.camera = SCNCamera()
@@ -247,23 +218,21 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
             cameraNode.constraints = []
         }
 
-        // Funzione per il pinch zoom
-        func handlePinch(_ gesture: UIPinchGestureRecognizer) {
-            guard let camera = cameraNode.camera else { return }
-            if gesture.state == .changed {
-                let newScale = camera.orthographicScale / Double(gesture.scale)
-                camera.orthographicScale = max(5.0, min(newScale, 50.0)) // Limita lo zoom tra 5x e 50x
-                gesture.scale = 1
-            }
+    func handlePinch(_ gesture: UIPinchGestureRecognizer) {
+        guard let camera = cameraNode.camera else { return }
+        if gesture.state == .changed {
+            let newScale = camera.orthographicScale / Double(gesture.scale)
+            camera.orthographicScale = max(5.0, min(newScale, 50.0)) // Limita lo zoom tra 5x e 50x
+            gesture.scale = 1
         }
-
-        // Funzione per il pan (spostamento della mappa)
-        func handlePan(_ gesture: UIPanGestureRecognizer) {
-            let translation = gesture.translation(in: scnView)
-            cameraNode.position.x -= Float(translation.x) * 0.01 // Spostamento orizzontale
-            cameraNode.position.z += Float(translation.y) * 0.01 // Spostamento verticale
-            gesture.setTranslation(.zero, in: scnView)
-        }
+    }
+    
+    func handlePan(_ gesture: UIPanGestureRecognizer) {
+        let translation = gesture.translation(in: scnView)
+        cameraNode.position.x -= Float(translation.x) * 0.01 // Spostamento orizzontale
+        cameraNode.position.z += Float(translation.y) * 0.01 // Spostamento verticale
+        gesture.setTranslation(.zero, in: scnView)
+    }
     
     private func setMassCenter() {
         var massCenter = SCNNode()
@@ -367,9 +336,6 @@ struct SCNViewUpdatePositionRoomContainer: UIViewRepresentable {
     }
     
     func makeUIView(context: Context) -> SCNView {
-        // Aggiunta dei riconoscitori di gesti
-        let tapGesture = UITapGestureRecognizer(target: context.coordinator, action: #selector(context.coordinator.handleTap(_:)))
-        handler.scnView.addGestureRecognizer(tapGesture)
         
         let pinchGesture = UIPinchGestureRecognizer(target: context.coordinator, action: #selector(context.coordinator.handlePinch(_:)))
         handler.scnView.addGestureRecognizer(pinchGesture)
@@ -393,12 +359,6 @@ struct SCNViewUpdatePositionRoomContainer: UIViewRepresentable {
             self.parent = parent
         }
         
-        // Gestore del tap
-        @objc func handleTap(_ gesture: UITapGestureRecognizer) {
-            let location = gesture.location(in: parent.handler.scnView)
-            parent.handler.handleTap(at: location)
-        }
-
         // Gestore del pinch (zoom)
         @objc func handlePinch(_ gesture: UIPinchGestureRecognizer) {
             parent.handler.handlePinch(gesture)

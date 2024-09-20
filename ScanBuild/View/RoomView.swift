@@ -78,7 +78,7 @@ struct RoomView: View {
                                     }
                                 }
                                 .onAppear {
-                                    print("PINO: \(room.planimetry)")
+                                    room.planimetry.drawContent(borders: true)
                                 }
                             }
                         }
@@ -99,7 +99,7 @@ struct RoomView: View {
                                             .padding()
                                             .shadow(color: Color.gray, radius: 3)
                                            
-                                    } .onAppear {
+                                    }.onAppear {
                                         var floorRooms: [Room] = []
                                         
                                         floorRooms.append(room)
@@ -349,7 +349,7 @@ struct RoomView: View {
                             
                             Button(action: {
                                 isCreateManualRoomPosition = true
-                                print("isNavigationActive set to true") // Aggiungi per debug
+                                print("isNavigationActive set to true")
                             }) {
                                 Label("Correct Room Position", systemImage: "mappin")
                             }
@@ -538,7 +538,6 @@ struct RoomView: View {
                         print("Errore durante l'eliminazione del file: \(error)")
                     }
                     
-                    // Chiudi il dialogo e avvia la navigazione
                     self.isOptionsSheetPresented = false
                     self.isNavigationActive = true
                 }

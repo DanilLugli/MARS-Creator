@@ -42,6 +42,8 @@ struct RoomPositionView: View {
     @State var apiResponseCode = ""
     @State var matchingNodesForAPI: [(SCNNode, SCNNode)] = []
 
+    @State var originalRoomNodes: [String] = [] // Nuovo stato per memorizzare i nodi originali
+
     var body: some View {
         NavigationStack {
             VStack {
@@ -64,45 +66,28 @@ struct RoomPositionView: View {
                     }
                        
                     HStack {
-                        Picker("Choose Floor Node", selection: $selectedFloorNodeName) {
+                        Picker(selection: $selectedFloorNodeName, label: Text("")) {
                             ForEach(floor.sceneObjects ?? [], id: \.self) { node in
                                 Text(node.name ?? "Unnamed").tag(node.name ?? "")
                             }
-                        }
-                        .onAppear {
+                        }.onAppear {
                             print("Floor Scene Objects onAppear: \(floor.sceneObjects?.compactMap { $0.name } ?? [])")
                             if let firstNodeName = floor.sceneObjects?.first?.name {
                                 selectedFloorNodeName = firstNodeName
                             }
                         }
-                        .onChange(of: selectedFloorNodeName) {newValue in
+                        .onChange(of: selectedFloorNodeName) { newValue in
                             print("New NAME NODE: \(newValue)")
                             floor.planimetry.changeColorOfNode(nodeName: newValue, color: UIColor.red)
                             
-                            let firstLetter = String(newValue.prefix(4))
+                            let firstLetter = String(newValue.prefix(3)) // Prende le prime tre lettere
                             
-//                            roomNodes = roomView.scnView.scene?.rootNode.childNodes(passingTest: {
-//                                n, _ in n.name != nil && n.name!.starts(with: firstLetter) && n.name! != "Room" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp"
-//                            })
-//                            .sorted(by: { a, b in
-//                                let sizeA = SCNVector3(
-//                                    a.boundingBox.max.x - a.boundingBox.min.x,
-//                                    a.boundingBox.max.y - a.boundingBox.min.y,
-//                                    a.boundingBox.max.z - a.boundingBox.min.z
-//                                )
-//                                
-//                                let sizeB = SCNVector3(
-//                                    b.boundingBox.max.x - b.boundingBox.min.x,
-//                                    b.boundingBox.max.y - b.boundingBox.min.y,
-//                                    b.boundingBox.max.z - b.boundingBox.min.z
-//                                )
-//                                return sizeA.x > sizeB.x
-//                            })
-//                            .map { node in node.name ?? "nil" } ?? []
-//                            
                             selectedFloorNode = floor.sceneObjects?.first(where: { node in
                                 node.name == newValue
                             })
+
+                            // Filtra i nodi della stanza in base al prefisso del nodo di floor
+                            filterRoomNodes(byPrefix: firstLetter)
                         }
                     }
                 }
@@ -116,32 +101,37 @@ struct RoomPositionView: View {
                     
 
                     ZStack {
-                        roomView
+                        room.planimetry
                             .border(Color.white)
                             .cornerRadius(10)
                             .padding()
                             .shadow(color: Color.gray, radius: 3)
                     }.onAppear{
-                        //roomView.loadRoomPlanimetry(room: room, borders: true)
-                        roomView.loadRoomPlanimetry(room: room, borders: false)
+                        originalRoomNodes = room.sceneObjects?.compactMap { $0.name ?? "" } ?? []
+                        roomNodes = originalRoomNodes // Imposta i nodi originali alla comparsa
                     }
-                    
                     
                     HStack {
                         Picker("Choose Room Node", selection: $selectedRoomNodeName) {
                             Text("Choose Room Node")
-                            //ForEach(roomNodes, id: \.self) { Text($0) }
-                            ForEach(roomNodes, id: \.self) { node in
-                                //print("Node ID: \(node.name)") // Debug output
-                                Text(node).tag(node)
+                            ForEach(roomNodes, id: \.self) { nodeName in
+                                Text(nodeName).tag(nodeName)
                             }
-                        }.onChange(of: selectedRoomNodeName){
+                        }.onAppear {
+                            let sceneObjectsWithNames = room.sceneObjects?.compactMap { $0.name }
+                            print("Room Scene Objects with names: \(sceneObjectsWithNames)")
+                            if let firstRoomNodeSelected = sceneObjectsWithNames?.first {
+                                selectedRoomNodeName = firstRoomNodeSelected
+                            }
+                        }.onChange(of: selectedRoomNodeName){ newValue in
+                            print("CHANGE COLOR")
                             
-                            roomView.changeColorOfNode(nodeName: selectedRoomNodeName, color: UIColor.green)
+                            room.planimetry.changeColorOfNode(nodeName: selectedRoomNodeName, color: UIColor.red)
                             
-                            selectedRoomNode = roomView.scnView.scene?.rootNode.childNodes(passingTest: {
-                                n, _ in n.name != nil && n.name! == selectedRoomNodeName
-                            }).first
+                            selectedRoomNode = room.sceneObjects?.first(where: { node in
+                                node.name == newValue
+                            })
+                            print("SELEZIONATO: \(String(describing: selectedRoomNode))")
                         }
                     }
                 }
@@ -154,11 +144,17 @@ struct RoomPositionView: View {
                             
                             selectedRoomNode = nil
                             selectedFloorNode = nil
+
+                            floor.planimetry.drawContent(borders: true)
+                            room.planimetry.drawContent(borders: true)
+
                             print(_selectedLocalNode)
                             print(_selectedGlobalNode)
                             print(selectedMap.lastPathComponent)
                             print(matchingNodesForAPI)
                             
+                            // Ripristina tutti i nodi della stanza
+                            resetRoomNodes()
                         }.buttonStyle(.bordered)
                             .background(Color.blue.opacity(0.4)
                             .cornerRadius(10))
@@ -175,11 +171,7 @@ struct RoomPositionView: View {
                                 } else {
                                     print("Error: \(response.1)")
                                 }
-                                
-                                print(selectedMap.lastPathComponent)
-                                print(matchingNodesForAPI)
-                                
-                                //saveConversionGlobalLocal(response.1, floor.floorURL, floor)
+                            
                                 responseFromServer = true
                                 showAlert = true
                             }
@@ -215,10 +207,15 @@ struct RoomPositionView: View {
             }
         }
     }
+
+    // Funzione per filtrare i nodi di room in base al prefisso
+    func filterRoomNodes(byPrefix prefix: String) {
+        roomNodes = originalRoomNodes.filter { $0.hasPrefix(prefix) }
+    }
     
-    func getSceneNodeNames(from sceneObjects: [SCNNode]?) -> [String] {
-        // Verifica se sceneObjects non è nil e lo trasforma in un array di nomi, altrimenti ritorna un array vuoto
-        return sceneObjects?.compactMap { $0.name ?? "Unnamed Node" } ?? []
+    // Funzione per ripristinare tutti i nodi di room
+    func resetRoomNodes() {
+        roomNodes = originalRoomNodes
     }
 }
 

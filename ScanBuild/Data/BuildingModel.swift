@@ -52,7 +52,7 @@ class BuildingModel: ObservableObject {
                 
                 for k in 1...5 {
 
-                    let room = Room(_name: "Room \(k)", _lastUpdate: Date(), _planimetry: SCNViewContainer(), _referenceMarkers: [], _transitionZones: [], _sceneObjects: [], _roomURL: URL(fileURLWithPath: ""))
+                    let room = Room(_name: "Room \(k)", _lastUpdate: Date(), _planimetry: SCNViewContainer(), _referenceMarkers: [], _transitionZones: [], _scene: nil, _sceneObjects: [], _roomURL: URL(fileURLWithPath: ""))
                     
                     for z in 1...2 {
                         _ = Float.random(in: 0...10)
@@ -126,25 +126,21 @@ class BuildingModel: ObservableObject {
                     if fileManager.fileExists(atPath: floorDataURL.path) {
                         let floorDataContents = try fileManager.contentsOfDirectory(at: floorDataURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
                         
-                        for fileURL in floorDataContents {
-                            if fileURL.pathExtension == "scn" || fileURL.pathExtension == "dae" {
-                                if fileURL.lastPathComponent.contains("sceneObjects") {
-                                    let objectScene = try SCNScene(url: fileURL, options: nil)
-                                    sceneObjects.append(contentsOf: objectScene.rootNode.childNodes)
-                                } else if fileURL.lastPathComponent.contains("scene") {
-                                    scene = try SCNScene(url: fileURL, options: nil)
-                                } else if fileURL.lastPathComponent.contains("sceneConfiguration") {
-                                    sceneConfiguration = try SCNScene(url: fileURL, options: nil)
-                                }
-                            }
-                            
-                        }
+//                        for fileURL in floorDataContents {
+//                            if fileURL.pathExtension == "scn" || fileURL.pathExtension == "dae" {
+//                                if fileURL.lastPathComponent.contains("sceneObjects") {
+//                                    let objectScene = try SCNScene(url: fileURL, options: nil)
+//                                    sceneObjects.append(contentsOf: objectScene.rootNode.childNodes)
+//                                } else if fileURL.lastPathComponent.contains("scene") {
+//                                    scene = try SCNScene(url: fileURL, options: nil)
+//                                } else if fileURL.lastPathComponent.contains("sceneConfiguration") {
+//                                    sceneConfiguration = try SCNScene(url: fileURL, options: nil)
+//                                }
+//                            }
+//                            
+//                        }
                     }
                     
-//                    if FileManager.default.fileExists(atPath: floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floorURL.lastPathComponent).usdz").path){
-//                        planimetry.loadFloorPlanimetry(borders: true, usdzURL: floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floorURL.lastPathComponent).usdz"))
-//                    }
-//                    
                     let associationMatrixURL = floorURL.appendingPathComponent("\(floorURL.lastPathComponent).json")
                     if fileManager.fileExists(atPath: associationMatrixURL.path) {
                         if let loadedMatrix = loadRoomPositionFromJson(from: associationMatrixURL) {
@@ -171,38 +167,56 @@ class BuildingModel: ObservableObject {
                                       _sceneObjects: sceneObjects,
                                       _scene: scene,
                                       _sceneConfiguration: sceneConfiguration,
-                                      _floorURL: floorURL)
+                                      _floorURL: floorURL
+                    )
                     
                     if FileManager.default.fileExists(atPath: floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floorURL.lastPathComponent).usdz").path){
                         
-                        planimetry.loadFloorPlanimetry(borders: true, floor: floor)
+                        let usdzURL = floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz")
+                        floor.scene = try SCNScene(url: usdzURL)
                         
-                        floor.scene = planimetry.scnView.scene
+                        floor.planimetry.loadFloorPlanimetry(borders: true, floor: floor)
                         
+                        let roomNames = floor.rooms.map { $0.name }
+                        
+                        var seenNodeNames = Set<String>()
+                        
+                        print("PRE_CARICAMENTO NODI \(floor.name)")
                         floor.sceneObjects = floor.scene?.rootNode.childNodes(passingTest: { n, _ in
                             if let nodeName = n.name {
-                                return nodeName != "Room" &&
-                                       nodeName != "Geom" &&
-                                       !nodeName.hasSuffix("_grp") &&
-                                       !nodeName.hasPrefix("unidentified")
-                            }
-                            return false
-                        })
-                        
-                        if let sceneObjects = floor.sceneObjects {
-                            print("Printing all valid nodes for \(floor.name):")
-                                for node in sceneObjects {
-                                    print("Node name: \(node.name ?? "Unnamed")")
+                                if seenNodeNames.contains(nodeName) {
+                                    print("NODE ALREADY CREATED: \(nodeName)")
+                                    return false
                                 }
-                            } else {
-                                print("No valid nodes found.")
+
+                                guard let geometry = n.geometry else {
+                                    print("NODE WITHOUT GEOMETRY: \(nodeName)")
+                                    return false
+                                }
+
+                                let isValidNode = nodeName != "Room" &&
+                                                  nodeName != "Geom" &&
+                                                  !nodeName.hasSuffix("_grp") &&
+                                                  !nodeName.hasPrefix("unidentified") &&
+                                                  !(nodeName.first?.isNumber ?? false) &&
+                                                  !nodeName.hasPrefix("_")
+
+                                if isValidNode {
+                                    seenNodeNames.insert(nodeName)
+                                    print("VALID MESH NODE ADDED: \(nodeName)")
+                                    return true
+                                }
                             }
-                        
-                    }else{
-                        print("File .usdz for \(floor.name) planimetry is not available.")
+                            
+                            return false
+                        }).sorted(by: {
+                            ($0.name ?? "").localizedCaseInsensitiveCompare($1.name ?? "") == .orderedAscending
+                        })
+                            ?? []
                     }
                     
-                    planimetryRooms.handler.loadRoomsMaps(
+                    
+                    floor.planimetryRooms.handler.loadRoomsMaps(
                         floor: floor,
                         rooms: floorRooms,
                         borders: true
@@ -231,7 +245,8 @@ class BuildingModel: ObservableObject {
                     
                     var referenceMarkers: [ReferenceMarker] = []
                     let transitionZones: [TransitionZone] = []
-                    let sceneObjects: [SCNNode] = []
+                    let scene: SCNScene? = nil
+                    var sceneObjects: [SCNNode] = []
                     let planimetry: SCNViewContainer = SCNViewContainer()
 
                     let referenceMarkerURL = roomURL.appendingPathComponent("ReferenceMarker")
@@ -261,14 +276,57 @@ class BuildingModel: ObservableObject {
                                     _planimetry: planimetry,
                                     _referenceMarkers: referenceMarkers,
                                     _transitionZones: transitionZones,
+                                    _scene: scene,
                                     _sceneObjects: sceneObjects,
                                     _roomURL: roomURL
                     )
                     
                     if FileManager.default.fileExists(atPath: roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz").path){
-                        planimetry.loadRoomPlanimetry(room: room, borders: true)
+                        
+                        let usdzURL = room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz")
+                        
+                        room.scene = try SCNScene(url: usdzURL)
+                        
+                        room.planimetry.loadRoomPlanimetry(room: room, borders: true)
+                        
+                        var seenNodeNames = Set<String>()
+
+                        print("PRE_CARICAMENTO NODI \(room.name)")
+                        room.sceneObjects = room.scene?.rootNode.childNodes(passingTest: { n, _ in
+                            if let nodeName = n.name {
+                                if seenNodeNames.contains(nodeName) {
+                                    print("NODE ALREADY CREATED: \(nodeName)")
+                                    return false
+                                }
+
+                                guard let _ = n.geometry else {
+                                    print("NODE WITHOUT GEOMETRY: \(nodeName)")
+                                    return false
+                                }
+
+                                let isValidNode = nodeName != "Room" &&
+                                                  nodeName != "Geom" &&
+                                                  !nodeName.hasSuffix("_grp") &&
+                                                  !nodeName.hasPrefix("unidentified") &&
+                                                  !(nodeName.first?.isNumber ?? false) &&
+                                                  !nodeName.hasPrefix("_")
+
+                                if isValidNode {
+                                    seenNodeNames.insert(nodeName)
+                                    print("VALID MESH NODE ADDED: \(nodeName)")
+                                    return true
+                                }
+                            }
+                            
+                            return false
+                        }).sorted(by: {
+                            ($0.name ?? "").localizedCaseInsensitiveCompare($1.name ?? "") == .orderedAscending
+                        }) ?? []
+
+                        
+                    }else{
+                        print("File .usdz for \(room.name) planimetry is not available.")
                     }
-                    
                     rooms.append(room)
                 }
             }

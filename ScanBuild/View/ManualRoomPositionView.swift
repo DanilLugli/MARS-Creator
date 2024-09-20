@@ -79,7 +79,8 @@ struct ManualRoomPositionView: View {
                 title: Text("ATTENTION").foregroundColor(.red),
                 message: Text("Room Position Saved"),
                 dismissButton: .default(Text("OK")){
-                    floor.objectWillChange.send()  
+                    floor.planimetryRooms.handler.loadRoomsMaps(floor: floor, rooms: floor.rooms, borders: true)
+                    floor.objectWillChange.send()
                 }
             )
         }

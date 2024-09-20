@@ -32,27 +32,21 @@ struct SCNViewContainer: UIViewRepresentable {
         
         cameraNode.camera = SCNCamera()
         
-        // Posiziona la camera sopra il massCenter
         cameraNode.worldPosition = SCNVector3(massCenter.worldPosition.x, massCenter.worldPosition.y + 10, massCenter.worldPosition.z)
         
-        // Configura la camera per la vista ortografica dall'alto
         cameraNode.camera?.usesOrthographicProjection = true
         cameraNode.camera?.orthographicScale = 10
         
-        // Ruota la camera per guardare verso il basso
         cameraNode.eulerAngles = SCNVector3(-Double.pi / 2, 0, 0)
-        
-        // Crea una luce direzionale (opzionale)
+
         let directionalLight = SCNNode()
         directionalLight.light = SCNLight()
         directionalLight.light!.type = .ambient
         directionalLight.light!.color = UIColor(white: 1.0, alpha: 1.0)
         cameraNode.addChildNode(directionalLight)
         
-        // Imposta la camera come punto di vista
         scnView.pointOfView = cameraNode
         
-        // Rimuovi il LookAtConstraint per evitare che la camera ruoti
         cameraNode.constraints = []
     }
     
@@ -69,37 +63,53 @@ struct SCNViewContainer: UIViewRepresentable {
     }
     
     func drawContent(borders: Bool) {
-        print(borders)
-
+        
         var drawnNodes = Set<String>()
         
+        print("RootNode: \(String(describing: scnView.scene?.rootNode.name))\n\n")
         scnView.scene?
             .rootNode
             .childNodes(passingTest: { n, _ in
-                n.name != nil && n.name! != "Room" && n.name! != "Floor0" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp" && n.name! != "__selected__"
+                n.name != nil && 
+                n.name! != "Room" &&
+                n.name! != "Floor0" &&
+                n.name! != "Geom" &&
+                String(n.name!.suffix(4)) != "_grp" &&
+                n.name! != "__selected__"
             })
             .forEach {
-                // Verifica se il nodo è già stato disegnato
-                guard let nodeName = $0.name, !drawnNodes.contains(nodeName) else {
-                    return // Se l'oggetto è già stato disegnato, passa al successivo
-                }
-                
+                let nodeName = $0.name
                 let material = SCNMaterial()
                 if nodeName == "Floor0" {
                     material.diffuse.contents = UIColor.green
                 } else {
                     material.diffuse.contents = UIColor.black
-                    if nodeName.prefix(5) == "Floor" {
+                    if nodeName?.prefix(5) == "Floor" {
                         material.diffuse.contents = UIColor.white.withAlphaComponent(0.2)
                     }
-                    if nodeName.prefix(6) == "Transi" {
-                        print("Disegno: \(nodeName)")
-                        print("Tipo: \($0.geometry ?? SCNGeometry())")
-                        material.diffuse.contents = UIColor.red
-                        material.fillMode = .lines
+                    if nodeName!.prefix(6) == "Transi" {
+                        material.diffuse.contents = UIColor.white
                     }
-                    if nodeName.prefix(4) == "Door" || nodeName.prefix(4) == "Open" {
-                        material.diffuse.contents = UIColor.green
+                    if nodeName!.prefix(4) == "Door" {
+                        material.diffuse.contents = UIColor.systemGray5
+                    }
+                    if nodeName!.prefix(4) == "Open"{
+                        material.diffuse.contents = UIColor.systemGray5
+                    }
+                    if nodeName!.prefix(4) == "Tabl" {
+                        material.diffuse.contents = UIColor.brown
+                    }
+                    if nodeName!.prefix(4) == "Chai"{
+                        material.diffuse.contents = UIColor.brown.withAlphaComponent(0.4)
+                    }
+                    if nodeName!.prefix(4) == "Stor"{
+                        material.diffuse.contents = UIColor.systemGray2
+                    }
+                    if nodeName!.prefix(4) == "Sofa"{
+                        material.diffuse.contents = UIColor(red: 0.0, green: 0.0, blue: 0.5, alpha: 0.6)
+                    }
+                    if nodeName!.prefix(4) == "Tele"{
+                        material.diffuse.contents = UIColor.orange
                     }
                     material.lightingModel = .physicallyBased
                     $0.geometry?.materials = [material]
@@ -107,20 +117,22 @@ struct SCNViewContainer: UIViewRepresentable {
                     if borders {
                         $0.scale.x = $0.scale.x < 0.2 ? $0.scale.x + 0.1 : $0.scale.x
                         $0.scale.z = $0.scale.z < 0.2 ? $0.scale.z + 0.1 : $0.scale.z
-                        $0.scale.y = (nodeName.prefix(4) == "Wall") ? 0.1 : $0.scale.y
+                        $0.scale.y = ($0.name!.prefix(4) == "Wall") ? 0.1 : $0.scale.y
                     }
                 }
-                
-                // Aggiungi il nome del nodo al set dopo averlo disegnato
-                drawnNodes.insert(nodeName)
+                drawnNodes.insert(nodeName!)
             }
     }
     
     func loadRoomPlanimetry(room: Room, borders: Bool) {
         do {
-            let usdzURL = room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz")
+            scnView.scene = room.scene
             
-            scnView.scene = try SCNScene(url: usdzURL)
+            if (scnView.scene?.rootNode) != nil {
+                //print("NODE HIERARCHY FOR \(room.name)")
+                //printNodeHierarchy(rootNode)
+            }
+            
             addDoorNodesBasedOnExistingDoors(room: room)
             drawContent(borders: borders)
             setMassCenter()
@@ -131,17 +143,13 @@ struct SCNViewContainer: UIViewRepresentable {
     }
     
     func loadFloorPlanimetry(borders: Bool, floor: Floor) {
-        do {
-            let usdzURL = floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz")
-            scnView.scene = try SCNScene(url: usdzURL)
+
+            scnView.scene = floor.scene
             drawContent(borders: borders)
             setMassCenter()
             setCamera()
             
             floor.isPlanimetryLoaded = true
-        } catch {
-            print("Error loading scene from URL: \(error)")
-        }
     }
     
     func addDoorNodesBasedOnExistingDoors(room: Room) {
@@ -284,6 +292,7 @@ struct SCNViewContainer: UIViewRepresentable {
     }
     
     func changeColorOfNode(nodeName: String, color: UIColor) {
+        print("Change Color of Node: \(nodeName)")
         drawContent(borders: false)
         if let _node = scnView.scene?.rootNode.childNodes(passingTest: { n,_ in n.name != nil && n.name! == nodeName }).first {
             let copy = _node.copy() as! SCNNode
@@ -296,6 +305,21 @@ struct SCNViewContainer: UIViewRepresentable {
             copy.scale.x = _node.scale.x < 0.2 ? _node.scale.x + 0.1 : _node.scale.x
             copy.scale.z = _node.scale.z < 0.2 ? _node.scale.z + 0.1 : _node.scale.z
             scnView.scene?.rootNode.addChildNode(copy)
+        }
+    }
+    
+    func resetColorNode() {
+        // Trova tutti i nodi nella scena con il prefisso "__selected__"
+        if let nodes = scnView.scene?.rootNode.childNodes(passingTest: { n, _ in
+            n.name?.hasPrefix("__selected__") ?? false
+        }) {
+            // Rimuove ogni nodo trovato dalla scena
+            for node in nodes {
+                node.removeFromParentNode()
+            }
+            print("All nodes with prefix '__selected__' have been removed.")
+        } else {
+            print("No nodes with prefix '__selected__' found.")
         }
     }
     

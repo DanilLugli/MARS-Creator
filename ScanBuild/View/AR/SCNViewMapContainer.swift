@@ -18,61 +18,59 @@ class SCNViewMapHandler: ObservableObject {
     }
     
     @MainActor func loadRoomsMaps(floor: Floor, rooms: [Room], borders: Bool) {
-        do {
-            let floorFileURL = floor.floorURL.appendingPathComponent("MapUsdz")
-                .appendingPathComponent("\(floor.name).usdz")
-            
-            // Prima rimuovi la scena corrente
-            scnView.scene = nil
-            
-            // Ora carica la nuova scena
-            scnView.scene = try SCNScene(url: floorFileURL)
-            
-            drawContent(borders: borders)
-            setMassCenter()
-            setCamera()
-
-            for room in rooms {
-                print("\n\nProcessing room URL: \(room.roomURL)")
-                let roomMap = room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz")
+            do {
+                let floorFileURL = floor.floorURL.appendingPathComponent("MapUsdz")
+                    .appendingPathComponent("\(floor.name).usdz")
                 
-                let roomScene = try SCNScene(url: URL(fileURLWithPath: roomMap.path))
+                // Prima rimuovi la scena corrente
+                scnView.scene = nil
                 
-                if let roomNode = roomScene.rootNode.childNode(withName: "Floor0", recursively: true) {
-                    print("Found 'Floor0' node for room at: \(roomMap)")
+                // Ora carica la nuova scena
+                scnView.scene = try SCNScene(url: floorFileURL)
+                
+                drawContent(borders: borders)
+                setMassCenter()
+                setCamera()
 
-                    let roomName = room.name
+                for room in rooms {
+                    print("\n\nProcessing room URL: \(room.roomURL)")
+                    let roomMap = room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz")
+                    
+                    let roomScene = try SCNScene(url: URL(fileURLWithPath: roomMap.path))
+                    
+                    if let roomNode = roomScene.rootNode.childNode(withName: "Floor0", recursively: true) {
+                        print("Found 'Floor0' node for room at: \(roomMap)")
 
-                    if let rotoTraslationMatrix = floor.associationMatrix[roomName] {
-                        applyRotoTraslation(to: roomNode, with: rotoTraslationMatrix)
+                        let roomName = room.name
+
+                        if let rotoTraslationMatrix = floor.associationMatrix[roomName] {
+                            applyRotoTraslation(to: roomNode, with: rotoTraslationMatrix)
+                        } else {
+                            print("No RotoTraslationMatrix found for room: \(roomName)")
+                        }
+
+                        roomNode.name = roomName
+
+                        let material = SCNMaterial()
+                        material.diffuse.contents = floor.getRoomByName(roomName)?.color
+                        roomNode.geometry?.materials = [material]
+
+                        scnView.scene?.rootNode.addChildNode(roomNode)
                     } else {
-                        print("No RotoTraslationMatrix found for room: \(roomName)")
+                        print("Node 'Floor0' not found in scene: \(roomMap)")
                     }
-
-                    roomNode.name = roomName
-
-                    let material = SCNMaterial()
-                    material.diffuse.contents = floor.getRoomByName(roomName)?.color
-                    roomNode.geometry?.materials = [material]
-
-                    scnView.scene?.rootNode.addChildNode(roomNode)
-                } else {
-                    print("Node 'Floor0' not found in scene: \(roomMap)")
                 }
+                
+            } catch {
+                print("Error loading scene from URL: \(error)")
             }
-            
-        } catch {
-            print("Error loading scene from URL: \(error)")
         }
-    }
     
     func printAllNodes(in node: SCNNode?, indent: String = "") {
         guard let node = node else { return }
         
-        // Stampa il nodo corrente con l'indentazione
         print("\(indent)Node: \(node.name ?? "Unnamed"), Position: \(node.position)")
         
-        // Ricorsivamente stampa tutti i nodi figli
         for child in node.childNodes {
             printAllNodes(in: child, indent: indent + "  ")
         }
@@ -93,42 +91,45 @@ class SCNViewMapHandler: ObservableObject {
     }
     
     func drawContent(borders: Bool) {
-        scnView.scene?
-            .rootNode
-            .childNodes(passingTest: {
-                n, _ in
-                // Filtra i nodi che non devono essere esclusi
-                n.name != nil && n.name! != "Room" && n.name! != "Geom" && !n.name!.hasPrefix("Floor") && String(n.name!.suffix(4)) != "_grp" && n.name! != "__selected__"
-            })
-            .forEach {
-                let material = SCNMaterial()
-                // Applica i materiali solo ai nodi rimanenti
-                if $0.name!.prefix(4) == "Door" || $0.name!.prefix(4) == "Open" {
-                    material.diffuse.contents = UIColor.red
-                } else {
-                    material.diffuse.contents = UIColor.black
+            scnView.scene?
+                .rootNode
+                .childNodes(passingTest: {
+                    n, _ in
+                    n.name != nil && 
+                    n.name! != "Room" &&
+                    n.name! != "Geom" &&
+                    !n.name!.hasPrefix("Floor") &&
+                    String(n.name!.suffix(4)) != "_grp" &&
+                    n.name! != "__selected__"
+                })
+                .forEach {
+                    let material = SCNMaterial()
+                    
+                    if $0.name!.prefix(4) == "Door" || $0.name!.prefix(4) == "Open" {
+                        material.diffuse.contents = UIColor.red
+                    } else {
+                        material.diffuse.contents = UIColor.black
+                    }
+                    material.lightingModel = .physicallyBased
+                    $0.geometry?.materials = [material]
+
+                    if borders {
+                        $0.scale.x = $0.scale.x < 0.2 ? $0.scale.x + 0.1 : $0.scale.x
+                        $0.scale.z = $0.scale.z < 0.2 ? $0.scale.z + 0.1 : $0.scale.z
+                        $0.scale.y = ($0.name!.prefix(4) == "Wall") ? 0.1 : $0.scale.y
+                    }
                 }
-                material.lightingModel = .physicallyBased
-                $0.geometry?.materials = [material]
-                
-                // Applica le modifiche di scala se richiesto
-                if borders {
-                    $0.scale.x = $0.scale.x < 0.2 ? $0.scale.x + 0.1 : $0.scale.x
-                    $0.scale.z = $0.scale.z < 0.2 ? $0.scale.z + 0.1 : $0.scale.z
-                    $0.scale.y = ($0.name!.prefix(4) == "Wall") ? 0.1 : $0.scale.y
+            
+            scnView.scene?
+                .rootNode
+                .childNodes(passingTest: {
+                    n, _ in n.name?.hasPrefix("Floor") ?? false
+                })
+                .forEach { node in
+                    node.removeFromParentNode()
                 }
-            }
+        }
         
-        // Rimuovi tutti i nodi con prefisso "Floor"
-        scnView.scene?
-            .rootNode
-            .childNodes(passingTest: {
-                n, _ in n.name?.hasPrefix("Floor") ?? false
-            })
-            .forEach { node in
-                node.removeFromParentNode()
-            }
-    }
     
     func changeColorOfNode(nodeName: String, color: UIColor) {
         drawContent(borders: false)

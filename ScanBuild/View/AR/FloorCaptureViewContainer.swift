@@ -105,6 +105,6 @@ struct FloorCaptureViewContainer: UIViewRepresentable {
 
 struct FloorCaptureViewContainer_Previews: PreviewProvider {
     static var previews: some View {
-        FloorCaptureViewContainer(namedUrl: Room(_name: "Sample Room", _lastUpdate: Date(), _planimetry: SCNViewContainer(), _referenceMarkers: [], _transitionZones: [], _sceneObjects: [], _roomURL: URL(fileURLWithPath: "")))
+        FloorCaptureViewContainer(namedUrl: Room(_name: "Sample Room", _lastUpdate: Date(), _planimetry: SCNViewContainer(), _referenceMarkers: [], _transitionZones: [], _scene: nil, _sceneObjects: [], _roomURL: URL(fileURLWithPath: "")))
     }
 }

@@ -197,7 +197,7 @@ struct CaptureViewContainer: UIViewRepresentable {
 
 struct CaptureViewContainer_Previews: PreviewProvider {
     static var previews: some View {
-        CaptureViewContainer(namedUrl: Room(_name: "Sample Room", _lastUpdate: Date(), _referenceMarkers: [], _transitionZones: [], _sceneObjects: [], _roomURL: URL(fileURLWithPath:"")))
+        CaptureViewContainer(namedUrl: Room(_name: "Sample Room", _lastUpdate: Date(), _referenceMarkers: [], _transitionZones: [], _scene: nil, _sceneObjects: [], _roomURL: URL(fileURLWithPath:"")))
     }
 }
 

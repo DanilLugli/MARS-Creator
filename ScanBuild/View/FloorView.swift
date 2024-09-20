@@ -1,4 +1,5 @@
 import SwiftUI
+import SceneKit
 import Foundation
 import UIKit
 import UniformTypeIdentifiers
@@ -70,6 +71,9 @@ struct FloorView: View {
                                             .padding()
                                             .shadow(color: Color.gray, radius: 3)
                                     }
+                                }.onAppear(){
+//                                    floor.planimetryRooms.handler.drawContent(borders: true)
+//                                    floor.planimetry.drawContent(borders: true)
                                 }
                             }
                         }
