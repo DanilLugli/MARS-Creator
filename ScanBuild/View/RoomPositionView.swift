@@ -141,7 +141,7 @@ struct RoomPositionView: View {
                        let _selectedGlobalNode = selectedFloorNode {
                         Button("Confirm Relation") {
                             matchingNodesForAPI.append((_selectedLocalNode, _selectedGlobalNode))
-                            
+
                             selectedRoomNode = nil
                             selectedFloorNode = nil
 
@@ -152,15 +152,16 @@ struct RoomPositionView: View {
                             print(_selectedGlobalNode)
                             print(selectedMap.lastPathComponent)
                             print(matchingNodesForAPI)
-                            
-                            // Ripristina tutti i nodi della stanza
+
                             resetRoomNodes()
-                        }.buttonStyle(.bordered)
-                            .background(Color.blue.opacity(0.4)
-                            .cornerRadius(10))
+                        }.frame(width: 160, height: 50)
+                            .foregroundStyle(.white)
+                            .background(Color.blue.opacity(0.4))
+                            .cornerRadius(20)
                             .bold()
                     }
-                    if matchingNodesForAPI.count >= 3 {
+                    
+                    if matchingNodesForAPI.count >= 3{
                         Button("Create Matrix") {
                             Task {
                                 print(matchingNodesForAPI)
@@ -175,11 +176,10 @@ struct RoomPositionView: View {
                                 responseFromServer = true
                                 showAlert = true
                             }
-                        }.buttonStyle(.bordered)
-                            .frame(width: 150, height: 50)
+                        }.frame(width: 160, height: 50)
                             .foregroundColor(.white)
                             .background(Color(red: 62/255, green: 206/255, blue: 76/255))
-                            .cornerRadius(6)
+                            .cornerRadius(20)
                             .bold()
                     }
                 }
