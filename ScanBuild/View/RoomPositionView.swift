@@ -86,7 +86,6 @@ struct RoomPositionView: View {
                                 node.name == newValue
                             })
 
-                            // Filtra i nodi della stanza in base al prefisso del nodo di floor
                             filterRoomNodes(byPrefix: firstLetter)
                         }
                     }
@@ -112,10 +111,9 @@ struct RoomPositionView: View {
                     }
                     
                     HStack {
-                        Picker("Choose Room Node", selection: $selectedRoomNodeName) {
-                            Text("Choose Room Node")
-                            ForEach(roomNodes, id: \.self) { nodeName in
-                                Text(nodeName).tag(nodeName)
+                        Picker(selection: $selectedRoomNodeName, label: Text("")) {
+                            ForEach(room.sceneObjects ?? [], id: \.self) { nodeName in
+                                Text(nodeName.name ?? "Unnamed").tag(nodeName.name ?? "")
                             }
                         }.onAppear {
                             let sceneObjectsWithNames = room.sceneObjects?.compactMap { $0.name }
@@ -141,7 +139,7 @@ struct RoomPositionView: View {
                        let _selectedGlobalNode = selectedFloorNode {
                         Button("Confirm Relation") {
                             matchingNodesForAPI.append((_selectedLocalNode, _selectedGlobalNode))
-                            
+
                             selectedRoomNode = nil
                             selectedFloorNode = nil
 
@@ -152,15 +150,16 @@ struct RoomPositionView: View {
                             print(_selectedGlobalNode)
                             print(selectedMap.lastPathComponent)
                             print(matchingNodesForAPI)
-                            
-                            // Ripristina tutti i nodi della stanza
+
                             resetRoomNodes()
-                        }.buttonStyle(.bordered)
-                            .background(Color.blue.opacity(0.4)
-                            .cornerRadius(10))
+                        }.frame(width: 160, height: 50)
+                            .foregroundStyle(.white)
+                            .background(Color.blue.opacity(0.4))
+                            .cornerRadius(20)
                             .bold()
                     }
-                    if matchingNodesForAPI.count >= 3 {
+                    
+                    if matchingNodesForAPI.count >= 3{
                         Button("Create Matrix") {
                             Task {
                                 print(matchingNodesForAPI)
@@ -175,11 +174,10 @@ struct RoomPositionView: View {
                                 responseFromServer = true
                                 showAlert = true
                             }
-                        }.buttonStyle(.bordered)
-                            .frame(width: 150, height: 50)
+                        }.frame(width: 160, height: 50)
                             .foregroundColor(.white)
                             .background(Color(red: 62/255, green: 206/255, blue: 76/255))
-                            .cornerRadius(6)
+                            .cornerRadius(20)
                             .bold()
                     }
                 }
@@ -228,15 +226,15 @@ func orderBySimilarity(node: SCNNode, listOfNodes: [SCNNode]) -> [SCNNode] {
     return result.sorted(by: { a, b in a.1 < b.1 }).map { $0.0 }
 }
 
-//
-//struct RoomPositionView_Preview: PreviewProvider {
-//    static var previews: some View {
-//        let buildingModel = BuildingModel.getInstance()
-//        let firstBuildingIndex = buildingModel.initTryData()
-//        let floor = firstBuildingIndex.floors.first!
-//        let room = floor.rooms.first!
-//        
-//        return RoomPositionView(floor: floor, room: room)
-//    }
-//}
+
+struct RoomPositionView_Preview: PreviewProvider {
+    static var previews: some View {
+        let buildingModel = BuildingModel.getInstance()
+        let firstBuildingIndex = buildingModel.initTryData()
+        let floor = firstBuildingIndex.floors.first!
+        let room = floor.rooms.first!
+        
+        return RoomPositionView(floor: floor, room: room)
+    }
+}
 
