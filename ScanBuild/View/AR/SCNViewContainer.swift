@@ -154,37 +154,38 @@ struct SCNViewContainer: UIViewRepresentable {
     
     func addDoorNodesBasedOnExistingDoors(room: Room) {
         
-        let doorNodes = scnView.scene?.rootNode.childNodes(passingTest: { node, _ in
+        let transitionNodes = room.sceneObjects?.filter{ node in
             if let nodeName = node.name {
-                return (nodeName.hasPrefix("Door") || nodeName.hasPrefix("Opening")) && !nodeName.hasSuffix("_grp")
+                return (nodeName.hasPrefix("Door") || nodeName.hasPrefix("Opening"))
             }
             return false
-        }) ?? []
+        } ?? []
         
-        for doorNode in doorNodes {
+        for newTZNode in transitionNodes {
             
-            let doorWidth = doorNode.width
-            let doorHeight = doorNode.height
-            var doorDepth = doorNode.length
-            
+            print(newTZNode.name! + "\n")
+            let doorWidth = newTZNode.width
+            let doorHeight = newTZNode.height
+            var doorDepth = newTZNode.length
             let depthExtension: CGFloat = 0.6
             doorDepth += depthExtension
+            var newDoorGeometry = SCNBox()
             
-            let newDoorGeometry = SCNBox(width: doorWidth, height: doorHeight, length: doorDepth, chamferRadius: 0.0)
+            newDoorGeometry = SCNBox(width: doorWidth, height: doorHeight, length: doorDepth, chamferRadius: 0.0)
             
             let newDoorNode = SCNNode(geometry: newDoorGeometry)
             
-            newDoorNode.transform = doorNode.transform
+            newDoorNode.transform = newTZNode.transform
             
-            let doorDirection = doorNode.simdWorldFront
+            let doorDirection = newTZNode.simdWorldFront
             let inwardTranslation = SIMD3<Float>(doorDirection * Float(doorDepth / 2))
             
-            newDoorNode.simdPosition = doorNode.simdPosition - inwardTranslation
+            newDoorNode.simdPosition = newTZNode.simdPosition - inwardTranslation
             
-            let nodeName = doorNode.name != nil ? "TransitionZone_\(doorNode.name!)" : "TransitionZone_Door"
+            let nodeName = newTZNode.name != nil ? "TransitionZone_\(newTZNode.name!)" : "TransitionZone_Door"
             
             newDoorNode.name = nodeName
-            
+           
             scnView.scene?.rootNode.addChildNode(newDoorNode)
             
             let updateName = newDoorNode.name!.replacingOccurrences(of: "TransitionZone_", with: "")

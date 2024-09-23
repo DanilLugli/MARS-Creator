@@ -287,8 +287,6 @@ class BuildingModel: ObservableObject {
                         
                         room.scene = try SCNScene(url: usdzURL)
                         
-                        room.planimetry.loadRoomPlanimetry(room: room, borders: true)
-                        
                         var seenNodeNames = Set<String>()
 
                         print("PRE_CARICAMENTO NODI \(room.name)")
@@ -327,6 +325,8 @@ class BuildingModel: ObservableObject {
                     }else{
                         print("File .usdz for \(room.name) planimetry is not available.")
                     }
+                    
+                    room.planimetry.loadRoomPlanimetry(room: room, borders: true)
                     rooms.append(room)
                 }
             }

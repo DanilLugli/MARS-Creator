@@ -2,11 +2,11 @@ import SwiftUI
 import Foundation
 
 struct AddStairsConnectionView: View {
-    
+
     var building: Building
     @State var selectedFloor: Floor?
     @State var selectedRoom: Room?
-    
+
     var initialSelectedFloor: Floor? = nil
     var initialSelectedRoom: Room? = nil
 
@@ -16,7 +16,8 @@ struct AddStairsConnectionView: View {
     @State private var fromFloor: Floor?
     @State private var fromRoom: Room?
     
-    @State var mapView = SCNViewContainer()
+    @State var mapViewFromTZ = SCNViewContainer()
+    @State var mapViewToTZ = SCNViewContainer()  
 
     @State private var step: Int = 1
     @State private var showConfirmDialog = false
@@ -32,123 +33,166 @@ struct AddStairsConnectionView: View {
             VStack {
                 
                 ConnectedDotsView(labels: ["1° Connection From", "2° Connection To", "Confirm"], progress: step == 1 ? 1 : (step == 2 ? 2 : 3))
-                
-                HStack {
-                    VStack {
-                        Text("Floor")
-                            .font(.system(size: 22))
-                            .fontWeight(.heavy)
-                        
-                        HStack {
-                            ConnectionCardView(name: selectedFloor?.name ?? "Choose\nFloor", isSelected: selectedFloor != nil)
-                                .padding()
-                                .onTapGesture {
-                                    showActionSheetFloor = true
-                                }
-                                .actionSheet(isPresented: $showActionSheetFloor) {
-                                    ActionSheet(
-                                        title: Text("Select a Floor"),
-                                        buttons: actionSheetFloorButtons()
-                                    )
-                                }
+                if step != 3{
+                    HStack {
+                        VStack {
+                            Text("Floor")
+                                .font(.system(size: 22))
+                                .fontWeight(.heavy)
+                            
+                            HStack {
+                                ConnectionCardView(name: selectedFloor?.name ?? "Choose\nFloor", isSelected: selectedFloor != nil)
+                                    .padding()
+                                    .onTapGesture {
+                                        showActionSheetFloor = true
+                                    }
+                                    .actionSheet(isPresented: $showActionSheetFloor) {
+                                        ActionSheet(
+                                            title: Text("Select a Floor"),
+                                            buttons: actionSheetFloorButtons()
+                                        )
+                                    }
+                            }
                         }
-                    }
-                    
-                    VStack {
-                        Text("Room")
-                            .font(.system(size: 22))
-                            .fontWeight(.heavy)
                         
-                        HStack {
-                            ConnectionCardView(name: selectedRoom?.name ?? "Choose\nRoom", isSelected: selectedRoom != nil)
-                                .padding()
-                                .onTapGesture {
-                                    showActionSheetRoom = true
-                                }
-                                .actionSheet(isPresented: $showActionSheetRoom) {
-                                    ActionSheet(
-                                        title: Text("Select a Room"),
-                                        buttons: actionSheetRoomButtons()
-                                    )
-                                }
+                        VStack {
+                            Text("Room")
+                                .font(.system(size: 22))
+                                .fontWeight(.heavy)
+                            
+                            HStack {
+                                ConnectionCardView(name: selectedRoom?.name ?? "Choose\nRoom", isSelected: selectedRoom != nil)
+                                    .padding()
+                                    .onTapGesture {
+                                        showActionSheetRoom = true
+                                    }
+                                    .actionSheet(isPresented: $showActionSheetRoom) {
+                                        ActionSheet(
+                                            title: Text("Select a Room"),
+                                            buttons: actionSheetRoomButtons()
+                                        )
+                                    }
+                            }
                         }
-                    }
-                    
-                    VStack {
-                        Text("Transition\nZone")
-                            .font(.system(size: 14))
-                            .fontWeight(.heavy)
                         
-                        HStack {
-                            ConnectionCardView(name: (step == 1 ? fromTransitionZone?.name : toTransitionZone?.name) ?? "Choose\nT. Z.", isSelected: (step == 1 ? fromTransitionZone : toTransitionZone) != nil)
-                                .padding()
-                                .onTapGesture {
-                                    showActionSheetTZ = true
-                                }
-                                .actionSheet(isPresented: $showActionSheetTZ) {
-                                    ActionSheet(
-                                        title: Text("Select a Transition Zone"),
-                                        buttons: actionSheetTZButtons()
-                                    )
-                                }
+                        VStack {
+                            Text("Transition\nZone")
+                                .font(.system(size: 14))
+                                .fontWeight(.heavy)
+                            
+                            HStack {
+                                ConnectionCardView(name: (step == 1 ? fromTransitionZone?.name : toTransitionZone?.name) ?? "Choose\nT. Z.", isSelected: (step == 1 ? fromTransitionZone : toTransitionZone) != nil)
+                                    .padding()
+                                    .onTapGesture {
+                                        showActionSheetTZ = true
+                                    }
+                                    .actionSheet(isPresented: $showActionSheetTZ) {
+                                        ActionSheet(
+                                            title: Text("Select a Transition Zone"),
+                                            buttons: actionSheetTZButtons()
+                                        )
+                                    }
+                            }
                         }
                     }
                 }
                 
                 VStack {
-                    ZStack {
-                        mapView
-                            .border(Color.white)
-                            .frame(width: 360, height: 360)
-                            .cornerRadius(10)
-                            .padding()
-                            .shadow(color: Color.gray, radius: 3)
+                    if step < 3 {
+                        ZStack {
+                            mapViewFromTZ
+                                .border(Color.white)
+                                .frame(width: 360, height: 360)
+                                .cornerRadius(10)
+                                .padding()
+                                .shadow(color: Color.gray, radius: 3)
+                        }
+                        .onAppear {
+                            loadMap(for: selectedRoom, on: mapViewFromTZ)
+                        }
+                        .onChange(of: selectedRoom) { oldRoom, newRoom in
+                            loadMap(for: newRoom, on: mapViewFromTZ)
+                        }
+                    } else {
+                       
+                        VStack {
+                            Text("NEW CONNECTION").font(.system(size: 18, weight: .heavy)).bold().bold()
+                            VStack {
+                                Text("FROM: ").font(.system(size: 14, weight: .heavy)).bold()
+                                mapViewFromTZ
+                                    .border(Color.white)
+                                    .frame(width: 360, height: 220)
+                                    .cornerRadius(10)
+                                    .padding()
+                                    .shadow(color: Color.gray, radius: 3)
+                            }
+                            
+                            Divider()
+                            Spacer()
+                            
+                            VStack {
+                                Text("TO: ").font(.system(size: 14, weight: .heavy)).bold()
+                                mapViewToTZ
+                                    .border(Color.white)
+                                    .frame(width: 360, height: 220)
+                                    .cornerRadius(10)
+                                    .padding()
+                                    .shadow(color: Color.gray, radius: 3)
+                            }
+                        }
+                        .onAppear {
+                            if toTransitionZone != nil {
+                                print("3 CONFIRM onAppear")
+                                loadMap(for: initialSelectedRoom, on: mapViewFromTZ)
+                                mapViewFromTZ.changeColorOfNode(nodeName: "TransitionZone_" + fromTransitionZone!.name, color: .red)
+                                loadMap(for: selectedRoom, on: mapViewToTZ)
+                                mapViewToTZ.changeColorOfNode(nodeName: "TransitionZone_" + toTransitionZone!.name, color: .red)
+                            }
+                        }
                     }
                 }
-                .onChange(of: selectedRoom) { oldRoom, newRoom in
-                    loadMap(for: newRoom)
-                }
-                .onAppear {
-                    loadMap(for: selectedRoom)
-                }
-
-                if step == 1 && fromTransitionZone != nil {
+                
+                if (step == 1 && fromTransitionZone != nil) || (step == 2 && toTransitionZone != nil) {
+                    Spacer()
                     Button(action: {
-                        step = 2
-                        selectedFloor = nil
-                        selectedRoom = nil
-                    }) {
+                        if step == 1 {
+                            step = 2
+                            selectedFloor = nil
+                            selectedRoom = nil
+                        } else if step == 2 {
+                            step = 3
+                        }
+                    }){
                         HStack {
                             Text("Next").bold()
                             Image(systemName: "arrow.right").bold()
                         }
-                        .font(.system(size: 20))
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
+                        .frame(width: 160, height: 60)
+                        .foregroundStyle(.white)
+                        .background(Color.blue.opacity(0.4))
+                        .cornerRadius(20)
+                        .bold()
                     }
                 }
                 
-                // Conferma finale
                 if step == 3 {
+                    Spacer()
                     Button(action: {
-                        createConnection() // Crea la connessione
+                        createConnection()
                         showConfirmDialog = true
                     }) {
                         Text("Confirm Connection")
-                            .font(.system(size: 20, weight: .bold))
-                            .padding()
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
+                            .frame(width: 190, height: 60)
+                            .foregroundStyle(.white)
+                            .background(Color(red: 62/255, green: 206/255, blue: 76/255).opacity(0.9))
+                            .cornerRadius(20)
+                            .bold()
                     }
                     .confirmationDialog("Do you confirm this connection?", isPresented: $showConfirmDialog) {
                         Button("Confirm") {
-                            insertConnection()
+                            createConnection()
                             dismiss()
                         }
-                        Button("Cancel", role: .cancel) {}
                     }
                 }
             }
@@ -173,9 +217,8 @@ struct AddStairsConnectionView: View {
         }
         .background(Color.customBackground.ignoresSafeArea())
     }
-    
-    // Funzione per caricare la mappa
-    private func loadMap(for room: Room?) {
+
+    private func loadMap(for room: Room?, on mapView: SCNViewContainer) {
         if let room = room {
             mapView.loadRoomPlanimetry(
                 room: room,
@@ -185,21 +228,19 @@ struct AddStairsConnectionView: View {
     }
 
     func actionSheetFloorButtons() -> [ActionSheet.Button] {
-        // Filtra i piani per escludere il piano già selezionato nel primo passaggio (fromFloor)
         var buttons: [ActionSheet.Button] = building.floors
             .filter { floor in
                 if step == 2 {
-                    // Escludiamo il piano selezionato nel primo step (fromFloor)
-                    return floor.name != fromFloor?.name
+                    return floor.name != initialSelectedFloor?.name
                 }
                 return true
             }
             .map { floor in
                 .default(Text(floor.name)) {
                     if step == 1 {
-                        fromFloor = floor // Se siamo nello step 1, memorizziamo il piano selezionato
+                        fromFloor = floor
                     } else {
-                        selectedFloor = floor // Se siamo nello step 2, memorizziamo il secondo piano selezionato
+                        selectedFloor = floor
                     }
                 }
             }
@@ -212,7 +253,6 @@ struct AddStairsConnectionView: View {
             return [.cancel()]
         }
         
-        // Filtra le stanze per escludere quella già selezionata nel primo passaggio
         var buttons: [ActionSheet.Button] = rooms
             .filter { room in
                 if step == 2 {
@@ -241,52 +281,26 @@ struct AddStairsConnectionView: View {
         var buttons: [ActionSheet.Button] = transitionZones.map { tz in
             .default(Text(tz.name)) {
                 if step == 1 {
+                    
+                    mapViewFromTZ.changeColorOfNode(nodeName: "TransitionZone_" + tz.name , color: .red)
                     fromTransitionZone = tz
                 } else {
+                    mapViewFromTZ.changeColorOfNode(nodeName: "TransitionZone_" +  tz.name , color: .red)
                     toTransitionZone = tz
-                    step = 3 // Pronto per confermare
                 }
             }
         }
         buttons.append(.cancel())
         return buttons
     }
-
     
     private func createConnection() {
-        
         print("Connection created between \(fromTransitionZone?.name ?? "") and \(toTransitionZone?.name ?? "")")
-        
-        // Verifica che tutte le informazioni necessarie siano presenti
-           guard let fromFloor = selectedFloor,
-                 let fromRoom = selectedRoom,
-                 let fromTransitionZone = fromTransitionZone,
-                 let toFloor = selectedFloor,
-                 let toRoom = selectedRoom,
-                 let toTransitionZone = toTransitionZone else {
-               print("Incomplete data for creating a connection")
-               return
-           }
-           
-           // Crea la connessione tra le due TransitionZone
-           let fromConnection = AdjacentFloorsConnection(name: "Connection to \(toRoom.name)", targetFloor: toFloor.name, targetRoom: toRoom.name)
-        
-           let toConnection = AdjacentFloorsConnection(name: "Connection to \(fromRoom.name)", targetFloor: fromFloor.name, targetRoom: fromRoom.name)
-
-           // Imposta le connessioni nelle TransitionZone
-           fromTransitionZone.connection = fromConnection
-           toTransitionZone.connection = toConnection
-           
-           // Stampa per verificare che la connessione sia stata creata correttamente
-           print("Connection created from \(fromRoom.name) to \(toRoom.name)")
-           print("From Transition Zone Connection: \(fromConnection.targetRoom)")
-           print("To Transition Zone Connection: \(toConnection.targetRoom)")
-           
     }
     
-    func insertConnection() {
-        // Inserisci la connessione nel modello, salva o invia al server
-    }
+//    func insertConnection() {
+//        // Inserisci la connessione nel modello, salva o invia al server
+//    }
 }
 
 struct AddConnection_Preview: PreviewProvider {

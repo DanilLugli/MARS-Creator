@@ -178,7 +178,7 @@ struct RoomPositionView: View {
                             }
                         }.frame(width: 160, height: 50)
                             .foregroundColor(.white)
-                            .background(Color(red: 62/255, green: 206/255, blue: 76/255))
+                            .background(Color(red: 62/255, green: 206/255, blue: 76/255).opacity(0.3))
                             .cornerRadius(20)
                             .bold()
                     }

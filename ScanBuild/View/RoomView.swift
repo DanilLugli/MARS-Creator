@@ -394,7 +394,7 @@ struct RoomView: View {
                                     isConnectionSameFloor = true
                                 }) {
                                     Label("Create Same Floor Connection", systemImage: "arrow.left.arrow.right")
-                                }
+                                }.disabled(true)
                                 
                                 Button(action: {
                                     isConnectionAdjacentFloor = true
@@ -404,7 +404,7 @@ struct RoomView: View {
                                 
                                 // Navigazione verso una terza vista
                                 Button(action: {
-                                    //TODO: Create in future Connection with Elevator
+                                    
                                 }) {
                                     Label("Create Elevator Connection", systemImage: "arrow.up.and.line.horizontal.and.arrow.down")
                                 }.disabled(true)
@@ -425,7 +425,7 @@ struct RoomView: View {
                             )
                             
                             NavigationLink(
-                                destination: AddSameConnectionView(selectedBuilding: building, initialSelectedFloor: floor, initialSelectedRoom: room),
+                                destination: AddSameConnectionView(building: building, initialSelectedFloor: floor, initialSelectedRoom: room),
                                 isActive: $isConnectionSameFloor,
                                 label: {
                                     EmptyView()
