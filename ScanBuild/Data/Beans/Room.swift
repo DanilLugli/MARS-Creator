@@ -203,4 +203,42 @@ extension Room {
         
         print("-----------------------------\n")
     }
+    
+    
+    func addConnection(from fromTransitionZone: TransitionZone, to targetRoom: Room, targetTransitionZone: TransitionZone) {
+        // 1. Crea la connessione dalla transitionZone corrente
+        let connectionFrom = AdjacentFloorsConnection(
+            name: "Connection to \(targetRoom.name)",
+            targetFloor: targetRoom.roomURL.lastPathComponent, // Supponiamo che l'URL rappresenti il nome del piano
+            targetRoom: targetRoom.name
+        )
+        
+        // 2. Crea la connessione inversa dalla transitionZone di destinazione alla stanza originale
+        let connectionTo = AdjacentFloorsConnection(
+            name: "Connection to \(self.name)",
+            targetFloor: self.roomURL.lastPathComponent,
+            targetRoom: self.name
+        )
+        
+        // 3. Imposta le connessioni nelle rispettive TransitionZone
+        fromTransitionZone.connection = connectionFrom
+        targetTransitionZone.connection = connectionTo
+        
+        // 4. Aggiorna le transition zone nelle rispettive stanze
+        if let index = _transitionZones.firstIndex(where: { $0.id == fromTransitionZone.id }) {
+            _transitionZones[index].connection = connectionFrom
+        }
+        
+        if let targetIndex = targetRoom._transitionZones.firstIndex(where: { $0.id == targetTransitionZone.id }) {
+            targetRoom._transitionZones[targetIndex].connection = connectionTo
+        }
+        
+        // Debug output
+        print("Connection added from \(fromTransitionZone.name) in room \(self.name) to \(targetTransitionZone.name) in room \(targetRoom.name).")
+        print("Connection from \(fromTransitionZone.name) to \(targetTransitionZone.name): \(connectionFrom.name)")
+        print("Connection from \(targetTransitionZone.name) to \(fromTransitionZone.name): \(connectionTo.name)")
+    }
+    
 }
+
+

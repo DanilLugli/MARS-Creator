@@ -178,7 +178,7 @@ struct AddStairsConnectionView: View {
                 if step == 3 {
                     Spacer()
                     Button(action: {
-                        createConnection()
+                        //createConnection()
                         showConfirmDialog = true
                     }) {
                         Text("Confirm Connection")
@@ -295,12 +295,21 @@ struct AddStairsConnectionView: View {
     }
     
     private func createConnection() {
-        print("Connection created between \(fromTransitionZone?.name ?? "") and \(toTransitionZone?.name ?? "")")
+        print("Entrato")
+        guard let fromTransitionZone = fromTransitionZone,
+              let toTransitionZone = toTransitionZone,
+              let selectedRoom = selectedRoom
+        else {
+            print("Missing data for creating the connection")
+            return
+        }
+        
+        initialSelectedRoom!.addConnection(from: fromTransitionZone, to: selectedRoom, targetTransitionZone: toTransitionZone)
+        
+        print("Connection created between \(fromTransitionZone.name) in room \(initialSelectedRoom!.name) and \(toTransitionZone.name) in room \(selectedRoom.name).")
+        
     }
-    
-//    func insertConnection() {
-//        // Inserisci la connessione nel modello, salva o invia al server
-//    }
+
 }
 
 struct AddConnection_Preview: PreviewProvider {

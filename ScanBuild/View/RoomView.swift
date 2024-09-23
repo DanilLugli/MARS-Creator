@@ -198,15 +198,11 @@ struct RoomView: View {
                         
                         
                         VStack {
-                            if room.hasConnections() {
-                                VStack {
-                                    Text("Add Connection for \(room.name) with + icon")
-                                        .foregroundColor(.gray)
-                                        .font(.headline)
-                                        .padding()
-                                }
-                                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                .background(Color.customBackground)
+                            if filteredConnection.isEmpty {
+                                Text("No connections available. Add a connection using the + icon.")
+                                    .foregroundColor(.gray)
+                                    .font(.headline)
+                                    .padding()
                             } else {
                                 ScrollView {
                                     LazyVStack(spacing: 50) {
@@ -226,23 +222,12 @@ struct RoomView: View {
                                                         rowSize: 1
                                                     )
                                                     .padding()
-                                                } else if let connection = transitionZone.connection as? SameFloorConnection {
-                                                    ListConnectionCardView(
-                                                        floor: floor.name,
-                                                        room: connection.targetRoom,
-                                                        targetFloor: floor.name,
-                                                        targetRoom: connection.targetRoom,
-                                                        transitionZone: transitionZone.name,
-                                                        exist: false,
-                                                        date: Date(),
-                                                        rowSize: 1
-                                                    )
-                                                    .padding()
                                                 }
                                             }
                                         }
                                     }
-                                }.padding(.top, 15)
+                                }
+                                .padding(.top, 15)
                             }
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
