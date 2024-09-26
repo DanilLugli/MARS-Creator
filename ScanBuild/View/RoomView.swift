@@ -205,7 +205,7 @@ struct RoomView: View {
                                     .padding()
                             } else {
                                 ScrollView {
-                                    LazyVStack(spacing: 50) {
+                                    LazyVStack(spacing: 40) {
                                         ForEach(filteredTransitionZones.sorted(by: { $0.name < $1.name }), id: \.id) { transitionZone in
                                             
                                             if let connections = transitionZone.connection, !connections.isEmpty {
@@ -220,12 +220,11 @@ struct RoomView: View {
                                                                 transitionZone: transitionZone.name,
                                                                 targetFloor: adjacentConnection.targetFloor,
                                                                 targetRoom: adjacentConnection.targetRoom,
-                                                                targetTransitionZone: transitionZone.name,
+                                                                targetTransitionZone: adjacentConnection.targetTransitionZone,
                                                                 exist: true,
                                                                 date: Date(),
                                                                 rowSize: 1
                                                             )
-                                                            .padding()
                                                         }
                                                     }
                                                 }
@@ -237,8 +236,9 @@ struct RoomView: View {
                                             
                                         }
                                     }
-                                }
-                                .padding(.top, 15)
+                                } .safeAreaInset(edge: .bottom, spacing: 0) {
+                                    Color.clear.frame(height: 80) // Inserisci uno spazio di 80 punti sotto la scroll view
+                                }.padding(.top, 15)
                             }
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)

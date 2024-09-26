@@ -53,14 +53,29 @@ class BuildingModel: ObservableObject {
                 for k in 1...5 {
 
                     let room = Room(_name: "Room \(k)", _lastUpdate: Date(), _planimetry: SCNViewContainer(), _referenceMarkers: [], _transitionZones: [], _scene: nil, _sceneObjects: [], _roomURL: URL(fileURLWithPath: ""))
-                    
+
                     for z in 1...2 {
-                        _ = Float.random(in: 0...10)
-                        _ = Float.random(in: 0...10)
-                        let transitionZone = TransitionZone(name: "Scala \(z)", connection: nil)
-                        do {
-                             room.addTransitionZone(transitionZone: transitionZone)
+                        let transitionZone = TransitionZone(name: "Scala \(z)", connection: [])
+                        
+                        // Creiamo 3 connessioni casuali per ogni transitionZone
+                        for _ in 1...3 {
+                            let randomTargetFloor = "Floor \(Int.random(in: 1...5))"
+                            let randomTargetRoom = "Room \(Int.random(in: 1...5))"
+                            let randomTargetTransitionZone = "TZ \(Int.random(in: 1...3))"
+                            
+                            let connection = AdjacentFloorsConnection(
+                                name: "Connection to \(randomTargetRoom)",
+                                targetFloor: randomTargetFloor,
+                                targetRoom: randomTargetRoom,
+                                targetTransitionZone: randomTargetTransitionZone
+                            )
+                            
+                            // Aggiungiamo la connessione alla lista di connessioni della TransitionZone
+                            transitionZone.connection?.append(connection)
                         }
+
+                        // Aggiungi la TransitionZone alla Room
+                        room.addTransitionZone(transitionZone: transitionZone)
                     }
                     floor.addRoom(room: room)
                 }
@@ -151,12 +166,9 @@ class BuildingModel: ObservableObject {
                         }
                     }
                     
-                    let rooms = try loadRooms(from: floorURL)
                     
-                    var floorRooms: [Room] = []
-                    rooms.forEach { room in
-                        floorRooms.append(room)
-                    }
+                    var rooms: [Room] = []
+                    
                     
                     let floor = Floor(_name: floorURL.lastPathComponent,
                                       _lastUpdate: lastModifiedDate,
@@ -169,6 +181,14 @@ class BuildingModel: ObservableObject {
                                       _sceneConfiguration: sceneConfiguration,
                                       _floorURL: floorURL
                     )
+                    
+                    rooms = try loadRooms(from: floorURL, floor: floor)
+                    floor.rooms = rooms
+                    
+                    var floorRooms: [Room] = []
+                    rooms.forEach { room in
+                        floorRooms.append(room)
+                    }
                     
                     if FileManager.default.fileExists(atPath: floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floorURL.lastPathComponent).usdz").path){
                         
@@ -229,7 +249,7 @@ class BuildingModel: ObservableObject {
         return floors
     }
     
-    private func loadRooms(from floorURL: URL) throws -> [Room] {
+    private func loadRooms(from floorURL: URL, floor: Floor) throws -> [Room] {
         let fileManager = FileManager.default
         
         let roomsDirectoryURL = floorURL.appendingPathComponent(BuildingModel.FLOOR_ROOMS_FOLDER)
@@ -278,7 +298,8 @@ class BuildingModel: ObservableObject {
                                     _transitionZones: transitionZones,
                                     _scene: scene,
                                     _sceneObjects: sceneObjects,
-                                    _roomURL: roomURL
+                                    _roomURL: roomURL,
+                                    parentFloor: floor
                     )
                     
                     if FileManager.default.fileExists(atPath: roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz").path){

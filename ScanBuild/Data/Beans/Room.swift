@@ -215,7 +215,7 @@ extension Room {
 
         let connectionFrom = AdjacentFloorsConnection(
             name: "Connection to \(targetRoom.name)",
-            targetFloor: targetRoom.parentFloor?.name ?? "Error ParentFloor",
+            targetFloor: targetRoom.getFloor(of: targetRoom)?.name ?? "Error ParentFloor",
             targetRoom: targetRoom.name,
             targetTransitionZone: targetTransitionZone.name
         )

@@ -32,62 +32,57 @@ struct ListConnectionCardView: View {
     }
     
     var body: some View {
-        GeometryReader { geometry in
-            ZStack {
-                RoundedRectangle(cornerRadius: 10)
-                                    .fill(Color.white)
-                
-                VStack(alignment: .leading) {
+        ZStack {
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color.white)
+            
+            VStack(alignment: .leading) {
+                VStack{
                     VStack{
-                        VStack{
-                            HStack{
-                                ConnectionCardView(name: floor, isSelected: false)
-                                    
-                                Text(Image(systemName: "arrow.right"))
-                                    .font(.system(size: 15, weight: .bold))
-                                    .foregroundColor(.black)
-                                ConnectionCardView(name: room, isSelected: false)
-                                    
-                                Text(Image(systemName: "arrow.right"))
-                                    .font(.system(size: 15, weight: .bold))
-                                    .foregroundColor(.black)
-                                ConnectionCardView(name: floor, isSelected: false)
-     
-                            }.padding(.top, -8)
+                        HStack{
+                            ConnectionCardView(name: floor, isSelected: false)
                             
-                            Text("Has a connection To:").font(.system(size: 18, weight: .bold))
-                                .foregroundColor(.green)
-                                .padding(.top, 8)
+                            Text(Image(systemName: "arrow.right"))
+                                .font(.system(size: 15, weight: .bold))
+                                .foregroundColor(.black)
+                            ConnectionCardView(name: room, isSelected: false)
                             
-                            HStack{
-                                ConnectionCardView(name: targetFloor, isSelected: false)
-                                
-                                Text(Image(systemName: "arrow.right"))
-                                    .font(.system(size: 15, weight: .bold))
-                                    .foregroundColor(.black)
-                                ConnectionCardView(name: targetRoom, isSelected: false)
-                                    
-                                Text(Image(systemName: "arrow.right"))
-                                    .font(.system(size: 15, weight: .bold))
-                                    .foregroundColor(.black)
-                                ConnectionCardView(name: targetTransitionZone, isSelected: false)
-                                    
-                            }.padding(.top, 8)
-                        }
+                            Text(Image(systemName: "arrow.right"))
+                                .font(.system(size: 15, weight: .bold))
+                                .foregroundColor(.black)
+                            ConnectionCardView(name: transitionZone, isSelected: false)
+                        }.padding(.top, -8)
+                        
+                        Text("Has a connection To:").font(.system(size: 18, weight: .bold))
+                            .foregroundColor(.green)
+                            .padding(.top, 8)
+                        
+                        HStack{
+                            ConnectionCardView(name: targetFloor, isSelected: false)
+                            
+                            Text(Image(systemName: "arrow.right"))
+                                .font(.system(size: 15, weight: .bold))
+                                .foregroundColor(.black)
+                            ConnectionCardView(name: targetRoom, isSelected: false)
+                            
+                            Text(Image(systemName: "arrow.right"))
+                                .font(.system(size: 15, weight: .bold))
+                                .foregroundColor(.black)
+                            ConnectionCardView(name: targetTransitionZone, isSelected: false)
+                        }.padding(.top, 8)
                     }
-                    Text("Created: \(dateFormatter.string(from: date))")
-                        .font(.system(size: 14))
-                        .foregroundColor(.gray)
-                        .padding(10)
                 }
+                Text("Created: \(dateFormatter.string(from: date))")
+                    .font(.system(size: 14))
+                    .foregroundColor(.gray)
+                    .padding(10)
             }
-            .frame(width: (geometry.size.width / CGFloat(rowSize)) , height: 300)
-            .cornerRadius(10)
-            .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 2)
         }
+        .frame(width: 380, height: 300) // Imposta un'altezza fissa di 300 punti e larghezza massima
+        .cornerRadius(10)
+        .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 2)
     }
 }
-
 
 #Preview {
     ListConnectionCardView(floor: "Floor1", room: "Room2", transitionZone: "TZ", targetFloor: "floor", targetRoom: "room", targetTransitionZone: "tTZ", exist: false, date: Date(), rowSize: 1)
