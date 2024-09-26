@@ -125,21 +125,19 @@ struct SCNViewContainer: UIViewRepresentable {
     }
     
     func loadRoomPlanimetry(room: Room, borders: Bool) {
-        do {
-            scnView.scene = room.scene
-            
-            if (scnView.scene?.rootNode) != nil {
-                //print("NODE HIERARCHY FOR \(room.name)")
-                //printNodeHierarchy(rootNode)
-            }
-            
-            addDoorNodesBasedOnExistingDoors(room: room)
-            drawContent(borders: borders)
-            setMassCenter()
-            setCamera()
-        } catch {
-            print("Error loading scene from URL: \(error)")
+        
+        scnView.scene = room.scene
+        
+        if (scnView.scene?.rootNode) != nil {
+            //print("NODE HIERARCHY FOR \(room.name)")
+            //printNodeHierarchy(rootNode)
         }
+        
+        addDoorNodesBasedOnExistingDoors(room: room)
+        drawContent(borders: borders)
+        setMassCenter()
+        setCamera()
+        
     }
     
     func loadFloorPlanimetry(borders: Bool, floor: Floor) {
@@ -192,7 +190,7 @@ struct SCNViewContainer: UIViewRepresentable {
             
             if !room.transitionZones.contains(where: { $0.name == updateName }) {
                 print("AGGIUNGO \(updateName)")
-                let transitionZones = TransitionZone(name: updateName, connection: Connection(name: ""))
+                let transitionZones = TransitionZone(name: updateName, connection: [Connection(name: "")])
                 room.addTransitionZone(transitionZone: transitionZones)
                 
             } else {

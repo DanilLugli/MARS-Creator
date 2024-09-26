@@ -206,24 +206,35 @@ struct RoomView: View {
                             } else {
                                 ScrollView {
                                     LazyVStack(spacing: 50) {
-                                        ForEach(filteredConnection, id: \.id) { transitionZone in
-                                            Button(action: {
-                                                selectedConnection = transitionZone
-                                            }) {
-                                                if let connection = transitionZone.connection as? AdjacentFloorsConnection {
-                                                    ListConnectionCardView(
-                                                        floor: floor.name,
-                                                        room: room.name,
-                                                        targetFloor: connection.targetFloor,
-                                                        targetRoom: connection.targetRoom,
-                                                        transitionZone: transitionZone.name,
-                                                        exist: true,
-                                                        date: Date(),
-                                                        rowSize: 1
-                                                    )
-                                                    .padding()
+                                        ForEach(filteredTransitionZones.sorted(by: { $0.name < $1.name }), id: \.id) { transitionZone in
+                                            
+                                            if let connections = transitionZone.connection, !connections.isEmpty {
+                                                ForEach(connections, id: \.id) { connection in
+                                                    Button(action: {
+                                                        selectedConnection = transitionZone
+                                                    }) {
+                                                        if let adjacentConnection = connection as? AdjacentFloorsConnection {
+                                                            ListConnectionCardView(
+                                                                floor: floor.name,
+                                                                room: room.name,
+                                                                transitionZone: transitionZone.name,
+                                                                targetFloor: adjacentConnection.targetFloor,
+                                                                targetRoom: adjacentConnection.targetRoom,
+                                                                targetTransitionZone: transitionZone.name,
+                                                                exist: true,
+                                                                date: Date(),
+                                                                rowSize: 1
+                                                            )
+                                                            .padding()
+                                                        }
+                                                    }
                                                 }
+                                            } else {
+                                                Text("No connections found.")
+                                                    .padding()
+                                                    .foregroundColor(.gray)
                                             }
+                                            
                                         }
                                     }
                                 }

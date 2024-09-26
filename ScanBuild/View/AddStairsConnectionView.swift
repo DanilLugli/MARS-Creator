@@ -191,6 +191,7 @@ struct AddStairsConnectionView: View {
                     .confirmationDialog("Do you confirm this connection?", isPresented: $showConfirmDialog) {
                         Button("Confirm") {
                             createConnection()
+                            initialSelectedRoom?.debugConnectionPrint()
                             dismiss()
                         }
                     }

@@ -144,6 +144,8 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
     }
     
     func addRoom(room: Room) {
+        
+        room.parentFloor = self
         _rooms.append(room)
         
         // Creare la directory della stanza all'interno di "<floor_name>_Rooms"
@@ -170,13 +172,11 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
     }
     
     func deleteRoom(room: Room) {
-        // Rimuovi la room dall'array _rooms
+        
         _rooms.removeAll { $0.id == room.id }
         
-        // Ottieni l'URL della cartella della room da eliminare
         let roomURL = floorURL.appendingPathComponent(room.name)
         
-        // Elimina la cartella della room dal file system
         do {
             if FileManager.default.fileExists(atPath: roomURL.path) {
                 try FileManager.default.removeItem(at: roomURL)

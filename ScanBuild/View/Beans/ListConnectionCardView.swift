@@ -11,20 +11,21 @@ struct ListConnectionCardView: View {
     
     var floor: String
     var room: String
+    var transitionZone: String
     var targetFloor: String
     var targetRoom: String
-    var transitionZone: String
+    var targetTransitionZone: String
     var exist: Bool
     var date: Date
     var rowSize: Int
    
-    
-    init(floor: String, room: String, targetFloor: String, targetRoom: String, transitionZone: String, exist: Bool, date: Date, rowSize: Int) {
+    init(floor: String, room: String, transitionZone: String, targetFloor: String, targetRoom: String, targetTransitionZone: String, exist: Bool, date: Date, rowSize: Int) {
         self.floor = floor
         self.room = room
+        self.transitionZone = transitionZone
         self.targetFloor = targetFloor
         self.targetRoom = targetRoom
-        self.transitionZone = transitionZone
+        self.targetTransitionZone = targetTransitionZone
         self.exist = exist
         self.date = date
         self.rowSize = rowSize
@@ -69,7 +70,7 @@ struct ListConnectionCardView: View {
                                 Text(Image(systemName: "arrow.right"))
                                     .font(.system(size: 15, weight: .bold))
                                     .foregroundColor(.black)
-                                ConnectionCardView(name: transitionZone, isSelected: false)
+                                ConnectionCardView(name: targetTransitionZone, isSelected: false)
                                     
                             }.padding(.top, 8)
                         }
@@ -89,7 +90,7 @@ struct ListConnectionCardView: View {
 
 
 #Preview {
-    ListConnectionCardView(floor: "Floor1", room: "Room2", targetFloor: "floor", targetRoom: "room", transitionZone: "TZ", exist: false, date: Date(), rowSize: 1)
+    ListConnectionCardView(floor: "Floor1", room: "Room2", transitionZone: "TZ", targetFloor: "floor", targetRoom: "room", targetTransitionZone: "tTZ", exist: false, date: Date(), rowSize: 1)
 }
 
 private let dateFormatter: DateFormatter = {

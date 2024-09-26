@@ -15,7 +15,9 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     private var _roomURL: URL
     @Published private var _color: UIColor
     
-    init(_id: UUID = UUID(), _name: String, _lastUpdate: Date, _planimetry: SCNViewContainer? = nil, _referenceMarkers: [ReferenceMarker], _transitionZones: [TransitionZone], _scene: SCNScene? = SCNScene(), _sceneObjects: [SCNNode]? = nil, _roomURL: URL) {
+    weak var parentFloor: Floor?
+    
+    init(_id: UUID = UUID(), _name: String, _lastUpdate: Date, _planimetry: SCNViewContainer? = nil, _referenceMarkers: [ReferenceMarker], _transitionZones: [TransitionZone], _scene: SCNScene? = SCNScene(), _sceneObjects: [SCNNode]? = nil, _roomURL: URL, parentFloor: Floor? = nil) {
         self._name = _name
         self._lastUpdate = _lastUpdate
         self._planimetry = _planimetry
@@ -25,6 +27,7 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         self._sceneObjects = _sceneObjects
         self._roomURL = _roomURL
         self._color = Room.randomColor().withAlphaComponent(0.3)
+        self.parentFloor = parentFloor
     }
     
     static func ==(lhs: Room, rhs: Room) -> Bool {
@@ -102,6 +105,10 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         }
     }
     
+    func getFloor(of room: Room) -> Floor? {
+        return room.parentFloor
+    }
+    
     var color: UIColor{
         get{
             return _color
@@ -170,11 +177,10 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     func deleteTransitionZone(transitionZone: TransitionZone) {
         _transitionZones.removeAll { $0.id == transitionZone.id }
     }
-    
-    // Nuovo metodo per ottenere tutte le connessioni
-    func getConnections() -> [Connection] {
-        return _transitionZones.compactMap { $0.connection }
-    }
+
+//    func getConnections() -> [Connection] {
+//        return _transitionZones.compactMap { $0.connection }
+//    }
 }
 
 extension Room {
@@ -206,31 +212,33 @@ extension Room {
     
     
     func addConnection(from fromTransitionZone: TransitionZone, to targetRoom: Room, targetTransitionZone: TransitionZone) {
-        // 1. Crea la connessione dalla transitionZone corrente
+
         let connectionFrom = AdjacentFloorsConnection(
             name: "Connection to \(targetRoom.name)",
-            targetFloor: targetRoom.roomURL.lastPathComponent, // Supponiamo che l'URL rappresenti il nome del piano
-            targetRoom: targetRoom.name
+            targetFloor: targetRoom.parentFloor?.name ?? "Error ParentFloor",
+            targetRoom: targetRoom.name,
+            targetTransitionZone: targetTransitionZone.name
         )
         
         // 2. Crea la connessione inversa dalla transitionZone di destinazione alla stanza originale
         let connectionTo = AdjacentFloorsConnection(
             name: "Connection to \(self.name)",
             targetFloor: self.roomURL.lastPathComponent,
-            targetRoom: self.name
+            targetRoom: self.name,
+            targetTransitionZone: fromTransitionZone.name
         )
         
         // 3. Imposta le connessioni nelle rispettive TransitionZone
-        fromTransitionZone.connection = connectionFrom
-        targetTransitionZone.connection = connectionTo
+        fromTransitionZone.connection?.append(connectionFrom)
+        targetTransitionZone.connection?.append(connectionTo)
         
         // 4. Aggiorna le transition zone nelle rispettive stanze
         if let index = _transitionZones.firstIndex(where: { $0.id == fromTransitionZone.id }) {
-            _transitionZones[index].connection = connectionFrom
+            _transitionZones[index].connection?.append(connectionFrom)
         }
         
         if let targetIndex = targetRoom._transitionZones.firstIndex(where: { $0.id == targetTransitionZone.id }) {
-            targetRoom._transitionZones[targetIndex].connection = connectionTo
+            targetRoom._transitionZones[targetIndex].connection?.append(connectionTo)
         }
         
         // Debug output
@@ -239,6 +247,25 @@ extension Room {
         print("Connection from \(targetTransitionZone.name) to \(fromTransitionZone.name): \(connectionTo.name)")
     }
     
+    func debugConnectionPrint() {
+            print("Room: \(self.name)")
+            print("Transition Zones and their Connections:")
+
+            for transitionZone in self.transitionZones {
+                print("Transition Zone: \(transitionZone.name)")
+                
+                if let connections = transitionZone.connection, !connections.isEmpty {
+                    for (index, connection) in connections.enumerated() {
+                        print("\tConnection \(index + 1): \(connection.name)")
+                        
+                        if let adjacentConnection = connection as? AdjacentFloorsConnection {
+                            print("\t\tTarget Room: \(adjacentConnection.targetRoom)")
+                            print("\t\tTarget Floor: \(adjacentConnection.targetFloor)")
+                        }
+                    }
+                } else {
+                    print("\tNo connections found.")
+                }
+            }
+        }
 }
-
-

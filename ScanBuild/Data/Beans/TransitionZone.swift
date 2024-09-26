@@ -5,10 +5,10 @@ import SwiftUI
 class TransitionZone: Codable, Identifiable, Equatable, ObservableObject {
     @Published private var _id: UUID = UUID()
     @Published private var _name: String
-    @Published private var _connection: Connection?
+    @Published private var _connection: [Connection]?
     
 
-    init(name: String, connection: Connection?) {
+    init(name: String, connection: [Connection]?) {
         self._name = name
         self._connection = connection
     }
@@ -32,7 +32,7 @@ class TransitionZone: Codable, Identifiable, Equatable, ObservableObject {
         }
     }
     
-    var connection: Connection? {
+    var connection: [Connection]? {
         get {
             return _connection
         }set{
@@ -59,6 +59,6 @@ class TransitionZone: Codable, Identifiable, Equatable, ObservableObject {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         _id = try container.decode(UUID.self, forKey: .id)
         _name = try container.decode(String.self, forKey: .name)
-        _connection = try container.decodeIfPresent(Connection.self, forKey: .connection)
+        _connection = try container.decodeIfPresent([Connection].self, forKey: .connection)
     }
 }

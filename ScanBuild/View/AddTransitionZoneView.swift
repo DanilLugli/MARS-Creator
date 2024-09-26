@@ -108,7 +108,7 @@ struct AddTransitionZoneView: View {
 
     private func addTransitionZoneToScene() {
         
-        let transitionZone = TransitionZone(name: transitionZoneName, connection: Connection(name: ""))
+        let transitionZone = TransitionZone(name: transitionZoneName, connection: [Connection(name: "")])
         room.addTransitionZone(transitionZone: transitionZone)
         print("Transition Zone \(transitionZoneName) added to the room and scene.")
     }

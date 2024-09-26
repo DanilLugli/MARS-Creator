@@ -314,7 +314,6 @@ struct SCNViewMapContainer: UIViewRepresentable {
     }
     
     func makeUIView(context: Context) -> SCNView {
-        handler.scnView
         
         // Zoom
         let pinchGesture = UIPinchGestureRecognizer(target: context.coordinator, action: #selector(context.coordinator.handlePinch(_:)))
