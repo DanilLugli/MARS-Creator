@@ -262,7 +262,7 @@
 		AAA29E5D2C1711AA00CA267C = {
 			isa = PBXGroup;
 			children = (
-				AAA29E682C1711AA00CA267C /* ScanBuild */,
+				AAA29E682C1711AA00CA267C /* ARL Creator */,
 				AAA29E672C1711AA00CA267C /* Products */,
 				AA3A24F62C638A5D00E162A3 /* Frameworks */,
 			);
@@ -276,7 +276,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		AAA29E682C1711AA00CA267C /* ScanBuild */ = {
+		AAA29E682C1711AA00CA267C /* ARL Creator */ = {
 			isa = PBXGroup;
 			children = (
 				AA78F5D82C2C77250044F825 /* View */,
@@ -290,7 +290,7 @@
 				AAA29E772C1711AC00CA267C /* ScanBuild-Bridging-Header.h */,
 				AA2CA54B2C3D7ABA00C88C94 /* ContentView.swift */,
 			);
-			path = ScanBuild;
+			path = "ARL Creator";
 			sourceTree = "<group>";
 		};
 		AAE57FA92C384E4D00F0196F /* Beans */ = {
