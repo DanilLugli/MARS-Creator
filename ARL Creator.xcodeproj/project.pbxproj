@@ -606,7 +606,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "EveryLAB-Tesi.ScanBuild";
 				PRODUCT_NAME = "ARL Creator";
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "ScanBuild/ScanBuild-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "ARL Creator/ScanBuild-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -642,7 +642,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "EveryLAB-Tesi.ScanBuild";
 				PRODUCT_NAME = "ARL Creator";
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "ScanBuild/ScanBuild-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "ARL Creator/ScanBuild-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
