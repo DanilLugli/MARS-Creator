@@ -19,7 +19,7 @@ struct RoomView: View {
     @State private var selectedImageURL: URL?
     
     @State private var isRenameSheetPresented = false
-    @State private var isNavigationActive = false
+    @State private var isNavigationScanRoomActive = false
     @State private var isConnectionAdjacentFloor = false
     @State private var isRoomPlanimetryUploadPicker = false
     @State private var isConnectionSameFloor = false
@@ -59,10 +59,9 @@ struct RoomView: View {
                     TabView(selection: $selectedTab) {
                         
                         VStack {
-                            //if isDirectoryEmpty(url: room.roomURL.appendingPathComponent("MapUsdz")) {
-                            if room.planimetry == nil{
+                            if room.planimetry.scnView.scene == nil{
                                 
-                                Text("Add Planimetry with + icon")
+                                Text("Add Planimetry for \(room.name) with + icon.")
                                     .foregroundColor(.gray)
                                     .font(.headline)
                                     .padding()
@@ -112,11 +111,16 @@ struct RoomView: View {
                                     }
                                 }
                             } else {
-                                VStack {
-                                    let isSelected = floor.isMatrixPresent(named: room.name, inFileAt: floor.floorURL.appendingPathComponent("\(floor.name).json"))
-                                    MatrixCardView(floor: floor.name, room: room.name, exist: isSelected, date: Date(), rowSize: 1)
-                                }
-                                .padding()
+//                                VStack {
+////                                    let isSelected = floor.isMatrixPresent(named: room.name, inFileAt: floor.floorURL.appendingPathComponent("\(floor.name).json"))
+////                                    MatrixCardView(floor: floor.name, room: room.name, exist: isSelected, date: Date(), rowSize: 1)
+//                                    
+//                                }
+//                                .padding()
+                                Text("Add & Calculate \(room.name) Position with + icon.")
+                                    .foregroundColor(.gray)
+                                    .font(.headline)
+                                    .padding()
                             }
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -129,7 +133,7 @@ struct RoomView: View {
                         VStack {
                             if room.referenceMarkers.isEmpty {
                                 VStack {
-                                    Text("Add Marker with + icon")
+                                    Text("Add Marker to \(room.name) with + icon.")
                                         .foregroundColor(.gray)
                                         .font(.headline)
                                         .padding()
@@ -160,7 +164,7 @@ struct RoomView: View {
                         
                         VStack{
                             if room.transitionZones.isEmpty{
-                                Text("Add Transition Zone with + icon").foregroundColor(.gray)
+                                Text("Add Transition Zone to \(room.name) with + icon.").foregroundColor(.gray)
                                     .font(.headline)
                                     .padding()
                             }else{
@@ -199,7 +203,7 @@ struct RoomView: View {
                         
                         VStack {
                             if filteredConnection.isEmpty {
-                                Text("No connections available. Add a connection using the + icon.")
+                                Text("Add a Connection for \(room.name) using the + icon.")
                                     .foregroundColor(.gray)
                                     .font(.headline)
                                     .padding()
@@ -251,6 +255,9 @@ struct RoomView: View {
                 }
                 .background(Color.customBackground)
                 .foregroundColor(.white)
+            }
+            .navigationDestination(isPresented: $isNavigationScanRoomActive) {
+                ScanningView(namedUrl: room)
             }
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -313,15 +320,16 @@ struct RoomView: View {
                                 .font(.system(size: 22))
                                 .symbolRenderingMode(.palette)
                                 .foregroundStyle(.white, .blue, .blue)
-                        }.background{
-                            NavigationLink(
-                                destination: ScanningView(namedUrl: room),
-                                isActive: $isNavigationActive,
-                                label: {
-                                    EmptyView()
-                                }
-                            )
                         }
+//                        .background{
+//                            NavigationLink(
+//                                destination: ScanningView(namedUrl: room),
+//                                isActive: $isNavigationScanRoomActive,
+//                                label: {
+//                                    EmptyView()
+//                                }
+//                            )
+//                        }
                     }
                     else if selectedTab == 1 {
                         Menu {
@@ -440,7 +448,8 @@ struct RoomView: View {
                         }
                     }
                 }
-            }.sheet(isPresented: $isColorPickerPopoverPresented) {
+            }
+            .sheet(isPresented: $isColorPickerPopoverPresented) {
                 ZStack {
                     // Rettangolo che riempie l'intera sheet
                     Color.customBackground
@@ -535,7 +544,7 @@ struct RoomView: View {
                     }
                     
                     self.isOptionsSheetPresented = false
-                    self.isNavigationActive = true
+                    self.isNavigationScanRoomActive = true
                 }
                 .font(.system(size: 20))
                 .bold()
@@ -560,7 +569,6 @@ struct RoomView: View {
                 Button("Yes", role: .destructive) {
                     floor.deleteRoom(room: room)
                     print("Room eliminata")
-                    //dismiss() // Chiude la vista corrente, se necessario
                 }
                 
                 Button("Cancel", role: .cancel) {

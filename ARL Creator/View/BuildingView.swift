@@ -58,7 +58,8 @@ struct BuildingView: View {
         .toolbar {
             ToolbarItem(placement: .principal) {
                 Text("BUILDING")
-                    .font(.system(size: 26, weight: .heavy))
+                    .font(.system(size: 26))
+                    .fontWeight(.heavy)
                     .foregroundColor(.white)
             }
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -70,7 +71,6 @@ struct BuildingView: View {
                     }
                     Menu {
                         Button(action: {
-                            // Azione per il pulsante "Rename"
                             isRenameSheetPresented = true
                         }) {
                             Label("Rename Building", systemImage: "pencil")

@@ -76,7 +76,7 @@ struct RoomPositionView: View {
                                 selectedFloorNodeName = firstNodeName
                             }
                         }
-                        .onChange(of: selectedFloorNodeName) { newValue in
+                        .onChange(of: selectedFloorNodeName) { oldValue, newValue in
                             print("New NAME NODE: \(newValue)")
                             floor.planimetry.changeColorOfNode(nodeName: newValue, color: UIColor.red)
                             
@@ -119,11 +119,11 @@ struct RoomPositionView: View {
                             }
                         }.onAppear {
                             let sceneObjectsWithNames = room.sceneObjects?.compactMap { $0.name }
-                            print("Room Scene Objects with names: \(sceneObjectsWithNames)")
+                            print("Room Scene Objects with names: \(String(describing: sceneObjectsWithNames))")
                             if let firstRoomNodeSelected = sceneObjectsWithNames?.first {
                                 selectedRoomNodeName = firstRoomNodeSelected
                             }
-                        }.onChange(of: selectedRoomNodeName){ newValue in
+                        }.onChange(of: selectedRoomNodeName){ oldValue, newValue in
                             print("CHANGE COLOR")
                             
                             room.planimetry.changeColorOfNode(nodeName: selectedRoomNodeName, color: UIColor.red)

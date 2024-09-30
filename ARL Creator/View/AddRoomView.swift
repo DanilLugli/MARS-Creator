@@ -36,8 +36,6 @@ struct AddRoomView: View {
                     let newRoom = Room(_name: roomName, _lastUpdate: Date(), _planimetry: SCNViewContainer(), _referenceMarkers: [], _transitionZones: [], _sceneObjects: [], _roomURL: URL(fileURLWithPath: ""))
                     
                     floor.addRoom(room: newRoom)
-                    
-                    self.presentationMode.wrappedValue.dismiss()
                 }) {
                     Text("SAVE")
                         .font(.system(size: 22, weight: .heavy))
@@ -59,20 +57,6 @@ struct AddRoomView: View {
                         .font(.system(size: 22, weight: .heavy))
                         .foregroundColor(.white)
                 }
-//                ToolbarItem(placement: .navigationBarTrailing) {
-//                    HStack {
-//                        Button(action: {
-//                            print("Info button tapped")
-//                        }) {
-//                            Image(systemName: "info.circle.fill")
-//                                .resizable()
-//                                .aspectRatio(contentMode: .fit)
-//                                .frame(width: 31, height: 31)
-//                                .foregroundColor(.blue)
-//                                .background(Circle().fill(Color.white).frame(width: 31, height: 31))
-//                        }
-//                    }
-//                }
             }
         }
     }

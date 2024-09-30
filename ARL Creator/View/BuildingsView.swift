@@ -5,13 +5,11 @@ struct BuildingsView: View {
     
     @ObservedObject var buildingsModel = BuildingModel.getInstance()
     @State private var searchText = ""
-    @State private var selectedBuilding: UUID = UUID()
-    @State private var isNavigationActive = false
+    @State private var selectedBuilding: Building? = nil
     
     var body: some View {
         NavigationStack {
             VStack {
-                
                 if buildingsModel.getBuildings().isEmpty {
                     VStack {
                         Text("Add Building with + icon")
@@ -20,8 +18,7 @@ struct BuildingsView: View {
                             .padding()
                     }
                 } else {
-                    VStack{
-                        
+                    VStack {
                         TextField("Search", text: $searchText)
                             .padding(7)
                             .background(Color(.systemGray6))
@@ -30,23 +27,21 @@ struct BuildingsView: View {
                             .frame(maxWidth: .infinity)
                             .padding()
                         
-                        
                         ScrollView {
                             LazyVStack(spacing: 50) {
                                 ForEach(filteredBuildings, id: \.id) { building in
                                     NavigationLink(destination: BuildingView(building: building)) {
-                                        DefaultCardView(name: building.name, date: building.lastUpdate).padding()
+                                        DefaultCardView(name: building.name, date: Date())
+                                            .padding()
                                     }
                                 }
                             }
-                        }.padding(.top, 15)
+                        }
+                        .padding(.top, 15)
                     }
                 }
-            }
-            .foregroundColor(.white)
-            .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity)
+            }.foregroundColor(.white)
             .background(Color.customBackground)
-            .edgesIgnoringSafeArea(.all)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
@@ -65,7 +60,8 @@ struct BuildingsView: View {
                     }
                 }
             }
-        }
+          }
+
     }
     
     var filteredBuildings: [Building] {

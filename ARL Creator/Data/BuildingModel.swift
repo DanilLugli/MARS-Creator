@@ -131,29 +131,16 @@ class BuildingModel: ObservableObject {
                     
                     let floorDataURL = floorURL
                     
-                    var sceneObjects: [SCNNode] = []
-                    var scene: SCNScene? = nil
-                    var sceneConfiguration: SCNScene? = nil
+                    let sceneObjects: [SCNNode] = []
+                    let scene: SCNScene? = nil
+                    let sceneConfiguration: SCNScene? = nil
                     var associationMatrix: [String : RotoTraslationMatrix]?
                     let planimetry: SCNViewContainer = SCNViewContainer()
                     let planimetryRooms: SCNViewMapContainer = SCNViewMapContainer()
                     
                     if fileManager.fileExists(atPath: floorDataURL.path) {
-                        let floorDataContents = try fileManager.contentsOfDirectory(at: floorDataURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
-                        
-//                        for fileURL in floorDataContents {
-//                            if fileURL.pathExtension == "scn" || fileURL.pathExtension == "dae" {
-//                                if fileURL.lastPathComponent.contains("sceneObjects") {
-//                                    let objectScene = try SCNScene(url: fileURL, options: nil)
-//                                    sceneObjects.append(contentsOf: objectScene.rootNode.childNodes)
-//                                } else if fileURL.lastPathComponent.contains("scene") {
-//                                    scene = try SCNScene(url: fileURL, options: nil)
-//                                } else if fileURL.lastPathComponent.contains("sceneConfiguration") {
-//                                    sceneConfiguration = try SCNScene(url: fileURL, options: nil)
-//                                }
-//                            }
-//                            
-//                        }
+                        _ = try fileManager.contentsOfDirectory(at: floorDataURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+
                     }
                     
                     let associationMatrixURL = floorURL.appendingPathComponent("\(floorURL.lastPathComponent).json")
@@ -197,7 +184,7 @@ class BuildingModel: ObservableObject {
                         
                         floor.planimetry.loadFloorPlanimetry(borders: true, floor: floor)
                         
-                        let roomNames = floor.rooms.map { $0.name }
+                        _ = floor.rooms.map { $0.name }
                         
                         var seenNodeNames = Set<String>()
                         
@@ -209,7 +196,7 @@ class BuildingModel: ObservableObject {
                                     return false
                                 }
 
-                                guard let geometry = n.geometry else {
+                                guard n.geometry != nil else {
                                     print("NODE WITHOUT GEOMETRY: \(nodeName)")
                                     return false
                                 }
@@ -266,7 +253,7 @@ class BuildingModel: ObservableObject {
                     var referenceMarkers: [ReferenceMarker] = []
                     let transitionZones: [TransitionZone] = []
                     let scene: SCNScene? = nil
-                    var sceneObjects: [SCNNode] = []
+                    let sceneObjects: [SCNNode] = []
                     let planimetry: SCNViewContainer = SCNViewContainer()
 
                     let referenceMarkerURL = roomURL.appendingPathComponent("ReferenceMarker")
@@ -376,7 +363,7 @@ class BuildingModel: ObservableObject {
         }
     }
     
-    @MainActor func renameBuilding(building: Building, newName: String) throws -> Bool {
+    @MainActor func renameBuilding(building: Building, newName: String) throws {
         let fileManager = FileManager.default
         let oldBuildingURL = building.buildingURL
         
@@ -425,8 +412,6 @@ class BuildingModel: ObservableObject {
         }
 
         BuildingModel.LOGGER.log("Building rinominato da \(building.name) a \(newName)")
-        
-        return true
     }
     
     func deleteBuilding(building: Building) {

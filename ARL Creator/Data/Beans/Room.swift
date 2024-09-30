@@ -202,7 +202,7 @@ extension Room {
             print("\tTransition Zone Name: \(zone.name)")
         }
         
-        print("Scene Objects (\(self.sceneObjects?.count)):")
+        print("Scene Objects (\(String(describing: self.sceneObjects?.count))):")
         for object in sceneObjects! {
             print("\tObject Name: \(object.name ?? "Unnamed Object")")
         }

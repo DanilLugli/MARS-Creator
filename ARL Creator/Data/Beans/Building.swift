@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUICore
 
-class Building: Encodable, ObservableObject {
+class Building: Encodable, ObservableObject, Hashable {
     private var _id = UUID()
     @Published private var _name: String
     private var _lastUpdate: Date
@@ -33,6 +33,14 @@ class Building: Encodable, ObservableObject {
         try container.encode(_name, forKey: .name)
         try container.encode(_lastUpdate, forKey: .lastUpdate)
         try container.encode(_floors, forKey: .floors)
+    }
+    
+    static func == (lhs: Building, rhs: Building) -> Bool {
+        return lhs.id == rhs.id
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
     
     var id: UUID {

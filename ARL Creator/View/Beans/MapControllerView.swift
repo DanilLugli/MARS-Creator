@@ -8,7 +8,6 @@ struct MapControllerView: View {
     
     var body: some View {
         HStack {
-            // Sezione dei bottoni per la rotazione
             VStack {
                 Button(action: {
                     moveObject.rotateCounterClockwise()
@@ -51,7 +50,6 @@ struct MapControllerView: View {
                 Spacer()
             }
             
-            // Sezione dei bottoni per il movimento
             VStack {
                 Button(action: {
                     moveObject.moveUp()

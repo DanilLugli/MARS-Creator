@@ -20,6 +20,7 @@ struct FloorView: View {
     @State private var showFloorMap: Bool = false
     
     @State private var isNavigationActive = false
+    @State private var isNavigationAddActive = false
     @State private var isFloorPlanimetryUploadPicker = false
     @State private var isRenameSheetPresented = false
     @State private var isErrorUpdateAlertPresented = false
@@ -49,7 +50,7 @@ struct FloorView: View {
                                 .font(.system(size: 20)).bold()
                         }.toggleStyle(SwitchToggleStyle()).padding()
                         
-                        if floor.planimetry == nil {
+                        if floor.planimetry.scnView.scene == nil {
                             Text("Add Planimetry with + icon")
                                 .foregroundColor(.gray)
                                 .font(.headline)
@@ -126,6 +127,12 @@ struct FloorView: View {
             }
             .background(Color.customBackground)
             .foregroundColor(.white)
+            .navigationDestination(isPresented: $isNavigationAddActive) {
+                AddRoomView(floor: floor)
+            }
+            .navigationDestination(isPresented: $isNavigationActive) {
+                FloorScanningView(namedUrl: floor)
+            }
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -174,20 +181,27 @@ struct FloorView: View {
                                 .font(.system(size: 22))
                                 .foregroundStyle(.white, .blue, .blue)
                         }
-                        NavigationLink(destination: FloorScanningView(namedUrl: floor), isActive: $isNavigationActive) {
-                            EmptyView()
-                        }
+//                        NavigationLink(destination: FloorScanningView(namedUrl: floor), isActive: $isNavigationActive) {
+//                            EmptyView()
+//                        }
                     }
                     else if selectedTab == 1 {
-                        NavigationLink(destination: AddRoomView(floor: floor), isActive: $isNavigationActive) {
+                        Button(action: {
+                            let newRoom = Room(
+                                _name: "New Room",
+                                _lastUpdate: Date(),
+                                _planimetry: SCNViewContainer(),
+                                _referenceMarkers: [],
+                                _transitionZones: [],
+                                _sceneObjects: [],
+                                _roomURL: URL(fileURLWithPath:"")
+                            )
+                            self.newRoom = newRoom
+                            self.isNavigationAddActive = true
+                        }) {
                             Image(systemName: "plus.circle.fill")
                                 .font(.system(size: 22))
                                 .foregroundStyle(.white, .blue, .blue)
-                                .onTapGesture {
-                                    let newRoom = Room(_name: "New Room", _lastUpdate: Date(), _planimetry: SCNViewContainer(), _referenceMarkers: [], _transitionZones: [], _sceneObjects: [], _roomURL: URL(fileURLWithPath:""))
-                                    self.newRoom = newRoom
-                                    self.isNavigationActive = true
-                                }
                         }
                     }
                 }
@@ -234,11 +248,9 @@ struct FloorView: View {
             Button("Yes", role: .destructive) {
                 building.deleteFloor(floor: floor)
                 print("Floor eliminato")
-                //dismiss() // Chiude la vista corrente
             }
             
             Button("Cancel", role: .cancel) {
-                //Optional
             }
         }
         .alert(isPresented: $isErrorUpdateAlertPresented) {

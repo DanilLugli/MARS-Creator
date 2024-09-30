@@ -44,7 +44,6 @@ struct AddFloorView: View {
                     
                     building.addFloor(floor: newFloor)
                     
-                    self.presentationMode.wrappedValue.dismiss()
                 }) {
                     Text("SAVE")
                         .font(.system(size: 22, weight: .heavy))
