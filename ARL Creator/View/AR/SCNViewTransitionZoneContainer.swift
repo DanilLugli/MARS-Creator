@@ -16,16 +16,14 @@ class SCNViewModel: ObservableObject, MoveDimensionObject{
     }
     
     private func setupScene() {
-        // Configura la scena qui (massCenter, camera, etc.)
         scnView.scene = SCNScene()
         setCamera()
     }
     
     func removeLastBox() {
         if let boxNode = lastAddedBoxNode {
-            boxNode.removeFromParentNode()  // Rimuovi il nodo dalla scena
-            lastAddedBoxNode = nil  // Resetta il riferimento
-            print("Last SCNBox removed.")
+            boxNode.removeFromParentNode()
+            lastAddedBoxNode = nil
         } else {
             print("No SCNBox to remove.")
         }
@@ -35,7 +33,7 @@ class SCNViewModel: ObservableObject, MoveDimensionObject{
         scnView.scene?.rootNode.addChildNode(cameraNode)
         
         cameraNode.camera = SCNCamera()
-        cameraNode.worldPosition = SCNVector3(0, 10, 0)  // Esempio di posizionamento
+        cameraNode.worldPosition = SCNVector3(0, 10, 0)
         cameraNode.camera?.usesOrthographicProjection = true
         cameraNode.camera?.orthographicScale = 10
         cameraNode.eulerAngles = SCNVector3(-Double.pi / 2, 0, 0)
@@ -118,7 +116,6 @@ class SCNViewModel: ObservableObject, MoveDimensionObject{
     }
     
     func addBox(at position: SCNVector3) {
-        
         if lastAddedBoxNode != nil {
             print("A box has already been added. Remove it before adding a new one.")
             return  // Esci dalla funzione se esiste già un box
@@ -133,19 +130,17 @@ class SCNViewModel: ObservableObject, MoveDimensionObject{
     }
     
     func handleTap(at location: CGPoint) {
-        print("Tap rilevato in posizione: \(location)")
+        print("Tap detected at location: \(location)")
         
+        // Hit test to find the tapped point in the scene
         let hitResults = scnView.hitTest(location, options: nil)
         if let hitResult = hitResults.first {
             let position = hitResult.worldCoordinates
-            print("Punto toccato nella scena: \(position)")
-            
-            // Aggiungi il nodo SCNBox alla posizione toccata
+            print("Tapped position in scene: \(position)")
             addBox(at: position)
         } else {
-            // Se non viene trovato alcun punto, posiziona la scatola in una posizione di default
-            print("Nessun nodo trovato, aggiungo scatola alla posizione 0,0,0")
-            addBox(at: SCNVector3(0, 0, 0))
+            print("No node found at tap location, placing box at default position (0, 0, 0)")
+            addBox(at: SCNVector3(0, 0, 0))  // Default position
         }
     }
     
@@ -180,10 +175,8 @@ class SCNViewModel: ObservableObject, MoveDimensionObject{
     func rotateBoxClockwise() {
         guard let boxNode = lastAddedBoxNode else { return }
         
-        // 1 grado in radianti (positivi per rotazione in senso orario)
         let oneDegreeInRadians = CGFloat.pi / 180
         
-        // Aggiorna manualmente l'angolo di rotazione del nodo sull'asse Y
         boxNode.eulerAngles.y += Float(oneDegreeInRadians)
         
         print("Box rotated 1 degree clockwise.")
@@ -290,14 +283,7 @@ struct SCNViewTransitionZoneContainer: UIViewRepresentable {
         
         @objc func handleTap(_ gesture: UITapGestureRecognizer) {
             let location = gesture.location(in: viewModel.scnView)
-            let hitResults = viewModel.scnView.hitTest(location, options: nil)
-            
-            if let hitResult = hitResults.first {
-                let position = hitResult.worldCoordinates
-                viewModel.addBox(at: position)
-            } else {
-                viewModel.addBox(at: SCNVector3(0, 0, 0))  // Default position
-            }
+            viewModel.handleTap(at: location)
         }
     }
 }

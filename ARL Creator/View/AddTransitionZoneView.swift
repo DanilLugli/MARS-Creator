@@ -50,7 +50,7 @@ struct AddTransitionZoneView: View {
                         .padding()
                         .background(
                             Color.white.opacity(0.8)
-                                //.blur(radius: 2)
+                                
                         )
                         .cornerRadius(10) // BorderRadius
                         .shadow(radius: 4) // Shadow valore 4
