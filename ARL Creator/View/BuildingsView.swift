@@ -7,8 +7,10 @@ struct BuildingsView: View {
     @State private var searchText = ""
     @State private var selectedBuilding: Building? = nil
     
+    @State private var navigationPath = NavigationPath()
+    
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             VStack {
                 if buildingsModel.getBuildings().isEmpty {
                     VStack {
@@ -41,27 +43,27 @@ struct BuildingsView: View {
                     }
                 }
             }.foregroundColor(.white)
-            .background(Color.customBackground)
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Text("BUILDINGS")
-                        .font(.system(size: 26))
-                        .fontWeight(.heavy)
-                        .foregroundColor(.white)
-                }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack {
-                        NavigationLink(destination: AddBuildingView()) {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.system(size: 22))
-                                .foregroundStyle(.white, .blue, .blue)
+                .background(Color.customBackground)
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .principal) {
+                        Text("BUILDINGS")
+                            .font(.system(size: 26))
+                            .fontWeight(.heavy)
+                            .foregroundColor(.white)
+                    }
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        HStack {
+                            NavigationLink(destination: AddBuildingView()) {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.system(size: 22))
+                                    .foregroundStyle(.white, .blue, .blue)
+                            }
                         }
                     }
                 }
-            }
-          }
-
+        }
+        
     }
     
     var filteredBuildings: [Building] {

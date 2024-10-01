@@ -2,26 +2,26 @@ import SwiftUI
 import Foundation
 
 struct AddStairsConnectionView: View {
-
+    
     var building: Building
     @State var selectedFloor: Floor?
     @State var selectedRoom: Room?
-
+    
     var initialSelectedFloor: Floor? = nil
     var initialSelectedRoom: Room? = nil
-
+    
     @State private var fromTransitionZone: TransitionZone?
     @State private var toTransitionZone: TransitionZone?
-
+    
     @State private var fromFloor: Floor?
     @State private var fromRoom: Room?
     
     @State var mapViewFromTZ = SCNViewContainer()
-    @State var mapViewToTZ = SCNViewContainer()  
-
+    @State var mapViewToTZ = SCNViewContainer()
+    
     @State private var step: Int = 1
     @State private var showConfirmDialog = false
-
+    
     @State private var showActionSheetFloor = false
     @State private var showActionSheetRoom = false
     @State private var showActionSheetTZ = false
@@ -33,7 +33,8 @@ struct AddStairsConnectionView: View {
             VStack {
                 
                 ConnectedDotsView(labels: ["1° Connection From", "2° Connection To", "Confirm"], progress: step == 1 ? 1 : (step == 2 ? 2 : 3))
-                if step != 3{
+                
+                if step != 3 {
                     HStack {
                         VStack {
                             Text("Floor")
@@ -98,7 +99,8 @@ struct AddStairsConnectionView: View {
                 }
                 
                 VStack {
-                    if step < 3 {
+                    switch step {
+                    case 1:
                         ZStack {
                             mapViewFromTZ
                                 .border(Color.white)
@@ -113,12 +115,28 @@ struct AddStairsConnectionView: View {
                         .onChange(of: selectedRoom) { oldRoom, newRoom in
                             loadMap(for: newRoom, on: mapViewFromTZ)
                         }
-                    } else {
-                       
+                        
+                    case 2:
+                        ZStack {
+                            mapViewToTZ
+                                .border(Color.white)
+                                .frame(width: 360, height: 360)
+                                .cornerRadius(10)
+                                .padding()
+                                .shadow(color: Color.gray, radius: 3)
+                        }
+                        .onAppear {
+                            //loadMap(for: selectedFloor, on: mapViewToTZ)
+                        }
+                        .onChange(of: selectedRoom) { oldRoom, newRoom in
+                            loadMap(for: newRoom, on: mapViewToTZ)
+                        }
+                        
+                    case 3:
                         VStack {
                             Text("NEW CONNECTION").font(.system(size: 18, weight: .heavy)).bold().bold()
                             VStack {
-                                Text("FROM: ").font(.system(size: 14, weight: .heavy)).bold()
+                                Text("FROM: \(initialSelectedRoom?.name ?? "")").font(.system(size: 14, weight: .heavy)).bold()
                                 mapViewFromTZ
                                     .border(Color.white)
                                     .frame(width: 360, height: 220)
@@ -131,7 +149,7 @@ struct AddStairsConnectionView: View {
                             Spacer()
                             
                             VStack {
-                                Text("TO: ").font(.system(size: 14, weight: .heavy)).bold()
+                                Text("TO: \(selectedRoom?.name ?? "")").font(.system(size: 14, weight: .heavy)).bold()
                                 mapViewToTZ
                                     .border(Color.white)
                                     .frame(width: 360, height: 220)
@@ -149,20 +167,27 @@ struct AddStairsConnectionView: View {
                                 mapViewToTZ.changeColorOfNode(nodeName: "TransitionZone_" + toTransitionZone!.name, color: .red)
                             }
                         }
+                        
+                    default:
+                        EmptyView() // Fallback nel caso step non sia 1, 2 o 3
                     }
                 }
                 
-                if (step == 1 && fromTransitionZone != nil) || (step == 2 && toTransitionZone != nil) {
+                switch step {
+                case 1 where fromTransitionZone != nil, 2 where toTransitionZone != nil:
                     Spacer()
                     Button(action: {
-                        if step == 1 {
+                        switch step {
+                        case 1:
                             step = 2
                             selectedFloor = nil
                             selectedRoom = nil
-                        } else if step == 2 {
+                        case 2:
                             step = 3
+                        default:
+                            break
                         }
-                    }){
+                    }) {
                         HStack {
                             Text("Next").bold()
                             Image(systemName: "arrow.right").bold()
@@ -173,12 +198,10 @@ struct AddStairsConnectionView: View {
                         .cornerRadius(20)
                         .bold()
                     }
-                }
-                
-                if step == 3 {
+                    
+                case 3:
                     Spacer()
                     Button(action: {
-                        //createConnection()
                         showConfirmDialog = true
                     }) {
                         Text("Confirm Connection")
@@ -195,6 +218,9 @@ struct AddStairsConnectionView: View {
                             dismiss()
                         }
                     }
+                    
+                default:
+                    EmptyView() // Questo può essere il fallback nel caso step non soddisfi nessuna condizione
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
@@ -218,7 +244,7 @@ struct AddStairsConnectionView: View {
         }
         .background(Color.customBackground.ignoresSafeArea())
     }
-
+    
     private func loadMap(for room: Room?, on mapView: SCNViewContainer) {
         if let room = room {
             mapView.loadRoomPlanimetry(
@@ -227,7 +253,7 @@ struct AddStairsConnectionView: View {
             )
         }
     }
-
+    
     func actionSheetFloorButtons() -> [ActionSheet.Button] {
         var buttons: [ActionSheet.Button] = building.floors
             .filter { floor in
@@ -237,13 +263,13 @@ struct AddStairsConnectionView: View {
                 return true
             }
             .map { floor in
-                .default(Text(floor.name)) {
-                    if step == 1 {
-                        fromFloor = floor
-                    } else {
-                        selectedFloor = floor
+                    .default(Text(floor.name)) {
+                        if step == 1 {
+                            fromFloor = floor
+                        } else {
+                            selectedFloor = floor
+                        }
                     }
-                }
             }
         buttons.append(.cancel())
         return buttons
@@ -262,13 +288,13 @@ struct AddStairsConnectionView: View {
                 return true
             }
             .map { room in
-                .default(Text(room.name)) {
-                    if step == 1 {
-                        fromRoom = room
-                    } else {
-                        selectedRoom = room
+                    .default(Text(room.name)) {
+                        if step == 1 {
+                            fromRoom = room
+                        } else {
+                            selectedRoom = room
+                        }
                     }
-                }
             }
         buttons.append(.cancel())
         return buttons
@@ -280,16 +306,16 @@ struct AddStairsConnectionView: View {
         }
         
         var buttons: [ActionSheet.Button] = transitionZones.map { tz in
-            .default(Text(tz.name)) {
-                if step == 1 {
-                    
-                    mapViewFromTZ.changeColorOfNode(nodeName: "TransitionZone_" + tz.name , color: .red)
-                    fromTransitionZone = tz
-                } else {
-                    mapViewFromTZ.changeColorOfNode(nodeName: "TransitionZone_" +  tz.name , color: .red)
-                    toTransitionZone = tz
+                .default(Text(tz.name)) {
+                    if step == 1 {
+                        
+                        mapViewFromTZ.changeColorOfNode(nodeName: "TransitionZone_" + tz.name , color: .red)
+                        fromTransitionZone = tz
+                    } else {
+                        mapViewToTZ.changeColorOfNode(nodeName: "TransitionZone_" +  tz.name , color: .red)
+                        toTransitionZone = tz
+                    }
                 }
-            }
         }
         buttons.append(.cancel())
         return buttons
@@ -310,7 +336,7 @@ struct AddStairsConnectionView: View {
         print("Connection created between \(fromTransitionZone.name) in room \(initialSelectedRoom!.name) and \(toTransitionZone.name) in room \(selectedRoom.name).")
         
     }
-
+    
 }
 
 struct AddConnection_Preview: PreviewProvider {

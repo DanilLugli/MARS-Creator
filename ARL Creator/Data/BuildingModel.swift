@@ -26,9 +26,9 @@ class BuildingModel: ObservableObject {
     }
     
     @MainActor
-    func loadBuildings() async {
+    func loadBuildings(){
         do {
-            try loadBuildingsFromRoot()
+            try loadBuildingsFromRoot() // Aggiungi `await` alla chiamata della funzione
         } catch {
             BuildingModel.LOGGER.log("Errore durante il caricamento degli edifici: \(error)")
         }
@@ -65,6 +65,7 @@ class BuildingModel: ObservableObject {
                             
                             let connection = AdjacentFloorsConnection(
                                 name: "Connection to \(randomTargetRoom)",
+                                fromTransitionZone: randomTargetTransitionZone,
                                 targetFloor: randomTargetFloor,
                                 targetRoom: randomTargetRoom,
                                 targetTransitionZone: randomTargetTransitionZone

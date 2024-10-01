@@ -59,6 +59,7 @@
 		AAA29E6F2C1711AA00CA267C /* Renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA29E6E2C1711AA00CA267C /* Renderer.swift */; };
 		AAA29E712C1711AA00CA267C /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA29E702C1711AA00CA267C /* ViewController.swift */; };
 		AAA29E762C1711AC00CA267C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AAA29E752C1711AC00CA267C /* Assets.xcassets */; };
+		AAA5FB6C2CAB38C9003B048E /* ConnectionJSON.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAA5FB6B2CAB38C9003B048E /* ConnectionJSON.swift */; };
 		AAB6190A2C502995008F77EE /* AddRoomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAB619092C502995008F77EE /* AddRoomView.swift */; };
 		AAD2F4472C7E2CCF009D52E2 /* FloorScanningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD2F4462C7E2CCF009D52E2 /* FloorScanningView.swift */; };
 		AAD778A72C5288A40091181A /* ScanningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAD778A62C5288A30091181A /* ScanningView.swift */; };
@@ -128,6 +129,7 @@
 		AAA29E702C1711AA00CA267C /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		AAA29E752C1711AC00CA267C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AAA29E772C1711AC00CA267C /* ScanBuild-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ScanBuild-Bridging-Header.h"; sourceTree = "<group>"; };
+		AAA5FB6B2CAB38C9003B048E /* ConnectionJSON.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionJSON.swift; sourceTree = "<group>"; };
 		AAB619092C502995008F77EE /* AddRoomView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddRoomView.swift; sourceTree = "<group>"; };
 		AAD2F4462C7E2CCF009D52E2 /* FloorScanningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloorScanningView.swift; sourceTree = "<group>"; };
 		AAD778A62C5288A30091181A /* ScanningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanningView.swift; sourceTree = "<group>"; };
@@ -188,6 +190,7 @@
 				AA64CC7B2C47F8EE005C883B /* SameFloorConnection.swift */,
 				AA64CC7D2C47F903005C883B /* AdjacentFloorsConnection.swift */,
 				AA64CC7F2C47F91F005C883B /* ElevatorConnection.swift */,
+				AAA5FB6B2CAB38C9003B048E /* ConnectionJSON.swift */,
 			);
 			path = Connection;
 			sourceTree = "<group>";
@@ -397,6 +400,7 @@
 				AA78F5D62C2C6BAC0044F825 /* Room.swift in Sources */,
 				AA64CC802C47F91F005C883B /* ElevatorConnection.swift in Sources */,
 				AAE57FAB2C384E6400F0196F /* DefaultCardView.swift in Sources */,
+				AAA5FB6C2CAB38C9003B048E /* ConnectionJSON.swift in Sources */,
 				AA2CA55B2C3F07A500C88C94 /* RoomView.swift in Sources */,
 				AA8E0A642C57E50F0097BDCD /* VisualizeRoomViewContainer.swift in Sources */,
 				AAE57FB12C385D2B00F0196F /* ConnectedDotsView.swift in Sources */,
@@ -597,7 +601,7 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeRight UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeRight UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UISupportsDocumentBrowser = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -633,7 +637,7 @@
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeRight UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeRight UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UISupportsDocumentBrowser = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

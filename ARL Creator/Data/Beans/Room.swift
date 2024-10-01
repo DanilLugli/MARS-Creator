@@ -34,6 +34,8 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         return lhs.id == rhs.id
     }
     
+    
+    
     var id: UUID {
         get {
             return _id
@@ -66,6 +68,9 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     var transitionZones: [TransitionZone] {
         get {
             return _transitionZones
+        }
+        set{
+            _transitionZones = newValue
         }
     }
     
@@ -158,7 +163,6 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         try container.encode(_transitionZones, forKey: .transitionZones)
     }
     
-    // JSON Serialization using Encodable
     func toJSON() -> String? {
         if let jsonData = try? JSONEncoder().encode(self) {
             return String(data: jsonData, encoding: .utf8)
@@ -177,13 +181,7 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     func deleteTransitionZone(transitionZone: TransitionZone) {
         _transitionZones.removeAll { $0.id == transitionZone.id }
     }
-
-//    func getConnections() -> [Connection] {
-//        return _transitionZones.compactMap { $0.connection }
-//    }
-}
-
-extension Room {
+    
     func debugPrintRoom() {
         print("Room Debug Info:")
         print("-----------------------------")
@@ -215,24 +213,23 @@ extension Room {
 
         let connectionFrom = AdjacentFloorsConnection(
             name: "Connection to \(targetRoom.name)",
+            fromTransitionZone: fromTransitionZone.name,
             targetFloor: targetRoom.getFloor(of: targetRoom)?.name ?? "Error ParentFloor",
             targetRoom: targetRoom.name,
             targetTransitionZone: targetTransitionZone.name
         )
         
-        // 2. Crea la connessione inversa dalla transitionZone di destinazione alla stanza originale
         let connectionTo = AdjacentFloorsConnection(
             name: "Connection to \(self.name)",
+            fromTransitionZone: targetTransitionZone.name,
             targetFloor: self.roomURL.lastPathComponent,
             targetRoom: self.name,
             targetTransitionZone: fromTransitionZone.name
         )
         
-        // 3. Imposta le connessioni nelle rispettive TransitionZone
         fromTransitionZone.connection?.append(connectionFrom)
         targetTransitionZone.connection?.append(connectionTo)
         
-        // 4. Aggiorna le transition zone nelle rispettive stanze
         if let index = _transitionZones.firstIndex(where: { $0.id == fromTransitionZone.id }) {
             _transitionZones[index].connection?.append(connectionFrom)
         }
@@ -241,11 +238,16 @@ extension Room {
             targetRoom._transitionZones[targetIndex].connection?.append(connectionTo)
         }
         
-        // Debug output
+
         print("Connection added from \(fromTransitionZone.name) in room \(self.name) to \(targetTransitionZone.name) in room \(targetRoom.name).")
         print("Connection from \(fromTransitionZone.name) to \(targetTransitionZone.name): \(connectionFrom.name)")
         print("Connection from \(targetTransitionZone.name) to \(fromTransitionZone.name): \(connectionTo.name)")
     }
+    
+    func saveConnectionToJSON(for transitionZoneName: String, connection: AdjacentFloorsConnection, to url: URL) throws {
+        //
+    }
+
     
     func debugConnectionPrint() {
             print("Room: \(self.name)")

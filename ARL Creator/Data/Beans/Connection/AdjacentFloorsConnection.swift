@@ -8,11 +8,13 @@
 import Foundation
 
 class AdjacentFloorsConnection: Connection {
+    private var _fromTransitionZone: String
     private var _targetFloor: String
     private var _targetRoom: String
     private var _targetTransitionZone: String
     
-    init(name: String, targetFloor: String, targetRoom: String, targetTransitionZone: String) {
+    init(name: String, fromTransitionZone: String, targetFloor: String, targetRoom: String, targetTransitionZone: String) {
+        self._fromTransitionZone = fromTransitionZone
         self._targetFloor = targetFloor
         self._targetRoom = targetRoom
         self._targetTransitionZone = targetTransitionZone
@@ -21,11 +23,21 @@ class AdjacentFloorsConnection: Connection {
     
     required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+        _fromTransitionZone = try container.decode(String.self, forKey: .fromTransitionZone)
         _targetFloor = try container.decode(String.self, forKey: .targetFloor)
         _targetRoom = try container.decode(String.self, forKey: .targetRoom)
         _targetTransitionZone = try container.decode(String.self, forKey: .targetTransitionZone)
         let superDecoder = try container.superDecoder()
         try super.init(from: superDecoder)
+    }
+    
+    var fromTransitionZone: String{
+        get {
+            return _fromTransitionZone
+        }
+        set {
+            _fromTransitionZone = newValue
+        }
     }
     
     var targetFloor: String {
@@ -56,6 +68,7 @@ class AdjacentFloorsConnection: Connection {
     }
     
     private enum CodingKeys: String, CodingKey {
+        case fromTransitionZone
         case targetFloor
         case targetRoom
         case targetTransitionZone

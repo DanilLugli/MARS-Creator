@@ -14,7 +14,7 @@ class TransitionZone: Codable, Identifiable, Equatable, ObservableObject {
     }
     
     static func ==(lhs: TransitionZone, rhs: TransitionZone) -> Bool {
-        return lhs.id == rhs.id // Compara gli ID, o qualsiasi altra proprietà unica
+        return lhs.id == rhs.id 
     }
     
     var id: UUID {
