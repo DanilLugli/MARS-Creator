@@ -165,12 +165,12 @@
 			children = (
 				AA8E0A562C52BA6C0097BDCD /* ARSessionManager.swift */,
 				AA2CA5502C3DB5F400C88C94 /* CaptureViewContainer.swift */,
+				AA2CA5542C3DB61100C88C94 /* ExportRoomViewContainer.swift */,
 				AAD778A82C528C600091181A /* FloorCaptureViewContainer.swift */,
 				AA2CA5562C3DB61E00C88C94 /* SCNViewContainer.swift */,
 				AA3A24F02C62599A00E162A3 /* SCNViewMapContainer.swift */,
-				AA92C4D72C83721C00637AF2 /* SCNViewUpdatePositionRoomContainer.swift */,
 				AA2289442C8CE834008452D8 /* SCNViewTransitionZoneContainer.swift */,
-				AA2CA5542C3DB61100C88C94 /* ExportRoomViewContainer.swift */,
+				AA92C4D72C83721C00637AF2 /* SCNViewUpdatePositionRoomContainer.swift */,
 				AA8E0A632C57E50F0097BDCD /* VisualizeRoomViewContainer.swift */,
 			);
 			path = AR;
