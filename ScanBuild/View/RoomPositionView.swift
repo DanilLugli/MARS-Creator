@@ -67,7 +67,7 @@ struct RoomPositionView: View {
                        
                     HStack {
                         Picker(selection: $selectedFloorNodeName, label: Text("")) {
-                            ForEach(floor.sceneObjects ?? [], id: \.self) { node in
+                            ForEach(floor.sceneObjects?.sorted(by: { calculateNodeLengthAndWidth($0) < calculateNodeLengthAndWidth($1) }) ?? [], id: \.self) { node in
                                 Text(node.name ?? "Unnamed").tag(node.name ?? "")
                             }
                         }.onAppear {
@@ -112,16 +112,17 @@ struct RoomPositionView: View {
                     
                     HStack {
                         Picker(selection: $selectedRoomNodeName, label: Text("")) {
-                            ForEach(room.sceneObjects ?? [], id: \.self) { nodeName in
-                                Text(nodeName.name ?? "Unnamed").tag(nodeName.name ?? "")
+                            ForEach(room.sceneObjects?.sorted(by: { calculateNodeLengthAndWidth($0) < calculateNodeLengthAndWidth($1) }) ?? [], id: \.self) { node in
+                                Text(node.name ?? "Unnamed").tag(node.name ?? "")
                             }
                         }.onAppear {
                             let sceneObjectsWithNames = room.sceneObjects?.compactMap { $0.name }
-                            print("Room Scene Objects with names: \(sceneObjectsWithNames)")
+                            print("Room Scene Objects with names: \(String(describing: sceneObjectsWithNames))")
                             if let firstRoomNodeSelected = sceneObjectsWithNames?.first {
                                 selectedRoomNodeName = firstRoomNodeSelected
                             }
-                        }.onChange(of: selectedRoomNodeName){ newValue in
+                        }
+                        .onChange(of: selectedRoomNodeName) { newValue in
                             print("CHANGE COLOR")
                             
                             room.planimetry.changeColorOfNode(nodeName: selectedRoomNodeName, color: UIColor.red)
@@ -214,6 +215,13 @@ struct RoomPositionView: View {
     // Funzione per ripristinare tutti i nodi di room
     func resetRoomNodes() {
         roomNodes = originalRoomNodes
+    }
+    
+    func calculateNodeLengthAndWidth(_ node: SCNNode) -> (Float, Float) {
+        let (min, max) = node.boundingBox
+        let length = max.x - min.x // Lunghezza lungo l'asse X
+        let width = max.z - min.z  // Larghezza lungo l'asse Z
+        return (length, width)
     }
 }
 
