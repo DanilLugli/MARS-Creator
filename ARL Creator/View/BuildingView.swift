@@ -111,7 +111,6 @@ struct BuildingView: View {
             }
             
             Button("Cancel", role: .cancel) {
-                // Azione per annullare
             }
         } message: {
             Text("Are you sure you want to delete this building? This action cannot be undone.")

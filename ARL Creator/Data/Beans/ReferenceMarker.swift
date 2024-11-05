@@ -4,23 +4,25 @@
 //
 //  Created by Danil Lugli on 10/07/24.
 //
-
 import Foundation
 import SwiftUI
+import ARKit
 
-class ReferenceMarker: ObservableObject, Codable, Identifiable  {
+class ReferenceMarker: ObservableObject, Codable, Identifiable {
     private var _id: UUID = UUID()
     @Published private var _image: Image? = nil
     private var _imagePath : URL
     @Published private var _imageName: String
     private var _coordinates: Coordinates
     private var _rmUML: URL
-    
-    init(_imagePath: URL, _imageName: String, _coordinates: Coordinates, _rmUML: URL) {
+    private var _physicalWidth: CGFloat  // Aggiungi la larghezza fisica dell'immagine in metri
+
+    init(_imagePath: URL, _imageName: String, _coordinates: Coordinates, _rmUML: URL, _physicalWidth: CGFloat) {
         self._imagePath = _imagePath
         self._imageName = _imageName
         self._coordinates = _coordinates
         self._rmUML = _rmUML
+        self._physicalWidth = _physicalWidth
     }
     
     var id: UUID {
@@ -28,16 +30,16 @@ class ReferenceMarker: ObservableObject, Codable, Identifiable  {
     }
     
     var image: Image {
-            if _image == nil {
-                if let imageData = try? Data(contentsOf: _imagePath),
-                   let uiImage = UIImage(data: imageData) {
-                    _image = Image(uiImage: uiImage)
-                } else {
-                    _image = Image(systemName: "photo") // Placeholder image in case of failure
-                }
+        if _image == nil {
+            if let imageData = try? Data(contentsOf: _imagePath),
+               let uiImage = UIImage(data: imageData) {
+                _image = Image(uiImage: uiImage)
+            } else {
+                _image = Image(systemName: "photo")
             }
-            return _image!
         }
+        return _image!
+    }
     
     var imageName: String {
         return _imageName
@@ -51,31 +53,47 @@ class ReferenceMarker: ObservableObject, Codable, Identifiable  {
         return _rmUML
     }
     
+    var physicalWidth: CGFloat {
+        return _physicalWidth
+    }
+    
+    // Metodo per creare ARReferenceImage
+    func asARReferenceImage() -> ARReferenceImage? {
+        if let imageData = try? Data(contentsOf: _imagePath),
+           let uiImage = UIImage(data: imageData),
+           let cgImage = uiImage.cgImage {
+            return ARReferenceImage(cgImage, orientation: .up, physicalWidth: _physicalWidth)
+        }
+        return nil
+    }
+    
     // Implementazione personalizzata di Codable
-        private enum CodingKeys: String, CodingKey {
-            case id
-            case imageName
-            case coordinates
-            case rmUML
-            case imagePath
-        }
-        
-        func encode(to encoder: Encoder) throws {
-            var container = encoder.container(keyedBy: CodingKeys.self)
-            try container.encode(_id, forKey: .id)
-            try container.encode(_imageName, forKey: .imageName)
-            try container.encode(_coordinates, forKey: .coordinates)
-            try container.encode(_rmUML, forKey: .rmUML)
-            try container.encode(_imagePath, forKey: .imagePath)
-        }
-        
-        required init(from decoder: Decoder) throws {
-            let container = try decoder.container(keyedBy: CodingKeys.self)
-            _id = try container.decode(UUID.self, forKey: .id)
-            _imageName = try container.decode(String.self, forKey: .imageName)
-            _coordinates = try container.decode(Coordinates.self, forKey: .coordinates)
-            _rmUML = try container.decode(URL.self, forKey: .rmUML)
-            _imagePath = try container.decode(URL.self, forKey: .imagePath)
-        }
+    private enum CodingKeys: String, CodingKey {
+        case id
+        case imageName
+        case coordinates
+        case rmUML
+        case imagePath
+        case physicalWidth
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(_id, forKey: .id)
+        try container.encode(_imageName, forKey: .imageName)
+        try container.encode(_coordinates, forKey: .coordinates)
+        try container.encode(_rmUML, forKey: .rmUML)
+        try container.encode(_imagePath, forKey: .imagePath)
+        try container.encode(_physicalWidth, forKey: .physicalWidth)
+    }
+    
+    required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        _id = try container.decode(UUID.self, forKey: .id)
+        _imageName = try container.decode(String.self, forKey: .imageName)
+        _coordinates = try container.decode(Coordinates.self, forKey: .coordinates)
+        _rmUML = try container.decode(URL.self, forKey: .rmUML)
+        _imagePath = try container.decode(URL.self, forKey: .imagePath)
+        _physicalWidth = try container.decode(CGFloat.self, forKey: .physicalWidth)
+    }
 }
-

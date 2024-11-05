@@ -28,7 +28,7 @@ class BuildingModel: ObservableObject {
     @MainActor
     func loadBuildings(){
         do {
-            try loadBuildingsFromRoot() // Aggiungi `await` alla chiamata della funzione
+            try loadBuildingsFromRoot()
         } catch {
             BuildingModel.LOGGER.log("Errore durante il caricamento degli edifici: \(error)")
         }
@@ -273,7 +273,7 @@ class BuildingModel: ObservableObject {
                                 // Create a new ReferenceMarker
                                 let coordinates = Coordinates(x: Float(Double.random(in: -100...100)), y: Float(Double.random(in: -100...100))) // Adjust accordingly
                                 let rmUML = URL(fileURLWithPath: "") // Adjust accordingly
-                                let newMarker = ReferenceMarker(_imagePath: imagePath, _imageName: imageName, _coordinates: coordinates, _rmUML: rmUML)
+                                let newMarker = ReferenceMarker(_imagePath: imagePath, _imageName: imageName, _coordinates: coordinates, _rmUML: rmUML, _physicalWidth: 0.0)
                                 referenceMarkers.append(newMarker)
                             }
                         }

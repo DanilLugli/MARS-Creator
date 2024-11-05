@@ -77,7 +77,6 @@ struct RoomPositionView: View {
                             }
                         }
                         .onChange(of: selectedFloorNodeName) { oldValue, newValue in
-                            print("New NAME NODE: \(newValue)")
                             floor.planimetry.changeColorOfNode(nodeName: newValue, color: UIColor.red)
                             
                             let firstLetter = String(newValue.prefix(3)) // Prende le prime tre lettere

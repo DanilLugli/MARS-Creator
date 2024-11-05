@@ -19,6 +19,8 @@ struct BuildingsView: View {
                             .font(.headline)
                             .padding()
                     }
+                    .foregroundColor(.white)
+                    .background(Color.customBackground)
                 } else {
                     VStack {
                         TextField("Search", text: $searchText)

@@ -137,6 +137,7 @@ struct CaptureViewContainer: UIViewRepresentable {
                     session.arSession.getCurrentWorldMap { [self] worldMap, error in
                         if let worldMap = worldMap {
                             if self.namedUrl is Room {
+                                
                                 saveARWorldMap(worldMap, name, at: namedUrl.url)
                                 
                                 let newIdentifiers = worldMap.rawFeaturePoints.identifiers.difference(from: featuresPoints)
