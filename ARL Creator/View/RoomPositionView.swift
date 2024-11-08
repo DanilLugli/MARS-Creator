@@ -1,3 +1,4 @@
+
 import Foundation
 import SwiftUI
 import SceneKit
@@ -17,7 +18,7 @@ struct RoomPositionView: View {
     var roomsMaps: [URL]?
     
     @State var floorNodes: [String] = []
-    @State var roomNodes: [String] = []
+    @State var roomNodes: [SCNNode] = [] // Cambiato il tipo a [SCNNode]
     
     @State private var showButton1 = false
     @State private var showButton2 = false
@@ -41,9 +42,9 @@ struct RoomPositionView: View {
     @State var response: (HTTPURLResponse?, [String: Any]) = (nil, ["": ""])
     @State var apiResponseCode = ""
     @State var matchingNodesForAPI: [(SCNNode, SCNNode)] = []
-
-    @State var originalRoomNodes: [String] = [] // Nuovo stato per memorizzare i nodi originali
-
+    
+    @State var originalRoomNodes: [SCNNode] = [] // Cambiato il tipo a [SCNNode]
+    
     var body: some View {
         NavigationStack {
             VStack {
@@ -67,26 +68,28 @@ struct RoomPositionView: View {
                        
                     HStack {
                         Picker(selection: $selectedFloorNodeName, label: Text("")) {
-                            ForEach(floor.sceneObjects ?? [], id: \.self) { node in
+                            ForEach(sortSceneObjects(nodes: floor.sceneObjects ?? []), id: \.self) { node in
                                 Text(node.name ?? "Unnamed").tag(node.name ?? "")
                             }
-                        }.onAppear {
+                        }
+                        .onAppear {
                             print("Floor Scene Objects onAppear: \(floor.sceneObjects?.compactMap { $0.name } ?? [])")
                             if let firstNodeName = floor.sceneObjects?.first?.name {
                                 selectedFloorNodeName = firstNodeName
                             }
                         }
-                        .onChange(of: selectedFloorNodeName) { oldValue, newValue in
+                        .onChange(of: selectedFloorNodeName) { newValue in
+                            print("New NAME NODE: \(newValue)")
                             floor.planimetry.changeColorOfNode(nodeName: newValue, color: UIColor.red)
-                            
-                            let firstLetter = String(newValue.prefix(3)) // Prende le prime tre lettere
                             
                             selectedFloorNode = floor.sceneObjects?.first(where: { node in
                                 node.name == newValue
                             })
-
-                            // Filtra i nodi della stanza in base al prefisso del nodo di floor
-                            filterRoomNodes(byPrefix: firstLetter)
+                            
+                            if let selectedFloorNode = selectedFloorNode {
+                                // Filtra i nodi della room in base al tipo del nodo selezionato nel floor
+                                filterRoomNodes(byTypeOf: selectedFloorNode)
+                            }
                         }
                     }
                 }
@@ -98,7 +101,6 @@ struct RoomPositionView: View {
                         Text("Room: \(room.name)").bold().font(.title3).foregroundColor(.white)
                     }
                     
-
                     ZStack {
                         room.planimetry
                             .border(Color.white)
@@ -106,23 +108,22 @@ struct RoomPositionView: View {
                             .padding()
                             .shadow(color: Color.gray, radius: 3)
                     }.onAppear{
-                        originalRoomNodes = room.sceneObjects?.compactMap { $0.name ?? "" } ?? []
+                        originalRoomNodes = room.sceneObjects ?? []
                         roomNodes = originalRoomNodes // Imposta i nodi originali alla comparsa
                     }
                     
                     HStack {
-                        Picker("Choose Room Node", selection: $selectedRoomNodeName) {
-                            Text("Choose Room Node")
-                            ForEach(roomNodes, id: \.self) { nodeName in
-                                Text(nodeName).tag(nodeName)
+                        Picker(selection: $selectedRoomNodeName, label: Text("")) {
+                            ForEach(sortSceneObjects(nodes: roomNodes), id: \.self) { node in
+                                Text(node.name ?? "Unnamed").tag(node.name ?? "")
                             }
-                        }.onAppear {
-                            let sceneObjectsWithNames = room.sceneObjects?.compactMap { $0.name }
-                            print("Room Scene Objects with names: \(String(describing: sceneObjectsWithNames))")
-                            if let firstRoomNodeSelected = sceneObjectsWithNames?.first {
-                                selectedRoomNodeName = firstRoomNodeSelected
+                        }
+                        .onAppear {
+                            if let firstNodeName = roomNodes.first?.name {
+                                selectedRoomNodeName = firstNodeName
                             }
-                        }.onChange(of: selectedRoomNodeName){ oldValue, newValue in
+                        }
+                        .onChange(of: selectedRoomNodeName) { newValue in
                             print("CHANGE COLOR")
                             
                             room.planimetry.changeColorOfNode(nodeName: selectedRoomNodeName, color: UIColor.red)
@@ -171,13 +172,13 @@ struct RoomPositionView: View {
                                 } else {
                                     print("Error: \(response.1)")
                                 }
-                            
+                                
                                 responseFromServer = true
                                 showAlert = true
                             }
                         }.frame(width: 160, height: 50)
                             .foregroundColor(.white)
-                            .background(Color(red: 62/255, green: 206/255, blue: 76/255).opacity(0.3))
+                            .background(Color(red: 62/255, green: 206/255, blue: 76/255))
                             .cornerRadius(20)
                             .bold()
                     }
@@ -206,27 +207,81 @@ struct RoomPositionView: View {
             }
         }
     }
-
-    // Funzione per filtrare i nodi di room in base al prefisso
-    func filterRoomNodes(byPrefix prefix: String) {
-        roomNodes = originalRoomNodes.filter { $0.hasPrefix(prefix) }
+    
+    // Funzione per filtrare i nodi di room in base al tipo del nodo selezionato nel floor
+    func filterRoomNodes(byTypeOf selectedFloorNode: SCNNode) {
+        let selectedType = extractType(from: selectedFloorNode.name ?? "")
+        print("Tipo selezionato: \(selectedType)")
+        
+        roomNodes = originalRoomNodes.filter { node in
+            let nodeType = extractType(from: node.name ?? "")
+            return nodeType == selectedType
+        }
+        
+        // Aggiorna il nodo selezionato nel picker della room
+        if let firstNodeName = roomNodes.first?.name {
+            selectedRoomNodeName = firstNodeName
+        } else {
+            selectedRoomNodeName = ""
+            selectedRoomNode = nil
+        }
     }
     
     // Funzione per ripristinare tutti i nodi di room
     func resetRoomNodes() {
         roomNodes = originalRoomNodes
     }
-}
-
-func orderBySimilarity(node: SCNNode, listOfNodes: [SCNNode]) -> [SCNNode] {
-    print(node.scale)
-    var result: [(SCNNode, Float)] = []
-    for n in listOfNodes {
-        result.append((n, simd_fast_distance(n.simdScale, node.simdScale)))
+    
+    // Funzione per calcolare il volume di un nodo
+    func calculateVolume(of node: SCNNode) -> Float {
+        let min = node.boundingBox.min
+        let max = node.boundingBox.max
+        let length = max.x - min.x
+        let width = max.y - min.y
+        let height = max.z - min.z
+        return length * width * height
     }
-    return result.sorted(by: { a, b in a.1 < b.1 }).map { $0.0 }
+    
+    // Funzione per estrarre il tipo dal nome del nodo
+    func extractType(from nodeName: String) -> String {
+        // Estrae tutti i caratteri dall'inizio fino al primo numero
+        let name = nodeName.lowercased()
+        var type = ""
+        for character in name {
+            if character.isNumber {
+                break
+            }
+            type.append(character)
+        }
+        return type.isEmpty ? "unknown" : type
+    }
+    
+    // Funzione per ordinare i nodi per tipologia e dimensione (dal più grande al più piccolo)
+    func sortSceneObjects(nodes: [SCNNode]) -> [SCNNode] {
+        
+        let typeOrder = ["wall", "storage", "chair", "table", "window", "door"]
+        
+        return nodes.sorted { (node1, node2) -> Bool in
+            // Estrai le tipologie dai nomi dei nodi
+            let type1 = extractType(from: node1.name ?? "")
+            let type2 = extractType(from: node2.name ?? "")
+            
+            // Ottieni l'indice delle tipologie nell'array typeOrder
+            let typeIndex1 = typeOrder.firstIndex(of: type1) ?? typeOrder.count
+            let typeIndex2 = typeOrder.firstIndex(of: type2) ?? typeOrder.count
+            
+            if typeIndex1 != typeIndex2 {
+                // I nodi hanno tipologie diverse, ordina per ordine di tipologia
+                return typeIndex1 < typeIndex2
+            } else {
+                // I nodi hanno la stessa tipologia, ordina per dimensione dal più grande al più piccolo
+                let size1 = calculateVolume(of: node1)
+                let size2 = calculateVolume(of: node2)
+                return size1 > size2
+            }
+        }
+    }
 }
-
 
 struct RoomPositionView_Preview: PreviewProvider {
     static var previews: some View {
@@ -238,4 +293,3 @@ struct RoomPositionView_Preview: PreviewProvider {
         return RoomPositionView(floor: floor, room: room)
     }
 }
-
