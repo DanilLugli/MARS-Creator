@@ -21,17 +21,19 @@ struct DefaultCardView: View {
                     .stroke(isSelected ? Color.green : Color.clear, lineWidth: 6)
                     .background(RoundedRectangle(cornerRadius: 10).fill(Color.white))
                 
-                VStack(alignment: .leading) {
-                    Text(name)
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(.black)
-                    
-                    Text("\(dateFormatter.string(from: date))")
-                        .font(.system(size: 14))
-                        .foregroundColor(.gray)
-                }
-                .padding()
-                
+                HStack{
+                    VStack(alignment: .leading) {
+                        Text(name)
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundColor(.customBackground)
+                        
+                        Text("Last modified: \(dateFormatter.string(from: date))")
+                            .font(.system(size: 14))
+                            .foregroundColor(.gray)
+                        
+                    }
+                    Spacer()
+                }.padding(.leading)
             }
             .frame(width: geometry.size.width / CGFloat(rowSize), height: 80)
             .cornerRadius(10)

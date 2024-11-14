@@ -62,7 +62,8 @@ struct AddTransitionZoneView: View {
         }
         .background(Color.customBackground)
         .foregroundColor(.white)
-        .navigationBarTitleDisplayMode(.inline)
+        //.navigationBarTitleDisplayMode(.inline)
+        .navigationTitle("Add Transition Zone")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button(action: {
@@ -79,11 +80,11 @@ struct AddTransitionZoneView: View {
                 }
             }
             
-            ToolbarItem(placement: .principal) {
-                Text("ADD TRANSITION ZOOM")
-                    .font(.system(size: 26, weight: .heavy))
-                    .foregroundColor(.white)
-            }
+//            ToolbarItem(placement: .principal) {
+//                Text("ADD TRANSITION ZOOM")
+//                    .font(.system(size: 26, weight: .heavy))
+//                    .foregroundColor(.white)
+//            }
         }
         .alert(isPresented: $showUpdateAlert) {
             Alert(

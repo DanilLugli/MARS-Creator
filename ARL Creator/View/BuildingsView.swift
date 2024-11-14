@@ -21,16 +21,16 @@ struct BuildingsView: View {
                     }
                     .foregroundColor(.white)
                     .background(Color.customBackground)
-                } else {
+                }
+                else {
                     VStack {
                         TextField("Search", text: $searchText)
                             .padding(7)
                             .background(Color(.systemGray6))
                             .cornerRadius(8)
-                            .padding(.horizontal, 10)
+                            .padding(.horizontal, 12)
                             .frame(maxWidth: .infinity)
-                            .padding()
-                        
+                            
                         ScrollView {
                             LazyVStack(spacing: 50) {
                                 ForEach(filteredBuildings, id: \.id) { building in
@@ -46,14 +46,8 @@ struct BuildingsView: View {
                 }
             }.foregroundColor(.white)
                 .background(Color.customBackground)
-                .navigationBarTitleDisplayMode(.inline)
+                .navigationTitle("Buildings")
                 .toolbar {
-                    ToolbarItem(placement: .principal) {
-                        Text("BUILDINGS")
-                            .font(.system(size: 26))
-                            .fontWeight(.heavy)
-                            .foregroundColor(.white)
-                    }
                     ToolbarItem(placement: .navigationBarTrailing) {
                         HStack {
                             NavigationLink(destination: AddBuildingView()) {

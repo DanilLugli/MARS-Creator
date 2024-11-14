@@ -36,7 +36,6 @@ struct CaptureViewContainer: UIViewRepresentable {
     func updateUIView(_ uiView: RoomCaptureView, context: Context) {}
     
     mutating func stopCapture(pauseARSession: Bool) {
-        print("CALL STOPCAPTURE CaptureViewContainer")
         SessionDelegate.save = !pauseARSession
         sessionDelegate.currentMapName = sessionDelegate.namedUrl.name
         
@@ -128,9 +127,7 @@ struct CaptureViewContainer: UIViewRepresentable {
                 do {
                     let name = currentMapName ?? "_\(DateFormatter.localizedString(from: Date(), dateStyle: .medium, timeStyle: .short))"
                     let finalRoom = try! await self.roomBuilder.capturedRoom(from: data)
-                    
-                    print(namedUrl.url)
-                    
+                                        
                     saveJSONMap(finalRoom, name, at: namedUrl.url)
                     saveUSDZMap(finalRoom, namedUrl.name, at: namedUrl.url)
                     
@@ -167,14 +164,10 @@ struct CaptureViewContainer: UIViewRepresentable {
         func captureSession(_ session: RoomCaptureSession, didRemove room: CapturedRoom) {}
         
         func captureView(shouldPresent roomDataForProcessing: CapturedRoomData, error: Error?) -> Bool {
-            print("captureView")
-            print(CapturedRoomData.self)
             return true
         }
         
         func captureView(didPresent processedResult: CapturedRoom, error: Error?) {
-            print("captureView 2")
-            print(CapturedRoom.self)
             self.finalResults = processedResult
         }
         

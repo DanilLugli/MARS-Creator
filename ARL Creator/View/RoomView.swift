@@ -55,6 +55,8 @@ struct RoomView: View {
                     Text("\(building.name) > \(floor.name) > \(room.name)")
                         .font(.system(size: 14))
                         .fontWeight(.heavy)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.leading)
                     
                     TabView(selection: $selectedTab) {
                         
@@ -259,13 +261,14 @@ struct RoomView: View {
             .navigationDestination(isPresented: $isNavigationScanRoomActive) {
                 ScanningView(namedUrl: room)
             }
-            .navigationBarTitleDisplayMode(.inline)
+            //.navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("Room")
             .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Text("ROOM")
-                        .font(.system(size: 26, weight: .heavy))
-                        .foregroundColor(.white)
-                }
+//                ToolbarItem(placement: .principal) {
+//                    Text("ROOM")
+//                        .font(.system(size: 26, weight: .heavy))
+//                        .foregroundColor(.white)
+//                }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     if selectedTab == 0 {
                         Menu {
@@ -614,7 +617,6 @@ struct RoomView: View {
             }
         }
     }
-    
     
     var tabTitle: String {
         switch selectedTab {

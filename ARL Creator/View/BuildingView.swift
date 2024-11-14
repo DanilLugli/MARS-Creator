@@ -4,6 +4,7 @@ import Foundation
 struct BuildingView: View {
     
     @ObservedObject var building : Building
+    
     @State private var searchText: String = ""
     @State private var isRenameSheetPresented = false
     @State private var newBuildingName: String = ""
@@ -14,10 +15,12 @@ struct BuildingView: View {
         NavigationStack {
             VStack {
                 VStack {
+                    
                     Text("\(building.name) > Floors")
                         .font(.system(size: 14))
                         .fontWeight(.heavy)
-                    
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.leading)
                     
                     if building.floors.isEmpty {
                         VStack {
@@ -54,14 +57,8 @@ struct BuildingView: View {
             .background(Color.customBackground)
             .foregroundColor(.white)
         }
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationTitle("Building")
         .toolbar {
-            ToolbarItem(placement: .principal) {
-                Text("BUILDING")
-                    .font(.system(size: 26))
-                    .fontWeight(.heavy)
-                    .foregroundColor(.white)
-            }
             ToolbarItem(placement: .navigationBarTrailing) {
                 HStack {
                     NavigationLink(destination: AddFloorView(building: building)) {

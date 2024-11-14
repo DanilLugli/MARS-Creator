@@ -38,6 +38,8 @@ struct FloorView: View {
         NavigationStack {
             VStack {
                 Text("\(building.name) > \(floor.name)")
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.leading)
                     .font(.system(size: 14))
                     .fontWeight(.heavy)
                 
@@ -73,8 +75,6 @@ struct FloorView: View {
                                             .shadow(color: Color.gray, radius: 3)
                                     }
                                 }.onAppear(){
-//                                    floor.planimetryRooms.handler.drawContent(borders: true)
-//                                    floor.planimetry.drawContent(borders: true)
                                 }
                             }
                         }
@@ -134,11 +134,8 @@ struct FloorView: View {
                 FloorScanningView(namedUrl: floor)
             }
         }
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationTitle("Floor")
         .toolbar {
-            ToolbarItem(placement: .principal) {
-                Text("FLOOR").font(.system(size: 26, weight: .heavy)).foregroundColor(.white)
-            }
             ToolbarItem(placement: .navigationBarTrailing) {
                 HStack {
                     if selectedTab == 0 {

@@ -34,15 +34,21 @@ struct RoomCardView: View {
                     .background(RoundedRectangle(cornerRadius: 10).fill(Color.white))
                 HStack{
                     
-                    VStack(alignment: .leading) {
-                        Text(name)
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.black)
-                        
-                        Text("\(dateFormatter.string(from: date))")
-                            .font(.system(size: 14))
-                            .foregroundColor(.gray)
+                    HStack{
+                        VStack(alignment: .leading) {
+                            Text(name)
+                                .font(.system(size: 20, weight: .bold))
+                                .foregroundColor(.customBackground)
+                            
+                            Text("Last modified \(dateFormatter.string(from: date))")
+                                .font(.system(size: 14))
+                                .foregroundColor(.gray)
+                        }
+                        Spacer()
                     }
+                    .padding()
+                    
+                    
                 }
                 HStack{
                     Spacer()

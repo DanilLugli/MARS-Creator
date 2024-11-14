@@ -43,7 +43,7 @@ struct RoomPositionView: View {
     @State var apiResponseCode = ""
     @State var matchingNodesForAPI: [(SCNNode, SCNNode)] = []
     
-    @State var originalRoomNodes: [SCNNode] = [] // Cambiato il tipo a [SCNNode]
+    @State var originalRoomNodes: [SCNNode] = []
     
     var body: some View {
         NavigationStack {
@@ -185,13 +185,7 @@ struct RoomPositionView: View {
                 }
             }
             .background(Color.customBackground)
-            .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Text("CREATE ROOM POSITION")
-                        .font(.system(size: 26, weight: .heavy))
-                        .foregroundColor(.white)
-                }
-            }
+            .navigationTitle("Create Room Position")
             .alert(isPresented: $showAlert) {
                 Alert(
                     title: Text("ROOM POSITION CREATED")
@@ -208,7 +202,7 @@ struct RoomPositionView: View {
         }
     }
     
-    // Funzione per filtrare i nodi di room in base al tipo del nodo selezionato nel floor
+    
     func filterRoomNodes(byTypeOf selectedFloorNode: SCNNode) {
         let selectedType = extractType(from: selectedFloorNode.name ?? "")
         print("Tipo selezionato: \(selectedType)")
@@ -227,12 +221,10 @@ struct RoomPositionView: View {
         }
     }
     
-    // Funzione per ripristinare tutti i nodi di room
     func resetRoomNodes() {
         roomNodes = originalRoomNodes
     }
     
-    // Funzione per calcolare il volume di un nodo
     func calculateVolume(of node: SCNNode) -> Float {
         let min = node.boundingBox.min
         let max = node.boundingBox.max
@@ -256,7 +248,6 @@ struct RoomPositionView: View {
         return type.isEmpty ? "unknown" : type
     }
     
-    // Funzione per ordinare i nodi per tipologia e dimensione (dal più grande al più piccolo)
     func sortSceneObjects(nodes: [SCNNode]) -> [SCNNode] {
         
         let typeOrder = ["wall", "storage", "chair", "table", "window", "door"]

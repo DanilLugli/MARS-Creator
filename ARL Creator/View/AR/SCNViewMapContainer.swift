@@ -18,53 +18,52 @@ class SCNViewMapHandler: ObservableObject {
     }
     
     @MainActor func loadRoomsMaps(floor: Floor, rooms: [Room], borders: Bool) {
-            do {
-                let floorFileURL = floor.floorURL.appendingPathComponent("MapUsdz")
-                    .appendingPathComponent("\(floor.name).usdz")
+        do {
+            let floorFileURL = floor.floorURL.appendingPathComponent("MapUsdz")
+                .appendingPathComponent("\(floor.name).usdz")
+            
+            // Prima rimuovi la scena corrente
+            scnView.scene = nil
+            
+            // Ora carica la nuova scena
+            scnView.scene = try SCNScene(url: floorFileURL)
+            
+            drawContent(borders: borders)
+            setMassCenter()
+            setCamera()
+            
+            for room in rooms {
                 
-                // Prima rimuovi la scena corrente
-                scnView.scene = nil
+                let roomMap = room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz")
                 
-                // Ora carica la nuova scena
-                scnView.scene = try SCNScene(url: floorFileURL)
+                let roomScene = try SCNScene(url: URL(fileURLWithPath: roomMap.path))
                 
-                drawContent(borders: borders)
-                setMassCenter()
-                setCamera()
-
-                for room in rooms {
-                    print("\n\nProcessing room URL: \(room.roomURL)")
-                    let roomMap = room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz")
+                if let roomNode = roomScene.rootNode.childNode(withName: "Floor0", recursively: true) {
                     
-                    let roomScene = try SCNScene(url: URL(fileURLWithPath: roomMap.path))
+                    let roomName = room.name
                     
-                    if let roomNode = roomScene.rootNode.childNode(withName: "Floor0", recursively: true) {
-                        print("Found 'Floor0' node for room at: \(roomMap)")
-
-                        let roomName = room.name
-
-                        if let rotoTraslationMatrix = floor.associationMatrix[roomName] {
-                            applyRotoTraslation(to: roomNode, with: rotoTraslationMatrix)
-                        } else {
-                            print("No RotoTraslationMatrix found for room: \(roomName)")
-                        }
-
-                        roomNode.name = roomName
-
-                        let material = SCNMaterial()
-                        material.diffuse.contents = floor.getRoomByName(roomName)?.color
-                        roomNode.geometry?.materials = [material]
-
-                        scnView.scene?.rootNode.addChildNode(roomNode)
+                    if let rotoTraslationMatrix = floor.associationMatrix[roomName] {
+                        applyRotoTraslation(to: roomNode, with: rotoTraslationMatrix)
                     } else {
-                        print("Node 'Floor0' not found in scene: \(roomMap)")
+                        print("No RotoTraslationMatrix found for room: \(roomName)")
                     }
+                    
+                    roomNode.name = roomName
+                    
+                    let material = SCNMaterial()
+                    material.diffuse.contents = floor.getRoomByName(roomName)?.color
+                    roomNode.geometry?.materials = [material]
+                    
+                    scnView.scene?.rootNode.addChildNode(roomNode)
+                } else {
+                    print("Node 'Floor0' not found in scene: \(roomMap)")
                 }
-                
-            } catch {
-                print("Error loading scene from URL: \(error)")
             }
+            
+        } catch {
+            print("Error loading scene from URL: \(error)")
         }
+    }
     
     func printAllNodes(in node: SCNNode?, indent: String = "") {
         guard let node = node else { return }
@@ -91,45 +90,45 @@ class SCNViewMapHandler: ObservableObject {
     }
     
     func drawContent(borders: Bool) {
-            scnView.scene?
-                .rootNode
-                .childNodes(passingTest: {
-                    n, _ in
-                    n.name != nil && 
-                    n.name! != "Room" &&
-                    n.name! != "Geom" &&
-                    !n.name!.hasPrefix("Floor") &&
-                    String(n.name!.suffix(4)) != "_grp" &&
-                    n.name! != "__selected__"
-                })
-                .forEach {
-                    let material = SCNMaterial()
-                    
-                    if $0.name!.prefix(4) == "Door" || $0.name!.prefix(4) == "Open" {
-                        material.diffuse.contents = UIColor.red
-                    } else {
-                        material.diffuse.contents = UIColor.black
-                    }
-                    material.lightingModel = .physicallyBased
-                    $0.geometry?.materials = [material]
-
-                    if borders {
-                        $0.scale.x = $0.scale.x < 0.2 ? $0.scale.x + 0.1 : $0.scale.x
-                        $0.scale.z = $0.scale.z < 0.2 ? $0.scale.z + 0.1 : $0.scale.z
-                        $0.scale.y = ($0.name!.prefix(4) == "Wall") ? 0.1 : $0.scale.y
-                    }
+        scnView.scene?
+            .rootNode
+            .childNodes(passingTest: {
+                n, _ in
+                n.name != nil &&
+                n.name! != "Room" &&
+                n.name! != "Geom" &&
+                !n.name!.hasPrefix("Floor") &&
+                String(n.name!.suffix(4)) != "_grp" &&
+                n.name! != "__selected__"
+            })
+            .forEach {
+                let material = SCNMaterial()
+                
+                if $0.name!.prefix(4) == "Door" || $0.name!.prefix(4) == "Open" {
+                    material.diffuse.contents = UIColor.red
+                } else {
+                    material.diffuse.contents = UIColor.black
                 }
-            
-            scnView.scene?
-                .rootNode
-                .childNodes(passingTest: {
-                    n, _ in n.name?.hasPrefix("Floor") ?? false
-                })
-                .forEach { node in
-                    node.removeFromParentNode()
+                material.lightingModel = .physicallyBased
+                $0.geometry?.materials = [material]
+                
+                if borders {
+                    $0.scale.x = $0.scale.x < 0.2 ? $0.scale.x + 0.1 : $0.scale.x
+                    $0.scale.z = $0.scale.z < 0.2 ? $0.scale.z + 0.1 : $0.scale.z
+                    $0.scale.y = ($0.name!.prefix(4) == "Wall") ? 0.1 : $0.scale.y
                 }
-        }
+            }
         
+        scnView.scene?
+            .rootNode
+            .childNodes(passingTest: {
+                n, _ in n.name?.hasPrefix("Floor") ?? false
+            })
+            .forEach { node in
+                node.removeFromParentNode()
+            }
+    }
+    
     
     func changeColorOfNode(nodeName: String, color: UIColor) {
         drawContent(borders: false)
@@ -268,24 +267,20 @@ class SCNViewMapHandler: ObservableObject {
     
     @MainActor
     func applyRotoTraslation(to node: SCNNode, with rotoTraslation: RotoTraslationMatrix) {
-        // Applica la traslazione locale
+        
         let translationVector = simd_float3(
             rotoTraslation.translation.columns.3.x,
             rotoTraslation.translation.columns.3.y,
             rotoTraslation.translation.columns.3.z
         )
         node.simdPosition += translationVector
-
-        // Estrae la matrice di rotazione
+        
         let rotationMatrix = rotoTraslation.r_Y
-
-        // Converti la matrice di rotazione in un quaternione
+        
         let rotationQuaternion = simd_quatf(rotationMatrix)
-
-        // Applica la rotazione locale
+        
         node.simdOrientation = rotationQuaternion * node.simdOrientation
-
-        print("Updated Node Position: \(node.simdPosition)")
+        
     }
 }
 

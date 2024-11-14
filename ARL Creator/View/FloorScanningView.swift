@@ -32,7 +32,6 @@ struct FloorScanningView: View {
                     Text("Press Start to begin scanning of \(namedUrl.name)")
                         .foregroundColor(.gray).bold()
                         .onAppear {
-                            // Placeholder
                         }
                 }
                 
@@ -48,6 +47,7 @@ struct FloorScanningView: View {
                                     captureView?.stopCapture()
                                 }
                             )
+                            .ignoresSafeArea()
                             .padding()
                             .zIndex(1)
                         }
@@ -97,13 +97,14 @@ struct FloorScanningView: View {
                     self.message = message
                 }
             }
-            .navigationBarTitleDisplayMode(.inline)
+            //.navigationBarTitleDisplayMode(.inline)
+            .navigationTitle(namedUrl.name)
             .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Text(namedUrl.name)
-                        .font(.system(size: 26, weight: .heavy))
-                        .foregroundColor(.white)
-                }
+//                ToolbarItem(placement: .principal) {
+//                    Text(namedUrl.name)
+//                        .font(.system(size: 26, weight: .heavy))
+//                        .foregroundColor(.white)
+//                }
             }
             .onDisappear {
                 //captureView?.stopCapture(pauseARSession: false, saveData: false)

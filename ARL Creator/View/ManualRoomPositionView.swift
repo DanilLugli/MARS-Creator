@@ -54,9 +54,8 @@ struct ManualRoomPositionView: View {
         }
         .background(Color.customBackground)
         .foregroundColor(.white)
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationTitle("Positioning Room")
         .toolbar {
-            
             ToolbarItem(placement: .topBarTrailing) {
                 Button(action: {
                     floor.updateAssociationMatrixInJSON(for: room.name, fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"))
@@ -66,12 +65,6 @@ struct ManualRoomPositionView: View {
                         .font(.system(size: 24))  // Dimensione dell'icona
                         .foregroundStyle(.white, .green, .green)
                 }
-            }
-            
-            ToolbarItem(placement: .principal) {
-                Text("POSITIONING ROOM")
-                    .font(.system(size: 26, weight: .heavy))
-                    .foregroundColor(.white)
             }
         }
         .alert(isPresented: $showUpdateAlert) {

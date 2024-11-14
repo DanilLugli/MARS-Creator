@@ -49,13 +49,14 @@ struct AddBuildingView: View {
             }
             .padding()
             .background(Color.customBackground.ignoresSafeArea())
-            .navigationBarTitleDisplayMode(.inline)
+            //.navigationBarTitleDisplayMode(.inline)
+            .navigationTitle("Add New Building")
             .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Text("ADD NEW BUILDING")
-                        .font(.system(size: 22, weight: .heavy))
-                        .foregroundColor(.white)
-                }
+//                ToolbarItem(placement: .principal) {
+//                    Text("ADD NEW BUILDING")
+//                        .font(.system(size: 22, weight: .heavy))
+//                        .foregroundColor(.white)
+//                }
 //                ToolbarItem(placement: .navigationBarTrailing) {
 //                    HStack {
 //                        Button(action: {
