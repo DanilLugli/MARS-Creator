@@ -20,7 +20,8 @@ struct BuildingsView: View {
                             .padding()
                     }
                     .foregroundColor(.white)
-                    .background(Color.customBackground)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.customBackground.ignoresSafeArea())
                 }
                 else {
                     VStack {
@@ -44,8 +45,9 @@ struct BuildingsView: View {
                         .padding(.top, 15)
                     }
                 }
-            }.foregroundColor(.white)
-                .background(Color.customBackground)
+            }
+            .foregroundColor(.white)
+                .background(Color.customBackground.ignoresSafeArea())
                 .navigationTitle("Buildings")
                 .toolbar {
                     ToolbarItem(placement: .navigationBarTrailing) {

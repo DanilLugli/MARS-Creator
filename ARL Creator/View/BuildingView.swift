@@ -16,11 +16,16 @@ struct BuildingView: View {
             VStack {
                 VStack {
                     
-                    Text("\(building.name) > Floors")
-                        .font(.system(size: 14))
-                        .fontWeight(.heavy)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.leading)
+                    HStack(spacing: 4) {
+                        Text(building.name)
+                        Image(systemName: "arrow.right")
+                            .font(.system(size: 12))
+                        Text("Floors")
+                    }
+                    .font(.system(size: 14))
+                    .fontWeight(.heavy)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.leading)
                     
                     if building.floors.isEmpty {
                         VStack {
@@ -57,7 +62,7 @@ struct BuildingView: View {
             .background(Color.customBackground)
             .foregroundColor(.white)
         }
-        .navigationTitle("Building")
+        .navigationTitle("\(building.name)")
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
                 HStack {

@@ -205,13 +205,7 @@ struct AddSameConnectionView: View {
                 }
             }
         }
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                Text("NEW SAME FLOOR CONNECTION")
-                    .font(.system(size: 22, weight: .heavy))
-                    .foregroundColor(.white)
-            }
-        }
+        .navigationTitle("New Same Floor Connection")
         .background(Color.customBackground.ignoresSafeArea())
     }
 

@@ -52,11 +52,19 @@ struct RoomView: View {
         NavigationStack {
             VStack {
                 VStack {
-                    Text("\(building.name) > \(floor.name) > \(room.name)")
-                        .font(.system(size: 14))
-                        .fontWeight(.heavy)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.leading)
+                    HStack(spacing: 4) {
+                        Text(building.name)
+                        Image(systemName: "arrow.right")
+                            .font(.system(size: 14))
+                        Text(floor.name)
+                        Image(systemName: "arrow.right")
+                            .font(.system(size: 14))
+                        Text(room.name)
+                    }
+                    .font(.system(size: 14))
+                    .fontWeight(.heavy)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.leading)
                     
                     TabView(selection: $selectedTab) {
                         
@@ -79,7 +87,7 @@ struct RoomView: View {
                                     }
                                 }
                                 .onAppear {
-                                    room.planimetry.drawContent(borders: true)
+                                    room.planimetry.drawSceneObjects(borders: true)
                                 }
                             }
                         }

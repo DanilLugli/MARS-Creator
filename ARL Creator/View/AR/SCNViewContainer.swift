@@ -35,7 +35,7 @@ struct SCNViewContainer: UIViewRepresentable {
         cameraNode.worldPosition = SCNVector3(massCenter.worldPosition.x, massCenter.worldPosition.y + 10, massCenter.worldPosition.z)
         
         cameraNode.camera?.usesOrthographicProjection = true
-        cameraNode.camera?.orthographicScale = 10
+        cameraNode.camera?.orthographicScale = 20
         
         cameraNode.eulerAngles = SCNVector3(-Double.pi / 2, 0, 0)
 
@@ -49,20 +49,20 @@ struct SCNViewContainer: UIViewRepresentable {
         
         cameraNode.constraints = []
     }
+//    
+//    func setMassCenter() {
+//        var massCenter = SCNNode()
+//        massCenter.worldPosition = SCNVector3(0, 0, 0)
+//        if let nodes = scnView.scene?.rootNode
+//            .childNodes(passingTest: {
+//                n,_ in n.name != nil && n.name! != "Room" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp"
+//            }) {
+//            massCenter = findMassCenter(nodes)
+//        }
+//        scnView.scene?.rootNode.addChildNode(massCenter)
+//    }
     
-    func setMassCenter() {
-        var massCenter = SCNNode()
-        massCenter.worldPosition = SCNVector3(0, 0, 0)
-        if let nodes = scnView.scene?.rootNode
-            .childNodes(passingTest: {
-                n,_ in n.name != nil && n.name! != "Room" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp"
-            }) {
-            massCenter = findMassCenter(nodes)
-        }
-        scnView.scene?.rootNode.addChildNode(massCenter)
-    }
-    
-    func drawContent(borders: Bool) {
+    func drawSceneObjects(borders: Bool) {
         
         var drawnNodes = Set<String>()
         
@@ -91,7 +91,7 @@ struct SCNViewContainer: UIViewRepresentable {
                         material.diffuse.contents = UIColor.white
                     }
                     if nodeName!.prefix(4) == "Door" {
-                        material.diffuse.contents = UIColor.systemGray5
+                        material.diffuse.contents = UIColor.white
                     }
                     if nodeName!.prefix(4) == "Open"{
                         material.diffuse.contents = UIColor.systemGray5
@@ -103,7 +103,7 @@ struct SCNViewContainer: UIViewRepresentable {
                         material.diffuse.contents = UIColor.brown.withAlphaComponent(0.4)
                     }
                     if nodeName!.prefix(4) == "Stor"{
-                        material.diffuse.contents = UIColor.systemGray2
+                        material.diffuse.contents = UIColor.systemGray
                     }
                     if nodeName!.prefix(4) == "Sofa"{
                         material.diffuse.contents = UIColor(red: 0.0, green: 0.0, blue: 0.5, alpha: 0.6)
@@ -134,7 +134,7 @@ struct SCNViewContainer: UIViewRepresentable {
         }
         
         addDoorNodesBasedOnExistingDoors(room: room)
-        drawContent(borders: borders)
+        drawSceneObjects(borders: borders)
         setMassCenter()
         setCamera()
         
@@ -143,7 +143,7 @@ struct SCNViewContainer: UIViewRepresentable {
     func loadFloorPlanimetry(borders: Bool, floor: Floor) {
 
             scnView.scene = floor.scene
-            drawContent(borders: borders)
+            drawSceneObjects(borders: borders)
             setMassCenter()
             setCamera()
             
@@ -220,20 +220,42 @@ struct SCNViewContainer: UIViewRepresentable {
     //
     //    }
     
-    
-    func findMassCenter(_ nodes: [SCNNode]) -> SCNNode {
-        let massCenter = SCNNode()
-        var X: [Float] = [Float.greatestFiniteMagnitude, -Float.greatestFiniteMagnitude]
-        var Z: [Float] = [Float.greatestFiniteMagnitude, -Float.greatestFiniteMagnitude]
-        for n in nodes{
-            if (n.worldPosition.x < X[0]) {X[0] = n.worldPosition.x}
-            if (n.worldPosition.x > X[1]) {X[1] = n.worldPosition.x}
-            if (n.worldPosition.z < Z[0]) {Z[0] = n.worldPosition.z}
-            if (n.worldPosition.z > Z[1]) {Z[1] = n.worldPosition.z}
+    func setMassCenter() {
+        if let massCenter = findMassCenter() {
+            scnView.scene?.rootNode.addChildNode(massCenter)
         }
-        massCenter.worldPosition = SCNVector3((X[0]+X[1])/2, 0, (Z[0]+Z[1])/2)
+    }
+
+    func findMassCenter() -> SCNNode? {
+        guard let rootNode = scnView.scene?.rootNode else { return nil }
+        
+        var minVector = SCNVector3Zero
+        var maxVector = SCNVector3Zero
+        rootNode.__getBoundingBoxMin(&minVector, max: &maxVector)
+        
+        let centerX = (minVector.x + maxVector.x) / 2
+        let centerY = (minVector.y + maxVector.y) / 2
+        let centerZ = (minVector.z + maxVector.z) / 2
+        
+        let massCenter = SCNNode()
+        massCenter.worldPosition = SCNVector3(centerX, centerY, centerZ)
+        
         return massCenter
     }
+    
+//    func findMassCenter(_ nodes: [SCNNode]) -> SCNNode {
+//        let massCenter = SCNNode()
+//        var X: [Float] = [Float.greatestFiniteMagnitude, -Float.greatestFiniteMagnitude]
+//        var Z: [Float] = [Float.greatestFiniteMagnitude, -Float.greatestFiniteMagnitude]
+//        for n in nodes{
+//            if (n.worldPosition.x < X[0]) {X[0] = n.worldPosition.x}
+//            if (n.worldPosition.x > X[1]) {X[1] = n.worldPosition.x}
+//            if (n.worldPosition.z < Z[0]) {Z[0] = n.worldPosition.z}
+//            if (n.worldPosition.z > Z[1]) {Z[1] = n.worldPosition.z}
+//        }
+//        massCenter.worldPosition = SCNVector3((X[0]+X[1])/2, 0, (Z[0]+Z[1])/2)
+//        return massCenter
+//    }
     
     func setupCamera(cameraNode: SCNNode){
         cameraNode.camera = SCNCamera()
@@ -292,7 +314,7 @@ struct SCNViewContainer: UIViewRepresentable {
     
     func changeColorOfNode(nodeName: String, color: UIColor) {
         print("Change Color of Node: \(nodeName)")
-        drawContent(borders: false)
+        drawSceneObjects(borders: false)
         if let _node = scnView.scene?.rootNode.childNodes(passingTest: { n,_ in n.name != nil && n.name! == nodeName }).first {
             let copy = _node.copy() as! SCNNode
             copy.name = "__selected__"

@@ -235,13 +235,7 @@ struct AddStairsConnectionView: View {
                 }
             }
         }
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                Text("NEW STAIRS FLOORS CONNECTION")
-                    .font(.system(size: 22, weight: .heavy))
-                    .foregroundColor(.white)
-            }
-        }
+        .navigationTitle("Add New Stairs Connection")
         .background(Color.customBackground.ignoresSafeArea())
     }
     

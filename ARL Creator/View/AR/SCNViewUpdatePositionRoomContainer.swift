@@ -269,7 +269,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
                 let material = SCNMaterial()
                 material.diffuse.contents = UIColor.black
                 if ($0.name!.prefix(5) == "Floor") { material.diffuse.contents = UIColor.white.withAlphaComponent(0.2) }
-                if ($0.name!.prefix(4) == "Door" || $0.name!.prefix(4) == "Open") { material.diffuse.contents = UIColor.red }
+                if ($0.name!.prefix(4) == "Door" || $0.name!.prefix(4) == "Open") { material.diffuse.contents = UIColor.white }
                 material.lightingModel = .physicallyBased
                 $0.geometry?.materials = [material]
                 
@@ -282,23 +282,14 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
     }
     
     func applyRotoTraslation(to node: SCNNode, with rotoTraslation: RotoTraslationMatrix) {
-        // Normalizza l'orientamento del nodo mantenendo la scala
-        //normalizeNodeOrientationPreservingScale(node)
-        
-        print("Node Transform: \(node.transform)")
-        print("Scale of the node: \(node.scale)")
-        print("Euler angles of the node: \(node.eulerAngles)")
-        print("Rotation of the node: \(node.rotation)")
-        
-        
-        if let parentNode = node.parent {
-            print("Parent Node: \(parentNode)")
-            print("Parent's Transform: \(parentNode.transform)")
-            print("Parent's Scale: \(parentNode.scale)")
-            print("Parent's Euler Angles: \(parentNode.eulerAngles)")
-        }
-        
-        // Applica le trasformazioni di traslazione e rotazione
+
+//        if let parentNode = node.parent {
+//            print("Parent Node: \(parentNode)")
+//            print("Parent's Transform: \(parentNode.transform)")
+//            print("Parent's Scale: \(parentNode.scale)")
+//            print("Parent's Euler Angles: \(parentNode.eulerAngles)")
+//        }
+//
         node.simdWorldTransform.columns.3 = rotoTraslation.translation.columns.3 + node.simdWorldTransform.columns.3
         
         let r_Y = simd_float3x3([
@@ -318,8 +309,6 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         node.simdWorldTransform.columns.0 = simd_float4(currentRotation.columns.0, node.simdWorldTransform.columns.0.w)
         node.simdWorldTransform.columns.1 = simd_float4(currentRotation.columns.1, node.simdWorldTransform.columns.1.w)
         node.simdWorldTransform.columns.2 = simd_float4(currentRotation.columns.2, node.simdWorldTransform.columns.2.w)
-        
-        print("Updated Node Position: \(node.simdWorldTransform.columns.3)")
     }
 }
 

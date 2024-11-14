@@ -1,20 +1,12 @@
-//
-//  AddFloorView.swift
-//  ScanBuild
-//
-//  Created by Danil Lugli on 07/07/24.
-//
-
 import Foundation
 import SwiftUI
 
 struct AddFloorView: View {
     
     @State private var floorName: String = ""
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) var dismiss
     @State var building: Building
 
-    
     var body: some View {
         NavigationStack {
             VStack {
@@ -40,9 +32,23 @@ struct AddFloorView: View {
                     dateFormatter.timeStyle = .none
                     _ = dateFormatter.string(from: Date())
                     
-                    let newFloor = Floor(_name: floorName, _lastUpdate: Date(), _planimetry: SCNViewContainer(), _planimetryRooms: SCNViewMapContainer(), _associationMatrix: [String : RotoTraslationMatrix](), _rooms: [], _sceneObjects: nil, _scene: nil, _sceneConfiguration: nil, _floorURL: URL(fileURLWithPath: ""))
+                    let newFloor = Floor(
+                        _name: floorName,
+                        _lastUpdate: Date(),
+                        _planimetry: SCNViewContainer(),
+                        _planimetryRooms: SCNViewMapContainer(),
+                        _associationMatrix: [String : RotoTraslationMatrix](),
+                        _rooms: [],
+                        _sceneObjects: nil,
+                        _scene: nil,
+                        _sceneConfiguration: nil,
+                        _floorURL: URL(fileURLWithPath: "")
+                    )
                     
                     building.addFloor(floor: newFloor)
+                    
+                    // Chiude la vista corrente per tornare alla vista precedente
+                    dismiss()
                     
                 }) {
                     Text("SAVE")
@@ -58,28 +64,7 @@ struct AddFloorView: View {
             }
             .padding()
             .background(Color.customBackground.ignoresSafeArea())
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .principal) {
-                    Text("ADD NEW FLOOR")
-                        .font(.system(size: 22, weight: .heavy))
-                        .foregroundColor(.white)
-                }
-//                ToolbarItem(placement: .navigationBarTrailing) {
-//                    HStack {
-//                        Button(action: {
-//                            print("Info button tapped")
-//                        }) {
-//                            Image(systemName: "info.circle.fill")
-//                                .resizable()
-//                                .aspectRatio(contentMode: .fit)
-//                                .frame(width: 31, height: 31)
-//                                .foregroundColor(.blue) // Simbolo blu
-//                                .background(Circle().fill(Color.white).frame(width: 31, height: 31))
-//                        }
-//                    }
-//                }
-            }
+            .navigationTitle("Add New Floor")
         }
     }
 }

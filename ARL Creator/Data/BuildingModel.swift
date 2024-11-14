@@ -190,6 +190,7 @@ class BuildingModel: ObservableObject {
                         var seenNodeNames = Set<String>()
                         
                         print("PRE_CARICAMENTO NODI \(floor.name)")
+                        
                         floor.sceneObjects = floor.scene?.rootNode.childNodes(passingTest: { n, _ in
                             if let nodeName = n.name {
                                 if seenNodeNames.contains(nodeName) {
@@ -220,7 +221,7 @@ class BuildingModel: ObservableObject {
                         }).sorted(by: {
                             ($0.name ?? "").localizedCaseInsensitiveCompare($1.name ?? "") == .orderedAscending
                         })
-                            ?? []
+                        ?? []
                     }
                     
                     
@@ -261,7 +262,7 @@ class BuildingModel: ObservableObject {
                     if fileManager.fileExists(atPath: referenceMarkerURL.path) {
                         let referenceMarkerContents = try fileManager.contentsOfDirectory(at: referenceMarkerURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
                         for fileURL in referenceMarkerContents {
-                            // Load each ReferenceMarker file (assumed to be JSON files)
+
                             if fileURL.pathExtension == "json" {
                                 let jsonData = try Data(contentsOf: fileURL)
                                 let decodedMarkers = try JSONDecoder().decode([ReferenceMarker].self, from: jsonData)
@@ -306,7 +307,7 @@ class BuildingModel: ObservableObject {
                                     return false
                                 }
 
-                                guard let _ = n.geometry else {
+                                guard n.geometry != nil else {
                                     print("NODE WITHOUT GEOMETRY: \(nodeName)")
                                     return false
                                 }
@@ -328,8 +329,9 @@ class BuildingModel: ObservableObject {
                             return false
                         }).sorted(by: {
                             ($0.name ?? "").localizedCaseInsensitiveCompare($1.name ?? "") == .orderedAscending
-                        }) ?? []
-
+                        })
+                        ?? []
+                    
                         
                     }else{
                         print("File .usdz for \(room.name) planimetry is not available.")

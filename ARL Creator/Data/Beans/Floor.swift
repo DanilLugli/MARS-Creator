@@ -269,6 +269,9 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
         let roomDirectoryURL = room.roomURL
         print("RoomDirectoryURL: \(roomDirectoryURL)\n")
         
+        // Ottieni il vecchio nome della stanza
+        let oldRoomName = room.name
+        
         for directory in directories {
             let directoryURL = roomDirectoryURL.appendingPathComponent(directory)
             print("directoryURL: \(directoryURL)\n")
@@ -281,18 +284,43 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
             // Ottieni tutti i file all'interno della directory
             let fileURLs = try fileManager.contentsOfDirectory(at: directoryURL, includingPropertiesForKeys: nil)
             
-            // Itera su ciascun file per rinominarlo
-            for oldFileURL in fileURLs {
-                let oldFileName = oldFileURL.lastPathComponent
+            // Elimina i file con il vecchio nome
+            for fileURL in fileURLs {
+                let fileNameWithoutExtension = fileURL.deletingPathExtension().lastPathComponent
+                if fileNameWithoutExtension == oldRoomName {
+                    do {
+                        try fileManager.removeItem(at: fileURL)
+                        print("File con vecchio nome \(fileURL.lastPathComponent) eliminato nella directory \(directory).")
+                    } catch {
+                        throw NSError(domain: "com.example.ScanBuild", code: 6, userInfo: [NSLocalizedDescriptionKey: "Errore durante l'eliminazione del file \(fileURL.lastPathComponent) in \(directory): \(error.localizedDescription)"])
+                    }
+                }
+            }
+            
+            // Ottieni la lista aggiornata dei file dopo l'eliminazione
+            let updatedFileURLs = try fileManager.contentsOfDirectory(at: directoryURL, includingPropertiesForKeys: nil)
+            
+            // Rinominare tutti i file rimanenti con il nuovo nome
+            for oldFileURL in updatedFileURLs {
                 let fileExtension = oldFileURL.pathExtension
                 let newFileName = "\(newRoomName).\(fileExtension)"
                 let newFileURL = oldFileURL.deletingLastPathComponent().appendingPathComponent(newFileName)
                 
+                // Se esiste già un file con il nuovo nome, eliminalo
+                if fileManager.fileExists(atPath: newFileURL.path) {
+                    do {
+                        try fileManager.removeItem(at: newFileURL)
+                        print("File esistente con il nuovo nome \(newFileURL.lastPathComponent) eliminato nella directory \(directory).")
+                    } catch {
+                        throw NSError(domain: "com.example.ScanBuild", code: 6, userInfo: [NSLocalizedDescriptionKey: "Errore durante l'eliminazione del file esistente \(newFileURL.lastPathComponent) in \(directory): \(error.localizedDescription)"])
+                    }
+                }
+                
                 do {
                     try fileManager.moveItem(at: oldFileURL, to: newFileURL)
-                    print("File rinominato da \(oldFileName) a \(newFileName) nella directory \(directory).")
+                    print("File rinominato a \(newFileName) nella directory \(directory).")
                 } catch {
-                    throw NSError(domain: "com.example.ScanBuild", code: 6, userInfo: [NSLocalizedDescriptionKey: "Errore durante la rinomina del file \(oldFileName) in \(directory): \(error.localizedDescription)"])
+                    throw NSError(domain: "com.example.ScanBuild", code: 6, userInfo: [NSLocalizedDescriptionKey: "Errore durante la rinomina del file \(oldFileURL.lastPathComponent) in \(directory): \(error.localizedDescription)"])
                 }
             }
         }
@@ -474,4 +502,5 @@ extension Floor {
         print("Floor URL: \(_floorURL)")
         print("============================")
     }
+    
 }

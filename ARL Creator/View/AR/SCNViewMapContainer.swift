@@ -105,7 +105,7 @@ class SCNViewMapHandler: ObservableObject {
                 let material = SCNMaterial()
                 
                 if $0.name!.prefix(4) == "Door" || $0.name!.prefix(4) == "Open" {
-                    material.diffuse.contents = UIColor.red
+                    material.diffuse.contents = UIColor.white
                 } else {
                     material.diffuse.contents = UIColor.black
                 }

@@ -49,30 +49,7 @@ struct AddBuildingView: View {
             }
             .padding()
             .background(Color.customBackground.ignoresSafeArea())
-            //.navigationBarTitleDisplayMode(.inline)
             .navigationTitle("Add New Building")
-            .toolbar {
-//                ToolbarItem(placement: .principal) {
-//                    Text("ADD NEW BUILDING")
-//                        .font(.system(size: 22, weight: .heavy))
-//                        .foregroundColor(.white)
-//                }
-//                ToolbarItem(placement: .navigationBarTrailing) {
-//                    HStack {
-//                        Button(action: {
-//                            // Azione per il pulsante "info.circle"
-//                            print("Info button tapped")
-//                        }) {
-//                            Image(systemName: "info.circle.fill")
-//                                .resizable()
-//                                .aspectRatio(contentMode: .fit)
-//                                .frame(width: 31, height: 31)
-//                                .foregroundColor(.blue) // Simbolo blu
-//                                .background(Circle().fill(Color.white).frame(width: 31, height: 31))
-//                        }
-//                    }
-//                }
-            }
         }
     }
 }

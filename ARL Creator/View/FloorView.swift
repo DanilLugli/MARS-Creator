@@ -37,20 +37,22 @@ struct FloorView: View {
         
         NavigationStack {
             VStack {
-                Text("\(building.name) > \(floor.name)")
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.leading)
-                    .font(.system(size: 14))
-                    .fontWeight(.heavy)
+                
+                HStack(spacing: 4) {
+                    Text(building.name)
+                    Image(systemName: "arrow.right")
+                        .font(.system(size: 12))
+                    Text(floor.name)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.leading)
+                .font(.system(size: 14))
+                .fontWeight(.heavy)
                 
                 
                 TabView(selection: $selectedTab) {
                     VStack {
                         
-                        Toggle(isOn: $showFloorMap) {
-                            Text("Show Rooms")
-                                .font(.system(size: 20)).bold()
-                        }.toggleStyle(SwitchToggleStyle()).padding()
                         
                         if floor.planimetry.scnView.scene == nil {
                             Text("Add Planimetry with + icon")
@@ -60,6 +62,14 @@ struct FloorView: View {
                         }
                         else {
                             VStack {
+                                Toggle(isOn: $showFloorMap) {
+                                    Text("Show Rooms")
+                                        .font(.system(size: 20))
+                                        .bold()
+                                }
+                                .toggleStyle(SwitchToggleStyle())
+                                .padding()
+                    
                                 ZStack {
                                     if showFloorMap{
                                         floor.planimetryRooms

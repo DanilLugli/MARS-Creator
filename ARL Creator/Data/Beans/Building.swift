@@ -156,7 +156,7 @@ class Building: Encodable, ObservableObject, Hashable {
     }
     
     @MainActor func renameFloor(floor: Floor, newName: String) throws -> Bool {
-        // Aggiorna l'oggetto floor
+
         floor.name = newName
         
         let fileManager = FileManager.default
