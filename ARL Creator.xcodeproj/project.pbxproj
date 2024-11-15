@@ -25,6 +25,11 @@
 		AA3A24F32C62924200E162A3 /* ConnectionCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA3A24F22C62924200E162A3 /* ConnectionCardView.swift */; };
 		AA3A24F52C62942300E162A3 /* ListConnectionCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA3A24F42C62942300E162A3 /* ListConnectionCardView.swift */; };
 		AA4D2CDB2C7358EE000312A7 /* RoomCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4D2CDA2C7358EE000312A7 /* RoomCardView.swift */; };
+		AA5EA2B82CE793F600AE6EA3 /* RoomPlanimetryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA5EA2B72CE793EF00AE6EA3 /* RoomPlanimetryView.swift */; };
+		AA5EA2BA2CE7948500AE6EA3 /* RoomPositionTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA5EA2B92CE7948500AE6EA3 /* RoomPositionTabView.swift */; };
+		AA5EA2BC2CE794F500AE6EA3 /* MarkerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA5EA2BB2CE794F500AE6EA3 /* MarkerView.swift */; };
+		AA5EA2BE2CE7953E00AE6EA3 /* TransitionZoneTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA5EA2BD2CE7953E00AE6EA3 /* TransitionZoneTabView.swift */; };
+		AA5EA2C02CE7956600AE6EA3 /* ConnectionsTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA5EA2BF2CE7956600AE6EA3 /* ConnectionsTabView.swift */; };
 		AA6110112C621CF400B61D0B /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA6110102C621CF400B61D0B /* Utils.swift */; };
 		AA64CC7C2C47F8EE005C883B /* SameFloorConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA64CC7B2C47F8EE005C883B /* SameFloorConnection.swift */; };
 		AA64CC7E2C47F903005C883B /* AdjacentFloorsConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA64CC7D2C47F903005C883B /* AdjacentFloorsConnection.swift */; };
@@ -95,6 +100,11 @@
 		AA3A24F22C62924200E162A3 /* ConnectionCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionCardView.swift; sourceTree = "<group>"; };
 		AA3A24F42C62942300E162A3 /* ListConnectionCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListConnectionCardView.swift; sourceTree = "<group>"; };
 		AA4D2CDA2C7358EE000312A7 /* RoomCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomCardView.swift; sourceTree = "<group>"; };
+		AA5EA2B72CE793EF00AE6EA3 /* RoomPlanimetryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomPlanimetryView.swift; sourceTree = "<group>"; };
+		AA5EA2B92CE7948500AE6EA3 /* RoomPositionTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomPositionTabView.swift; sourceTree = "<group>"; };
+		AA5EA2BB2CE794F500AE6EA3 /* MarkerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkerView.swift; sourceTree = "<group>"; };
+		AA5EA2BD2CE7953E00AE6EA3 /* TransitionZoneTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransitionZoneTabView.swift; sourceTree = "<group>"; };
+		AA5EA2BF2CE7956600AE6EA3 /* ConnectionsTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionsTabView.swift; sourceTree = "<group>"; };
 		AA6110102C621CF400B61D0B /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		AA64CC7B2C47F8EE005C883B /* SameFloorConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SameFloorConnection.swift; sourceTree = "<group>"; };
 		AA64CC7D2C47F903005C883B /* AdjacentFloorsConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdjacentFloorsConnection.swift; sourceTree = "<group>"; };
@@ -208,24 +218,29 @@
 		AA78F5D82C2C77250044F825 /* View */ = {
 			isa = PBXGroup;
 			children = (
-				AAE57FA92C384E4D00F0196F /* Beans */,
-				AA2CA54F2C3DB5C600C88C94 /* AR */,
+				AA78F5E02C2DB6DE0044F825 /* AddBuildingView.swift */,
+				AA2CA5252C39FF3000C88C94 /* AddFloorView.swift */,
+				AAB619092C502995008F77EE /* AddRoomView.swift */,
+				AA0FD83E2C750BC600DF6E20 /* AddSameConnectionView.swift */,
+				AAE57F9F2C376D0D00F0196F /* AddStairsConnectionView.swift */,
+				AA2289462C8CEB63008452D8 /* AddTransitionZoneView.swift */,
 				AA78F5DA2C2C773E0044F825 /* BuildingsView.swift */,
 				AA78F5DC2C2DB51D0044F825 /* BuildingView.swift */,
-				AAE57F9D2C3764FC00F0196F /* FloorView.swift */,
-				AA2CA55A2C3F07A500C88C94 /* RoomView.swift */,
-				AAD2F4462C7E2CCF009D52E2 /* FloorScanningView.swift */,
-				AAD778A62C5288A30091181A /* ScanningView.swift */,
-				AA2CA55C2C3FC62400C88C94 /* RoomPositionView.swift */,
-				AA92C4D92C8373D900637AF2 /* ManualRoomPositionView.swift */,
-				AA78F5E02C2DB6DE0044F825 /* AddBuildingView.swift */,
-				AA2289462C8CEB63008452D8 /* AddTransitionZoneView.swift */,
-				AAE57F9F2C376D0D00F0196F /* AddStairsConnectionView.swift */,
-				AA0FD83E2C750BC600DF6E20 /* AddSameConnectionView.swift */,
-				AAB619092C502995008F77EE /* AddRoomView.swift */,
-				AA2CA5252C39FF3000C88C94 /* AddFloorView.swift */,
 				AAE57FA12C37FB6100F0196F /* Color.swift */,
+				AA5EA2BF2CE7956600AE6EA3 /* ConnectionsTabView.swift */,
 				AA8E0A6B2C5D02280097BDCD /* FilePickerView.swift */,
+				AAD2F4462C7E2CCF009D52E2 /* FloorScanningView.swift */,
+				AAE57F9D2C3764FC00F0196F /* FloorView.swift */,
+				AA92C4D92C8373D900637AF2 /* ManualRoomPositionView.swift */,
+				AA5EA2BB2CE794F500AE6EA3 /* MarkerView.swift */,
+				AA5EA2B72CE793EF00AE6EA3 /* RoomPlanimetryView.swift */,
+				AA5EA2B92CE7948500AE6EA3 /* RoomPositionTabView.swift */,
+				AA2CA55C2C3FC62400C88C94 /* RoomPositionView.swift */,
+				AA2CA55A2C3F07A500C88C94 /* RoomView.swift */,
+				AAD778A62C5288A30091181A /* ScanningView.swift */,
+				AA5EA2BD2CE7953E00AE6EA3 /* TransitionZoneTabView.swift */,
+				AA2CA54F2C3DB5C600C88C94 /* AR */,
+				AAE57FA92C384E4D00F0196F /* Beans */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -282,16 +297,16 @@
 		AAA29E682C1711AA00CA267C /* ARL Creator */ = {
 			isa = PBXGroup;
 			children = (
-				AA78F5D82C2C77250044F825 /* View */,
-				AA78F5D72C2C77060044F825 /* Data */,
-				AAA29E692C1711AA00CA267C /* AppDelegate.swift */,
-				AAA29E6B2C1711AA00CA267C /* Shaders.metal */,
+				AAA29E772C1711AC00CA267C /* ScanBuild-Bridging-Header.h */,
 				AAA29E6D2C1711AA00CA267C /* ShaderTypes.h */,
+				AAA29E6B2C1711AA00CA267C /* Shaders.metal */,
+				AAA29E692C1711AA00CA267C /* AppDelegate.swift */,
+				AA2CA54B2C3D7ABA00C88C94 /* ContentView.swift */,
 				AAA29E6E2C1711AA00CA267C /* Renderer.swift */,
 				AAA29E702C1711AA00CA267C /* ViewController.swift */,
 				AAA29E752C1711AC00CA267C /* Assets.xcassets */,
-				AAA29E772C1711AC00CA267C /* ScanBuild-Bridging-Header.h */,
-				AA2CA54B2C3D7ABA00C88C94 /* ContentView.swift */,
+				AA78F5D72C2C77060044F825 /* Data */,
+				AA78F5D82C2C77250044F825 /* View */,
 			);
 			path = "ARL Creator";
 			sourceTree = "<group>";
@@ -402,10 +417,12 @@
 				AAE57FAB2C384E6400F0196F /* DefaultCardView.swift in Sources */,
 				AAA5FB6C2CAB38C9003B048E /* ConnectionJSON.swift in Sources */,
 				AA2CA55B2C3F07A500C88C94 /* RoomView.swift in Sources */,
+				AA5EA2C02CE7956600AE6EA3 /* ConnectionsTabView.swift in Sources */,
 				AA8E0A642C57E50F0097BDCD /* VisualizeRoomViewContainer.swift in Sources */,
 				AAE57FB12C385D2B00F0196F /* ConnectedDotsView.swift in Sources */,
 				AA2CA55D2C3FC62400C88C94 /* RoomPositionView.swift in Sources */,
 				AA2CA5512C3DB5F400C88C94 /* CaptureViewContainer.swift in Sources */,
+				AA5EA2B82CE793F600AE6EA3 /* RoomPlanimetryView.swift in Sources */,
 				AA64CC862C495D73005C883B /* Rectangle.swift in Sources */,
 				AAD778A72C5288A40091181A /* ScanningView.swift in Sources */,
 				AA3A24F32C62924200E162A3 /* ConnectionCardView.swift in Sources */,
@@ -417,6 +434,7 @@
 				AA78F5D42C2C6B570044F825 /* Floor.swift in Sources */,
 				AAB6190A2C502995008F77EE /* AddRoomView.swift in Sources */,
 				AAE57FA22C37FB6100F0196F /* Color.swift in Sources */,
+				AA5EA2BC2CE794F500AE6EA3 /* MarkerView.swift in Sources */,
 				AAA29E6F2C1711AA00CA267C /* Renderer.swift in Sources */,
 				AA6110112C621CF400B61D0B /* Utils.swift in Sources */,
 				AA78F5DD2C2DB51D0044F825 /* BuildingView.swift in Sources */,
@@ -424,10 +442,12 @@
 				AA0A80782C9477A300501EB4 /* MoveDimensionObject.swift in Sources */,
 				AA78F5E12C2DB6DE0044F825 /* AddBuildingView.swift in Sources */,
 				AA2CA5262C39FF3000C88C94 /* AddFloorView.swift in Sources */,
+				AA5EA2BA2CE7948500AE6EA3 /* RoomPositionTabView.swift in Sources */,
 				AAE57FA02C376D0D00F0196F /* AddStairsConnectionView.swift in Sources */,
 				AA64CC822C47FDA8005C883B /* RotoTraslationMatrix.swift in Sources */,
 				AAFB3A022C4DB73400DBC593 /* SaveFile.swift in Sources */,
 				AA78F5E82C3300550044F825 /* Connection.swift in Sources */,
+				AA5EA2BE2CE7953E00AE6EA3 /* TransitionZoneTabView.swift in Sources */,
 				AAE57FA62C382C6D00F0196F /* TransitionZone.swift in Sources */,
 				AA78F5DB2C2C773E0044F825 /* BuildingsView.swift in Sources */,
 				AA8E0A5B2C52C69D0097BDCD /* NamedURL.swift in Sources */,

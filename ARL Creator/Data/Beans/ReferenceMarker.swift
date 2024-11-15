@@ -4,6 +4,7 @@
 //
 //  Created by Danil Lugli on 10/07/24.
 //
+
 import Foundation
 import SwiftUI
 import ARKit
@@ -15,7 +16,7 @@ class ReferenceMarker: ObservableObject, Codable, Identifiable {
     @Published private var _imageName: String
     private var _coordinates: Coordinates
     private var _rmUML: URL
-    private var _physicalWidth: CGFloat  // Aggiungi la larghezza fisica dell'immagine in metri
+    @Published private var _physicalWidth: CGFloat
 
     init(_imagePath: URL, _imageName: String, _coordinates: Coordinates, _rmUML: URL, _physicalWidth: CGFloat) {
         self._imagePath = _imagePath
@@ -42,32 +43,42 @@ class ReferenceMarker: ObservableObject, Codable, Identifiable {
     }
     
     var imageName: String {
-        return _imageName
+        get {
+            return _imageName
+        }
+        set {
+            _imageName = newValue
+        }
     }
-    
+
     var coordinates: Coordinates {
         return _coordinates
     }
-    
+
     var rmUML: URL {
         return _rmUML
     }
-    
+
     var physicalWidth: CGFloat {
-        return _physicalWidth
+        get {
+            return _physicalWidth
+        }
+        set {
+            _physicalWidth = newValue
+        }
     }
     
-    // Metodo per creare ARReferenceImage
     func asARReferenceImage() -> ARReferenceImage? {
         if let imageData = try? Data(contentsOf: _imagePath),
            let uiImage = UIImage(data: imageData),
            let cgImage = uiImage.cgImage {
-            return ARReferenceImage(cgImage, orientation: .up, physicalWidth: _physicalWidth)
+            let referenceImage = ARReferenceImage(cgImage, orientation: .up, physicalWidth: _physicalWidth)
+            referenceImage.name = _imageName
+            return referenceImage
         }
         return nil
     }
     
-    // Implementazione personalizzata di Codable
     private enum CodingKeys: String, CodingKey {
         case id
         case imageName

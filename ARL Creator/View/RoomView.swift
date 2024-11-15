@@ -12,6 +12,7 @@ struct RoomView: View {
     
     @State private var newRoomName: String = ""
     @State private var selectedMarker: ReferenceMarker? = nil
+    //@State private var isMarkerDetailSheetPresented = false // Stato per mostrare la Sheet del marker
     @State private var selectedConnection: TransitionZone? = nil
     @State private var selectedTransitionZone: TransitionZone? = nil
     @State private var selectedTab: Int = 0
@@ -45,7 +46,6 @@ struct RoomView: View {
     @State private var alertMessage = ""
     @State private var searchText: String = ""
     
-//    var mapView = SCNViewContainer()
     @State var mapRoomPositionView = SCNViewMapContainer()
     
     var body: some View {
@@ -68,199 +68,43 @@ struct RoomView: View {
                     
                     TabView(selection: $selectedTab) {
                         
-                        VStack {
-                            if room.planimetry.scnView.scene == nil{
-                                
-                                Text("Add Planimetry for \(room.name) with + icon.")
-                                    .foregroundColor(.gray)
-                                    .font(.headline)
-                                    .padding()
-                                
-                            } else {
-                                VStack {
-                                    ZStack {
-                                        room.planimetry
-                                            .border(Color.white)
-                                            .cornerRadius(10)
-                                            .padding()
-                                            .shadow(color: Color.gray, radius: 3)
-                                    }
-                                }
-                                .onAppear {
-                                    room.planimetry.drawSceneObjects(borders: true)
-                                }
+                        RoomPlanimetryView(room: room)
+                            .tabItem {
+                                Label("Room Planimetry", systemImage: "map.fill")
                             }
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color.customBackground)
-                        .tabItem {
-                            Label("Room Planimetry", systemImage: "map.fill")
-                        }
-                        .tag(0)
+                            .tag(0)
                         
-                        VStack {
-                            if doesMatrixExist(for: room.name, in: floor.associationMatrix) {
-                                VStack{
-                                    ZStack {
-                                        mapRoomPositionView
-                                            .border(Color.white)
-                                            .cornerRadius(10)
-                                            .padding()
-                                            .shadow(color: Color.gray, radius: 3)
-                                           
-                                    }.onAppear {
-                                        var floorRooms: [Room] = []
-                                        
-                                        floorRooms.append(room)
-                                        
-                                        mapRoomPositionView.handler.loadRoomsMaps(
-                                            floor: floor,
-                                            rooms: floorRooms,
-                                            borders: true
-                                        )
-                                    }
-                                }
-                            } else {
-//                                VStack {
-////                                    let isSelected = floor.isMatrixPresent(named: room.name, inFileAt: floor.floorURL.appendingPathComponent("\(floor.name).json"))
-////                                    MatrixCardView(floor: floor.name, room: room.name, exist: isSelected, date: Date(), rowSize: 1)
-//                                    
-//                                }
-//                                .padding()
-                                Text("Add & Calculate \(room.name) Position with + icon.")
-                                    .foregroundColor(.gray)
-                                    .font(.headline)
-                                    .padding()
+                        RoomPositionTabView(room: room, floor: floor)
+                            .tabItem {
+                                Label("Room Position", systemImage: "sum")
                             }
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color.customBackground)
-                        .tabItem {
-                            Label("Room Position", systemImage: "sum")
-                        }
-                        .tag(1)
+                            .tag(1)
                         
-                        VStack {
-                            if room.referenceMarkers.isEmpty {
-                                VStack {
-                                    Text("Add Marker to \(room.name) with + icon.")
-                                        .foregroundColor(.gray)
-                                        .font(.headline)
-                                        .padding()
-                                }
-                                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                .background(Color.customBackground)
-                            } else {
-                                ScrollView {
-                                    LazyVStack(spacing: 50) {
-                                        ForEach(filteredMarker, id: \.id) { marker in
-                                            Button(action: {
-                                                selectedMarker = marker
-                                            }) {
-                                                MarkerCardView(imageName: marker.image).padding()
-                                            }
-                                        }
-                                    }
-                                }
-                                .padding(.top, 15)
+                        MarkerView(room: room)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .background(Color.customBackground)
+                            .tabItem {
+                                Label("Marker", systemImage: "photo")
                             }
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color.customBackground)
-                        .tabItem {
-                            Label("Marker", systemImage: "photo")
-                        }
-                        .tag(2)
+                            .tag(2)
+                            
                         
-                        VStack{
-                            if room.transitionZones.isEmpty{
-                                Text("Add Transition Zone to \(room.name) with + icon.").foregroundColor(.gray)
-                                    .font(.headline)
-                                    .padding()
-                            }else{
-                                
-                                TextField("Search", text: $searchText)
-                                    .padding(7)
-                                    .background(Color(.systemGray6))
-                                    .cornerRadius(8)
-                                    .padding(.horizontal, 10)
-                                    .frame(maxWidth: .infinity)
-                                    .padding()
-                                
-                                ScrollView {
-                                    LazyVStack(spacing: 50) {
-                                        ForEach(filteredTransitionZones.sorted(by: { $0.name < $1.name }), id: \.id) { transitionZone in
-                                            Button(action: {
-                                                selectedTransitionZone = transitionZone
-                                            }) {
-                                                DefaultCardView(name: transitionZone.name, date: Date()).padding()
-                                            }
-                                        }
-                                    }
-                                } .safeAreaInset(edge: .bottom, spacing: 0) {
-                                    Color.clear.frame(height: 80) // Inserisci uno spazio di 80 punti sotto la scroll view
-                                }
-                                .padding(.top, 15)
+                        TransitionZoneTabView(room: room)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .background(Color.customBackground)
+                            .tabItem {
+                                Label("Transition Zones", systemImage: "mappin.and.ellipse")
                             }
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color.customBackground)
-                        .tabItem {
-                            Label("Transition Zones", systemImage: "mappin.and.ellipse")
-                        }
-                        .tag(4)
+                            .tag(4)
                         
                         
-                        VStack {
-                            if filteredConnection.isEmpty {
-                                Text("Add a Connection for \(room.name) using the + icon.")
-                                    .foregroundColor(.gray)
-                                    .font(.headline)
-                                    .padding()
-                            } else {
-                                ScrollView {
-                                    LazyVStack(spacing: 40) {
-                                        ForEach(filteredTransitionZones.sorted(by: { $0.name < $1.name }), id: \.id) { transitionZone in
-                                            
-                                            if let connections = transitionZone.connection, !connections.isEmpty {
-                                                ForEach(connections, id: \.id) { connection in
-                                                    Button(action: {
-                                                        selectedConnection = transitionZone
-                                                    }) {
-                                                        if let adjacentConnection = connection as? AdjacentFloorsConnection {
-                                                            ListConnectionCardView(
-                                                                floor: floor.name,
-                                                                room: room.name,
-                                                                transitionZone: transitionZone.name,
-                                                                targetFloor: adjacentConnection.targetFloor,
-                                                                targetRoom: adjacentConnection.targetRoom,
-                                                                targetTransitionZone: adjacentConnection.targetTransitionZone,
-                                                                exist: true,
-                                                                date: Date(),
-                                                                rowSize: 1
-                                                            )
-                                                        }
-                                                    }
-                                                }
-                                            } else {
-                                                Text("No connections found.")
-                                                    .padding()
-                                                    .foregroundColor(.gray)
-                                            }
-                                            
-                                        }
-                                    }
-                                } .safeAreaInset(edge: .bottom, spacing: 0) {
-                                    Color.clear.frame(height: 80) // Inserisci uno spazio di 80 punti sotto la scroll view
-                                }.padding(.top, 15)
+                        ConnectionsTabView(room: room, floor: floor)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .background(Color.customBackground)
+                            .tabItem {
+                                Label("Connections", systemImage: "arrow.left.arrow.right")
                             }
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color.customBackground)
-                        .tabItem {
-                            Label("Connections", systemImage: "arrow.left.arrow.right")
-                        }
-                        .tag(3)
+                            .tag(3)
                     }
                 }
                 .background(Color.customBackground)
@@ -269,16 +113,11 @@ struct RoomView: View {
             .navigationDestination(isPresented: $isNavigationScanRoomActive) {
                 ScanningView(namedUrl: room)
             }
-            //.navigationBarTitleDisplayMode(.inline)
             .navigationTitle("Room")
             .toolbar {
-//                ToolbarItem(placement: .principal) {
-//                    Text("ROOM")
-//                        .font(.system(size: 26, weight: .heavy))
-//                        .foregroundColor(.white)
-//                }
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    if selectedTab == 0 {
+                    switch selectedTab {
+                    case 0:
                         Menu {
                             Button(action: {
                                 isRenameSheetPresented = true
@@ -290,25 +129,24 @@ struct RoomView: View {
                             
                             Button(action: {
                                 isOptionsSheetPresented = true
-                                print("isNavigationActive set to true") // Aggiungi per debug
+                                print("isNavigationActive set to true")
                             }) {
                                 Label("Create Planimetry", systemImage: "plus")
-                            }.disabled(FileManager.default.fileExists(atPath: room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz").path))
-
+                            }
+                            .disabled(FileManager.default.fileExists(atPath: room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz").path))
                             
                             Button(action: {
                                 alertMessage = "If you proceed with the update, the current floor plan will be deleted.\nThis action is irreversible, are you sure you want to continue?"
                                 showUpdateAlert = true
                             }) {
                                 Label("Update Planimetry", systemImage: "arrow.clockwise")
-                            }.disabled(!FileManager.default.fileExists(atPath: room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz").path))
+                            }
+                            .disabled(!FileManager.default.fileExists(atPath: room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz").path))
                             
                             Divider()
                             
                             Button(action: {
                                 isColorPickerPopoverPresented = true
-//                                ColorPicker("Choose a color", selection: $selectedColor)
-//                                    .padding()
                             }) {
                                 Label("Change Room Color", systemImage: "paintpalette")
                             }
@@ -320,9 +158,9 @@ struct RoomView: View {
                             }) {
                                 HStack {
                                     Image(systemName: "trash")
-                                        .foregroundColor(.red) // Imposta l'icona in rosso
+                                        .foregroundColor(.red)
                                     Text("Delete Room")
-                                        .foregroundColor(.red) // Imposta il testo in rosso
+                                        .foregroundColor(.red)
                                 }
                             }
                             
@@ -332,30 +170,19 @@ struct RoomView: View {
                                 .symbolRenderingMode(.palette)
                                 .foregroundStyle(.white, .blue, .blue)
                         }
-//                        .background{
-//                            NavigationLink(
-//                                destination: ScanningView(namedUrl: room),
-//                                isActive: $isNavigationScanRoomActive,
-//                                label: {
-//                                    EmptyView()
-//                                }
-//                            )
-//                        }
-                    }
-                    else if selectedTab == 1 {
+                        
+                    case 1:
                         Menu {
-                            
                             Button(action: {
                                 isRoomPlanimetryUploadPicker = true
                             }) {
                                 Label("Create Room Position Automatic Mode", systemImage: "mappin.and.ellipse")
-                            }.disabled(true)
-                            
-                            
+                            }
+                            .disabled(true)
                             
                             Button(action: {
                                 isCreateRoomPosition = true
-                                print("isNavigationActive set to true") // Aggiungi per debug
+                                print("isNavigationActive set to true")
                             }) {
                                 Label("Create Room Position Association Mode", systemImage: "mappin")
                             }
@@ -374,25 +201,22 @@ struct RoomView: View {
                                 .font(.system(size: 22))
                                 .symbolRenderingMode(.palette)
                                 .foregroundStyle(.white, .blue, .blue)
-                        }.background{
+                        }
+                        .background {
                             NavigationLink(
                                 destination: RoomPositionView(floor: self.floor, room: self.room),
                                 isActive: $isCreateRoomPosition,
-                                label: {
-                                    EmptyView()
-                                }
+                                label: { EmptyView() }
                             )
                             
                             NavigationLink(
                                 destination: ManualRoomPositionView(floor: self.floor, room: self.room),
                                 isActive: $isCreateManualRoomPosition,
-                                label: {
-                                    EmptyView()
-                                }
+                                label: { EmptyView() }
                             )
                         }
-                    }
-                    else if selectedTab == 2 {
+                        
+                    case 2:
                         Button(action: {
                             isReferenceMarkerUploadPicker = true
                         }) {
@@ -400,16 +224,16 @@ struct RoomView: View {
                                 .font(.system(size: 22))
                                 .foregroundStyle(.white, .blue, .blue)
                         }
-                    }
-                    else if selectedTab == 3 {
-                        ZStack{
+                        
+                    case 3:
+                        ZStack {
                             Menu {
-                                
                                 Button(action: {
                                     isConnectionSameFloor = true
                                 }) {
                                     Label("Create Same Floor Connection", systemImage: "arrow.left.arrow.right")
-                                }.disabled(true)
+                                }
+                                .disabled(true)
                                 
                                 Button(action: {
                                     isConnectionAdjacentFloor = true
@@ -417,12 +241,12 @@ struct RoomView: View {
                                     Label("Create Adjacent Floors Connection", systemImage: "arrow.up.arrow.down")
                                 }
                                 
-                                // Navigazione verso una terza vista
                                 Button(action: {
-                                    
+                                    // Placeholder for future functionality
                                 }) {
                                     Label("Create Elevator Connection", systemImage: "arrow.up.and.line.horizontal.and.arrow.down")
-                                }.disabled(true)
+                                }
+                                .disabled(true)
                                 
                             } label: {
                                 Image(systemName: "plus.circle.fill")
@@ -430,33 +254,30 @@ struct RoomView: View {
                                     .foregroundStyle(.white, .blue, .blue)
                             }
                             
-                            // NavigationLink per AddStairsConnectionView, attivato al di fuori del menu
                             NavigationLink(
                                 destination: AddStairsConnectionView(building: building, initialSelectedFloor: floor, initialSelectedRoom: room),
                                 isActive: $isConnectionAdjacentFloor,
-                                label: {
-                                    EmptyView()
-                                }
+                                label: { EmptyView() }
                             )
                             
                             NavigationLink(
                                 destination: AddSameConnectionView(building: building, initialSelectedFloor: floor, initialSelectedRoom: room),
                                 isActive: $isConnectionSameFloor,
-                                label: {
-                                    EmptyView()
-                                }
+                                label: { EmptyView() }
                             )
                         }
                         
-                    }
-                    else if selectedTab == 4 {
-                        HStack{
+                    case 4:
+                        HStack {
                             NavigationLink(destination: AddTransitionZoneView(floor: floor, room: room)) {
                                 Image(systemName: "plus.circle.fill")
                                     .font(.system(size: 22))
                                     .foregroundStyle(.white, .blue, .blue)
                             }
                         }
+                        
+                    default:
+                        EmptyView()
                     }
                 }
             }
@@ -464,7 +285,7 @@ struct RoomView: View {
                 ZStack {
                     // Rettangolo che riempie l'intera sheet
                     Color.customBackground
-                        .edgesIgnoringSafeArea(.all)  // Assicura che lo sfondo copra tutta l'area
+                        .edgesIgnoringSafeArea(.all)  
                     
                     VStack {
                         Text("Change Room Color")
@@ -506,39 +327,31 @@ struct RoomView: View {
                     
                     // Se l'URL selezionato è un'immagine, aggiungi un nuovo ReferenceMarker
                     if imageExtensions.contains(fileExtension) {
-                        // Definisci il percorso di destinazione per l'immagine
                         let destinationURL = room.roomURL.appendingPathComponent("ReferenceMarker").appendingPathComponent("\(url.lastPathComponent)")
                         
                         do {
-                            // Crea la directory "ReferenceMarker" se non esiste
                             let referenceMarkerDirectory = room.roomURL.appendingPathComponent("ReferenceMarker")
                             if !fileManager.fileExists(atPath: referenceMarkerDirectory.path) {
                                 try fileManager.createDirectory(at: referenceMarkerDirectory, withIntermediateDirectories: true, attributes: nil)
                             }
                             
                             try fileManager.copyItem(at: url, to: destinationURL)
-                            
-                            //                            let referenceMarker = ReferenceMarker(
-                            //                                imagePath: destinationURL,
-                            //                                imageName: url.lastPathComponent,
-                            //                                coordinates: Coordinates(latitude: 0.0, longitude: 0.0), // Aggiungi le coordinate reali se disponibili
-                            //                                rmUML: URLComponents(string: "")
-                            //                            )
-                            //
-                            //                            // Aggiungi il nuovo ReferenceMarker all'array della stanza
-                            //                            room.addReferenceMarker(referenceMarker: referenceMarker)
-                            // Assuming the image file name is the same as the marker name
+                           
                             
                             print("Image added successfully to ReferenceMarkers: \(destinationURL)")
                             
                         } catch {
-                            // In caso di errore, aggiorna lo stato e mostra l'alert
                             errorMessage = "Failed to save the image: \(error.localizedDescription)"
                             isErrorAlertPresented = true
                         }
                     }
                 }
             }
+            //.sheet(isPresented: $isMarkerDetailSheetPresented) {
+//                            if let marker = selectedMarker {
+//                                MarkerDetailView(marker: marker)
+//                            }
+//                        }
             .confirmationDialog("How do you want to create the \(room.name) planimetry?", isPresented: $isOptionsSheetPresented, titleVisibility: .visible) {
                 
                 Button("Create With AR") {
@@ -626,51 +439,11 @@ struct RoomView: View {
         }
     }
     
-    var tabTitle: String {
-        switch selectedTab {
-        case 0: return "Planimentry"
-        case 1: return "Markers"
-        case 2: return "Room Position"
-        case 3: return "Transition Zone"
-        default: return ""
-        }
-    }
-    
-    var filteredMarker: [ReferenceMarker] {
-        if searchText.isEmpty {
-            return room.referenceMarkers
-        } else {
-            return room.referenceMarkers.filter { $0.imageName.lowercased().contains(searchText.lowercased()) }
-        }
-    }
-    
-    var filteredTransitionZones: [TransitionZone] {
-        if searchText.isEmpty {
-            return room.transitionZones
-        } else {
-            return room.transitionZones.filter { $0.name.lowercased().contains(searchText.lowercased()) }
-        }
-    }
-    
-    var filteredConnection: [TransitionZone] {
-        let filteredZones = room.transitionZones.filter { transitionZone in
-            transitionZone.connection != nil
-        }
-        
-        if searchText.isEmpty {
-            return filteredZones
-        } else {
-            return filteredZones.filter { $0.name.lowercased().contains(searchText.lowercased()) }
-        }
-        
-    }
-    
-    // Funzione che viene eseguita quando un colore viene selezionato
     func colorSelected(_ color: UIColor) {
         room.color = color
         print("Selected color: \(color)")
     }
-    
+
     func isDirectoryEmpty(url: URL) -> Bool {
         let fileManager = FileManager.default
         
