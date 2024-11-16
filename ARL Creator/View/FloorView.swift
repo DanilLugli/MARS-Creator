@@ -13,14 +13,13 @@ struct FloorView: View {
     @State private var searchText: String = ""
     @State private var newFloorName: String = ""
     @State private var selectedTab: Int = 0
-    @State private var animateRooms: Bool = false
-    @State private var newRoom: Room? = nil
+    @State private var newRoomName: String = ""
     
     @State private var selectedFileURL: URL?
     @State private var showFloorMap: Bool = false
     
     @State private var isNavigationActive = false
-    @State private var isNavigationAddActive = false
+    @State private var isRoomSheetPresented = false
     @State private var isFloorPlanimetryUploadPicker = false
     @State private var isRenameSheetPresented = false
     @State private var isErrorUpdateAlertPresented = false
@@ -49,18 +48,14 @@ struct FloorView: View {
                 .font(.system(size: 14))
                 .fontWeight(.heavy)
                 
-                
                 TabView(selection: $selectedTab) {
                     VStack {
-                        
-                        
                         if floor.planimetry.scnView.scene == nil {
                             Text("Add Planimetry with + icon")
                                 .foregroundColor(.gray)
                                 .font(.headline)
                                 .padding()
-                        }
-                        else {
+                        } else {
                             VStack {
                                 Toggle(isOn: $showFloorMap) {
                                     Text("Show Rooms")
@@ -71,7 +66,7 @@ struct FloorView: View {
                                 .padding()
                     
                                 ZStack {
-                                    if showFloorMap{
+                                    if showFloorMap {
                                         floor.planimetryRooms
                                             .border(Color.white)
                                             .cornerRadius(10)
@@ -84,7 +79,6 @@ struct FloorView: View {
                                             .padding()
                                             .shadow(color: Color.gray, radius: 3)
                                     }
-                                }.onAppear(){
                                 }
                             }
                         }
@@ -97,7 +91,6 @@ struct FloorView: View {
                     .tag(0)
                     
                     VStack {
-                        
                         if floor.rooms.isEmpty {
                             VStack {
                                 Text("Add Room to \(floor.name) with + icon")
@@ -106,7 +99,6 @@ struct FloorView: View {
                                     .padding()
                             }
                         } else {
-                            
                             TextField("Search", text: $searchText)
                                 .padding(7)
                                 .background(Color(.systemGray6))
@@ -117,7 +109,7 @@ struct FloorView: View {
                             
                             ScrollView {
                                 LazyVStack(spacing: 50) {
-                                    ForEach(floor.rooms, id: \.id) { room in
+                                    ForEach(filteredRooms, id: \.id) { room in
                                         NavigationLink(destination: RoomView(room: room, floor: floor, building: building )) {
                                             let isSelected = floor.isMatrixPresent(named: room.name, inFileAt: floor.floorURL.appendingPathComponent("\(floor.name).json"))
                                             RoomCardView(name: room.name, date: room.lastUpdate, position: isSelected, color: room.color, rowSize: 1, isSelected: false).padding()
@@ -137,9 +129,6 @@ struct FloorView: View {
             }
             .background(Color.customBackground)
             .foregroundColor(.white)
-            .navigationDestination(isPresented: $isNavigationAddActive) {
-                AddRoomView(floor: floor)
-            }
             .navigationDestination(isPresented: $isNavigationActive) {
                 FloorScanningView(namedUrl: floor)
             }
@@ -159,19 +148,19 @@ struct FloorView: View {
                             Divider()
                             
                             Button(action: {
-                                
-                                self.isOptionsSheetPresented = true
-                                
+                                isOptionsSheetPresented = true
                             }) {
                                 Label("Create Planimetry", systemImage: "plus")
-                            }.disabled(FileManager.default.fileExists(atPath: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz").path))
+                            }
+                            .disabled(FileManager.default.fileExists(atPath: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz").path))
 
                             Button(action: {
                                 alertMessage = "If you proceed with the update:\n1. Current floor plan\n2. All rooms position\nWill be deleted.\nThis action is irreversible, are you sure you want to continue?"
                                 showUpdateAlert = true
                             }) {
                                 Label("Update Planimetry", systemImage: "arrow.clockwise")
-                            }.disabled(!FileManager.default.fileExists(atPath: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz").path))
+                            }
+                            .disabled(!FileManager.default.fileExists(atPath: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz").path))
                             
                             Divider()
                             
@@ -188,23 +177,10 @@ struct FloorView: View {
                                 .font(.system(size: 22))
                                 .foregroundStyle(.white, .blue, .blue)
                         }
-//                        NavigationLink(destination: FloorScanningView(namedUrl: floor), isActive: $isNavigationActive) {
-//                            EmptyView()
-//                        }
                     }
                     else if selectedTab == 1 {
                         Button(action: {
-                            let newRoom = Room(
-                                _name: "New Room",
-                                _lastUpdate: Date(),
-                                _planimetry: SCNViewContainer(),
-                                _referenceMarkers: [],
-                                _transitionZones: [],
-                                _sceneObjects: [],
-                                _roomURL: URL(fileURLWithPath:"")
-                            )
-                            self.newRoom = newRoom
-                            self.isNavigationAddActive = true
+                            isRoomSheetPresented = true
                         }) {
                             Image(systemName: "plus.circle.fill")
                                 .font(.system(size: 22))
@@ -332,12 +308,95 @@ struct FloorView: View {
                 }
             }
         }
+        .sheet(isPresented: $isRoomSheetPresented) {
+            addRoomSheet
+        }
+    }
+    
+    // Custom sheet for adding a new room
+    private var addRoomSheet: some View {
+        VStack(spacing: 16) {
+            Text("Add New Room")
+                .font(.title)
+                .foregroundColor(.customBackground)
+                .bold()
+                .padding(.top)
+            
+            Image(systemName: "plus.viewfinder")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 50, height: 50)
+                .foregroundColor(.blue)
+            
+            Text("Enter a name for the new room.")
+                .foregroundColor(.customBackground)
+                .font(.body)
+                .padding(.horizontal)
+            
+            TextField("Room Name", text: $newRoomName)
+                .padding()
+                .foregroundColor(.customBackground)
+                .background(Color(.systemGray6))
+                .cornerRadius(8)
+                .padding(.horizontal)
+            
+            HStack {
+                Button("Cancel") {
+                    isRoomSheetPresented = false
+                    newRoomName = ""
+                }
+                .font(.headline)
+                .bold()
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.red.cornerRadius(10))
+
+                Spacer()
+
+                Button("Add") {
+                    addNewRoom()
+                    isRoomSheetPresented = false
+                }
+                .font(.headline)
+                .bold()
+                .foregroundColor(.white)
+                .frame(maxWidth: .infinity)
+                .padding()
+                .background(Color.green.cornerRadius(10))
+                .disabled(newRoomName.isEmpty)
+            }
+            .padding(.horizontal)
+            .padding(.bottom)
+        }
+        .presentationDetents([.height(370)])
+        .presentationDragIndicator(.visible)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.white)
+        .cornerRadius(16)
+        .padding()
+    }
+    
+    private func addNewRoom() {
+        guard !newRoomName.isEmpty else { return }
+        let newRoom = Room(
+            _name: newRoomName,
+            _lastUpdate: Date(),
+            _planimetry: SCNViewContainer(),
+            _referenceMarkers: [],
+            _transitionZones: [],
+            _sceneObjects: [],
+            _roomURL: URL(fileURLWithPath: "")
+        )
+        
+        floor.addRoom(room: newRoom)
+        newRoomName = ""
     }
     
     var filteredRooms: [Room] {
         if searchText.isEmpty {
             print("PRINT DEBUG ROOM")
-            floor.rooms.forEach{ room in
+            floor.rooms.forEach { room in
                 room.debugPrintRoom()
             }
             return floor.rooms
@@ -346,7 +405,6 @@ struct FloorView: View {
         }
     }
 }
-
 
 struct FloorView_Previews: PreviewProvider {
     static var previews: some View {
@@ -357,4 +415,3 @@ struct FloorView_Previews: PreviewProvider {
         return FloorView(floor: floor, building: building)
     }
 }
-

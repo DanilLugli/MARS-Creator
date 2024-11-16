@@ -34,8 +34,6 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         return lhs.id == rhs.id
     }
     
-    
-    
     var id: UUID {
         get {
             return _id
@@ -144,7 +142,6 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         return colors[Int(arc4random_uniform(UInt32(colors.count)))]
     }
     
-    
     // Implementazione personalizzata di Encodable
     private enum CodingKeys: String, CodingKey {
         case name
@@ -192,7 +189,7 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         print("Reference Markers (\(_referenceMarkers.count)):")
         
         for marker in referenceMarkers {
-            print("\tMarker ID: \(marker.id), Coordinates: \(marker.coordinates)")
+            print("\tMarker ID: \(marker.id), Marker name: \(marker.imageName)")
         }
         
         print("Transition Zones (\(self.transitionZones.count)):")
@@ -207,7 +204,6 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         
         print("-----------------------------\n")
     }
-    
     
     func addConnection(from fromTransitionZone: TransitionZone, to targetRoom: Room, targetTransitionZone: TransitionZone) {
 
@@ -247,7 +243,6 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     func saveConnectionToJSON(for transitionZoneName: String, connection: AdjacentFloorsConnection, to url: URL) throws {
         //
     }
-
     
     func debugConnectionPrint() {
             print("Room: \(self.name)")

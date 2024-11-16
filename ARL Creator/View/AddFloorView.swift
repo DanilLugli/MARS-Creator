@@ -7,8 +7,10 @@ struct AddFloorView: View {
     @Environment(\.dismiss) var dismiss
     @State var building: Building
 
+    @State private var navigationPath = NavigationPath()
+    
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             VStack {
                 Text("Insert the name of new floor: ")
                     .font(.system(size: 18))

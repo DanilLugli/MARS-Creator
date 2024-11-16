@@ -175,14 +175,14 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
         
         _rooms.removeAll { $0.id == room.id }
         
-        let roomURL = floorURL.appendingPathComponent(room.name)
+        let roomURL = floorURL.appendingPathComponent("Rooms")
         
         do {
-            if FileManager.default.fileExists(atPath: roomURL.path) {
+            if FileManager.default.fileExists(atPath: roomURL.path()) {
                 try FileManager.default.removeItem(at: roomURL)
                 print("Room \(room.name) eliminata con successo da \(roomURL.path).")
             } else {
-                print("La cartella della room \(room.name) non esiste.")
+                print("La cartella della room \(room.name) non esiste in \(roomURL.path()).")
             }
         } catch {
             print("Errore durante l'eliminazione della room \(room.name): \(error)")

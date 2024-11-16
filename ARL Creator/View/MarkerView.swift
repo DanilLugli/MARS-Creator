@@ -1,17 +1,10 @@
-//
-//  MarkerView.swift
-//  ScanBuild
-//
-//  Created by Danil Lugli on 15/11/24.
-//
-
 import SwiftUI
 
 struct MarkerView: View {
     @ObservedObject var room: Room
     @State private var searchText: String = ""
-    @State private var selectedMarker: ReferenceMarker? = nil // Marker selezionato
-    @State private var isMarkerDetailSheetPresented = false // Stato per mostrare la sheet
+    @State private var selectedMarker: ReferenceMarker? = nil
+    @State private var isMarkerDetailSheetPresented = false
     
     var filteredMarker: [ReferenceMarker] {
         if searchText.isEmpty {
@@ -33,8 +26,8 @@ struct MarkerView: View {
                     LazyVStack(spacing: 50) {
                         ForEach(filteredMarker, id: \.id) { marker in
                             Button(action: {
-                                selectedMarker = marker // Imposta il marker selezionato
-                                isMarkerDetailSheetPresented = true // Mostra la sheet
+                                selectedMarker = marker
+                                isMarkerDetailSheetPresented = true
                             }) {
                                 MarkerCardView(imageName: marker)
                             }
@@ -48,41 +41,50 @@ struct MarkerView: View {
         .background(Color.customBackground)
         .sheet(isPresented: $isMarkerDetailSheetPresented) {
             if let marker = selectedMarker {
-                MarkerDetailView(marker: marker)
+                MarkerDetailView(marker: marker, room: room)
+            } else {
+                Text("NO MARKER SELECTED")
             }
         }
     }
 }
 
-import SwiftUI
-
 struct MarkerDetailView: View {
     @ObservedObject var marker: ReferenceMarker
-    @Environment(\.dismiss) private var dismiss // Ambiente per chiudere la sheet
+    @ObservedObject var room: Room
+    
+    @Environment(\.dismiss) private var dismiss
     
     @State private var newName: String
     @State private var newSize: String
+    @State private var showAlert = false
+    @State private var alertMessage = ""
     
-    init(marker: ReferenceMarker) {
+    private var oldName: String
+    
+    init(marker: ReferenceMarker, room: Room) {
+        self.room = room
         self.marker = marker
-        _newName = State(initialValue: marker.imageName) // Mostra il nome attuale
+        self.oldName = marker.imageName
+        
+        _newName = State(initialValue: marker.imageName)
         _newSize = State(initialValue: "\(marker.physicalWidth)") // Mostra la dimensione attuale
     }
     
     var body: some View {
-        ZStack{
-            Color.customBackground
+        ZStack {
+            Color.white
                 .edgesIgnoringSafeArea(.all)
             
-            VStack{
+            VStack {
                 Text("Marker Details")
                     .font(.title)
                     .bold()
-                    .foregroundColor(.white)
+                    .foregroundColor(.customBackground)
                     .padding(.top)
                 
-                if marker.physicalWidth == 0.0{
-                    Text("Marker can't have a 0.0 value of Width !")
+                if marker.physicalWidth == 0.0 {
+                    Text("A marker cannot have a width value of 0.0.")
                         .bold()
                         .foregroundColor(.red)
                         .padding()
@@ -92,20 +94,20 @@ struct MarkerDetailView: View {
                     Text("Name:")
                         .font(.headline)
                         .bold()
-                        .foregroundColor(.white)
+                        .foregroundColor(.customBackground)
                     TextField("Enter marker name", text: $newName)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .foregroundColor(.customBackground) // Colore dei caratteri nella TextField
+                        .foregroundColor(.customBackground)
                         .padding(.bottom)
                     
                     Text("Size:")
                         .font(.headline)
                         .bold()
-                        .foregroundColor(.white)
+                        .foregroundColor(.customBackground)
                     TextField("Enter marker size", text: $newSize)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .keyboardType(.decimalPad)
-                        .foregroundColor(.customBackground) // Colore dei caratteri nella TextField
+                        .foregroundColor(.customBackground)
                         .padding(.bottom)
                 }
                 .padding(.horizontal)
@@ -120,6 +122,7 @@ struct MarkerDetailView: View {
                         .background(Color.blue)
                         .cornerRadius(10)
                 }
+                .padding(.top)
                 .padding(.horizontal)
                 
                 Spacer()
@@ -127,16 +130,41 @@ struct MarkerDetailView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding()
         }
-        .presentationDetents([.height(350)])
-            .presentationDragIndicator(.visible)
-        
+        .presentationDetents([.height(370)])
+        .presentationDragIndicator(.visible)
+        .alert(isPresented: $showAlert) {
+            Alert(
+                title: Text("Invalid Input"),
+                message: Text(alertMessage),
+                dismissButton: .default(Text("OK"))
+            )
+        }
     }
     
     private func saveChanges() {
-        marker.imageName = newName
-        if let size = Double(newSize) {
-            marker.physicalWidth = CGFloat(size)
+        guard !newName.isEmpty else {
+            alertMessage = "Name cannot be empty."
+            showAlert = true
+            return
         }
-        dismiss() // Chiude la sheet
+        
+        guard let size = Double(newSize), size > 0 else {
+            alertMessage = "Size must be a valid positive number."
+            showAlert = true
+            return
+        }
+        
+        marker.imageName = newName
+        marker.physicalWidth = CGFloat(size)
+        
+        let fileMarkerDataURL = room.roomURL.appendingPathComponent("ReferenceMarker").appendingPathComponent("Marker Data.json")
+        
+        marker.saveMarkerData(to: fileMarkerDataURL,
+                              old: oldName,
+                              new: marker.imageName,
+                              size: marker.physicalWidth
+        )
+        
+        dismiss()
     }
 }

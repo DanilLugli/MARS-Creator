@@ -25,8 +25,7 @@ class BuildingModel: ObservableObject {
         }
     }
     
-    @MainActor
-    func loadBuildings(){
+    @MainActor func loadBuildings(){
         do {
             try loadBuildingsFromRoot()
         } catch {
@@ -88,36 +87,35 @@ class BuildingModel: ObservableObject {
         return self.getBuildings()[0]
     }
     
-    @MainActor
-    func loadBuildingsFromRoot() throws {
-        let fileManager = FileManager.default
+    @MainActor func loadBuildingsFromRoot() throws {
+    let fileManager = FileManager.default
+    
+    if !fileManager.fileExists(atPath: BuildingModel.SCANBUILD_ROOT.path) {
         
-        if !fileManager.fileExists(atPath: BuildingModel.SCANBUILD_ROOT.path) {
-            
-            do {
-                try fileManager.createDirectory(at: BuildingModel.SCANBUILD_ROOT, withIntermediateDirectories: true, attributes: nil)
-                print("Cartella root creata: \(BuildingModel.SCANBUILD_ROOT.path)")
-            } catch {
-                throw NSError(domain: "com.example.ScanBuild", code: 1, userInfo: [NSLocalizedDescriptionKey: "Errore durante la creazione della cartella root: \(error)"])
-            }
+        do {
+            try fileManager.createDirectory(at: BuildingModel.SCANBUILD_ROOT, withIntermediateDirectories: true, attributes: nil)
+            print("Cartella root creata: \(BuildingModel.SCANBUILD_ROOT.path)")
+        } catch {
+            throw NSError(domain: "com.example.ScanBuild", code: 1, userInfo: [NSLocalizedDescriptionKey: "Errore durante la creazione della cartella root: \(error)"])
         }
-        
-        let buildingURLs = try fileManager.contentsOfDirectory(at: BuildingModel.SCANBUILD_ROOT, includingPropertiesForKeys: [.isDirectoryKey], options: .skipsHiddenFiles)
-        print(buildingURLs)
-        
-        for buildingURL in buildingURLs {
-            print(buildingURL)
-            var isDirectory: ObjCBool = false
-            if fileManager.fileExists(atPath: buildingURL.path, isDirectory: &isDirectory), isDirectory.boolValue {
-                let attributes = try fileManager.attributesOfItem(atPath: buildingURL.path)
-                if let lastModifiedDate = attributes[.modificationDate] as? Date {
-                    let floors = try loadFloors(from: buildingURL)
-                    let building = Building(name: buildingURL.lastPathComponent, lastUpdate: lastModifiedDate, floors: floors, buildingURL: buildingURL)
-                    addBuilding(building: building)
-                }
+    }
+    
+    let buildingURLs = try fileManager.contentsOfDirectory(at: BuildingModel.SCANBUILD_ROOT, includingPropertiesForKeys: [.isDirectoryKey], options: .skipsHiddenFiles)
+    print(buildingURLs)
+    
+    for buildingURL in buildingURLs {
+        print(buildingURL)
+        var isDirectory: ObjCBool = false
+        if fileManager.fileExists(atPath: buildingURL.path, isDirectory: &isDirectory), isDirectory.boolValue {
+            let attributes = try fileManager.attributesOfItem(atPath: buildingURL.path)
+            if let lastModifiedDate = attributes[.modificationDate] as? Date {
+                let floors = try loadFloors(from: buildingURL)
+                let building = Building(name: buildingURL.lastPathComponent, lastUpdate: lastModifiedDate, floors: floors, buildingURL: buildingURL)
+                addBuilding(building: building)
             }
         }
     }
+}
     
     @MainActor func loadFloors(from buildingURL: URL) throws -> [Floor] {
         let fileManager = FileManager.default
@@ -242,7 +240,6 @@ class BuildingModel: ObservableObject {
         let fileManager = FileManager.default
         
         let roomsDirectoryURL = floorURL.appendingPathComponent(BuildingModel.FLOOR_ROOMS_FOLDER)
-        
         let roomURLs = try fileManager.contentsOfDirectory(at: roomsDirectoryURL, includingPropertiesForKeys: [.isDirectoryKey], options: .skipsHiddenFiles)
         
         var rooms: [Room] = []
@@ -259,46 +256,65 @@ class BuildingModel: ObservableObject {
                     let planimetry: SCNViewContainer = SCNViewContainer()
 
                     let referenceMarkerURL = roomURL.appendingPathComponent("ReferenceMarker")
+
                     if fileManager.fileExists(atPath: referenceMarkerURL.path) {
                         let referenceMarkerContents = try fileManager.contentsOfDirectory(at: referenceMarkerURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+                        
+                        // Percorso al file JSON dei marker
+                        let markerDataURL = referenceMarkerURL.appendingPathComponent("Marker Data.json")
+                        
+                        // Carica i dati dal JSON solo una volta
+                        var markersData: [String: ReferenceMarker.MarkerData] = [:]
+                        if fileManager.fileExists(atPath: markerDataURL.path) {
+                            let jsonData = try Data(contentsOf: markerDataURL)
+                            markersData = try JSONDecoder().decode([String: ReferenceMarker.MarkerData].self, from: jsonData)
+                            print("\n\n\nMARKERS DATA")
+                            print(markersData)
+                        }
+                        
                         for fileURL in referenceMarkerContents {
-
-                            if fileURL.pathExtension == "json" {
-                                let jsonData = try Data(contentsOf: fileURL)
-                                let decodedMarkers = try JSONDecoder().decode([ReferenceMarker].self, from: jsonData)
-                                referenceMarkers.append(contentsOf: decodedMarkers)
-                            } else if fileURL.pathExtension == "jpg" || fileURL.pathExtension == "png" || fileURL.pathExtension == "JPG" || fileURL.pathExtension == "PNG" || fileURL.pathExtension == "JPEG" || fileURL.pathExtension == "jpeg" {
-                                // Assuming the image file name is the same as the marker name
+                            if fileURL.pathExtension.lowercased() == "jpg" || fileURL.pathExtension.lowercased() == "png" || fileURL.pathExtension.lowercased() == "jpeg" {
+                                // Nome e percorso immagine
                                 let imageName = fileURL.deletingPathExtension().lastPathComponent
                                 let imagePath = fileURL
-                                // Create a new ReferenceMarker
-                                let coordinates = Coordinates(x: Float(Double.random(in: -100...100)), y: Float(Double.random(in: -100...100))) // Adjust accordingly
-                                let rmUML = URL(fileURLWithPath: "") // Adjust accordingly
-                                let newMarker = ReferenceMarker(_imagePath: imagePath, _imageName: imageName, _coordinates: coordinates, _rmUML: rmUML, _physicalWidth: 0.0)
+                                
+                                // Recupera i dati dal JSON (nome e larghezza) se disponibili
+                                let coordinates = Coordinates(x: Float(Double.random(in: -100...100)), y: Float(Double.random(in: -100...100))) // Coordinate di esempio
+                                let rmUML = URL(fileURLWithPath: "")
+                                let markerWidth = markersData[imageName]?.width ?? 0.0 // Recupera la larghezza dal JSON se esiste
+                                let markerName = markersData[imageName]?.name ?? imageName // Recupera il nome dal JSON o usa il nome dell'immagine
+                                
+                                // Crea un nuovo ReferenceMarker con i dati caricati dal JSON
+                                let newMarker = ReferenceMarker(
+                                    _imagePath: imagePath,
+                                    _imageName: markerName,
+                                    _coordinates: coordinates,
+                                    _rmUML: rmUML,
+                                    _physicalWidth: markerWidth
+                                )
+                                
                                 referenceMarkers.append(newMarker)
                             }
                         }
                     }
                     
-                    let room = Room(_name: roomURL.lastPathComponent,
-                                    _lastUpdate: lastModifiedDate,
-                                    _planimetry: planimetry,
-                                    _referenceMarkers: referenceMarkers,
-                                    _transitionZones: transitionZones,
-                                    _scene: scene,
-                                    _sceneObjects: sceneObjects,
-                                    _roomURL: roomURL,
-                                    parentFloor: floor
+                    let room = Room(
+                        _name: roomURL.lastPathComponent,
+                        _lastUpdate: lastModifiedDate,
+                        _planimetry: planimetry,
+                        _referenceMarkers: referenceMarkers,
+                        _transitionZones: transitionZones,
+                        _scene: scene,
+                        _sceneObjects: sceneObjects,
+                        _roomURL: roomURL,
+                        parentFloor: floor
                     )
-                    
-                    if FileManager.default.fileExists(atPath: roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz").path){
-                        
+
+                    if fileManager.fileExists(atPath: roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz").path) {
                         let usdzURL = room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz")
-                        
                         room.scene = try SCNScene(url: usdzURL)
                         
                         var seenNodeNames = Set<String>()
-
                         print("PRE_CARICAMENTO NODI \(room.name)")
                         room.sceneObjects = room.scene?.rootNode.childNodes(passingTest: { n, _ in
                             if let nodeName = n.name {
@@ -306,12 +322,10 @@ class BuildingModel: ObservableObject {
                                     print("NODE ALREADY CREATED: \(nodeName)")
                                     return false
                                 }
-
                                 guard n.geometry != nil else {
                                     print("NODE WITHOUT GEOMETRY: \(nodeName)")
                                     return false
                                 }
-
                                 let isValidNode = nodeName != "Room" &&
                                                   nodeName != "Geom" &&
                                                   !nodeName.hasSuffix("_grp") &&
@@ -325,15 +339,9 @@ class BuildingModel: ObservableObject {
                                     return true
                                 }
                             }
-                            
                             return false
-                        }).sorted(by: {
-                            ($0.name ?? "").localizedCaseInsensitiveCompare($1.name ?? "") == .orderedAscending
-                        })
-                        ?? []
-                    
-                        
-                    }else{
+                        }).sorted(by: { ($0.name ?? "").localizedCaseInsensitiveCompare($1.name ?? "") == .orderedAscending }) ?? []
+                    } else {
                         print("File .usdz for \(room.name) planimetry is not available.")
                     }
                     
