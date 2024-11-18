@@ -18,7 +18,7 @@ struct FloorView: View {
     @State private var selectedFileURL: URL?
     @State private var showFloorMap: Bool = false
     
-    @State private var isNavigationActive = false
+    @State private var isScanningFloorPlanimetry = false
     @State private var isRoomSheetPresented = false
     @State private var isFloorPlanimetryUploadPicker = false
     @State private var isRenameSheetPresented = false
@@ -129,9 +129,6 @@ struct FloorView: View {
             }
             .background(Color.customBackground)
             .foregroundColor(.white)
-            .navigationDestination(isPresented: $isNavigationActive) {
-                FloorScanningView(namedUrl: floor)
-            }
         }
         .navigationTitle("Floor")
         .toolbar {
@@ -206,7 +203,7 @@ struct FloorView: View {
                 }
                 
                 self.isOptionsSheetPresented = false
-                self.isNavigationActive = true
+                self.isScanningFloorPlanimetry = true
             }
             .font(.system(size: 20))
             .bold()
@@ -227,6 +224,13 @@ struct FloorView: View {
                 // Azione di annullamento, facoltativa
             }
         }
+        NavigationLink(
+            destination: FloorScanningView(namedUrl: floor),
+            isActive: $isScanningFloorPlanimetry,
+            label: {
+                EmptyView()
+            }
+        )
         .confirmationDialog("Are you sure to delete Floor?", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
             Button("Yes", role: .destructive) {
                 building.deleteFloor(floor: floor)
