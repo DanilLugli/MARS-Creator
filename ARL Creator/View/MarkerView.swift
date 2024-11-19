@@ -4,7 +4,6 @@ struct MarkerView: View {
     @ObservedObject var room: Room
     @State private var searchText: String = ""
     @State private var selectedMarker: ReferenceMarker? = nil
-    @State private var isMarkerDetailSheetPresented = false
     
     var filteredMarker: [ReferenceMarker] {
         if searchText.isEmpty {
@@ -27,7 +26,6 @@ struct MarkerView: View {
                         ForEach(filteredMarker, id: \.id) { marker in
                             Button(action: {
                                 selectedMarker = marker
-                                isMarkerDetailSheetPresented = true
                             }) {
                                 MarkerCardView(imageName: marker)
                             }
@@ -39,12 +37,8 @@ struct MarkerView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.customBackground)
-        .sheet(isPresented: $isMarkerDetailSheetPresented) {
-            if let marker = selectedMarker {
-                MarkerDetailView(marker: marker, room: room)
-            } else {
-                Text("NO MARKER SELECTED")
-            }
+        .sheet(item: $selectedMarker) { marker in
+            MarkerDetailView(marker: marker, room: room)
         }
     }
 }
@@ -84,33 +78,56 @@ struct MarkerDetailView: View {
                     .padding(.top)
                 
                 if marker.physicalWidth == 0.0 {
-                    Text("A marker cannot have a width value of 0.0.")
+                    Text("Width can't be 0.0")
                         .bold()
-                        .foregroundColor(.red)
+                        .foregroundColor(.white)
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(LinearGradient(
+                                    gradient: Gradient(colors: [Color.red.opacity(0.8), Color.red]),
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                ))
+                        )
                         .padding()
                 }
                 
+                
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("Name:")
-                        .font(.headline)
-                        .bold()
-                        .foregroundColor(.customBackground)
+                    HStack {
+                        Image(systemName: "characters.lowercase")
+                            .foregroundColor(.customBackground)
+                        
+                            Text("Name:")
+                                .font(.headline)
+                                .bold()
+                                .foregroundColor(.customBackground)
+
+                        }
+                    
                     TextField("Enter marker name", text: $newName)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .foregroundColor(.customBackground)
                         .padding(.bottom)
                     
-                    Text("Size:")
-                        .font(.headline)
-                        .bold()
-                        .foregroundColor(.customBackground)
+                    HStack{
+                        Image(systemName: "ruler")
+                            .foregroundColor(.customBackground)
+                        
+                        Text("Size (Meters):")
+                            .font(.headline)
+                            .bold()
+                            .foregroundColor(.customBackground)
+                    }
+                    
                     TextField("Enter marker size", text: $newSize)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .keyboardType(.decimalPad)
                         .foregroundColor(.customBackground)
                         .padding(.bottom)
                 }
-                .padding(.horizontal)
+                .padding()
                 
                 Button(action: saveChanges) {
                     Text("Save")
@@ -130,7 +147,7 @@ struct MarkerDetailView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding()
         }
-        .presentationDetents([.height(370)])
+        .presentationDetents(marker.physicalWidth == 0.0 ? [.height(435)] : [.height(370)])
         .presentationDragIndicator(.visible)
         .alert(isPresented: $showAlert) {
             Alert(

@@ -28,11 +28,11 @@ struct FloorScanningView: View {
                 if isScanningRoom, let captureView = captureView {
                     captureView
                         .edgesIgnoringSafeArea(.all)
+                        .toolbar(.hidden, for: .automatic)
                 } else {
                     Text("Press Start to begin scanning of \(namedUrl.name)")
-                        .foregroundColor(.gray).bold()
-                        .onAppear {
-                        }
+                        .foregroundColor(.gray)
+                        .bold()
                 }
                 
                 VStack {
@@ -97,15 +97,7 @@ struct FloorScanningView: View {
                     self.message = message
                 }
             }
-            //.navigationBarTitleDisplayMode(.inline)
             .navigationTitle(namedUrl.name)
-            .toolbar {
-//                ToolbarItem(placement: .principal) {
-//                    Text(namedUrl.name)
-//                        .font(.system(size: 26, weight: .heavy))
-//                        .foregroundColor(.white)
-//                }
-            }
             .onDisappear {
                 //captureView?.stopCapture(pauseARSession: false, saveData: false)
             }

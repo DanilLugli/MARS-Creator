@@ -42,7 +42,8 @@ struct ScanningCardView: View {
             }
         }
         .padding()
-        .background(Color.gray.opacity(0.6))
-        .cornerRadius(12)
+        .frame(width: 380, height: 125)
+        .background(Color.blue.opacity(0.4))
+        .cornerRadius(20)
     }
 }

@@ -103,9 +103,8 @@ struct FloorView: View {
                                 .padding(7)
                                 .background(Color(.systemGray6))
                                 .cornerRadius(8)
-                                .padding(.horizontal, 10)
+                                .padding(.horizontal, 13)
                                 .frame(maxWidth: .infinity)
-                                .padding()
                             
                             ScrollView {
                                 LazyVStack(spacing: 50) {
@@ -224,13 +223,6 @@ struct FloorView: View {
                 // Azione di annullamento, facoltativa
             }
         }
-        NavigationLink(
-            destination: FloorScanningView(namedUrl: floor),
-            isActive: $isScanningFloorPlanimetry,
-            label: {
-                EmptyView()
-            }
-        )
         .confirmationDialog("Are you sure to delete Floor?", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
             Button("Yes", role: .destructive) {
                 building.deleteFloor(floor: floor)
@@ -315,9 +307,16 @@ struct FloorView: View {
         .sheet(isPresented: $isRoomSheetPresented) {
             addRoomSheet
         }
+        
+        NavigationLink(
+            destination: FloorScanningView(namedUrl: floor),
+            isActive: $isScanningFloorPlanimetry,
+            label: {
+                EmptyView()
+            }
+        )
     }
     
-    // Custom sheet for adding a new room
     private var addRoomSheet: some View {
         VStack(spacing: 16) {
             Text("Add New Room")
@@ -332,12 +331,7 @@ struct FloorView: View {
                 .frame(width: 50, height: 50)
                 .foregroundColor(.blue)
             
-            Text("Enter a name for the new room.")
-                .foregroundColor(.customBackground)
-                .font(.body)
-                .padding(.horizontal)
-            
-            TextField("Room Name", text: $newRoomName)
+            TextField("Enter New Room Name", text: $newRoomName)
                 .padding()
                 .foregroundColor(.customBackground)
                 .background(Color(.systemGray6))
@@ -345,33 +339,29 @@ struct FloorView: View {
                 .padding(.horizontal)
             
             HStack {
-                Button("Cancel") {
-                    isRoomSheetPresented = false
-                    newRoomName = ""
-                }
-                .font(.headline)
-                .bold()
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.red.cornerRadius(10))
-
-                Spacer()
-
-                Button("Add") {
+                Button(action: {
                     addNewRoom()
                     isRoomSheetPresented = false
+                }) {
+                    HStack {
+                        Text("Add")
+                            .font(.title) // Imposta la dimensione del font direttamente
+                            .bold()
+                            .foregroundColor(.white)
+                        
+                        Image(systemName: "checkmark.circle")
+                            .font(.title) // Applica la stessa dimensione della scritta
+                            .foregroundColor(.white)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.green.cornerRadius(10))
                 }
-                .font(.headline)
-                .bold()
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.green.cornerRadius(10))
                 .disabled(newRoomName.isEmpty)
             }
             .padding(.horizontal)
             .padding(.bottom)
+
         }
         .presentationDetents([.height(370)])
         .presentationDragIndicator(.visible)

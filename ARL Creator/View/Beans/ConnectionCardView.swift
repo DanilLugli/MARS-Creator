@@ -16,12 +16,12 @@ struct ConnectionCardView: View {
                     .font(.system(size: 14, weight: .bold))
                     .foregroundColor(.black)
                 
-                // Gestione della data opzionale
                 if let date = date {
                     Text("\(dateFormatter.string(from: date))")
                         .font(.system(size: 14))
                         .foregroundColor(.gray)
-                } 
+                        .padding(.top)
+                }
             }
             .padding()
         }

@@ -28,12 +28,11 @@ struct ScanningView: View {
                 if isScanningRoom, let captureView = captureView {
                     captureView
                         .edgesIgnoringSafeArea(.all)
+                        .toolbar(.hidden, for: .automatic)
                 } else {
                     Text("Press Start to begin scanning of \(namedUrl.name)")
-                        .foregroundColor(.gray).bold()
-                        .onAppear {
-                            // Placeholder
-                        }
+                        .foregroundColor(.gray)
+                        .bold()
                 }
                 
                 VStack {

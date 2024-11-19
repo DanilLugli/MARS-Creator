@@ -43,6 +43,7 @@ struct RoomCardView: View {
                             Text("Last modified \(dateFormatter.string(from: date))")
                                 .font(.system(size: 14))
                                 .foregroundColor(.gray)
+                                
                         }
                         Spacer()
                     }

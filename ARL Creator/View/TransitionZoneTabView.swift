@@ -28,13 +28,13 @@ struct TransitionZoneTabView: View {
                     .font(.headline)
                     .padding()
             } else {
+                
                 TextField("Search", text: $searchText)
                     .padding(7)
                     .background(Color(.systemGray6))
                     .cornerRadius(8)
-                    .padding(.horizontal, 10)
+                    .padding(.horizontal, 13)
                     .frame(maxWidth: .infinity)
-                    .padding()
                 
                 ScrollView {
                     LazyVStack(spacing: 50) {

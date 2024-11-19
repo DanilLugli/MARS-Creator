@@ -32,7 +32,7 @@ struct BuildingsView: View {
                             .padding(7)
                             .background(Color(.systemGray6))
                             .cornerRadius(8)
-                            .padding(.horizontal, 12)
+                            .padding(.horizontal, 13)
                             .frame(maxWidth: .infinity)
                         
                         ScrollView {
@@ -92,12 +92,7 @@ struct BuildingsView: View {
                 .frame(width: 50, height: 50)
                 .foregroundColor(.blue)
             
-            Text("Enter a name for the new building.")
-                .foregroundColor(.customBackground)
-                .font(.body)
-                .padding(.horizontal)
-            
-            TextField("Building Name", text: $newBuildingName)
+            TextField("Enter new Building Name", text: $newBuildingName)
                 .padding()
                 .background(Color(.systemGray6))
                 .foregroundColor(.customBackground)
@@ -105,33 +100,29 @@ struct BuildingsView: View {
                 .padding(.horizontal)
             
             HStack {
-                Button("Cancel") {
-                    isAddBuildingSheetPresented = false
-                    newBuildingName = ""
-                }
-                .font(.headline)
-                .bold()
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.red.cornerRadius(10))
-                
-                Spacer()
-                
-                Button("Add") {
+                Button(action: {
                     addNewBuilding()
                     isAddBuildingSheetPresented = false
+                }) {
+                    HStack {
+                        Text("Add")
+                            .font(.title) // Imposta la dimensione del font direttamente
+                            .bold()
+                            .foregroundColor(.white)
+                        
+                        Image(systemName: "checkmark.circle")
+                            .font(.title) // Applica la stessa dimensione della scritta
+                            .foregroundColor(.white)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.green.cornerRadius(10))
                 }
-                .font(.headline)
-                .bold()
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.green.cornerRadius(10))
                 .disabled(newBuildingName.isEmpty)
             }
             .padding(.horizontal)
             .padding(.bottom)
+
             
         }
         .presentationDetents([.height(370)])

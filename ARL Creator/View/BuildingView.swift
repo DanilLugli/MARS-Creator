@@ -44,9 +44,8 @@ struct BuildingView: View {
                             .padding(7)
                             .background(Color(.systemGray6))
                             .cornerRadius(8)
-                            .padding(.horizontal, 10)
+                            .padding(.horizontal, 13)
                             .frame(maxWidth: .infinity)
-                            .padding()
                         
                         ScrollView {
                             LazyVStack(spacing: 50) {
@@ -68,7 +67,7 @@ struct BuildingView: View {
         .alert("Rename Building", isPresented: $isRenameSheetPresented, actions: {
             TextField("New Building Name", text: $newBuildingName)
                 .padding()
-
+            
             Button("SAVE", action: {
                 if !newBuildingName.isEmpty {
                     do {
@@ -170,42 +169,33 @@ struct BuildingView: View {
                 .frame(width: 50, height: 50)
                 .foregroundColor(.blue)
             
-            Text("Enter a name for the new floor.")
-                .foregroundColor(.customBackground)
-                .font(.body)
-                .padding(.horizontal)
-            
-            TextField("Floor Name", text: $newFloorName)
+            TextField("Enter New Floor Name", text: $newFloorName)
                 .padding()
                 .foregroundColor(.customBackground)
                 .background(Color(.systemGray6))
                 .cornerRadius(8)
                 .padding(.horizontal)
             
+            
             HStack {
-                Button("Cancel") {
-                    isAddFloorSheetPresented = false
-                    newFloorName = ""
-                }
-                .font(.headline)
-                .bold()
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.red.cornerRadius(10))
-                
-                Spacer()
-                
-                Button("Add") {
+                Button(action: {
                     addNewFloor()
                     isAddFloorSheetPresented = false
+                }) {
+                    HStack {
+                        Text("Add")
+                            .font(.title) // Imposta la dimensione del font direttamente
+                            .bold()
+                            .foregroundColor(.white)
+                        
+                        Image(systemName: "checkmark.circle")
+                            .font(.title)
+                            .foregroundColor(.white)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.green.cornerRadius(10))
                 }
-                .font(.headline)
-                .bold()
-                .foregroundColor(.white)
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.green.cornerRadius(10))
                 .disabled(newFloorName.isEmpty)
             }
             .padding(.horizontal)
