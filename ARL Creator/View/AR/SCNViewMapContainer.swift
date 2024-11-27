@@ -273,7 +273,7 @@ class SCNViewMapHandler: ObservableObject {
             rotoTraslation.translation.columns.3.y,
             rotoTraslation.translation.columns.3.z
         )
-        node.simdPosition += translationVector
+        node.simdPosition = node.simdPosition + translationVector
         
         let rotationMatrix = rotoTraslation.r_Y
         

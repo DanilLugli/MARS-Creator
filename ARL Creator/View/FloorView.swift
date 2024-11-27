@@ -188,24 +188,27 @@ struct FloorView: View {
         }
         .confirmationDialog("How do you want to create the \(floor.name) planimetry?", isPresented: $isOptionsSheetPresented, titleVisibility: .visible) {
             
-            Button("Create With AR") {
-                let fileManager = FileManager.default
-                let filePath = floor.floorURL
-                    .appendingPathComponent("MapUsdz")
-                    .appendingPathComponent("\(floor.name).usdz")
-                
-                do {
-                    try fileManager.removeItem(at: filePath)
-                    print("File eliminato correttamente")
-                } catch {
-                    print("Errore durante l'eliminazione del file: \(error)")
+            NavigationLink(destination: FloorScanningView(namedUrl: floor)){
+                Button("Create With AR") {
+                    let fileManager = FileManager.default
+                    let filePath = floor.floorURL
+                        .appendingPathComponent("MapUsdz")
+                        .appendingPathComponent("\(floor.name).usdz")
+                    
+                    do {
+                        try fileManager.removeItem(at: filePath)
+                        print("File eliminato correttamente")
+                    } catch {
+                        print("Errore durante l'eliminazione del file: \(error)")
+                    }
+                    
+                    self.isOptionsSheetPresented = false
+                    self.isScanningFloorPlanimetry = true
                 }
-                
-                self.isOptionsSheetPresented = false
-                self.isScanningFloorPlanimetry = true
+                .font(.system(size: 20))
+                .bold()
             }
-            .font(.system(size: 20))
-            .bold()
+            
             
             Button("Update From File") {
                 // Chiudi il dialogo
@@ -308,13 +311,6 @@ struct FloorView: View {
             addRoomSheet
         }
         
-        NavigationLink(
-            destination: FloorScanningView(namedUrl: floor),
-            isActive: $isScanningFloorPlanimetry,
-            label: {
-                EmptyView()
-            }
-        )
     }
     
     private var addRoomSheet: some View {

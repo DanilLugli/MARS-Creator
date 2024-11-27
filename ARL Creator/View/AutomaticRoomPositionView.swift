@@ -3,7 +3,7 @@ import Foundation
 import SwiftUI
 import SceneKit
 
-struct RoomPositionView: View {
+struct AutomaticRoomPositionView: View {
     
     @ObservedObject var floor: Floor
     @ObservedObject var room: Room
@@ -18,7 +18,7 @@ struct RoomPositionView: View {
     var roomsMaps: [URL]?
     
     @State var floorNodes: [String] = []
-    @State var roomNodes: [SCNNode] = [] // Cambiato il tipo a [SCNNode]
+    @State var roomNodes: [SCNNode] = []
     
     @State private var showButton1 = false
     @State private var showButton2 = false
@@ -78,8 +78,7 @@ struct RoomPositionView: View {
                                 selectedFloorNodeName = firstNodeName
                             }
                         }
-                        .onChange(of: selectedFloorNodeName) { newValue in
-                            print("New NAME NODE: \(newValue)")
+                        .onChange(of: selectedFloorNodeName) { oldValue, newValue in
                             floor.planimetry.changeColorOfNode(nodeName: newValue, color: UIColor.red)
                             
                             selectedFloorNode = floor.sceneObjects?.first(where: { node in
@@ -87,7 +86,6 @@ struct RoomPositionView: View {
                             })
                             
                             if let selectedFloorNode = selectedFloorNode {
-                                // Filtra i nodi della room in base al tipo del nodo selezionato nel floor
                                 filterRoomNodes(byTypeOf: selectedFloorNode)
                             }
                         }
@@ -123,11 +121,13 @@ struct RoomPositionView: View {
                                 selectedRoomNodeName = firstNodeName
                             }
                         }
-                        .onChange(of: selectedRoomNodeName) { newValue in
+                        .onChange(of: selectedRoomNodeName) { oldValue, newValue in
                             print("CHANGE COLOR")
                             
+                            // Cambia il colore del nodo con il nome selezionato
                             room.planimetry.changeColorOfNode(nodeName: selectedRoomNodeName, color: UIColor.red)
                             
+                            // Aggiorna il nodo selezionato basandoti sul nuovo valore
                             selectedRoomNode = room.sceneObjects?.first(where: { node in
                                 node.name == newValue
                             })
@@ -262,7 +262,6 @@ struct RoomPositionView: View {
             let typeIndex2 = typeOrder.firstIndex(of: type2) ?? typeOrder.count
             
             if typeIndex1 != typeIndex2 {
-                // I nodi hanno tipologie diverse, ordina per ordine di tipologia
                 return typeIndex1 < typeIndex2
             } else {
                 // I nodi hanno la stessa tipologia, ordina per dimensione dal più grande al più piccolo
@@ -281,6 +280,6 @@ struct RoomPositionView_Preview: PreviewProvider {
         let floor = firstBuildingIndex.floors.first!
         let room = floor.rooms.first!
         
-        return RoomPositionView(floor: floor, room: room)
+        return AutomaticRoomPositionView(floor: floor, room: room)
     }
 }

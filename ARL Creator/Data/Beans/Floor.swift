@@ -188,7 +188,61 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
             print("Errore durante l'eliminazione della room \(room.name): \(error)")
         }
     }
-    
+   
+    @MainActor func processRooms(for floor: Floor) {
+        for room in floor.rooms {
+            let roomScene = room.scene
+            
+            if let roomNode = roomScene?.rootNode.childNode(withName: "Floor0", recursively: true) {
+                let originalScale = roomNode.scale
+                let roomName = room.name
+                
+                roomNode.simdWorldPosition = simd_float3(0, 0, 0)
+                roomNode.scale = originalScale
+                
+                if let rotoTraslationMatrix = floor.associationMatrix[roomName] {
+                    applyRotoTraslation(to: roomNode, with: rotoTraslationMatrix)
+                } else {
+                    print("No RotoTraslationMatrix found for room: \(roomName)")
+                }
+                
+                roomNode.name = roomName
+                let material = SCNMaterial()
+                material.diffuse.contents = floor.getRoomByName(roomName)?.color
+                roomNode.geometry?.materials = [material]
+                
+                floor.scene?.rootNode.addChildNode(roomNode)
+            } else {
+                print("Node 'Floor0' not found in scene: \(String(describing: roomScene))")
+            }
+        }
+        
+
+        /// Applica una rototraslazione a un nodo SCNNode.
+        /// - Parameters:
+        ///   - node: Il nodo da trasformare.
+        ///   - rotoTraslation: La matrice di rototraslazione contenente traslazione e rotazione.
+        ///   - baseTransform: (Opzionale) Una matrice di trasformazione base. Default: utilizza la trasformazione attuale del nodo.
+        @MainActor
+        func applyRotoTraslation(to node: SCNNode, with rotoTraslation: RotoTraslationMatrix) {
+            
+            let translationVector = simd_float3(
+                rotoTraslation.translation.columns.3.x,
+                rotoTraslation.translation.columns.3.y,
+                rotoTraslation.translation.columns.3.z
+            )
+            node.simdPosition = node.simdPosition + translationVector
+            
+            let rotationMatrix = rotoTraslation.r_Y
+            
+            let rotationQuaternion = simd_quatf(rotationMatrix)
+            
+            node.simdOrientation = rotationQuaternion * node.simdOrientation
+            
+        }
+    }
+
+        
     @MainActor func renameRoom(floor: Floor, room: Room, newName: String) throws {
         let fileManager = FileManager.default
         let oldRoomURL = room.roomURL
@@ -454,6 +508,8 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
         }
     }
     
+    
+    
     private func simd_float4(_ array: [Float]) -> simd_float4 {
         return simd.simd_float4(array[0], array[1], array[2], array[3])
     }
@@ -461,46 +517,4 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
     private func simd_float4x4(rows: [simd_float4]) -> simd_float4x4 {
         return simd.simd_float4x4(rows[0], rows[1], rows[2], rows[3])
     }
-}
-
-extension Floor {
-    
-    func debugPrint() {
-        print("=== Debug Info for Floor ===")
-        print("ID: \(_id)")
-        print("Name: \(_name)")
-        print("Last Update: \(_lastUpdate)")
-        print("Planimetry: \(String(describing: _planimetry))")
-        print("Association Matrix: \(_associationMatrix)")
-        
-        print("\nRooms: \(_rooms.count) room(s)")
-        for room in _rooms {
-            print("  Room ID: \(room.id), Name: \(room.name), Last Update: \(room.lastUpdate), URL: \(room.roomURL)")
-        }
-        
-        if let sceneObjects = _sceneObjects {
-            print("\nScene Objects: \(sceneObjects.count) object(s)")
-            for (index, object) in sceneObjects.enumerated() {
-                print("  Object \(index + 1): \(object)")
-            }
-        } else {
-            print("\nScene Objects: None")
-        }
-        
-        if let scene = _scene {
-            print("\nScene: \(scene)")
-        } else {
-            print("\nScene: None")
-        }
-        
-        if let sceneConfiguration = _sceneConfiguration {
-            print("\nScene Configuration: \(sceneConfiguration)")
-        } else {
-            print("\nScene Configuration: None")
-        }
-        
-        print("Floor URL: \(_floorURL)")
-        print("============================")
-    }
-    
 }

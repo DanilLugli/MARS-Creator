@@ -9,7 +9,6 @@ import Foundation
 import RoomPlan
 import ARKit
 
-
 class ARSessionManager {
     static let shared = ARSessionManager()
     let arSession = ARSession()

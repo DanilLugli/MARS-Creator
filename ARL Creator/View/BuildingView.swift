@@ -145,9 +145,9 @@ struct BuildingView: View {
     
     var filteredFloors: [Floor] {
         if searchText.isEmpty {
-            building.floors.forEach { building in
-                building.debugPrint()
-            }
+//            building.floors.forEach { building in
+//                building.debugPrint()
+//            }
             return building.floors
         } else {
             return building.floors.filter { $0.name.lowercased().contains(searchText.lowercased()) }

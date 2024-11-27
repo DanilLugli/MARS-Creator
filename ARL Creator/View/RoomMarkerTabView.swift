@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct MarkerView: View {
+struct RoomMarkerTabView: View {
     @ObservedObject var room: Room
     @State private var searchText: String = ""
     @State private var selectedMarker: ReferenceMarker? = nil

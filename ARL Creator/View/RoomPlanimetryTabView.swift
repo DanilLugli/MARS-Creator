@@ -8,7 +8,7 @@
 import SwiftUI
 import ARKit
 
-struct RoomPlanimetryView: View {
+struct RoomPlanimetryTabView: View {
     @ObservedObject var room: Room
 
     var body: some View {
@@ -28,9 +28,9 @@ struct RoomPlanimetryView: View {
                             .shadow(color: Color.gray, radius: 3)
                     }
                 }
-                .onAppear {
-                    room.planimetry.drawSceneObjects(borders: true)
-                }
+//                .onAppear {
+//                    room.planimetry.drawSceneObjects(floor: nil, borders: true)
+//                }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

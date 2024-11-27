@@ -24,8 +24,7 @@ struct RoomPositionTabView: View {
                             .shadow(color: Color.gray, radius: 3)
                     }
                     .onAppear {
-                        var floorRooms: [Room] = []
-                        floorRooms.append(room)
+                        let floorRooms: [Room] = [room]
                         mapRoomPositionView.handler.loadRoomsMaps(floor: floor, rooms: floorRooms, borders: true)
                     }
                 }

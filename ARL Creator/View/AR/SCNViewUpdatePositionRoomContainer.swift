@@ -40,7 +40,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
     }
     
     
-    func loadRoomMapsPosition(floor: Floor, roomURL: URL, borders: Bool) {
+    @MainActor func loadRoomMapsPosition(floor: Floor, roomURL: URL, borders: Bool) {
         do {
             self.floor = floor
             self.roomName = roomURL.deletingPathExtension().lastPathComponent
@@ -66,10 +66,10 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
             if let loadedRoomNode = roomScene.rootNode.childNode(withName: "Floor0", recursively: true) {
                 print("Found 'Floor0' node for room at: \(roomURL)")
                 
-                // Estrai il nome della stanza dal nome del file
+
                 let roomName = roomURL.deletingPathExtension().lastPathComponent
-                
-                // Cerca la matrice di trasformazione per la stanza nel dizionario associationMatrix
+                loadedRoomNode.worldPosition = SCNVector3(0,0,0)
+
                 if let rotoTraslationMatrix = floor.associationMatrix[roomName] {
                     print("Applying transformation for room: \(roomName)")
                     print("Translation matrix: \(rotoTraslationMatrix.translation)")
@@ -281,34 +281,22 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
             }
     }
     
+    @MainActor
     func applyRotoTraslation(to node: SCNNode, with rotoTraslation: RotoTraslationMatrix) {
-
-//        if let parentNode = node.parent {
-//            print("Parent Node: \(parentNode)")
-//            print("Parent's Transform: \(parentNode.transform)")
-//            print("Parent's Scale: \(parentNode.scale)")
-//            print("Parent's Euler Angles: \(parentNode.eulerAngles)")
-//        }
-//
-        node.simdWorldTransform.columns.3 = rotoTraslation.translation.columns.3 + node.simdWorldTransform.columns.3
         
-        let r_Y = simd_float3x3([
-            simd_float3(rotoTraslation.r_Y.columns.0.x, rotoTraslation.r_Y.columns.0.y, rotoTraslation.r_Y.columns.0.z),
-            simd_float3(rotoTraslation.r_Y.columns.1.x, rotoTraslation.r_Y.columns.1.y, rotoTraslation.r_Y.columns.1.z),
-            simd_float3(rotoTraslation.r_Y.columns.2.x, rotoTraslation.r_Y.columns.2.y, rotoTraslation.r_Y.columns.2.z)
-        ])
+        let translationVector = simd_float3(
+            rotoTraslation.translation.columns.3.x,
+            rotoTraslation.translation.columns.3.y,
+            rotoTraslation.translation.columns.3.z
+        )
+        node.simdPosition = node.simdPosition + translationVector
         
-        var currentRotation = simd_float3x3([
-            simd_float3(node.simdWorldTransform.columns.0.x, node.simdWorldTransform.columns.0.y, node.simdWorldTransform.columns.0.z),
-            simd_float3(node.simdWorldTransform.columns.1.x, node.simdWorldTransform.columns.1.y, node.simdWorldTransform.columns.1.z),
-            simd_float3(node.simdWorldTransform.columns.2.x, node.simdWorldTransform.columns.2.y, node.simdWorldTransform.columns.2.z)
-        ])
+        let rotationMatrix = rotoTraslation.r_Y
         
-        currentRotation = r_Y * currentRotation
+        let rotationQuaternion = simd_quatf(rotationMatrix)
         
-        node.simdWorldTransform.columns.0 = simd_float4(currentRotation.columns.0, node.simdWorldTransform.columns.0.w)
-        node.simdWorldTransform.columns.1 = simd_float4(currentRotation.columns.1, node.simdWorldTransform.columns.1.w)
-        node.simdWorldTransform.columns.2 = simd_float4(currentRotation.columns.2, node.simdWorldTransform.columns.2.w)
+        node.simdOrientation = rotationQuaternion * node.simdOrientation
+        
     }
 }
 

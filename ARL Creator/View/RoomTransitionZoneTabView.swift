@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-struct TransitionZoneTabView: View {
+struct RoomTransitionZoneTabView: View {
     @ObservedObject var room: Room
     @State private var searchText: String = ""
 

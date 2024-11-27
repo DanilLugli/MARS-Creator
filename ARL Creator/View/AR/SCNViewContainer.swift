@@ -49,28 +49,15 @@ struct SCNViewContainer: UIViewRepresentable {
         
         cameraNode.constraints = []
     }
-//    
-//    func setMassCenter() {
-//        var massCenter = SCNNode()
-//        massCenter.worldPosition = SCNVector3(0, 0, 0)
-//        if let nodes = scnView.scene?.rootNode
-//            .childNodes(passingTest: {
-//                n,_ in n.name != nil && n.name! != "Room" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp"
-//            }) {
-//            massCenter = findMassCenter(nodes)
-//        }
-//        scnView.scene?.rootNode.addChildNode(massCenter)
-//    }
     
     func drawSceneObjects(borders: Bool) {
         
         var drawnNodes = Set<String>()
         
-        print("RootNode: \(String(describing: scnView.scene?.rootNode.name))\n\n")
         scnView.scene?
             .rootNode
             .childNodes(passingTest: { n, _ in
-                n.name != nil && 
+                n.name != nil &&
                 n.name! != "Room" &&
                 n.name! != "Floor0" &&
                 n.name! != "Geom" &&
@@ -408,66 +395,4 @@ struct SCNViewContainer_Previews: PreviewProvider {
     }
 }
 
-extension SCNQuaternion {
-    func difference(_ other: SCNQuaternion) -> SCNQuaternion{
-        return SCNQuaternion(
-            self.x - other.x,
-            self.y - other.y,
-            self.z - other.z,
-            self.w - other.w
-        )
-    }
-    
-    func sum(_ other: SCNQuaternion) -> SCNQuaternion{
-        return SCNQuaternion(
-            self.x + other.x,
-            self.y + other.y,
-            self.z + other.z,
-            self.w + other.w
-        )
-    }
-}
 
-extension SCNVector3 {
-    func difference(_ other: SCNVector3) -> SCNVector3 {
-        return SCNVector3(
-            self.x - other.x,
-            self.y - other.y,
-            self.z - other.z
-        )
-    }
-    
-    func sum(_ other: SCNVector3) -> SCNVector3 {
-        return SCNVector3(
-            self.x + other.x,
-            self.y + other.y,
-            self.z + other.z
-        )
-    }
-    
-    func rotateAroundOrigin(_ angle: Float) -> SCNVector3 {
-        var a = Complex<Float>.i
-        a.real = cos(angle)
-        a.imaginary = sin(angle)
-        var b = Complex<Float>.i
-        b.real = self.x
-        b.imaginary = self.z
-        let position = a*b
-        return SCNVector3(
-            position.real,
-            self.y,
-            position.imaginary
-        )
-    }
-}
-
-extension SCNNode {
-    
-    var height: CGFloat { CGFloat(self.boundingBox.max.y - self.boundingBox.min.y) }
-    var width: CGFloat { CGFloat(self.boundingBox.max.x - self.boundingBox.min.x) }
-    var length: CGFloat { CGFloat(self.boundingBox.max.z - self.boundingBox.min.z) }
-    
-    var halfCGHeight: CGFloat { height / 2.0 }
-    var halfHeight: Float { Float(height / 2.0) }
-    var halfScaledHeight: Float { halfHeight * self.scale.y  }
-}

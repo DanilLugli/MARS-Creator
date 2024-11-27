@@ -8,8 +8,8 @@ struct CaptureViewContainer: UIViewRepresentable {
     
     var arSession = ARSession()
     var sessionDelegate: SessionDelegate
-    private let configuration: RoomCaptureSession.Configuration
-    private let roomCaptureView: RoomCaptureView
+    let configuration: RoomCaptureSession.Configuration
+    let roomCaptureView: RoomCaptureView
     
     init(namedUrl: NamedURL) {
         
@@ -35,7 +35,8 @@ struct CaptureViewContainer: UIViewRepresentable {
     
     func updateUIView(_ uiView: RoomCaptureView, context: Context) {}
     
-    mutating func stopCapture(pauseARSession: Bool) {
+    func stopCapture(pauseARSession: Bool) {
+        
         SessionDelegate.save = !pauseARSession
         sessionDelegate.currentMapName = sessionDelegate.namedUrl.name
         
@@ -48,12 +49,12 @@ struct CaptureViewContainer: UIViewRepresentable {
         if !pauseARSession {
             arSession.pause()
 
-            let emptyConfiguration = ARWorldTrackingConfiguration()
-            arSession.run(emptyConfiguration, options: [.resetTracking, .removeExistingAnchors])
+//            let emptyConfiguration = ARWorldTrackingConfiguration()
+//            arSession.run(emptyConfiguration, options: [.resetTracking, .removeExistingAnchors])
             
-            arSession.delegate = nil
+            //arSession.delegate = nil
             
-            arSession = ARSession()
+            //arSession = ARSession()
         }
     }
     
@@ -92,6 +93,8 @@ struct CaptureViewContainer: UIViewRepresentable {
         }
         
         func captureSession(_ session: RoomCaptureSession, didUpdate room: CapturedRoom) {
+            
+            //previewVisualizer.update(model: room)
             session.arSession.getCurrentWorldMap { worldMap, error in
                 guard let worldMap = worldMap else {
                     print("Can't get current world map")
@@ -112,7 +115,6 @@ struct CaptureViewContainer: UIViewRepresentable {
                 }
             }
         }
-        
         func captureSession(_ session: RoomCaptureSession, didEndWith data: CapturedRoomData, error: Error?) {
             print(SessionDelegate.save)
             if !SessionDelegate.save { return }
@@ -127,6 +129,7 @@ struct CaptureViewContainer: UIViewRepresentable {
                 do {
                     let name = currentMapName ?? "_\(DateFormatter.localizedString(from: Date(), dateStyle: .medium, timeStyle: .short))"
                     let finalRoom = try! await self.roomBuilder.capturedRoom(from: data)
+                    //previewVisualizer.update(model: finalRoom)
                                         
                     saveJSONMap(finalRoom, name, at: namedUrl.url)
                     saveUSDZMap(finalRoom, namedUrl.name, at: namedUrl.url)
@@ -166,7 +169,6 @@ struct CaptureViewContainer: UIViewRepresentable {
         func captureView(shouldPresent roomDataForProcessing: CapturedRoomData, error: Error?) -> Bool {
             return true
         }
-        
         func captureView(didPresent processedResult: CapturedRoom, error: Error?) {
             self.finalResults = processedResult
         }
@@ -189,9 +191,9 @@ struct CaptureViewContainer: UIViewRepresentable {
     }
 }
 
-struct CaptureViewContainer_Previews: PreviewProvider {
-    static var previews: some View {
-        CaptureViewContainer(namedUrl: Room(_name: "Sample Room", _lastUpdate: Date(), _referenceMarkers: [], _transitionZones: [], _scene: nil, _sceneObjects: [], _roomURL: URL(fileURLWithPath:"")))
-    }
-}
+//struct CaptureViewContainer_Previews: PreviewProvider {
+//    static var previews: some View {
+//        CaptureViewContainer(namedUrl: Room(_name: "Sample Room", _lastUpdate: Date(), _referenceMarkers: [], _transitionZones: [], _scene: nil, _sceneObjects: [], _roomURL: URL(fileURLWithPath:"")))
+//    }
+//}
 

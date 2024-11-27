@@ -5,7 +5,7 @@ import Combine
 struct RoomView: View {
     
     @EnvironmentObject var buildingModel: BuildingModel
-    @Environment(\.dismiss) private var dismiss // Environment dismiss for navigation back
+    @Environment(\.dismiss) private var dismiss
     
     @ObservedObject var room: Room
     @ObservedObject var floor: Floor
@@ -66,7 +66,7 @@ struct RoomView: View {
                 .padding(.leading)
                 
                 TabView(selection: $selectedTab) {
-                    RoomPlanimetryView(room: room)
+                    RoomPlanimetryTabView(room: room)
                         .tabItem {
                             Label("Room Planimetry", systemImage: "map.fill")
                         }
@@ -78,7 +78,7 @@ struct RoomView: View {
                         }
                         .tag(1)
                     
-                    MarkerView(room: room)
+                    RoomMarkerTabView(room: room)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(Color.customBackground)
                         .tabItem {
@@ -86,25 +86,26 @@ struct RoomView: View {
                         }
                         .tag(2)
                     
-                    TransitionZoneTabView(room: room)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color.customBackground)
-                        .tabItem {
-                            Label("Transition Zones", systemImage: "mappin.and.ellipse")
-                        }
-                        .tag(4)
-                    
-                    ConnectionsTabView(room: room, floor: floor)
+                    RoomConnectionsTabView(room: room, floor: floor)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(Color.customBackground)
                         .tabItem {
                             Label("Connections", systemImage: "arrow.left.arrow.right")
                         }
                         .tag(3)
+                    
+                    RoomTransitionZoneTabView(room: room)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color.customBackground)
+                        .tabItem {
+                            Label("Transition Zones", systemImage: "mappin.and.ellipse")
+                        }
+                        .tag(4)
                 }
             }
             .background(Color.customBackground)
-            .foregroundColor(.white)      }
+            .foregroundColor(.white)
+        }
         .navigationTitle("Room")
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
@@ -170,21 +171,26 @@ struct RoomView: View {
                             Label("Create Room Position Automatic Mode", systemImage: "mappin.and.ellipse")
                         }.disabled(true)
                         
-                        Button(action: {
-                            isCreateRoomPosition = true
-                            print("isCreateRoomPosition set to true") // Debug
-                        }) {
-                            Label("Create Room Position Association Mode", systemImage: "mappin")
+                        NavigationLink(destination: AutomaticRoomPositionView(floor: self.floor, room: self.room)){
+                            Button(action: {
+                                isCreateRoomPosition = true
+                            }) {
+                                Label("Create Room Position Association Mode", systemImage: "mappin")
+                            }
                         }
+                        
                         
                         Divider()
                         
-                        Button(action: {
-                            isCreateManualRoomPosition = true
-                            print("isCreateManualRoomPosition set to true") // Debug
-                        }) {
-                            Label("Correct Room Position", systemImage: "mappin")
+                        NavigationLink(destination:ManualRoomPositionView(floor: self.floor, room: self.room)){
+                            Button(action: {
+                                isCreateManualRoomPosition = true
+                                print("isCreateManualRoomPosition set to true") // Debug
+                            }) {
+                                Label("Correct Room Position", systemImage: "mappin")
+                            }
                         }
+                        
                         
                     } label: {
                         Image(systemName: "plus.circle.fill")
@@ -192,24 +198,8 @@ struct RoomView: View {
                             .symbolRenderingMode(.palette)
                             .foregroundStyle(.white, .blue, .blue)
                     }
-                    
-                    NavigationLink(
-                        destination: RoomPositionView(floor: self.floor, room: self.room),
-                        isActive: $isCreateRoomPosition,
-                        label: {
-                            EmptyView()
-                        }
-                    )
-                    
-                    NavigationLink(
-                        destination: ManualRoomPositionView(floor: self.floor, room: self.room),
-                        isActive: $isCreateManualRoomPosition,
-                        label: {
-                            EmptyView()
-                        }
-                    )
                 }
-                else if selectedTab == 2 {
+                if selectedTab == 2 {
                     Button(action: {
                         isReferenceMarkerUploadPicker = true
                     }) {
@@ -218,22 +208,27 @@ struct RoomView: View {
                             .foregroundStyle(.white, .blue, .blue)
                     }
                 }
-                else if selectedTab == 3 {
+                if selectedTab == 3 {
                     ZStack {
                         Menu {
-                            Button(action: {
-                                isConnectionSameFloor = true
-                            }) {
-                                Label("Create Same Floor Connection", systemImage: "arrow.left.arrow.right")
-                            }.disabled(true)
-                            
-                            Button(action: {
-                                isConnectionAdjacentFloor = true
-                            }) {
-                                Label("Create Adjacent Floors Connection", systemImage: "arrow.up.arrow.down")
+                            NavigationLink(destination: AddSameConnectionView(building: building, initialSelectedFloor: floor, initialSelectedRoom: room) ){
+                                Button(action: {
+                                    //isConnectionSameFloor = true
+                                }) {
+                                    Label("Create Same Floor Connection", systemImage: "arrow.left.arrow.right")
+                                }.disabled(true)
+                                
                             }
                             
-                            // Navigazione verso una terza vista
+                            NavigationLink(destination: AddStairsConnectionView(building: building, initialSelectedFloor: floor, initialSelectedRoom: room) ){
+                                Button(action: {
+                                    //isConnectionAdjacentFloor = true
+                                }) {
+                                    Label("Create Adjacent Floors Connection", systemImage: "arrow.up.arrow.down")
+                                }
+                            }
+                            
+                            
                             Button(action: {
                                 // Azione per la connessione ascensore, se necessario
                             }) {
@@ -247,24 +242,23 @@ struct RoomView: View {
                         }
                     }
                     
-                    // Posiziona i NavigationLink fuori dal Menu e ZStack
-                    NavigationLink(
-                        destination: AddStairsConnectionView(building: building, initialSelectedFloor: floor, initialSelectedRoom: room),
-                        isActive: $isConnectionAdjacentFloor,
-                        label: {
-                            EmptyView()
-                        }
-                    )
-                    
-                    NavigationLink(
-                        destination: AddSameConnectionView(building: building, initialSelectedFloor: floor, initialSelectedRoom: room),
-                        isActive: $isConnectionSameFloor,
-                        label: {
-                            EmptyView()
-                        }
-                    )
+//                    NavigationLink(
+//                        destination: AddStairsConnectionView(building: building, initialSelectedFloor: floor, initialSelectedRoom: room),
+//                        isActive: $isConnectionAdjacentFloor,
+//                        label: {
+//                            EmptyView()
+//                        }
+//                    )
+//                    
+//                    NavigationLink(
+//                        destination: AddSameConnectionView(building: building, initialSelectedFloor: floor, initialSelectedRoom: room),
+//                        isActive: $isConnectionSameFloor,
+//                        label: {
+//                            EmptyView()
+//                        }
+//                    )
                 }
-                else if selectedTab == 4 {
+                if selectedTab == 4 {
                     HStack{
                         NavigationLink(destination: AddTransitionZoneView(floor: floor, room: room)) {
                             Image(systemName: "plus.circle.fill")
@@ -356,24 +350,26 @@ struct RoomView: View {
         }
         .confirmationDialog("How do you want to create the \(room.name) planimetry?", isPresented: $isOptionsSheetPresented, titleVisibility: .visible) {
             
-            Button("Create With AR") {
-                let fileManager = FileManager.default
-                let filePath = room.roomURL
-                    .appendingPathComponent("MapUsdz")
-                    .appendingPathComponent("\(room.name).usdz")
-                
-                do {
-                    try fileManager.removeItem(at: filePath)
-                    print("File eliminato correttamente")
-                } catch {
-                    print("Errore durante l'eliminazione del file: \(error)")
+            NavigationLink(destination: RoomScanningView(namedUrl: room)){
+                Button("Create With AR") {
+                    let fileManager = FileManager.default
+                    let filePath = room.roomURL
+                        .appendingPathComponent("MapUsdz")
+                        .appendingPathComponent("\(room.name).usdz")
+                    
+                    do {
+                        try fileManager.removeItem(at: filePath)
+                        print("File eliminato correttamente")
+                    } catch {
+                        print("Errore durante l'eliminazione del file: \(error)")
+                    }
+                    
+                    self.isOptionsSheetPresented = false
+                    self.isNavigationScanRoomActive = true
                 }
-                
-                self.isOptionsSheetPresented = false
-                self.isNavigationScanRoomActive = true
-            }
-            .font(.system(size: 20))
-            .bold()
+                .font(.system(size: 20))
+                .bold()
+           }
             
             Button("Update From File") {
                 // Chiudi il dialogo
@@ -388,7 +384,7 @@ struct RoomView: View {
             .bold()
             
             Button("Cancel", role: .cancel) {
-                // Azione di annullamento, facoltativa
+                
             }
         }
         .confirmationDialog("Are you sure to delete Room?", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
@@ -436,17 +432,31 @@ struct RoomView: View {
             )
         }
         
-        NavigationLink(
-            destination: ScanningView(namedUrl: room),
-            isActive: $isNavigationScanRoomActive,
-            label: {
-                EmptyView()
-            }
-        )
+//        NavigationLink(
+//            destination: ScanningView(namedUrl: room),
+//            isActive: $isNavigationScanRoomActive,
+//            label: {
+//                EmptyView()
+//            }
+//        )
+        
+//        NavigationLink(
+//            destination: RoomPositionView(floor: self.floor, room: self.room),
+//            isActive: $isCreateRoomPosition,
+//            label: {
+//                EmptyView()
+//            }
+//        )
+        
+//        NavigationLink(
+//            destination: ManualRoomPositionView(floor: self.floor, room: self.room),
+//            isActive: $isCreateManualRoomPosition,
+//            label: {
+//                EmptyView()
+//            }
+//        )
     }
 }
-
-
 
 struct RoomView_Previews: PreviewProvider {
     static var previews: some View {

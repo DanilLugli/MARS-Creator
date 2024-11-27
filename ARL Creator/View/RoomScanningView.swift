@@ -2,7 +2,7 @@ import SwiftUI
 import ARKit
 import RoomPlan
 
-struct ScanningView: View {
+struct RoomScanningView: View {
     @State var namedUrl: NamedURL
     
     @State private var messagesFromWorldMap: String = ""
@@ -109,11 +109,5 @@ struct ScanningView: View {
                 //captureView?.stopCapture(pauseARSession: false, saveData: false)
             }
         }
-    }
-}
-
-struct ScanningView_Previews: PreviewProvider {
-    static var previews: some View {
-        ScanningView(namedUrl: Floor(_name: "Sample Floor", _lastUpdate: Date(), _planimetry: SCNViewContainer(), _planimetryRooms: SCNViewMapContainer(), _associationMatrix: [:], _rooms: [], _sceneObjects: [], _scene: nil, _sceneConfiguration: nil, _floorURL: URL(fileURLWithPath: "")))
     }
 }

@@ -61,11 +61,11 @@ class SCNViewModel: ObservableObject, MoveDimensionObject{
                 $0.geometry?.materials = [material]
                 
                 // Applica le modifiche di scala se richiesto
-                if borders {
-                    $0.scale.x = $0.scale.x < 0.2 ? $0.scale.x + 0.1 : $0.scale.x
-                    $0.scale.z = $0.scale.z < 0.2 ? $0.scale.z + 0.1 : $0.scale.z
-                    $0.scale.y = ($0.name!.prefix(4) == "Wall") ? 0.1 : $0.scale.y
-                }
+//                if borders {
+//                    $0.scale.x = $0.scale.x < 0.2 ? $0.scale.x + 0.1 : $0.scale.x
+//                    $0.scale.z = $0.scale.z < 0.2 ? $0.scale.z + 0.1 : $0.scale.z
+//                    $0.scale.y = ($0.name!.prefix(4) == "Wall") ? 0.1 : $0.scale.y
+//                }
             }
         
         scnView.scene?

@@ -19,7 +19,6 @@ struct MapControllerView: View {
                     .background(Color.blue.opacity(0.4))
                     .cornerRadius(8)
                 
-                
                 Button(action: {
                     moveObject.rotateClockwise()
                 }) {
@@ -44,7 +43,6 @@ struct MapControllerView: View {
                     }
                     .padding()
                 }
-
             }
             else{
                 Spacer()

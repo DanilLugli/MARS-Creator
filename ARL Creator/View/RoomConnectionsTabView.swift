@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-struct ConnectionsTabView: View {
+struct RoomConnectionsTabView: View {
     @ObservedObject var room: Room
     @ObservedObject var floor: Floor
     @State private var searchText: String = ""

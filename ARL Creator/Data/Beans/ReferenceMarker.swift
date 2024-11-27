@@ -25,8 +25,7 @@ class ReferenceMarker: ObservableObject, Codable, Identifiable {
     private var _coordinates: Coordinates
     private var _rmUML: URL
     
-    // Nome del file JSON per salvare i dati del marker
-    private let jsonFileName = "MarkerData.json"
+    private let jsonFileName = "Marker Data.json"
     
     init(_imagePath: URL, _imageName: String, _coordinates: Coordinates, _rmUML: URL, _physicalWidth: CGFloat) {
         self._imagePath = _imagePath
@@ -81,7 +80,7 @@ class ReferenceMarker: ObservableObject, Codable, Identifiable {
             let decoder = JSONDecoder()
             let markersData = try decoder.decode([String: MarkerData].self, from: data)
             
-            // Carica i dati del marker attuale
+            
             if let markerData = markersData[_imageName] {
                 _imageName = markerData.name
                 _physicalWidth = markerData.width
@@ -97,11 +96,9 @@ class ReferenceMarker: ObservableObject, Codable, Identifiable {
         var markersData: [String: MarkerData] = [:]
         let fileManager = FileManager.default
         
-        // Cerca il file con il vecchio nome, indipendentemente dall'estensione
         if let fileWithExtension = try? fileManager.contentsOfDirectory(at: referenceMarkerURL, includingPropertiesForKeys: nil)
             .first(where: { $0.deletingPathExtension().lastPathComponent == oldName }) {
 
-            // Costruisce il nuovo URL con il nuovo nome e l'estensione esistente
             let newFileURL = fileWithExtension.deletingLastPathComponent().appendingPathComponent(newName).appendingPathExtension(fileWithExtension.pathExtension)
             
             do {
@@ -127,16 +124,17 @@ class ReferenceMarker: ObservableObject, Codable, Identifiable {
         
         // Controlla se esiste un record per oldName e aggiorna i dati
         if let markerData = markersData[oldName] {
-            markersData.removeValue(forKey: oldName) // Rimuove il vecchio record
-            markersData[newName] = MarkerData(name: newName, width: markerData.width) // Aggiunge con il nuovo nome
+            markersData.removeValue(forKey: oldName)
+            markersData[newName] = MarkerData(name: newName, width: markerData.width)
+            
             print("Dati aggiornati per \(newName) nel JSON.")
         } else {
-            // Aggiunge direttamente i nuovi dati se oldName non esiste
+            
             markersData[newName] = MarkerData(name: newName, width: newWidth)
+            
             print("Dati aggiunti per \(newName) nel JSON poiché \(oldName) non era presente.")
         }
         
-        // Salva i dati aggiornati nel file JSON
         do {
             let encoder = JSONEncoder()
             encoder.outputFormatting = .prettyPrinted
