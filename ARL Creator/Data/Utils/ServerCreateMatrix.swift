@@ -12,8 +12,8 @@ import SceneKit
 func fetchAPIConversionLocalGlobal(localName: String, nodesList: [(SCNNode, SCNNode)]) async throws -> (HTTPURLResponse?, [String: Any]) {
     //0 local, 1 global
     for (node1, node2) in nodesList {
-        let name1 = node1.name ?? "Unnamed"
-        let name2 = node2.name ?? "Unnamed"
+        let name1 = await node1.name ?? "Unnamed"
+        let name2 = await node2.name ?? "Unnamed"
         
         print("\(name1):\(name2)")
     }
@@ -22,16 +22,16 @@ func fetchAPIConversionLocalGlobal(localName: String, nodesList: [(SCNNode, SCNN
     
     for n in nodesList {
         
-        print(n.0.simdWorldTransform)
-        print(n.0.transform)
-        print(n.1.simdWorldTransform)
-        print(n.1.transform)
+        await print(n.0.simdWorldTransform)
+        await print(n.0.transform)
+        await print(n.1.simdWorldTransform)
+        await print(n.1.transform)
         
         var _local: [String: Any] = [:]
         
-        _local["scale"] = [n.0.scale.x, n.0.scale.y, n.0.scale.z]
-        _local["eulerY"] = n.0.eulerAngles.y
-        _local["position"] = [
+        _local["scale"] = await [n.0.scale.x, n.0.scale.y, n.0.scale.z]
+        _local["eulerY"] = await n.0.eulerAngles.y
+        _local["position"] = await [
             [n.0.simdWorldTransform.columns.0.x, n.0.simdWorldTransform.columns.0.y, n.0.simdWorldTransform.columns.0.z, n.0.simdWorldTransform.columns.0.w],
             [n.0.simdWorldTransform.columns.1.x, n.0.simdWorldTransform.columns.1.y, n.0.simdWorldTransform.columns.1.z, n.0.simdWorldTransform.columns.1.w],
             [n.0.simdWorldTransform.columns.2.x, n.0.simdWorldTransform.columns.2.y, n.0.simdWorldTransform.columns.2.z, n.0.simdWorldTransform.columns.2.w],
@@ -40,9 +40,9 @@ func fetchAPIConversionLocalGlobal(localName: String, nodesList: [(SCNNode, SCNN
         
         
         var _global: [String: Any] = [:]
-        _global["scale"] = [n.1.scale.x, n.1.scale.y, n.1.scale.z]
-        _global["eulerY"] = n.1.eulerAngles.y
-        _global["position"] = [
+        _global["scale"] = await [n.1.scale.x, n.1.scale.y, n.1.scale.z]
+        _global["eulerY"] = await n.1.eulerAngles.y
+        _global["position"] = await [
             [n.1.simdWorldTransform.columns.0.x,
              n.1.simdWorldTransform.columns.0.y,
              n.1.simdWorldTransform.columns.0.z,

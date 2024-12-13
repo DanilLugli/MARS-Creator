@@ -17,48 +17,107 @@ class SCNViewMapHandler: ObservableObject {
         setCamera()
     }
     
-    @MainActor func loadRoomsMaps(floor: Floor, rooms: [Room], borders: Bool) {
+    @MainActor
+    func loadRoomsMaps(floor: Floor, rooms: [Room], borders: Bool) {
         do {
             let floorFileURL = floor.floorURL.appendingPathComponent("MapUsdz")
                 .appendingPathComponent("\(floor.name).usdz")
             
-            // Prima rimuovi la scena corrente
             scnView.scene = nil
-            
-            // Ora carica la nuova scena
             scnView.scene = try SCNScene(url: floorFileURL)
-            
-            drawContent(borders: borders)
-            setMassCenter()
-            setCamera()
-            
+
             for room in rooms {
                 
                 let roomMap = room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz")
                 
                 let roomScene = try SCNScene(url: URL(fileURLWithPath: roomMap.path))
                 
-                if let roomNode = roomScene.rootNode.childNode(withName: "Floor0", recursively: true) {
+                func createSceneNode(from scene: SCNScene) -> SCNNode {
+                    // Crea un nodo contenitore
+                    let containerNode = SCNNode()
+                    containerNode.name = "SceneContainer"
                     
-                    let roomName = room.name
-                    
-                    if let rotoTraslationMatrix = floor.associationMatrix[roomName] {
-                        applyRotoTraslation(to: roomNode, with: rotoTraslationMatrix)
+                    // Cerca il nodo `Floor0`
+                    if let floorNode = scene.rootNode.childNode(withName: "Floor0", recursively: true) {
+                        floorNode.name = "Floor0"
+                        let material = SCNMaterial()
+                        material.diffuse.contents = floor.getRoomByName(room.name)?.color
+                        floorNode.geometry?.materials = [material]
+                        containerNode.addChildNode(floorNode)
+                        print("Pino")
                     } else {
-                        print("No RotoTraslationMatrix found for room: \(roomName)")
+                        print("Node 'Floor0' not found in the provided scene.")
                     }
                     
-                    roomNode.name = roomName
+                    // Aggiungi una sfera di colore arancione fluorescente per rappresentare il punto centrale
+                    let sphereNode = SCNNode()
+                    sphereNode.name = "SceneCenterMarker"
+                    sphereNode.position = SCNVector3(0, 0, 0) // Centro locale del containerNode
                     
-                    let material = SCNMaterial()
-                    material.diffuse.contents = floor.getRoomByName(roomName)?.color
-                    roomNode.geometry?.materials = [material]
+                    let sphereGeometry = SCNSphere(radius: 0.1) // Raggio piccolo per rappresentare il punto
+                    let sphereMaterial = SCNMaterial()
+                    sphereMaterial.emission.contents = UIColor.orange // Colore fluorescente
+                    sphereMaterial.diffuse.contents = UIColor.orange
+                    sphereGeometry.materials = [sphereMaterial]
+                    sphereNode.geometry = sphereGeometry
+                    containerNode.addChildNode(sphereNode)
                     
-                    scnView.scene?.rootNode.addChildNode(roomNode)
-                } else {
-                    print("Node 'Floor0' not found in scene: \(roomMap)")
+                    // Imposta il pivot del nodo contenitore sul puntino arancione
+                    if let markerNode = containerNode.childNode(withName: "SceneCenterMarker", recursively: true) {
+                        let localMarkerPosition = markerNode.position // Posizione locale del puntino
+                        containerNode.pivot = SCNMatrix4MakeTranslation(localMarkerPosition.x, localMarkerPosition.y, localMarkerPosition.z)
+                        print("Pivot impostato su SceneCenterMarker")
+                    } else {
+                        print("SceneCenterMarker non trovato, pivot non modificato.")
+                    }
+                    
+                    return containerNode
                 }
+                
+                var roomNode = createSceneNode(from: roomScene)
+                roomNode.name = room.name
+                
+                roomNode.simdWorldPosition = simd_float3(0,5,0)
+                
+                if let rotoTraslationMatrix = floor.associationMatrix[room.name] {
+                    applyRotoTraslation(to: roomNode, with: rotoTraslationMatrix)
+                } else {
+                    print("No RotoTraslationMatrix found for room: \(room.name)")
+                }
+                
+//                let material = SCNMaterial()
+//                material.diffuse.contents = floor.getRoomByName(room.name)?.color
+//                roomNode.geometry?.materials = [material]
+                
+                scnView.scene?.rootNode.addChildNode(roomNode)
+                
+//                if let roomNode = roomScene.rootNode.childNode(withName: "Floor0", recursively: true) {
+//                    
+//                    let roomName = room.name
+//                    roomNode.name = room.name
+//                    roomNode.worldPosition = SCNVector3(0.0,0.0,0.0)
+//                    
+//                    if let rotoTraslationMatrix = floor.associationMatrix[roomName] {
+//                        applyRotoTraslation(to: roomNode, with: rotoTraslationMatrix)
+//                    } else {
+//                        print("No RotoTraslationMatrix found for room: \(roomName)")
+//                    }
+//                    
+//                    //roomNode.name = roomName
+//                    
+//                    let material = SCNMaterial()
+//                    material.diffuse.contents = floor.getRoomByName(roomName)?.color
+//                    roomNode.geometry?.materials = [material]
+//                    
+//                    scnView.scene?.rootNode.addChildNode(roomNode)
+//                } else {
+//                    print("Node 'Floor0' not found in scene: \(roomMap)")
+//                }
             }
+            
+            drawSceneObjects(borders: borders)
+            setMassCenter()
+            setCamera()
             
         } catch {
             print("Error loading scene from URL: \(error)")
@@ -73,6 +132,48 @@ class SCNViewMapHandler: ObservableObject {
         for child in node.childNodes {
             printAllNodes(in: child, indent: indent + "  ")
         }
+    }
+    
+    func setCameraUp() {
+        cameraNode.camera = SCNCamera()
+        
+        // Add the camera node to the scene
+        scnView.scene?.rootNode.addChildNode(cameraNode)
+        
+        // Position the camera at the same Y level as the mass center, and at a certain distance along the Z-axis
+        let cameraDistance: Float = 10.0 // Distance in front of the mass center
+        let cameraHeight: Float = massCenter.worldPosition.y + 2.0 // Slightly above the mass center
+        
+        cameraNode.worldPosition = SCNVector3(massCenter.worldPosition.x, cameraHeight, massCenter.worldPosition.z + cameraDistance)
+        
+        // Set the camera to use perspective projection
+        cameraNode.camera?.usesOrthographicProjection = false
+        
+        // Optionally set the field of view
+        cameraNode.camera?.fieldOfView = 60.0 // Adjust as needed
+        
+        // Make the camera look at the mass center
+        let lookAtConstraint = SCNLookAtConstraint(target: massCenter)
+        lookAtConstraint.isGimbalLockEnabled = true
+        cameraNode.constraints = [lookAtConstraint]
+        
+        // Add ambient light to the scene
+        let ambientLight = SCNNode()
+        ambientLight.light = SCNLight()
+        ambientLight.light!.type = .ambient
+        ambientLight.light!.color = UIColor(white: 0.5, alpha: 1.0)
+        scnView.scene?.rootNode.addChildNode(ambientLight)
+        
+        // Add a directional light to simulate sunlight
+        let directionalLight = SCNNode()
+        directionalLight.light = SCNLight()
+        directionalLight.light!.type = .directional
+        directionalLight.light!.color = UIColor(white: 1.0, alpha: 1.0)
+        directionalLight.eulerAngles = SCNVector3(-Float.pi / 3, 0, 0) // Adjust angle as needed
+        scnView.scene?.rootNode.addChildNode(directionalLight)
+        
+        // Set the point of view of the scene to the camera node
+        scnView.pointOfView = cameraNode
     }
     
     func findMassCenter(_ nodes: [SCNNode]) -> SCNNode {
@@ -129,6 +230,66 @@ class SCNViewMapHandler: ObservableObject {
             }
     }
     
+    func drawSceneObjects(borders: Bool) {
+        
+        var drawnNodes = Set<String>()
+        
+        scnView.scene?
+            .rootNode
+            .childNodes(passingTest: { n, _ in
+                n.name != nil &&
+                n.name! != "Room" &&
+                n.name! != "Floor0" &&
+                n.name! != "Geom" &&
+                String(n.name!.suffix(4)) != "_grp" &&
+                n.name! != "__selected__"
+            })
+            .forEach {
+                let nodeName = $0.name
+                let material = SCNMaterial()
+                if nodeName == "Floor0" {
+                    material.diffuse.contents = UIColor.green
+                } else {
+                    material.diffuse.contents = UIColor.black
+                    if nodeName?.prefix(5) == "Floor" {
+                        material.diffuse.contents = UIColor.white.withAlphaComponent(0.2)
+                    }
+                    if nodeName!.prefix(6) == "Transi" {
+                        material.diffuse.contents = UIColor.white
+                    }
+                    if nodeName!.prefix(4) == "Door" {
+                        material.diffuse.contents = UIColor.white
+                    }
+                    if nodeName!.prefix(4) == "Open"{
+                        material.diffuse.contents = UIColor.systemGray5
+                    }
+                    if nodeName!.prefix(4) == "Tabl" {
+                        material.diffuse.contents = UIColor.brown
+                    }
+                    if nodeName!.prefix(4) == "Chai"{
+                        material.diffuse.contents = UIColor.brown.withAlphaComponent(0.4)
+                    }
+                    if nodeName!.prefix(4) == "Stor"{
+                        material.diffuse.contents = UIColor.systemGray
+                    }
+                    if nodeName!.prefix(4) == "Sofa"{
+                        material.diffuse.contents = UIColor(red: 0.0, green: 0.0, blue: 0.5, alpha: 0.6)
+                    }
+                    if nodeName!.prefix(4) == "Tele"{
+                        material.diffuse.contents = UIColor.orange
+                    }
+                    material.lightingModel = .physicallyBased
+                    $0.geometry?.materials = [material]
+                    
+                    if borders {
+                        $0.scale.x = $0.scale.x < 0.2 ? $0.scale.x + 0.1 : $0.scale.x
+                        $0.scale.z = $0.scale.z < 0.2 ? $0.scale.z + 0.1 : $0.scale.z
+                        $0.scale.y = ($0.name!.prefix(4) == "Wall") ? 0.1 : $0.scale.y
+                    }
+                }
+                drawnNodes.insert(nodeName!)
+            }
+    }
     
     func changeColorOfNode(nodeName: String, color: UIColor) {
         drawContent(borders: false)
@@ -219,7 +380,6 @@ class SCNViewMapHandler: ObservableObject {
         scnView.scene?.rootNode.addChildNode(massCenter)
     }
     
-    
     //    func applyRotoTraslation(to node: SCNNode, with rotoTraslation: RotoTraslationMatrix) {
     //
     //        print("NODE: ")
@@ -273,13 +433,13 @@ class SCNViewMapHandler: ObservableObject {
             rotoTraslation.translation.columns.3.y,
             rotoTraslation.translation.columns.3.z
         )
-        node.simdPosition = node.simdPosition + translationVector
+        node.simdWorldPosition = node.simdWorldPosition + translationVector
         
         let rotationMatrix = rotoTraslation.r_Y
         
         let rotationQuaternion = simd_quatf(rotationMatrix)
         
-        node.simdOrientation = rotationQuaternion * node.simdOrientation
+        node.simdWorldOrientation = rotationQuaternion * node.simdWorldOrientation
         
     }
 }
@@ -355,5 +515,11 @@ struct SCNViewMapContainer: UIViewRepresentable {
 struct SCNViewMapContainer_Previews: PreviewProvider {
     static var previews: some View {
         SCNViewMapContainer()
+    }
+}
+
+extension SCNVector3: Equatable {
+    public static func == (lhs: SCNVector3, rhs: SCNVector3) -> Bool {
+        return lhs.x == rhs.x && lhs.y == rhs.y && lhs.z == rhs.z
     }
 }

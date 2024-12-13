@@ -50,6 +50,48 @@ struct SCNViewContainer: UIViewRepresentable {
         cameraNode.constraints = []
     }
     
+    func setCameraUp() {
+        cameraNode.camera = SCNCamera()
+        
+        // Add the camera node to the scene
+        scnView.scene?.rootNode.addChildNode(cameraNode)
+        
+        // Position the camera at the same Y level as the mass center, and at a certain distance along the Z-axis
+        let cameraDistance: Float = 10.0 // Distance in front of the mass center
+        let cameraHeight: Float = massCenter.worldPosition.y + 2.0 // Slightly above the mass center
+        
+        cameraNode.worldPosition = SCNVector3(massCenter.worldPosition.x, cameraHeight, massCenter.worldPosition.z + cameraDistance)
+        
+        // Set the camera to use perspective projection
+        cameraNode.camera?.usesOrthographicProjection = false
+        
+        // Optionally set the field of view
+        cameraNode.camera?.fieldOfView = 60.0 // Adjust as needed
+        
+        // Make the camera look at the mass center
+        let lookAtConstraint = SCNLookAtConstraint(target: massCenter)
+        lookAtConstraint.isGimbalLockEnabled = true
+        cameraNode.constraints = [lookAtConstraint]
+        
+        // Add ambient light to the scene
+        let ambientLight = SCNNode()
+        ambientLight.light = SCNLight()
+        ambientLight.light!.type = .ambient
+        ambientLight.light!.color = UIColor(white: 0.5, alpha: 1.0)
+        scnView.scene?.rootNode.addChildNode(ambientLight)
+        
+        // Add a directional light to simulate sunlight
+        let directionalLight = SCNNode()
+        directionalLight.light = SCNLight()
+        directionalLight.light!.type = .directional
+        directionalLight.light!.color = UIColor(white: 1.0, alpha: 1.0)
+        directionalLight.eulerAngles = SCNVector3(-Float.pi / 3, 0, 0) // Adjust angle as needed
+        scnView.scene?.rootNode.addChildNode(directionalLight)
+        
+        // Set the point of view of the scene to the camera node
+        scnView.pointOfView = cameraNode
+    }
+    
     func drawSceneObjects(borders: Bool) {
         
         var drawnNodes = Set<String>()
@@ -124,6 +166,7 @@ struct SCNViewContainer: UIViewRepresentable {
         drawSceneObjects(borders: borders)
         setMassCenter()
         setCamera()
+        createAxesNode()
         
     }
     
@@ -133,8 +176,36 @@ struct SCNViewContainer: UIViewRepresentable {
             drawSceneObjects(borders: borders)
             setMassCenter()
             setCamera()
-            
+            createAxesNode()
             floor.isPlanimetryLoaded = true
+    }
+    
+    func createAxesNode(length: CGFloat = 1.0, radius: CGFloat = 0.02) {
+        let axisNode = SCNNode()
+        
+        // X Axis (Red)
+        let xAxis = SCNNode(geometry: SCNCylinder(radius: radius, height: length))
+        xAxis.geometry?.firstMaterial?.diffuse.contents = UIColor.red
+        xAxis.position = SCNVector3(length / 2, 0, 0) // Offset by half length
+        xAxis.eulerAngles = SCNVector3(0, 0, Float.pi / 2) // Rotate cylinder along X-axis
+        
+        // Y Axis (Green)
+        let yAxis = SCNNode(geometry: SCNCylinder(radius: radius, height: length))
+        yAxis.geometry?.firstMaterial?.diffuse.contents = UIColor.green
+        yAxis.position = SCNVector3(0, length / 2, 0) // Offset by half length
+        
+        // Z Axis (Blue)
+        let zAxis = SCNNode(geometry: SCNCylinder(radius: radius, height: length))
+        zAxis.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
+        zAxis.position = SCNVector3(0, 0, length / 2) // Offset by half length
+        zAxis.eulerAngles = SCNVector3(Float.pi / 2, 0, 0) // Rotate cylinder along Z-axis
+        
+        // Add axes to parent node
+        axisNode.addChildNode(xAxis)
+        axisNode.addChildNode(yAxis)
+        axisNode.addChildNode(zAxis)
+        self.scnView.scene?.rootNode.addChildNode(axisNode)
+        
     }
     
     func addDoorNodesBasedOnExistingDoors(room: Room) {
@@ -187,26 +258,6 @@ struct SCNViewContainer: UIViewRepresentable {
         }
     }
     
-    //    func drawOrigin(_ o: SCNVector3,_ color: UIColor, _ size: CGFloat, _ addY: Bool = false) {
-    //
-    //        let sphere = generateSphereNode(color, size)
-    //        sphere.name = "Origin"
-    //
-    //        print("Origin Drawn")
-    //        print(sphere.worldTransform)
-    //
-    //        sphere.simdWorldPosition = simd_float3(o.x, o.y, o.z)
-    //
-    //        print(sphere.worldTransform)
-    //
-    //        if let r = Model.shared.actualRoto{sphere.simdWorldTransform = simd_mul(sphere.simdWorldTransform, r.traslation)}
-    //        sphere.worldPosition.y -= 1
-    //        if addY {sphere.worldPosition.y += 1}
-    //
-    //        scnView.scene?.rootNode.addChildNode(sphere)
-    //
-    //    }
-    
     func setMassCenter() {
         if let massCenter = findMassCenter() {
             scnView.scene?.rootNode.addChildNode(massCenter)
@@ -229,20 +280,6 @@ struct SCNViewContainer: UIViewRepresentable {
         
         return massCenter
     }
-    
-//    func findMassCenter(_ nodes: [SCNNode]) -> SCNNode {
-//        let massCenter = SCNNode()
-//        var X: [Float] = [Float.greatestFiniteMagnitude, -Float.greatestFiniteMagnitude]
-//        var Z: [Float] = [Float.greatestFiniteMagnitude, -Float.greatestFiniteMagnitude]
-//        for n in nodes{
-//            if (n.worldPosition.x < X[0]) {X[0] = n.worldPosition.x}
-//            if (n.worldPosition.x > X[1]) {X[1] = n.worldPosition.x}
-//            if (n.worldPosition.z < Z[0]) {Z[0] = n.worldPosition.z}
-//            if (n.worldPosition.z > Z[1]) {Z[1] = n.worldPosition.z}
-//        }
-//        massCenter.worldPosition = SCNVector3((X[0]+X[1])/2, 0, (Z[0]+Z[1])/2)
-//        return massCenter
-//    }
     
     func setupCamera(cameraNode: SCNNode){
         cameraNode.camera = SCNCamera()

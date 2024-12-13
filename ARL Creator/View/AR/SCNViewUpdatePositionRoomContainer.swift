@@ -17,19 +17,13 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
     var origin: SCNNode = SCNNode()
     @Published var floor: Floor?
     var roomName: String?
-   
     
-    // Incremento di zoom
     var zoomStep: CGFloat = 0.1
-    // Incremento di traslazione per ogni pressione del pulsante
     var translationStep: CGFloat = 0.1
-    // Incremento dell'angolo di rotazione (in radianti)
-    var rotationStep: Float = .pi / 100 // 11.25 gradi
-    
+    var rotationStep: Float = .pi / 100
     
     private let color: UIColor = UIColor.green.withAlphaComponent(0.3)
     
-    // Nodo per la stanza caricata
     var roomNode: SCNNode?
     
     init(scnView: SCNView, cameraNode: SCNNode, massCenter: SCNNode) {
@@ -39,98 +33,104 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         self.origin.simdWorldTransform = simd_float4x4([1.0,0,0,0], [0,1.0,0,0], [0,0,1.0,0], [0,0,0,1.0])
     }
     
-    
-    @MainActor func loadRoomMapsPosition(floor: Floor, roomURL: URL, borders: Bool) {
+    @MainActor
+    func loadRoomMapsPosition(floor: Floor, room: Room, borders: Bool) {
         do {
             self.floor = floor
-            self.roomName = roomURL.deletingPathExtension().lastPathComponent
+            
+            self.roomName = room.name
             let floorFileURL = floor.floorURL.appendingPathComponent("MapUsdz")
                 .appendingPathComponent("\(floor.name).usdz")
-            scnView.scene = try SCNScene(url: floorFileURL)
+            scnView.scene = floor.scene
             
-            drawContent(borders: borders)
-            setMassCenter()
-            setCamera()
             
-            self.rotoTraslation = floor.associationMatrix[roomURL.deletingPathExtension().lastPathComponent] ?? RotoTraslationMatrix(
+            self.rotoTraslation = floor.associationMatrix[room.name] ?? RotoTraslationMatrix(
                 name: "",
-                translation: floor.associationMatrix[roomURL.deletingPathExtension().lastPathComponent]?.translation ?? matrix_identity_float4x4,
-                r_Y: floor.associationMatrix[roomURL.deletingPathExtension().lastPathComponent]?.r_Y ?? matrix_identity_float4x4
+                translation: floor.associationMatrix[room.name]?.translation ?? matrix_identity_float4x4,
+                
+                r_Y: floor.associationMatrix[room.name]?.r_Y ?? matrix_identity_float4x4
             )
             
-            print(self.rotoTraslation)
-            print("\n\nProcessing room URL: \(roomURL)")
-            let roomScene = try SCNScene(url: roomURL)
+            let roomScene = room.scene
             
-            // Trova il nodo chiamato "Floor0" all'interno della stanza
-            if let loadedRoomNode = roomScene.rootNode.childNode(withName: "Floor0", recursively: true) {
-                print("Found 'Floor0' node for room at: \(roomURL)")
+            func createSceneNode(from scene: SCNScene) -> SCNNode {
+                // Crea un nodo contenitore
+                let containerNode = SCNNode()
+                containerNode.name = "SceneContainer"
                 
-
-                let roomName = roomURL.deletingPathExtension().lastPathComponent
-                loadedRoomNode.worldPosition = SCNVector3(0,0,0)
-
-                if let rotoTraslationMatrix = floor.associationMatrix[roomName] {
-                    print("Applying transformation for room: \(roomName)")
-                    print("Translation matrix: \(rotoTraslationMatrix.translation)")
-                    print("Rotation matrix (r_Y): \(rotoTraslationMatrix.r_Y)")
-                    print("BEFORE POSITION: \nNode: \(loadedRoomNode.name ?? "Unnamed"), Position: \(loadedRoomNode.position)")
-
-                    applyRotoTraslation(to: loadedRoomNode, with: rotoTraslationMatrix)
-                    
-                    print("AFTER POSITION: \nNode: \(loadedRoomNode.name ?? "Unnamed"), Position: \(loadedRoomNode.position)")
-                    
+                // Cerca il nodo `Floor0`
+                if let floorNode = scene.rootNode.childNode(withName: "Floor0", recursively: true) {
+                    floorNode.name = "Floor0"
+                    let material = SCNMaterial()
+                    material.diffuse.contents = UIColor.green.withAlphaComponent(0.6)
+                    floorNode.geometry?.materials = [material]
+                    containerNode.addChildNode(floorNode)
                 } else {
-                    print("No RotoTraslationMatrix found for room: \(roomName)")
+                    print("Node 'Floor0' not found in the provided scene.")
                 }
                 
-                // Imposta il nome del nodo in base al nome del file della stanza
-                loadedRoomNode.name = roomName
-                print("RoomNode aggiunto: \(loadedRoomNode)")
+                let sphereNode = SCNNode()
+                sphereNode.name = "SceneCenterMarker"
+                sphereNode.position = SCNVector3(0, 0, 0)
                 
-                // Aggiungi un materiale per colorare il nodo
-                let material = SCNMaterial()
-                material.diffuse.contents = color
-                loadedRoomNode.geometry?.materials = [material]
-
-                scnView.scene?.rootNode.addChildNode(loadedRoomNode)
+                let sphereGeometry = SCNSphere(radius: 0.1) // Raggio piccolo per rappresentare il punto
+                let sphereMaterial = SCNMaterial()
+                sphereMaterial.emission.contents = UIColor.orange // Colore fluorescente
+                sphereMaterial.diffuse.contents = UIColor.orange
+                sphereGeometry.materials = [sphereMaterial]
+                sphereNode.geometry = sphereGeometry
+                containerNode.addChildNode(sphereNode)
                 
-                self.roomNode = loadedRoomNode
-            } else {
-                print("Node 'Floor0' not found in scene: \(roomURL)")
+                if let markerNode = containerNode.childNode(withName: "SceneCenterMarker", recursively: true) {
+                    let localMarkerPosition = markerNode.position // Posizione locale del puntino
+                    containerNode.pivot = SCNMatrix4MakeTranslation(localMarkerPosition.x, localMarkerPosition.y, localMarkerPosition.z)
+                    print("Pivot impostato su SceneCenterMarker")
+                } else {
+                    print("SceneCenterMarker non trovato, pivot non modificato.")
+                }
+                
+                return containerNode
             }
             
+            var roomNode = createSceneNode(from: roomScene!)
+            roomNode.name = room.name
+            
+            roomNode.simdWorldPosition = simd_float3(0,0,0)
+            
+            if let rotoTraslationMatrix = floor.associationMatrix[room.name] {
+                applyRotoTraslation(to: roomNode, with: rotoTraslationMatrix)
+            } else {
+                print("No RotoTraslationMatrix found for room: \(room.name)")
+            }
+            
+            scnView.scene?.rootNode.addChildNode(roomNode)
+            self.roomNode = roomNode
         } catch {
             print("Error loading scene from URL: \(error)")
         }
-    }
-    
-
-    func normalizeNodeOrientationPreservingScale(_ node: SCNNode) {
-        // Salva la scala originale
-        let originalScale = node.scale
         
-        // Reset della trasformazione (posizione e rotazione)
-        node.transform = SCNMatrix4Identity
+        drawSceneObjects(borders: true)
+        setMassCenter()
+        setCamera()
         
-        // Ripristina la scala originale
-        node.scale = originalScale
     }
     
     func rotateClockwise() {
-        self.rotateRight()
-    }
-
-    func rotateCounterClockwise() {
         self.rotateLeft()
     }
 
+    func rotateCounterClockwise() {
+        
+        self.rotateRight()
+    }
+
     func moveUp() {
-        self.moveRoomPositionUp()
+        self.moveRoomPositionDown()
     }
 
     func moveDown() {
-        self.moveRoomPositionDown()
+        self.moveRoomPositionUp()
+        
     }
 
     func moveLeft() {
@@ -146,7 +146,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
             print("No room node available for movement")
             return
         }
-        roomNode.position.z += Float(translationStep)
+        roomNode.worldPosition.z += Float(translationStep)
         floor?.associationMatrix[roomName!]?.translation[3][2] += Float(translationStep)
     }
 
@@ -155,7 +155,9 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
             print("No room node available for movement")
             return
         }
-        roomNode.position.z -= Float(translationStep)
+        
+        roomNode.worldPosition.z -= Float(translationStep)
+        
         floor?.associationMatrix[roomName!]?.translation[3][2] -= Float(translationStep)
     }
 
@@ -164,7 +166,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
             print("No room node available for movement")
             return
         }
-        roomNode.position.x += Float(translationStep)
+        roomNode.worldPosition.x += Float(translationStep)
         floor?.associationMatrix[roomName!]?.translation[3][0] += Float(translationStep)
         print(floor?.associationMatrix[roomName!]?.translation[3][0] ?? 0)
     }
@@ -174,7 +176,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
             print("No room node available for movement")
             return
         }
-        roomNode.position.x -= Float(translationStep)
+        roomNode.worldPosition.x -= Float(translationStep)
         floor?.associationMatrix[roomName!]?.translation[3][0] -= Float(translationStep)
     }
 
@@ -259,6 +261,67 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         return massCenter
     }
     
+    func drawSceneObjects(borders: Bool) {
+        
+        var drawnNodes = Set<String>()
+        
+        scnView.scene?
+            .rootNode
+            .childNodes(passingTest: { n, _ in
+                n.name != nil &&
+                n.name! != "Room" &&
+                n.name! != "Floor0" &&
+                n.name! != "Geom" &&
+                String(n.name!.suffix(4)) != "_grp" &&
+                n.name! != "__selected__"
+            })
+            .forEach {
+                let nodeName = $0.name
+                let material = SCNMaterial()
+                if nodeName == "Floor0" {
+                    material.diffuse.contents = UIColor.green
+                } else {
+                    material.diffuse.contents = UIColor.black
+                    if nodeName?.prefix(5) == "Floor" {
+                        material.diffuse.contents = UIColor.white.withAlphaComponent(0.2)
+                    }
+                    if nodeName!.prefix(6) == "Transi" {
+                        material.diffuse.contents = UIColor.white
+                    }
+                    if nodeName!.prefix(4) == "Door" {
+                        material.diffuse.contents = UIColor.white
+                    }
+                    if nodeName!.prefix(4) == "Open"{
+                        material.diffuse.contents = UIColor.systemGray5
+                    }
+                    if nodeName!.prefix(4) == "Tabl" {
+                        material.diffuse.contents = UIColor.brown
+                    }
+                    if nodeName!.prefix(4) == "Chai"{
+                        material.diffuse.contents = UIColor.brown.withAlphaComponent(0.4)
+                    }
+                    if nodeName!.prefix(4) == "Stor"{
+                        material.diffuse.contents = UIColor.systemGray
+                    }
+                    if nodeName!.prefix(4) == "Sofa"{
+                        material.diffuse.contents = UIColor(red: 0.0, green: 0.0, blue: 0.5, alpha: 0.6)
+                    }
+                    if nodeName!.prefix(4) == "Tele"{
+                        material.diffuse.contents = UIColor.orange
+                    }
+                    material.lightingModel = .physicallyBased
+                    $0.geometry?.materials = [material]
+                    
+                    if borders {
+                        $0.scale.x = $0.scale.x < 0.2 ? $0.scale.x + 0.1 : $0.scale.x
+                        $0.scale.z = $0.scale.z < 0.2 ? $0.scale.z + 0.1 : $0.scale.z
+                        $0.scale.y = ($0.name!.prefix(4) == "Wall") ? 0.1 : $0.scale.y
+                    }
+                }
+                drawnNodes.insert(nodeName!)
+            }
+    }
+    
     private func drawContent(borders: Bool) {
         scnView.scene?
             .rootNode
@@ -273,11 +336,6 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
                 material.lightingModel = .physicallyBased
                 $0.geometry?.materials = [material]
                 
-                if borders {
-                    $0.scale.x = $0.scale.x < 0.2 ? $0.scale.x + 0.1 : $0.scale.x
-                    $0.scale.z = $0.scale.z < 0.2 ? $0.scale.z + 0.1 : $0.scale.z
-                    $0.scale.y = ($0.name!.prefix(4) == "Wall") ? 0.1 : $0.scale.y
-                }
             }
     }
     

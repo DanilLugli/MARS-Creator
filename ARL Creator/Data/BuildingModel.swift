@@ -176,6 +176,11 @@ class BuildingModel: ObservableObject {
                         floor.scene = try SCNScene(url: usdzURL)
                         
                         floor.planimetry.loadFloorPlanimetry(borders: true, floor: floor)
+                        floor.planimetryRooms.handler.loadRoomsMaps(
+                            floor: floor,
+                            rooms: floorRooms,
+                            borders: true
+                        )
                         
                         _ = floor.rooms.map { $0.name }
                         
@@ -210,13 +215,6 @@ class BuildingModel: ObservableObject {
                         })
                         ?? []
                     }
-                    
-                    
-                    floor.planimetryRooms.handler.loadRoomsMaps(
-                        floor: floor,
-                        rooms: floorRooms,
-                        borders: true
-                    )
                     
                     floors.append(floor)
                 }

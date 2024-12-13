@@ -42,11 +42,10 @@ struct ManualRoomPositionView: View {
                 }.padding(26)
                 
             }.onAppear {
-                    let roomURL: URL = room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz")
                 
                     mapPositionView.handler.loadRoomMapsPosition(
                         floor: floor,
-                        roomURL: roomURL,
+                        room: room,
                         borders: true
                     )
                 }
