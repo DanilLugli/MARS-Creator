@@ -11,85 +11,21 @@ struct SCNViewContainer: UIViewRepresentable {
     typealias UIViewType = SCNView
     
     var scnView = SCNView(frame: .zero)
+    var origin = SCNNode()
+    var massCenter = SCNNode()
+    var cameraNode = SCNNode()
+    var dimension = SCNVector3()
+
     var handler = HandleTap()
     
-    var cameraNode = SCNNode()
-    var massCenter = SCNNode()
     var delegate = RenderDelegate()
-    var dimension = SCNVector3()
     
     var rotoTraslation: [RotoTraslationMatrix] = []
-    var origin = SCNNode()
     @State var rotoTraslationActive: Int = 0
     
     init() {
         massCenter.worldPosition = SCNVector3(0, 0, 0)
         origin.simdWorldTransform = simd_float4x4([1.0,0,0,0],[0,1.0,0,0],[0,0,1.0,0],[0,0,0,1.0])
-    }
-    
-    func setCamera() {
-        scnView.scene?.rootNode.addChildNode(cameraNode)
-        
-        cameraNode.camera = SCNCamera()
-        
-        cameraNode.worldPosition = SCNVector3(massCenter.worldPosition.x, massCenter.worldPosition.y + 10, massCenter.worldPosition.z)
-        
-        cameraNode.camera?.usesOrthographicProjection = true
-        cameraNode.camera?.orthographicScale = 20
-        
-        cameraNode.eulerAngles = SCNVector3(-Double.pi / 2, 0, 0)
-
-        let directionalLight = SCNNode()
-        directionalLight.light = SCNLight()
-        directionalLight.light!.type = .ambient
-        directionalLight.light!.color = UIColor(white: 1.0, alpha: 1.0)
-        cameraNode.addChildNode(directionalLight)
-        
-        scnView.pointOfView = cameraNode
-        
-        cameraNode.constraints = []
-    }
-    
-    func setCameraUp() {
-        cameraNode.camera = SCNCamera()
-        
-        // Add the camera node to the scene
-        scnView.scene?.rootNode.addChildNode(cameraNode)
-        
-        // Position the camera at the same Y level as the mass center, and at a certain distance along the Z-axis
-        let cameraDistance: Float = 10.0 // Distance in front of the mass center
-        let cameraHeight: Float = massCenter.worldPosition.y + 2.0 // Slightly above the mass center
-        
-        cameraNode.worldPosition = SCNVector3(massCenter.worldPosition.x, cameraHeight, massCenter.worldPosition.z + cameraDistance)
-        
-        // Set the camera to use perspective projection
-        cameraNode.camera?.usesOrthographicProjection = false
-        
-        // Optionally set the field of view
-        cameraNode.camera?.fieldOfView = 60.0 // Adjust as needed
-        
-        // Make the camera look at the mass center
-        let lookAtConstraint = SCNLookAtConstraint(target: massCenter)
-        lookAtConstraint.isGimbalLockEnabled = true
-        cameraNode.constraints = [lookAtConstraint]
-        
-        // Add ambient light to the scene
-        let ambientLight = SCNNode()
-        ambientLight.light = SCNLight()
-        ambientLight.light!.type = .ambient
-        ambientLight.light!.color = UIColor(white: 0.5, alpha: 1.0)
-        scnView.scene?.rootNode.addChildNode(ambientLight)
-        
-        // Add a directional light to simulate sunlight
-        let directionalLight = SCNNode()
-        directionalLight.light = SCNLight()
-        directionalLight.light!.type = .directional
-        directionalLight.light!.color = UIColor(white: 1.0, alpha: 1.0)
-        directionalLight.eulerAngles = SCNVector3(-Float.pi / 3, 0, 0) // Adjust angle as needed
-        scnView.scene?.rootNode.addChildNode(directionalLight)
-        
-        // Set the point of view of the scene to the camera node
-        scnView.pointOfView = cameraNode
     }
     
     func drawSceneObjects(borders: Bool) {
@@ -157,15 +93,10 @@ struct SCNViewContainer: UIViewRepresentable {
         
         scnView.scene = room.scene
         
-        if (scnView.scene?.rootNode) != nil {
-            //print("NODE HIERARCHY FOR \(room.name)")
-            //printNodeHierarchy(rootNode)
-        }
-        
         addDoorNodesBasedOnExistingDoors(room: room)
         drawSceneObjects(borders: borders)
-        setMassCenter()
-        setCamera()
+        setMassCenter(scnView: self.scnView)
+        setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: self.massCenter)
         createAxesNode()
         
     }
@@ -174,8 +105,8 @@ struct SCNViewContainer: UIViewRepresentable {
 
             scnView.scene = floor.scene
             drawSceneObjects(borders: borders)
-            setMassCenter()
-            setCamera()
+        setMassCenter(scnView: self.scnView)
+            setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: self.massCenter)
             createAxesNode()
             floor.isPlanimetryLoaded = true
     }
@@ -219,7 +150,6 @@ struct SCNViewContainer: UIViewRepresentable {
         
         for newTZNode in transitionNodes {
             
-            print(newTZNode.name! + "\n")
             let doorWidth = newTZNode.width
             let doorHeight = newTZNode.height
             var doorDepth = newTZNode.length
@@ -247,97 +177,16 @@ struct SCNViewContainer: UIViewRepresentable {
             let updateName = newDoorNode.name!.replacingOccurrences(of: "TransitionZone_", with: "")
             
             if !room.transitionZones.contains(where: { $0.name == updateName }) {
-                print("AGGIUNGO \(updateName)")
                 let transitionZones = TransitionZone(name: updateName, connection: [Connection(name: "")])
                 room.addTransitionZone(transitionZone: transitionZones)
                 
             } else {
                 print("Una TransitionZone con il nome \(nodeName) esiste già.")
             }
-            print("Nuova porta aggiunta alla scena con nome \(newDoorNode.name!).")
         }
     }
-    
-    func setMassCenter() {
-        if let massCenter = findMassCenter() {
-            scnView.scene?.rootNode.addChildNode(massCenter)
-        }
-    }
-
-    func findMassCenter() -> SCNNode? {
-        guard let rootNode = scnView.scene?.rootNode else { return nil }
         
-        var minVector = SCNVector3Zero
-        var maxVector = SCNVector3Zero
-        rootNode.__getBoundingBoxMin(&minVector, max: &maxVector)
-        
-        let centerX = (minVector.x + maxVector.x) / 2
-        let centerY = (minVector.y + maxVector.y) / 2
-        let centerZ = (minVector.z + maxVector.z) / 2
-        
-        let massCenter = SCNNode()
-        massCenter.worldPosition = SCNVector3(centerX, centerY, centerZ)
-        
-        return massCenter
-    }
-    
-    func setupCamera(cameraNode: SCNNode){
-        cameraNode.camera = SCNCamera()
-        
-        scnView.scene?.rootNode.addChildNode(cameraNode)
-        let wall = scnView.scene?.rootNode
-            .childNodes(passingTest: {
-                n,_ in n.name != nil && n.name! == "Wall0"
-            })[0]
-        
-        print("root/Node -> \(scnView.scene!.rootNode.worldOrientation)")
-        var X: [Float] = [1000000.0, -1000000.0]
-        var Z: [Float] = [1000000.0, -1000000.0]
-        
-        let massCenter = SCNNode()
-        
-        scnView.scene?.rootNode
-            .childNodes(passingTest: {
-                n,_ in n.name != nil && n.name! != "Room" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp"
-            })
-            .forEach{
-                
-                let material = SCNMaterial()
-                material.diffuse.contents = ($0.name!.prefix(4) == "Door" || $0.name!.prefix(4) == "Open") ? UIColor.white : UIColor.black
-                material.lightingModel = .physicallyBased
-                $0.geometry?.materials = [material]
-                if ($0.worldPosition.x < X[0]) {X[0] = $0.worldPosition.x}
-                if ($0.worldPosition.x > X[1]) {X[1] = $0.worldPosition.x}
-                if ($0.worldPosition.z < Z[0]) {Z[0] = $0.worldPosition.z}
-                if ($0.worldPosition.z > Z[1]) {Z[1] = $0.worldPosition.z}
-                print("\(String(describing: $0.name)), \($0.worldPosition)")
-            }
-        massCenter.worldPosition = SCNVector3((X[0]+X[1])/2, 0, (Z[0]+Z[1])/2)
-        cameraNode.worldPosition = massCenter.worldPosition
-        cameraNode.worldPosition.y = 10
-        cameraNode.camera?.usesOrthographicProjection = true
-        cameraNode.camera?.orthographicScale = 20
-        cameraNode.rotation.y = wall!.rotation.y
-        cameraNode.rotation.w = wall!.rotation.w
-        // Create directional light
-        let directionalLight = SCNNode()
-        directionalLight.light = SCNLight()
-        directionalLight.light!.type = .ambient
-        directionalLight.light!.color = UIColor(white: 1.0, alpha: 1.0)
-        cameraNode.addChildNode(directionalLight)
-        
-        scnView.pointOfView = cameraNode
-        
-        scnView.scene?.rootNode.addChildNode(massCenter)
-        
-        let vConstraint = SCNLookAtConstraint(target: massCenter)
-        cameraNode.constraints = [vConstraint]
-        directionalLight.constraints = [vConstraint]
-        
-    }
-    
     func changeColorOfNode(nodeName: String, color: UIColor) {
-        print("Change Color of Node: \(nodeName)")
         drawSceneObjects(borders: false)
         if let _node = scnView.scene?.rootNode.childNodes(passingTest: { n,_ in n.name != nil && n.name! == nodeName }).first {
             let copy = _node.copy() as! SCNNode
@@ -362,14 +211,12 @@ struct SCNViewContainer: UIViewRepresentable {
             for node in nodes {
                 node.removeFromParentNode()
             }
-            print("All nodes with prefix '__selected__' have been removed.")
         } else {
             print("No nodes with prefix '__selected__' found.")
         }
     }
     
     func makeUIView(context: Context) -> SCNView {
-        print("Creazione di SCNView e aggiunta dei riconoscitori di gesti")
         
         handler.scnView = scnView
         
@@ -424,12 +271,3 @@ struct SCNViewContainer: UIViewRepresentable {
         }
     }
 }
-
-@available(iOS 17.0, *)
-struct SCNViewContainer_Previews: PreviewProvider {
-    static var previews: some View {
-        SCNViewContainer()
-    }
-}
-
-

@@ -155,7 +155,6 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
         do {
             try FileManager.default.createDirectory(at: roomURL, withIntermediateDirectories: true, attributes: nil)
             room.roomURL = roomURL
-            print("Folder created at: \(roomURL.path)")
             
             // Creare le cartelle all'interno della directory della stanza
             let subdirectories = ["JsonMaps", "JsonParametric", "Maps", "MapUsdz", "PlistMetadata", "ReferenceMarker", "TransitionZone"]
@@ -163,7 +162,6 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
             for subdirectory in subdirectories {
                 let subdirectoryURL = roomURL.appendingPathComponent(subdirectory)
                 try FileManager.default.createDirectory(at: subdirectoryURL, withIntermediateDirectories: true, attributes: nil)
-                print("Subdirectory created at: \(subdirectoryURL.path)")
             }
             
         } catch {
@@ -180,7 +178,6 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
         do {
             if FileManager.default.fileExists(atPath: roomURL.path()) {
                 try FileManager.default.removeItem(at: roomURL)
-                print("Room \(room.name) eliminata con successo da \(roomURL.path).")
             } else {
                 print("La cartella della room \(room.name) non esiste in \(roomURL.path()).")
             }
@@ -321,16 +318,15 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
         let directories = ["PlistMetadata", "MapUsdz", "JsonParametric", "Maps", "JsonMaps"]
         
         let roomDirectoryURL = room.roomURL
-        print("RoomDirectoryURL: \(roomDirectoryURL)\n")
         
         // Ottieni il vecchio nome della stanza
         let oldRoomName = room.name
         
         for directory in directories {
             let directoryURL = roomDirectoryURL.appendingPathComponent(directory)
-            print("directoryURL: \(directoryURL)\n")
             // Verifica se la directory esiste
-            guard fileManager.fileExists(atPath: directoryURL.path) else {
+            guard fileManager.fileExists(atPath: directoryURL.path)
+            else {
                 print("La directory \(directory) non esiste per la stanza \(room.name).")
                 continue
             }
@@ -344,7 +340,6 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
                 if fileNameWithoutExtension == oldRoomName {
                     do {
                         try fileManager.removeItem(at: fileURL)
-                        print("File con vecchio nome \(fileURL.lastPathComponent) eliminato nella directory \(directory).")
                     } catch {
                         throw NSError(domain: "com.example.ScanBuild", code: 6, userInfo: [NSLocalizedDescriptionKey: "Errore durante l'eliminazione del file \(fileURL.lastPathComponent) in \(directory): \(error.localizedDescription)"])
                     }
@@ -364,7 +359,7 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
                 if fileManager.fileExists(atPath: newFileURL.path) {
                     do {
                         try fileManager.removeItem(at: newFileURL)
-                        print("File esistente con il nuovo nome \(newFileURL.lastPathComponent) eliminato nella directory \(directory).")
+                        
                     } catch {
                         throw NSError(domain: "com.example.ScanBuild", code: 6, userInfo: [NSLocalizedDescriptionKey: "Errore durante l'eliminazione del file esistente \(newFileURL.lastPathComponent) in \(directory): \(error.localizedDescription)"])
                     }
@@ -372,7 +367,7 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
                 
                 do {
                     try fileManager.moveItem(at: oldFileURL, to: newFileURL)
-                    print("File rinominato a \(newFileName) nella directory \(directory).")
+                    
                 } catch {
                     throw NSError(domain: "com.example.ScanBuild", code: 6, userInfo: [NSLocalizedDescriptionKey: "Errore durante la rinomina del file \(oldFileURL.lastPathComponent) in \(directory): \(error.localizedDescription)"])
                 }
@@ -403,8 +398,6 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
                 
                 self._associationMatrix[key] = rotoTranslationMatrix
             }
-            
-            print("Association matrix loaded successfully from JSON file")
             
         } catch {
             print("Error loading JSON data: \(error)")
@@ -440,8 +433,6 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
             
             // Scrivi i dati JSON nel file
             try jsonData.write(to: fileURL)
-            
-            print("Association matrix saved successfully to JSON file")
             
         } catch {
             print("Error saving association matrix to JSON: \(error)")
@@ -482,8 +473,6 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
             
             // Scrivi i dati JSON nel file
             try jsonData.write(to: fileURL)
-            
-            print("Updated association matrix for room \(roomName) in JSON file")
             
         } catch {
             print("Error updating association matrix in JSON: \(error)")

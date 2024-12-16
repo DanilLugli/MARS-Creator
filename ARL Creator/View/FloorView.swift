@@ -385,9 +385,9 @@ struct FloorView: View {
     
     var filteredRooms: [Room] {
         if searchText.isEmpty {
-            print("PRINT DEBUG ROOM")
+            
             floor.rooms.forEach { room in
-                room.debugPrintRoom()
+                //room.debugPrintRoom()
             }
             return floor.rooms
         } else {

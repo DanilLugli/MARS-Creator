@@ -10,6 +10,8 @@ class SCNViewModel: ObservableObject, MoveDimensionObject{
     @Published var scnView = SCNView(frame: .zero)
     @Published var lastAddedBoxNode: SCNNode? = nil
     var cameraNode = SCNNode()
+    var massCenter: SCNNode = SCNNode()
+
     
     init() {
         setupScene()
@@ -17,7 +19,7 @@ class SCNViewModel: ObservableObject, MoveDimensionObject{
     
     private func setupScene() {
         scnView.scene = SCNScene()
-        setCamera()
+        self.massCenter.worldPosition = SCNVector3(0, 0, 0)
     }
     
     func removeLastBox() {
@@ -28,19 +30,7 @@ class SCNViewModel: ObservableObject, MoveDimensionObject{
             print("No SCNBox to remove.")
         }
     }
-    
-    func setCamera() {
-        scnView.scene?.rootNode.addChildNode(cameraNode)
-        
-        cameraNode.camera = SCNCamera()
-        cameraNode.worldPosition = SCNVector3(0, 10, 0)
-        cameraNode.camera?.usesOrthographicProjection = true
-        cameraNode.camera?.orthographicScale = 10
-        cameraNode.eulerAngles = SCNVector3(-Double.pi / 2, 0, 0)
-        
-        scnView.pointOfView = cameraNode
-    }
-    
+
     func drawContent(borders: Bool) {
         scnView.scene?
             .rootNode
@@ -78,43 +68,17 @@ class SCNViewModel: ObservableObject, MoveDimensionObject{
             }
     }
     
-    func setMassCenter() {
-        var massCenter = SCNNode()
-        massCenter.worldPosition = SCNVector3(0, 0, 0)
-        if let nodes = scnView.scene?.rootNode
-            .childNodes(passingTest: {
-                n,_ in n.name != nil && n.name! != "Room" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp"
-            }) {
-            massCenter = findMassCenter(nodes)
-        }
-        scnView.scene?.rootNode.addChildNode(massCenter)
-    }
-    
     func loadRoomMaps(room: Room, borders: Bool, usdzURL: URL) {
         do {
             scnView.scene = try SCNScene(url: usdzURL)
             drawContent(borders: borders)
-            setMassCenter()
-            setCamera()
+            setMassCenter(scnView: self.scnView)
+            setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: self.massCenter)
         } catch {
             print("Error loading scene from URL: \(error)")
         }
     }
-    
-    func findMassCenter(_ nodes: [SCNNode]) -> SCNNode {
-        let massCenter = SCNNode()
-        var X: [Float] = [Float.greatestFiniteMagnitude, -Float.greatestFiniteMagnitude]
-        var Z: [Float] = [Float.greatestFiniteMagnitude, -Float.greatestFiniteMagnitude]
-        for n in nodes{
-            if (n.worldPosition.x < X[0]) {X[0] = n.worldPosition.x}
-            if (n.worldPosition.x > X[1]) {X[1] = n.worldPosition.x}
-            if (n.worldPosition.z < Z[0]) {Z[0] = n.worldPosition.z}
-            if (n.worldPosition.z > Z[1]) {Z[1] = n.worldPosition.z}
-        }
-        massCenter.worldPosition = SCNVector3((X[0]+X[1])/2, 0, (Z[0]+Z[1])/2)
-        return massCenter
-    }
-    
+
     func addBox(at position: SCNVector3) {
         if lastAddedBoxNode != nil {
             print("A box has already been added. Remove it before adding a new one.")

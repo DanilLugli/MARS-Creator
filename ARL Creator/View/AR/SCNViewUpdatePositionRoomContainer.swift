@@ -35,83 +35,94 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
     
     @MainActor
     func loadRoomMapsPosition(floor: Floor, room: Room, borders: Bool) {
-        do {
-            self.floor = floor
-            
-            self.roomName = room.name
-            let floorFileURL = floor.floorURL.appendingPathComponent("MapUsdz")
-                .appendingPathComponent("\(floor.name).usdz")
-            scnView.scene = floor.scene
-            
-            
-            self.rotoTraslation = floor.associationMatrix[room.name] ?? RotoTraslationMatrix(
-                name: "",
-                translation: floor.associationMatrix[room.name]?.translation ?? matrix_identity_float4x4,
-                
-                r_Y: floor.associationMatrix[room.name]?.r_Y ?? matrix_identity_float4x4
-            )
-            
-            let roomScene = room.scene
-            
-            func createSceneNode(from scene: SCNScene) -> SCNNode {
-                // Crea un nodo contenitore
-                let containerNode = SCNNode()
-                containerNode.name = "SceneContainer"
-                
-                // Cerca il nodo `Floor0`
-                if let floorNode = scene.rootNode.childNode(withName: "Floor0", recursively: true) {
-                    floorNode.name = "Floor0"
-                    let material = SCNMaterial()
-                    material.diffuse.contents = UIColor.green.withAlphaComponent(0.6)
-                    floorNode.geometry?.materials = [material]
-                    containerNode.addChildNode(floorNode)
-                } else {
-                    print("Node 'Floor0' not found in the provided scene.")
-                }
-                
-                let sphereNode = SCNNode()
-                sphereNode.name = "SceneCenterMarker"
-                sphereNode.position = SCNVector3(0, 0, 0)
-                
-                let sphereGeometry = SCNSphere(radius: 0.1) // Raggio piccolo per rappresentare il punto
-                let sphereMaterial = SCNMaterial()
-                sphereMaterial.emission.contents = UIColor.orange // Colore fluorescente
-                sphereMaterial.diffuse.contents = UIColor.orange
-                sphereGeometry.materials = [sphereMaterial]
-                sphereNode.geometry = sphereGeometry
-                containerNode.addChildNode(sphereNode)
-                
-                if let markerNode = containerNode.childNode(withName: "SceneCenterMarker", recursively: true) {
-                    let localMarkerPosition = markerNode.position // Posizione locale del puntino
-                    containerNode.pivot = SCNMatrix4MakeTranslation(localMarkerPosition.x, localMarkerPosition.y, localMarkerPosition.z)
-                    print("Pivot impostato su SceneCenterMarker")
-                } else {
-                    print("SceneCenterMarker non trovato, pivot non modificato.")
-                }
-                
-                return containerNode
-            }
-            
-            var roomNode = createSceneNode(from: roomScene!)
-            roomNode.name = room.name
-            
-            roomNode.simdWorldPosition = simd_float3(0,0,0)
-            
-            if let rotoTraslationMatrix = floor.associationMatrix[room.name] {
-                applyRotoTraslation(to: roomNode, with: rotoTraslationMatrix)
+        for room in floor.rooms{
+            if let nodeToRemove = scnView.scene?.rootNode.childNode(withName: room.name, recursively: true) {
+                nodeToRemove.removeFromParentNode()
+                print("Pipi")
             } else {
-                print("No RotoTraslationMatrix found for room: \(room.name)")
+                print("Nodo con il nome non trovato nella scena.")
             }
-            
-            scnView.scene?.rootNode.addChildNode(roomNode)
-            self.roomNode = roomNode
-        } catch {
+        }
+        
+        self.floor = floor
+        
+        self.roomName = room.name
+        let floorFileURL = floor.floorURL.appendingPathComponent("MapUsdz")
+            .appendingPathComponent("\(floor.name).usdz")
+        
+        do{
+            scnView.scene = try SCNScene(url: floorFileURL)
+        }
+        catch{
             print("Error loading scene from URL: \(error)")
         }
         
+        
+        self.rotoTraslation = floor.associationMatrix[room.name] ?? RotoTraslationMatrix(
+            name: "",
+            translation: floor.associationMatrix[room.name]?.translation ?? matrix_identity_float4x4,
+            
+            r_Y: floor.associationMatrix[room.name]?.r_Y ?? matrix_identity_float4x4
+        )
+        
+        let roomScene = room.scene
+        
+        func createSceneNode(from scene: SCNScene) -> SCNNode {
+            // Crea un nodo contenitore
+            let containerNode = SCNNode()
+            containerNode.name = "SceneContainer"
+            
+            // Cerca il nodo `Floor0`
+            if let floorNode = scene.rootNode.childNode(withName: "Floor0", recursively: true) {
+                floorNode.name = "Floor0"
+                let material = SCNMaterial()
+                material.diffuse.contents = UIColor.green.withAlphaComponent(0.2)
+                floorNode.geometry?.materials = [material]
+                containerNode.addChildNode(floorNode)
+            } else {
+                print("Node 'Floor0' not found in the provided scene.")
+            }
+            
+            let sphereNode = SCNNode()
+            sphereNode.name = "SceneCenterMarker"
+            sphereNode.position = SCNVector3(0, 0, 0)
+            
+            let sphereGeometry = SCNSphere(radius: 0.1) // Raggio piccolo per rappresentare il punto
+            let sphereMaterial = SCNMaterial()
+            sphereMaterial.emission.contents = UIColor.orange // Colore fluorescente
+            sphereMaterial.diffuse.contents = UIColor.orange
+            sphereGeometry.materials = [sphereMaterial]
+            sphereNode.geometry = sphereGeometry
+            containerNode.addChildNode(sphereNode)
+            
+            if let markerNode = containerNode.childNode(withName: "SceneCenterMarker", recursively: true) {
+                let localMarkerPosition = markerNode.position // Posizione locale del puntino
+                containerNode.pivot = SCNMatrix4MakeTranslation(localMarkerPosition.x, localMarkerPosition.y, localMarkerPosition.z)
+                print("Pivot impostato su SceneCenterMarker")
+            } else {
+                print("SceneCenterMarker non trovato, pivot non modificato.")
+            }
+            
+            return containerNode
+        }
+        
+        var roomNode = createSceneNode(from: roomScene!)
+        roomNode.name = room.name
+        
+        roomNode.simdWorldPosition = simd_float3(0,4,0)
+        
+        if let rotoTraslationMatrix = floor.associationMatrix[room.name] {
+            applyRotoTraslation(to: roomNode, with: rotoTraslationMatrix)
+        } else {
+            print("No RotoTraslationMatrix found for room: \(room.name)")
+        }
+        
+        scnView.scene?.rootNode.addChildNode(roomNode)
+        self.roomNode = roomNode
+        
         drawSceneObjects(borders: true)
-        setMassCenter()
-        setCamera()
+        setMassCenter(scnView: self.scnView)
+        setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: self.massCenter)
         
     }
     
@@ -202,24 +213,6 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         print("rotateCounterClockwise: \(String(describing: floor?.associationMatrix[roomName ?? ""]?.r_Y) )")
     }
     
-    func setCamera() {
-            scnView.scene?.rootNode.addChildNode(cameraNode)
-            cameraNode.camera = SCNCamera()
-            cameraNode.worldPosition = SCNVector3(massCenter.worldPosition.x, massCenter.worldPosition.y + 10, massCenter.worldPosition.z)
-            cameraNode.camera?.usesOrthographicProjection = true
-            cameraNode.camera?.orthographicScale = 10
-            cameraNode.eulerAngles = SCNVector3(-Double.pi / 2, 0, 0)
-            
-            let directionalLight = SCNNode()
-            directionalLight.light = SCNLight()
-            directionalLight.light!.type = .ambient
-            directionalLight.light!.color = UIColor(white: 1.0, alpha: 1.0)
-            cameraNode.addChildNode(directionalLight)
-            
-            scnView.pointOfView = cameraNode
-            cameraNode.constraints = []
-        }
-
     func handlePinch(_ gesture: UIPinchGestureRecognizer) {
         guard let camera = cameraNode.camera else { return }
         if gesture.state == .changed {
@@ -234,31 +227,6 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         cameraNode.position.x -= Float(translation.x) * 0.01 // Spostamento orizzontale
         cameraNode.position.z += Float(translation.y) * 0.01 // Spostamento verticale
         gesture.setTranslation(.zero, in: scnView)
-    }
-    
-    private func setMassCenter() {
-        var massCenter = SCNNode()
-        massCenter.worldPosition = SCNVector3(0, 0, 0)
-        if let nodes = scnView.scene?.rootNode.childNodes(passingTest: {
-            n, _ in n.name != nil && n.name! != "Room" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp"
-        }) {
-            massCenter = findMassCenter(nodes)
-        }
-        scnView.scene?.rootNode.addChildNode(massCenter)
-    }
-    
-    private func findMassCenter(_ nodes: [SCNNode]) -> SCNNode {
-        let massCenter = SCNNode()
-        var X: [Float] = [Float.greatestFiniteMagnitude, -Float.greatestFiniteMagnitude]
-        var Z: [Float] = [Float.greatestFiniteMagnitude, -Float.greatestFiniteMagnitude]
-        for n in nodes {
-            if n.worldPosition.x < X[0] { X[0] = n.worldPosition.x }
-            if n.worldPosition.x > X[1] { X[1] = n.worldPosition.x }
-            if n.worldPosition.z < Z[0] { Z[0] = n.worldPosition.z }
-            if n.worldPosition.z > Z[1] { Z[1] = n.worldPosition.z }
-        }
-        massCenter.worldPosition = SCNVector3((X[0] + X[1]) / 2, 0, (Z[0] + Z[1]) / 2)
-        return massCenter
     }
     
     func drawSceneObjects(borders: Bool) {

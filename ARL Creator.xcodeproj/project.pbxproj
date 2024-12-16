@@ -46,6 +46,7 @@
 		AA78F5EA2C33006F0044F825 /* BuildingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA78F5E92C33006F0044F825 /* BuildingModel.swift */; };
 		AA78F5ED2C3303910044F825 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA78F5EC2C3303910044F825 /* Logger.swift */; };
 		AA78F5F32C3430C80044F825 /* ServerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA78F5F22C3430C80044F825 /* ServerManager.swift */; };
+		AA8920DF2D0E042900280C41 /* ManageSceneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA8920DE2D0E042100280C41 /* ManageSceneView.swift */; };
 		AA8E0A572C52BA6C0097BDCD /* ARSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA8E0A562C52BA6C0097BDCD /* ARSessionManager.swift */; };
 		AA8E0A5B2C52C69D0097BDCD /* NamedURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA8E0A5A2C52C69D0097BDCD /* NamedURL.swift */; };
 		AA8E0A5E2C57E4B20097BDCD /* ComplexModule in Frameworks */ = {isa = PBXBuildFile; productRef = AA8E0A5D2C57E4B20097BDCD /* ComplexModule */; };
@@ -116,6 +117,7 @@
 		AA78F5E92C33006F0044F825 /* BuildingModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingModel.swift; sourceTree = "<group>"; };
 		AA78F5EC2C3303910044F825 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		AA78F5F22C3430C80044F825 /* ServerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerManager.swift; sourceTree = "<group>"; };
+		AA8920DE2D0E042100280C41 /* ManageSceneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManageSceneView.swift; sourceTree = "<group>"; };
 		AA8E0A562C52BA6C0097BDCD /* ARSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARSessionManager.swift; sourceTree = "<group>"; };
 		AA8E0A5A2C52C69D0097BDCD /* NamedURL.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NamedURL.swift; sourceTree = "<group>"; };
 		AA8E0A632C57E50F0097BDCD /* VisualizeRoomViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualizeRoomViewContainer.swift; sourceTree = "<group>"; };
@@ -163,6 +165,7 @@
 		AA2CA54F2C3DB5C600C88C94 /* AR */ = {
 			isa = PBXGroup;
 			children = (
+				AA8920DE2D0E042100280C41 /* ManageSceneView.swift */,
 				AA8E0A562C52BA6C0097BDCD /* ARSessionManager.swift */,
 				AA2CA5502C3DB5F400C88C94 /* CaptureViewContainer.swift */,
 				AA2CA5542C3DB61100C88C94 /* ExportRoomViewContainer.swift */,
@@ -392,6 +395,7 @@
 			files = (
 				AA78F5D22C2C69E90044F825 /* Building.swift in Sources */,
 				AA2CA54C2C3D7ABA00C88C94 /* ContentView.swift in Sources */,
+				AA8920DF2D0E042900280C41 /* ManageSceneView.swift in Sources */,
 				AA8E0A682C59480D0097BDCD /* MarkerCardView.swift in Sources */,
 				AA2CA5552C3DB61100C88C94 /* ExportRoomViewContainer.swift in Sources */,
 				AA3A24F52C62942300E162A3 /* ListConnectionCardView.swift in Sources */,

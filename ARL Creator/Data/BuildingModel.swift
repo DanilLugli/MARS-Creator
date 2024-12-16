@@ -94,7 +94,6 @@ class BuildingModel: ObservableObject {
         
         do {
             try fileManager.createDirectory(at: BuildingModel.SCANBUILD_ROOT, withIntermediateDirectories: true, attributes: nil)
-            print("Cartella root creata: \(BuildingModel.SCANBUILD_ROOT.path)")
         } catch {
             throw NSError(domain: "com.example.ScanBuild", code: 1, userInfo: [NSLocalizedDescriptionKey: "Errore durante la creazione della cartella root: \(error)"])
         }
@@ -369,33 +368,6 @@ class BuildingModel: ObservableObject {
             throw NSError(domain: "com.example.ScanBuild", code: 4, userInfo: [NSLocalizedDescriptionKey: "Errore durante la rinomina della cartella del building: \(error.localizedDescription)"])
         }
 
-//        for floor in building.floors {
-//            floor.floorURL = newBuildingURL.appendingPathComponent(floor.name)
-//            
-////            if fileManager.fileExists(atPath: floor.floorURL.path) {
-////                print("Floor directory exists at: \(floor.floorURL.path)")
-////            } else {
-////                print("Floor directory does not exist at: \(floor.floorURL.path)")
-////            }
-//
-//            for room in floor.rooms {
-//                room.roomURL = floor.floorURL.appendingPathComponent("Rooms").appendingPathComponent(room.name)
-//
-////                if fileManager.fileExists(atPath: room.roomURL.path) {
-////                    print("Room directory exists at: \(room.roomURL.path)")
-////                } else {
-////                    print("Room directory does not exist at: \(room.roomURL.path)")
-////                }
-//
-//                let mapUsdzURL = room.roomURL.appendingPathComponent("MapUsdz")
-////                if fileManager.fileExists(atPath: mapUsdzURL.path) {
-////                    print("MapUsdz file found at: \(mapUsdzURL.path)")
-////                } else {
-////                    print("MapUsdz file not found at: \(mapUsdzURL.path)")
-////                }
-//            }
-//        }
-
         BuildingModel.LOGGER.log("Building rinominato da \(building.name) a \(newName)")
     }
     
@@ -407,7 +379,6 @@ class BuildingModel: ObservableObject {
 
         do {
             try FileManager.default.removeItem(at: buildingURL)
-            print("Folder deleted at: \(buildingURL.path)")
         } catch {
             print("Error deleting folder for building \(building.name): \(error.localizedDescription)")
         }

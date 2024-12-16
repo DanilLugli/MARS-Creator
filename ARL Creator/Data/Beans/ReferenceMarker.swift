@@ -103,7 +103,6 @@ class ReferenceMarker: ObservableObject, Codable, Identifiable {
             
             do {
                 try fileManager.moveItem(at: fileWithExtension, to: newFileURL)
-                print("File rinominato da \(fileWithExtension.lastPathComponent) a \(newFileURL.lastPathComponent)")
             } catch {
                 print("Errore nel rinominare il file: \(error)")
             }
@@ -127,12 +126,8 @@ class ReferenceMarker: ObservableObject, Codable, Identifiable {
             markersData.removeValue(forKey: oldName)
             markersData[newName] = MarkerData(name: newName, width: markerData.width)
             
-            print("Dati aggiornati per \(newName) nel JSON.")
         } else {
-            
             markersData[newName] = MarkerData(name: newName, width: newWidth)
-            
-            print("Dati aggiunti per \(newName) nel JSON poiché \(oldName) non era presente.")
         }
         
         do {
@@ -140,7 +135,6 @@ class ReferenceMarker: ObservableObject, Codable, Identifiable {
             encoder.outputFormatting = .prettyPrinted
             let data = try encoder.encode(markersData)
             try data.write(to: fileURL)
-            print("Dati salvati correttamente nel file JSON.")
         } catch {
             print("Errore nel salvataggio del file JSON: \(error)")
         }

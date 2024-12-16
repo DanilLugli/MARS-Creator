@@ -42,7 +42,6 @@ struct ManualRoomPositionView: View {
                 }.padding(26)
                 
             }.onAppear {
-                
                     mapPositionView.handler.loadRoomMapsPosition(
                         floor: floor,
                         room: room,

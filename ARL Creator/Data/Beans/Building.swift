@@ -90,7 +90,6 @@ class Building: Encodable, ObservableObject, Hashable {
         do {
             try FileManager.default.createDirectory(at: floorURL, withIntermediateDirectories: true, attributes: nil)
             floor.floorURL = floorURL
-            print("Folder created at: \(floorURL.path)")
             
             // Creare le cartelle aggiuntive all'interno della directory del piano
             let dataDirectory = floorURL//.appendingPathComponent(BuildingModel.FLOOR_DATA_FOLDER)
@@ -98,25 +97,16 @@ class Building: Encodable, ObservableObject, Hashable {
             
             try FileManager.default.createDirectory(at: dataDirectory, withIntermediateDirectories: true, attributes: nil)
             try FileManager.default.createDirectory(at: roomsDirectory, withIntermediateDirectories: true, attributes: nil)
-            
-            print("Data directory created at: \(dataDirectory.path)")
-            print("Rooms directory created at: \(roomsDirectory.path)")
+           
             
             // Creare le cartelle aggiuntive all'interno della directory Data
             let jsonParametricDirectory = dataDirectory.appendingPathComponent("JsonParametric")
-            print("PINO \(jsonParametricDirectory)")
             let mapUsdzDirectory = dataDirectory.appendingPathComponent("MapUsdz")
             let plistMetadataDirectory = dataDirectory.appendingPathComponent("PlistMetadata")
             
             try FileManager.default.createDirectory(at: jsonParametricDirectory, withIntermediateDirectories: true, attributes: nil)
             try FileManager.default.createDirectory(at: mapUsdzDirectory, withIntermediateDirectories: true, attributes: nil)
             try FileManager.default.createDirectory(at: plistMetadataDirectory, withIntermediateDirectories: true, attributes: nil)
-            
-            print("JsonParametric directory created at: \(jsonParametricDirectory.path)")
-            print("MapUsdz directory created at: \(mapUsdzDirectory.path)")
-            print("PlistMetadata directory created at: \(plistMetadataDirectory.path)")
-            
-           
             
         } catch {
             print("Error creating folder for floor \(floor.name): \(error)")
@@ -134,7 +124,7 @@ class Building: Encodable, ObservableObject, Hashable {
         do {
             if FileManager.default.fileExists(atPath: floorURL.path) {
                 try FileManager.default.removeItem(at: floorURL)
-                print("Floor \(floor.name) eliminato con successo da \(floorURL.path).")
+                
             } else {
                 print("La cartella del floor \(floor.name) non esiste.")
             }
@@ -149,7 +139,6 @@ class Building: Encodable, ObservableObject, Hashable {
         let floorURL = buildingURL.appendingPathComponent(name)
         do {
             try FileManager.default.removeItem(at: floorURL)
-            print("Folder deleted at: \(floorURL.path)")
         } catch {
             print("Error deleting folder for floor \(name): \(error)")
         }
@@ -176,9 +165,7 @@ class Building: Encodable, ObservableObject, Hashable {
         floor.floorURL = newFloorURL
         
         for room in floor.rooms {
-            print("OLD: \(room.roomURL) ")
             room.roomURL = floor.floorURL.appendingPathComponent(BuildingModel.FLOOR_ROOMS_FOLDER).appendingPathComponent("\(room.name)")
-            print("NEW: \(room.roomURL) ")
         }
         
         DispatchQueue.main.async {
@@ -217,7 +204,7 @@ class Building: Encodable, ObservableObject, Hashable {
             
             do {
                 try fileManager.moveItem(at: oldFileURL, to: newFileURL)
-                print("File .json rinominato da \(oldFileName) a \(newFileName) nella cartella principale del floor.")
+                
             } catch {
                 throw NSError(domain: "com.example.ScanBuild", code: 7, userInfo: [NSLocalizedDescriptionKey: "Errore durante la rinomina del file .json \(oldFileName): \(error.localizedDescription)"])
             }
@@ -229,7 +216,7 @@ class Building: Encodable, ObservableObject, Hashable {
             
             // Verifica se la directory esiste
             guard fileManager.fileExists(atPath: directoryURL.path) else {
-                print("La directory \(directory) non esiste per il floor \(floor.name).")
+                
                 continue
             }
 
@@ -245,7 +232,7 @@ class Building: Encodable, ObservableObject, Hashable {
                 
                 do {
                     try fileManager.moveItem(at: oldFileURL, to: newFileURL)
-                    print("File rinominato da \(oldFileName) a \(newFileName) nella directory \(directory).")
+                    
                 } catch {
                     throw NSError(domain: "com.example.ScanBuild", code: 6, userInfo: [NSLocalizedDescriptionKey: "Errore durante la rinomina del file \(oldFileName) in \(directory): \(error.localizedDescription)"])
                 }
