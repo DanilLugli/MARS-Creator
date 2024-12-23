@@ -89,7 +89,7 @@ class SCNViewMapHandler: ObservableObject {
 
             }
             
-            drawSceneObjects(borders: borders)
+            drawSceneObjects(scnView: self.scnView, borders: borders)
             setMassCenter(scnView: self.scnView)
             setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: self.massCenter)
             
@@ -97,117 +97,63 @@ class SCNViewMapHandler: ObservableObject {
             print("Error loading scene from URL: \(error)")
         }
     }
-
-    func drawContent(borders: Bool) {
-        scnView.scene?
-            .rootNode
-            .childNodes(passingTest: {
-                n, _ in
-                n.name != nil &&
-                n.name! != "Room" &&
-                n.name! != "Geom" &&
-                !n.name!.hasPrefix("Floor") &&
-                String(n.name!.suffix(4)) != "_grp" &&
-                n.name! != "__selected__"
-            })
-            .forEach {
-                let material = SCNMaterial()
-                
-                if $0.name!.prefix(4) == "Door" || $0.name!.prefix(4) == "Open" {
-                    material.diffuse.contents = UIColor.white
-                } else {
-                    material.diffuse.contents = UIColor.black
-                }
-                material.lightingModel = .physicallyBased
-                $0.geometry?.materials = [material]
-                
-                if borders {
-                    $0.scale.x = $0.scale.x < 0.2 ? $0.scale.x + 0.1 : $0.scale.x
-                    $0.scale.z = $0.scale.z < 0.2 ? $0.scale.z + 0.1 : $0.scale.z
-                    $0.scale.y = ($0.name!.prefix(4) == "Wall") ? 0.1 : $0.scale.y
-                }
-            }
-        
-        scnView.scene?
-            .rootNode
-            .childNodes(passingTest: {
-                n, _ in n.name?.hasPrefix("Floor") ?? false
-            })
-            .forEach { node in
-                node.removeFromParentNode()
-            }
-    }
     
-    func drawSceneObjects(borders: Bool) {
-        
-        var drawnNodes = Set<String>()
-        
-        scnView.scene?
-            .rootNode
-            .childNodes(passingTest: { n, _ in
-                n.name != nil &&
-                n.name! != "Room" &&
-                n.name! != "Floor0" &&
-                n.name! != "Geom" &&
-                String(n.name!.suffix(4)) != "_grp" &&
-                n.name! != "__selected__"
-            })
-            .forEach {
-                let nodeName = $0.name
-                let material = SCNMaterial()
-                if nodeName == "Floor0" {
-                    material.diffuse.contents = UIColor.green
-                } else {
-                    material.diffuse.contents = UIColor.black
-                    if nodeName?.prefix(5) == "Floor" {
-                        material.diffuse.contents = UIColor.white.withAlphaComponent(0.2)
-                    }
-                    if nodeName!.prefix(6) == "Transi" {
-                        material.diffuse.contents = UIColor.white
-                    }
-                    if nodeName!.prefix(4) == "Door" {
-                        material.diffuse.contents = UIColor.white
-                    }
-                    if nodeName!.prefix(4) == "Open"{
-                        material.diffuse.contents = UIColor.systemGray5
-                    }
-                    if nodeName!.prefix(4) == "Tabl" {
-                        material.diffuse.contents = UIColor.brown
-                    }
-                    if nodeName!.prefix(4) == "Chai"{
-                        material.diffuse.contents = UIColor.brown.withAlphaComponent(0.4)
-                    }
-                    if nodeName!.prefix(4) == "Stor"{
-                        material.diffuse.contents = UIColor.systemGray
-                    }
-                    if nodeName!.prefix(4) == "Sofa"{
-                        material.diffuse.contents = UIColor(red: 0.0, green: 0.0, blue: 0.5, alpha: 0.6)
-                    }
-                    if nodeName!.prefix(4) == "Tele"{
-                        material.diffuse.contents = UIColor.orange
-                    }
-                    
-                    material.lightingModel = .physicallyBased
-                    $0.geometry?.materials = [material]
-                    
-                }
-                drawnNodes.insert(nodeName!)
-            }
-    }
-    
-    func changeColorOfNode(nodeName: String, color: UIColor) {
-        drawContent(borders: false)
-        if let _node = scnView.scene?.rootNode.childNodes(passingTest: { n,_ in n.name != nil && n.name! == nodeName }).first {
-            let copy = _node.copy() as! SCNNode
-            copy.name = "__selected__"
-            let material = SCNMaterial()
-            let transparentColor = color.withAlphaComponent(0.3)
-            material.diffuse.contents = transparentColor
-            material.lightingModel = .physicallyBased
-            copy.geometry?.materials = [material]
-            scnView.scene?.rootNode.addChildNode(copy)
-        }
-    }
+//    func drawSceneObjects(borders: Bool) {
+//
+//        var drawnNodes = Set<String>()
+//        
+//        scnView.scene?
+//            .rootNode
+//            .childNodes(passingTest: { n, _ in
+//                n.name != nil &&
+//                n.name! != "Room" &&
+//                n.name! != "Floor0" &&
+//                n.name! != "Geom" &&
+//                String(n.name!.suffix(4)) != "_grp" &&
+//                n.name! != "__selected__"
+//            })
+//            .forEach {
+//                let nodeName = $0.name
+//                let material = SCNMaterial()
+//                if nodeName == "Floor0" {
+//                    material.diffuse.contents = UIColor.green
+//                } else {
+//                    material.diffuse.contents = UIColor.black
+//                    if nodeName?.prefix(5) == "Floor" {
+//                        material.diffuse.contents = UIColor.white.withAlphaComponent(0.2)
+//                    }
+//                    if nodeName!.prefix(6) == "Transi" {
+//                        material.diffuse.contents = UIColor.white
+//                    }
+//                    if nodeName!.prefix(4) == "Door" {
+//                        material.diffuse.contents = UIColor.white
+//                    }
+//                    if nodeName!.prefix(4) == "Open"{
+//                        material.diffuse.contents = UIColor.systemGray5
+//                    }
+//                    if nodeName!.prefix(4) == "Tabl" {
+//                        material.diffuse.contents = UIColor.brown
+//                    }
+//                    if nodeName!.prefix(4) == "Chai"{
+//                        material.diffuse.contents = UIColor.brown.withAlphaComponent(0.4)
+//                    }
+//                    if nodeName!.prefix(4) == "Stor"{
+//                        material.diffuse.contents = UIColor.systemGray
+//                    }
+//                    if nodeName!.prefix(4) == "Sofa"{
+//                        material.diffuse.contents = UIColor(red: 0.0, green: 0.0, blue: 0.5, alpha: 0.6)
+//                    }
+//                    if nodeName!.prefix(4) == "Tele"{
+//                        material.diffuse.contents = UIColor.orange
+//                    }
+//                    
+//                    material.lightingModel = .physicallyBased
+//                    $0.geometry?.materials = [material]
+//                    
+//                }
+//                drawnNodes.insert(nodeName!)
+//            }
+//    }
     
     func zoomIn() { cameraNode.camera?.orthographicScale -= 0.5 }
     
@@ -247,20 +193,15 @@ class SCNViewMapHandler: ObservableObject {
     
     @MainActor
     func applyRotoTraslation(to node: SCNNode, with rotoTraslation: RotoTraslationMatrix) {
-        
-        let translationVector = simd_float3(
-            rotoTraslation.translation.columns.3.x,
-            rotoTraslation.translation.columns.3.y,
-            rotoTraslation.translation.columns.3.z
-        )
-        node.simdWorldPosition = node.simdWorldPosition + translationVector
-        
-        let rotationMatrix = rotoTraslation.r_Y
-        
-        let rotationQuaternion = simd_quatf(rotationMatrix)
-        
-        node.simdWorldOrientation = rotationQuaternion * node.simdWorldOrientation
-        
+        print("APPLY TO NODE: \(node.name ?? "Unnamed Node")")
+        print("Initial Transform:")
+        //printSimdFloat4x4(node.simdWorldTransform)
+
+        let combinedMatrix = rotoTraslation.translation * rotoTraslation.r_Y
+        node.simdWorldTransform = combinedMatrix * node.simdWorldTransform
+
+        print("Updated Transform:")
+        //printSimdFloat4x4(node.simdWorldTransform)
     }
 }
 

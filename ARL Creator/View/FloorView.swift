@@ -372,7 +372,7 @@ struct FloorView: View {
         let newRoom = Room(
             _name: newRoomName,
             _lastUpdate: Date(),
-            _planimetry: SCNViewContainer(),
+            _planimetry: nil,
             _referenceMarkers: [],
             _transitionZones: [],
             _sceneObjects: [],

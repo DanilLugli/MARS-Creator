@@ -28,9 +28,6 @@ struct RoomPlanimetryTabView: View {
                             .shadow(color: Color.gray, radius: 3)
                     }
                 }
-//                .onAppear {
-//                    room.planimetry.drawSceneObjects(floor: nil, borders: true)
-//                }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

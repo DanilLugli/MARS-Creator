@@ -68,11 +68,10 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         let roomScene = room.scene
         
         func createSceneNode(from scene: SCNScene) -> SCNNode {
-            // Crea un nodo contenitore
+
             let containerNode = SCNNode()
             containerNode.name = "SceneContainer"
             
-            // Cerca il nodo `Floor0`
             if let floorNode = scene.rootNode.childNode(withName: "Floor0", recursively: true) {
                 floorNode.name = "Floor0"
                 let material = SCNMaterial()
@@ -120,7 +119,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         scnView.scene?.rootNode.addChildNode(roomNode)
         self.roomNode = roomNode
         
-        drawSceneObjects(borders: true)
+        drawSceneObjects(scnView: self.scnView, borders: true)
         setMassCenter(scnView: self.scnView)
         setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: self.massCenter)
         
@@ -229,100 +228,95 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         gesture.setTranslation(.zero, in: scnView)
     }
     
-    func drawSceneObjects(borders: Bool) {
-        
-        var drawnNodes = Set<String>()
-        
-        scnView.scene?
-            .rootNode
-            .childNodes(passingTest: { n, _ in
-                n.name != nil &&
-                n.name! != "Room" &&
-                n.name! != "Floor0" &&
-                n.name! != "Geom" &&
-                String(n.name!.suffix(4)) != "_grp" &&
-                n.name! != "__selected__"
-            })
-            .forEach {
-                let nodeName = $0.name
-                let material = SCNMaterial()
-                if nodeName == "Floor0" {
-                    material.diffuse.contents = UIColor.green
-                } else {
-                    material.diffuse.contents = UIColor.black
-                    if nodeName?.prefix(5) == "Floor" {
-                        material.diffuse.contents = UIColor.white.withAlphaComponent(0.2)
-                    }
-                    if nodeName!.prefix(6) == "Transi" {
-                        material.diffuse.contents = UIColor.white
-                    }
-                    if nodeName!.prefix(4) == "Door" {
-                        material.diffuse.contents = UIColor.white
-                    }
-                    if nodeName!.prefix(4) == "Open"{
-                        material.diffuse.contents = UIColor.systemGray5
-                    }
-                    if nodeName!.prefix(4) == "Tabl" {
-                        material.diffuse.contents = UIColor.brown
-                    }
-                    if nodeName!.prefix(4) == "Chai"{
-                        material.diffuse.contents = UIColor.brown.withAlphaComponent(0.4)
-                    }
-                    if nodeName!.prefix(4) == "Stor"{
-                        material.diffuse.contents = UIColor.systemGray
-                    }
-                    if nodeName!.prefix(4) == "Sofa"{
-                        material.diffuse.contents = UIColor(red: 0.0, green: 0.0, blue: 0.5, alpha: 0.6)
-                    }
-                    if nodeName!.prefix(4) == "Tele"{
-                        material.diffuse.contents = UIColor.orange
-                    }
-                    material.lightingModel = .physicallyBased
-                    $0.geometry?.materials = [material]
-                    
-                    if borders {
-                        $0.scale.x = $0.scale.x < 0.2 ? $0.scale.x + 0.1 : $0.scale.x
-                        $0.scale.z = $0.scale.z < 0.2 ? $0.scale.z + 0.1 : $0.scale.z
-                        $0.scale.y = ($0.name!.prefix(4) == "Wall") ? 0.1 : $0.scale.y
-                    }
-                }
-                drawnNodes.insert(nodeName!)
-            }
-    }
+//    func drawSceneObjects(borders: Bool) {
+//
+//        var drawnNodes = Set<String>()
+//        
+//        scnView.scene?
+//            .rootNode
+//            .childNodes(passingTest: { n, _ in
+//                n.name != nil &&
+//                n.name! != "Room" &&
+//                n.name! != "Floor0" &&
+//                n.name! != "Geom" &&
+//                String(n.name!.suffix(4)) != "_grp" &&
+//                n.name! != "__selected__"
+//            })
+//            .forEach {
+//                let nodeName = $0.name
+//                let material = SCNMaterial()
+//                if nodeName == "Floor0" {
+//                    material.diffuse.contents = UIColor.green
+//                } else {
+//                    material.diffuse.contents = UIColor.black
+//                    if nodeName?.prefix(5) == "Floor" {
+//                        material.diffuse.contents = UIColor.white.withAlphaComponent(0.2)
+//                    }
+//                    if nodeName!.prefix(6) == "Transi" {
+//                        material.diffuse.contents = UIColor.white
+//                    }
+//                    if nodeName!.prefix(4) == "Door" {
+//                        material.diffuse.contents = UIColor.white
+//                    }
+//                    if nodeName!.prefix(4) == "Open"{
+//                        material.diffuse.contents = UIColor.systemGray5
+//                    }
+//                    if nodeName!.prefix(4) == "Tabl" {
+//                        material.diffuse.contents = UIColor.brown
+//                    }
+//                    if nodeName!.prefix(4) == "Chai"{
+//                        material.diffuse.contents = UIColor.brown.withAlphaComponent(0.4)
+//                    }
+//                    if nodeName!.prefix(4) == "Stor"{
+//                        material.diffuse.contents = UIColor.systemGray
+//                    }
+//                    if nodeName!.prefix(4) == "Sofa"{
+//                        material.diffuse.contents = UIColor(red: 0.0, green: 0.0, blue: 0.5, alpha: 0.6)
+//                    }
+//                    if nodeName!.prefix(4) == "Tele"{
+//                        material.diffuse.contents = UIColor.orange
+//                    }
+//                    material.lightingModel = .physicallyBased
+//                    $0.geometry?.materials = [material]
+//                    
+//                    if borders {
+//                        $0.scale.x = $0.scale.x < 0.2 ? $0.scale.x + 0.1 : $0.scale.x
+//                        $0.scale.z = $0.scale.z < 0.2 ? $0.scale.z + 0.1 : $0.scale.z
+//                        $0.scale.y = ($0.name!.prefix(4) == "Wall") ? 0.1 : $0.scale.y
+//                    }
+//                }
+//                drawnNodes.insert(nodeName!)
+//            }
+//    }
     
-    private func drawContent(borders: Bool) {
-        scnView.scene?
-            .rootNode
-            .childNodes(passingTest: {
-                n,_ in n.name != nil && n.name! != "Room" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp" && n.name! != "__selected__"
-            })
-            .forEach{
-                let material = SCNMaterial()
-                material.diffuse.contents = UIColor.black
-                if ($0.name!.prefix(5) == "Floor") { material.diffuse.contents = UIColor.white.withAlphaComponent(0.2) }
-                if ($0.name!.prefix(4) == "Door" || $0.name!.prefix(4) == "Open") { material.diffuse.contents = UIColor.white }
-                material.lightingModel = .physicallyBased
-                $0.geometry?.materials = [material]
-                
-            }
-    }
+//    private func drawContent(borders: Bool) {
+//        scnView.scene?
+//            .rootNode
+//            .childNodes(passingTest: {
+//                n,_ in n.name != nil && n.name! != "Room" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp" && n.name! != "__selected__"
+//            })
+//            .forEach{
+//                let material = SCNMaterial()
+//                material.diffuse.contents = UIColor.black
+//                if ($0.name!.prefix(5) == "Floor") { material.diffuse.contents = UIColor.white.withAlphaComponent(0.2) }
+//                if ($0.name!.prefix(4) == "Door" || $0.name!.prefix(4) == "Open") { material.diffuse.contents = UIColor.white }
+//                material.lightingModel = .physicallyBased
+//                $0.geometry?.materials = [material]
+//                
+//            }
+//    }
     
     @MainActor
     func applyRotoTraslation(to node: SCNNode, with rotoTraslation: RotoTraslationMatrix) {
-        
-        let translationVector = simd_float3(
-            rotoTraslation.translation.columns.3.x,
-            rotoTraslation.translation.columns.3.y,
-            rotoTraslation.translation.columns.3.z
-        )
-        node.simdPosition = node.simdPosition + translationVector
-        
-        let rotationMatrix = rotoTraslation.r_Y
-        
-        let rotationQuaternion = simd_quatf(rotationMatrix)
-        
-        node.simdOrientation = rotationQuaternion * node.simdOrientation
-        
+        print("APPLY TO NODE: \(node.name ?? "Unnamed Node")")
+        print("Initial Transform:")
+        //printSimdFloat4x4(node.simdWorldTransform)
+
+        let combinedMatrix = rotoTraslation.translation * rotoTraslation.r_Y
+        node.simdWorldTransform = combinedMatrix * node.simdWorldTransform
+
+        print("Updated Transform:")
+        //printSimdFloat4x4(node.simdWorldTransform)
     }
 }
 

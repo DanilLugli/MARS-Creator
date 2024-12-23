@@ -171,18 +171,25 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
     
     func deleteRoom(room: Room) {
         
+        // 1. Rimuove la stanza dalla memoria
         _rooms.removeAll { $0.id == room.id }
         
-        let roomURL = floorURL.appendingPathComponent("Rooms")
+        // 2. Costruisce il percorso della cartella della stanza da eliminare
+        let roomURL = floorURL
+            .appendingPathComponent("Rooms")         // Directory "Rooms"
+            .appendingPathComponent(room.name)      // Sottocartella con nome stanza
         
         do {
-            if FileManager.default.fileExists(atPath: roomURL.path()) {
-                try FileManager.default.removeItem(at: roomURL)
+            // 3. Controlla se la cartella esiste e la elimina
+            if FileManager.default.fileExists(atPath: roomURL.path) {
+                try FileManager.default.removeItem(at: roomURL) // Elimina la cartella
+                print("Cartella \(room.name) eliminata con successo.")
             } else {
-                print("La cartella della room \(room.name) non esiste in \(roomURL.path()).")
+                print("La cartella della stanza \(room.name) non esiste in \(roomURL.path).")
             }
         } catch {
-            print("Errore durante l'eliminazione della room \(room.name): \(error)")
+            // 4. Gestisce eventuali errori
+            print("Errore durante l'eliminazione della stanza \(room.name): \(error)")
         }
     }
    
@@ -222,20 +229,15 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
         ///   - baseTransform: (Opzionale) Una matrice di trasformazione base. Default: utilizza la trasformazione attuale del nodo.
         @MainActor
         func applyRotoTraslation(to node: SCNNode, with rotoTraslation: RotoTraslationMatrix) {
-            
-            let translationVector = simd_float3(
-                rotoTraslation.translation.columns.3.x,
-                rotoTraslation.translation.columns.3.y,
-                rotoTraslation.translation.columns.3.z
-            )
-            node.simdPosition = node.simdPosition + translationVector
-            
-            let rotationMatrix = rotoTraslation.r_Y
-            
-            let rotationQuaternion = simd_quatf(rotationMatrix)
-            
-            node.simdOrientation = rotationQuaternion * node.simdOrientation
-            
+            print("APPLY TO NODE: \(node.name ?? "Unnamed Node")")
+            print("Initial Transform:")
+            //printSimdFloat4x4(node.simdWorldTransform)
+
+            let combinedMatrix = rotoTraslation.translation * rotoTraslation.r_Y
+            node.simdWorldTransform = combinedMatrix * node.simdWorldTransform
+
+            print("Updated Transform:")
+            //printSimdFloat4x4(node.simdWorldTransform)
         }
     }
 

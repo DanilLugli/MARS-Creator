@@ -145,8 +145,8 @@ struct AutomaticRoomPositionView: View {
                             selectedRoomNode = nil
                             selectedFloorNode = nil
 
-                            floor.planimetry.drawSceneObjects(borders: true)
-                            room.planimetry.drawSceneObjects(borders: true)
+//                            floor.planimetry.drawSceneObjects(borders: true)
+//                            room.planimetry.drawSceneObjects(borders: true)
 
                             print(_selectedLocalNode)
                             print(_selectedGlobalNode)

@@ -42,7 +42,7 @@ struct FloorScanningView: View {
                                 messagesFromWorldMap: messagesFromWorldMap,
                                 newFeatures: namedUrl is Room ? worldMapNewFeatures : nil,
                                 onSave: {
-                                    isScanningRoom = false
+                                    isScanningRoom = true
                                     _ = mapName.isEmpty ? "Map_\(Date().timeIntervalSince1970)" : mapName
                                     captureView?.stopCapture()
                                 }

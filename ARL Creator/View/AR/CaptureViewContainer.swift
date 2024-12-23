@@ -8,13 +8,13 @@ struct CaptureViewContainer: UIViewRepresentable {
     
     var arSession = ARSession()
     var sessionDelegate: SessionDelegate
-    let configuration: RoomCaptureSession.Configuration
+    let configuration: RoomCaptureSession.Configuration = RoomCaptureSession.Configuration()
+
     let roomCaptureView: RoomCaptureView
     
     init(namedUrl: NamedURL) {
         
         sessionDelegate = SessionDelegate(namedUrl: namedUrl)
-        configuration = RoomCaptureSession.Configuration()
         
         if #available(iOS 17.0, *) {
             roomCaptureView = RoomCaptureView(frame: .zero, arSession: arSession)
@@ -46,16 +46,16 @@ struct CaptureViewContainer: UIViewRepresentable {
             roomCaptureView.captureSession.stop()
         }
         
-        if !pauseARSession {
-            arSession.pause()
-
-//            let emptyConfiguration = ARWorldTrackingConfiguration()
-//            arSession.run(emptyConfiguration, options: [.resetTracking, .removeExistingAnchors])
-            
-            //arSession.delegate = nil
-            
-            //arSession = ARSession()
-        }
+//        if !pauseARSession {
+//            arSession.pause()
+//
+////            let emptyConfiguration = ARWorldTrackingConfiguration()
+////            arSession.run(emptyConfiguration, options: [.resetTracking, .removeExistingAnchors])
+//            
+//            //arSession.delegate = nil
+//            
+//            //arSession = ARSession()
+//        }
     }
     
     func continueCapture() {
@@ -169,6 +169,7 @@ struct CaptureViewContainer: UIViewRepresentable {
         func captureView(shouldPresent roomDataForProcessing: CapturedRoomData, error: Error?) -> Bool {
             return true
         }
+        
         func captureView(didPresent processedResult: CapturedRoom, error: Error?) {
             self.finalResults = processedResult
         }

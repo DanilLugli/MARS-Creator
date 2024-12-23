@@ -390,7 +390,7 @@ struct RoomView: View {
         .confirmationDialog("Are you sure to delete Room?", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
             Button("Yes", role: .destructive) {
                 floor.deleteRoom(room: room)
-                dismiss() // Navigate back after deletion
+                dismiss()
                 print("Room deleted and navigating back")
             }
             

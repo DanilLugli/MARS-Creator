@@ -28,73 +28,12 @@ struct SCNViewContainer: UIViewRepresentable {
         origin.simdWorldTransform = simd_float4x4([1.0,0,0,0],[0,1.0,0,0],[0,0,1.0,0],[0,0,0,1.0])
     }
     
-    func drawSceneObjects(borders: Bool) {
-        
-        var drawnNodes = Set<String>()
-        
-        scnView.scene?
-            .rootNode
-            .childNodes(passingTest: { n, _ in
-                n.name != nil &&
-                n.name! != "Room" &&
-                n.name! != "Floor0" &&
-                n.name! != "Geom" &&
-                String(n.name!.suffix(4)) != "_grp" &&
-                n.name! != "__selected__"
-            })
-            .forEach {
-                let nodeName = $0.name
-                let material = SCNMaterial()
-                if nodeName == "Floor0" {
-                    material.diffuse.contents = UIColor.green
-                } else {
-                    material.diffuse.contents = UIColor.black
-                    if nodeName?.prefix(5) == "Floor" {
-                        material.diffuse.contents = UIColor.white.withAlphaComponent(0.2)
-                    }
-                    if nodeName!.prefix(6) == "Transi" {
-                        material.diffuse.contents = UIColor.white
-                    }
-                    if nodeName!.prefix(4) == "Door" {
-                        material.diffuse.contents = UIColor.white
-                    }
-                    if nodeName!.prefix(4) == "Open"{
-                        material.diffuse.contents = UIColor.systemGray5
-                    }
-                    if nodeName!.prefix(4) == "Tabl" {
-                        material.diffuse.contents = UIColor.brown
-                    }
-                    if nodeName!.prefix(4) == "Chai"{
-                        material.diffuse.contents = UIColor.brown.withAlphaComponent(0.4)
-                    }
-                    if nodeName!.prefix(4) == "Stor"{
-                        material.diffuse.contents = UIColor.systemGray
-                    }
-                    if nodeName!.prefix(4) == "Sofa"{
-                        material.diffuse.contents = UIColor(red: 0.0, green: 0.0, blue: 0.5, alpha: 0.6)
-                    }
-                    if nodeName!.prefix(4) == "Tele"{
-                        material.diffuse.contents = UIColor.orange
-                    }
-                    material.lightingModel = .physicallyBased
-                    $0.geometry?.materials = [material]
-                    
-                    if borders {
-                        $0.scale.x = $0.scale.x < 0.2 ? $0.scale.x + 0.1 : $0.scale.x
-                        $0.scale.z = $0.scale.z < 0.2 ? $0.scale.z + 0.1 : $0.scale.z
-                        $0.scale.y = ($0.name!.prefix(4) == "Wall") ? 0.1 : $0.scale.y
-                    }
-                }
-                drawnNodes.insert(nodeName!)
-            }
-    }
-    
     func loadRoomPlanimetry(room: Room, borders: Bool) {
         
         scnView.scene = room.scene
         
         addDoorNodesBasedOnExistingDoors(room: room)
-        drawSceneObjects(borders: borders)
+        drawSceneObjects(scnView: self.scnView, borders: borders)
         setMassCenter(scnView: self.scnView)
         setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: self.massCenter)
         createAxesNode()
@@ -104,7 +43,7 @@ struct SCNViewContainer: UIViewRepresentable {
     func loadFloorPlanimetry(borders: Bool, floor: Floor) {
 
             scnView.scene = floor.scene
-            drawSceneObjects(borders: borders)
+        drawSceneObjects(scnView: self.scnView, borders: borders)
         setMassCenter(scnView: self.scnView)
             setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: self.massCenter)
             createAxesNode()
@@ -187,7 +126,7 @@ struct SCNViewContainer: UIViewRepresentable {
     }
         
     func changeColorOfNode(nodeName: String, color: UIColor) {
-        drawSceneObjects(borders: false)
+        drawSceneObjects(scnView: self.scnView, borders: false)
         if let _node = scnView.scene?.rootNode.childNodes(passingTest: { n,_ in n.name != nil && n.name! == nodeName }).first {
             let copy = _node.copy() as! SCNNode
             copy.name = "__selected__"

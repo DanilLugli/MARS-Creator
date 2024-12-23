@@ -25,7 +25,8 @@ class BuildingModel: ObservableObject {
         }
     }
     
-    @MainActor func loadBuildings(){
+    @MainActor
+    func loadBuildings(){
         do {
             try loadBuildingsFromRoot()
         } catch {
@@ -87,7 +88,8 @@ class BuildingModel: ObservableObject {
         return self.getBuildings()[0]
     }
     
-    @MainActor func loadBuildingsFromRoot() throws {
+    @MainActor
+    func loadBuildingsFromRoot() throws {
     let fileManager = FileManager.default
     
     if !fileManager.fileExists(atPath: BuildingModel.SCANBUILD_ROOT.path) {
@@ -114,7 +116,8 @@ class BuildingModel: ObservableObject {
     }
 }
     
-    @MainActor func loadFloors(from buildingURL: URL) throws -> [Floor] {
+    @MainActor
+    func loadFloors(from buildingURL: URL) throws -> [Floor] {
         let fileManager = FileManager.default
         let floorURLs = try fileManager.contentsOfDirectory(at: buildingURL, includingPropertiesForKeys: [.isDirectoryKey], options: .skipsHiddenFiles)
         
@@ -349,7 +352,8 @@ class BuildingModel: ObservableObject {
         }
     }
     
-    @MainActor func renameBuilding(building: Building, newName: String) throws {
+    @MainActor
+    func renameBuilding(building: Building, newName: String) throws {
         let fileManager = FileManager.default
         let oldBuildingURL = building.buildingURL
         
