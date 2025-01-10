@@ -4,7 +4,7 @@ import simd
 import SwiftUI
 
 class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Hashable {
-    
+
     private var _id = UUID()
     @Published private var _name: String
     private var _lastUpdate: Date
@@ -17,7 +17,7 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
     @Published private var _sceneConfiguration: SCNScene?
     @Published var isPlanimetryLoaded: Bool = false
     private var _floorURL: URL
-    
+
     init(_id: UUID = UUID(), _name: String, _lastUpdate: Date, _planimetry: SCNViewContainer? = nil, _planimetryRooms: SCNViewMapContainer? = nil, _associationMatrix: [String : RotoTraslationMatrix], _rooms: [Room], _sceneObjects: [SCNNode]? = nil, _scene: SCNScene? = nil, _sceneConfiguration: SCNScene? = nil, _floorURL: URL) {
         self._name = _name
         self._lastUpdate = _lastUpdate

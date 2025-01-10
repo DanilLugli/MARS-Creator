@@ -27,7 +27,7 @@ struct FloorView: View {
     
     @State private var showUpdateOptionsAlert = false
     @State private var showDeleteConfirmation = false
-    @State private var showUpdateAlert = false
+    @State private var showFloorUpdatePlanimetryAlert = false
     
     @State private var alertMessage = ""
     @State private var errorMessage: String = ""
@@ -151,8 +151,15 @@ struct FloorView: View {
                             .disabled(FileManager.default.fileExists(atPath: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz").path))
 
                             Button(action: {
-                                alertMessage = "If you proceed with the update:\n1. Current floor plan\n2. All rooms position\nWill be deleted.\nThis action is irreversible, are you sure you want to continue?"
-                                showUpdateAlert = true
+                                alertMessage = """
+                                    Proceeding with this update will permanently delete:
+
+                                    1. The current \(floor.name)'s planimetry
+                                    2. All room positions  
+
+                                    This action cannot be undone. Are you sure you want to continue?
+                                    """
+                                showFloorUpdatePlanimetryAlert = true
                             }) {
                                 Label("Update Planimetry", systemImage: "arrow.clockwise")
                             }
@@ -242,20 +249,20 @@ struct FloorView: View {
                 dismissButton: .default(Text("OK"))
             )
         }
-        .alert(isPresented: $showUpdateAlert) {
+        .alert(isPresented: $showFloorUpdatePlanimetryAlert) {
             Alert(
-                title: Text("ATTENTION").foregroundColor(.red),
+                title: Text("ATTENTION"),
                 message: Text(alertMessage),
                 primaryButton: .destructive(Text("OK")) {
-                    // Azione quando si preme "OK"
                     isOptionsSheetPresented = true
                 },
                 secondaryButton: .cancel(Text("Cancel")) {
-                    // Azione quando si preme "Cancel" (chiude l'alert automaticamente)
                 }
             )
         }
-        .alert("Rename Floor", isPresented: $isRenameSheetPresented, actions: {
+        .alert("Rename Floor",
+               isPresented: $isRenameSheetPresented,
+               actions: {
             TextField("New Floor Name", text: $newFloorName)
                 .padding()
             
@@ -276,9 +283,11 @@ struct FloorView: View {
             Button("Cancel", role: .cancel, action: {
                 isRenameSheetPresented = false
             })
-        }, message: {
+        },
+               message: {
             Text("Enter a new name for the Floor.")
-        })
+        }
+        )
         .sheet(isPresented: $isFloorPlanimetryUploadPicker) {
             FilePickerView { url in
                 selectedFileURL = url
@@ -339,19 +348,13 @@ struct FloorView: View {
                     addNewRoom()
                     isRoomSheetPresented = false
                 }) {
-                    HStack {
-                        Text("Add")
-                            .font(.title) // Imposta la dimensione del font direttamente
-                            .bold()
-                            .foregroundColor(.white)
-                        
-                        Image(systemName: "checkmark.circle")
-                            .font(.title) // Applica la stessa dimensione della scritta
-                            .foregroundColor(.white)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.green.cornerRadius(10))
+                    Text("Add")
+                        .font(.title)
+                        .bold()
+                        .padding()
+                        .background(Color.green)
+                        .foregroundColor(.white)
+                        .cornerRadius(30)
                 }
                 .disabled(newRoomName.isEmpty)
             }

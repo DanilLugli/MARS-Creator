@@ -42,10 +42,19 @@ struct FloorCaptureViewContainer: UIViewRepresentable {
         arSession.pause()
     }
     
-    func continueCapture() {
-        roomCaptureView.captureSession.run(configuration: configuration)
+    func redoCapture() {
+        roomCaptureView.captureSession.run(configuration: RoomCaptureSession.Configuration())
     }
     
+    func restartCapture() {
+
+        stopCapture()
+
+        sessionDelegate.roomBuilder = RoomBuilder(options: [.beautifyObjects])
+
+        roomCaptureView.captureSession.run(configuration: RoomCaptureSession.Configuration())
+    }
+
     class SessionDelegate: UIViewController, RoomCaptureSessionDelegate, RoomCaptureViewDelegate, ARSessionDelegate {
         
         var currentMapName: String?
@@ -100,11 +109,5 @@ struct FloorCaptureViewContainer: UIViewRepresentable {
         }
         
         func session(_ session: ARSession, didUpdate frame: ARFrame) {}
-    }
-}
-
-struct FloorCaptureViewContainer_Previews: PreviewProvider {
-    static var previews: some View {
-        FloorCaptureViewContainer(namedUrl: Room(_name: "Sample Room", _lastUpdate: Date(), _planimetry: SCNViewContainer(), _referenceMarkers: [], _transitionZones: [], _scene: nil, _sceneObjects: [], _roomURL: URL(fileURLWithPath: "")))
     }
 }

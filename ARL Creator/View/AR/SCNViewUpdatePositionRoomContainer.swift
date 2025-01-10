@@ -4,6 +4,7 @@ import SceneKit
 class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
     
     private let identityMatrix = matrix_identity_float4x4
+    @State private var isFaceIDSuccess = false
 
     @Published var rotoTraslation: RotoTraslationMatrix = RotoTraslationMatrix(
         name: "",
@@ -19,8 +20,8 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
     var roomName: String?
     
     var zoomStep: CGFloat = 0.1
-    var translationStep: CGFloat = 0.1
-    var rotationStep: Float = .pi / 100
+    var translationStep: CGFloat = 0.02
+    var rotationStep: Float = .pi / 200
     
     private let color: UIColor = UIColor.green.withAlphaComponent(0.3)
     
@@ -35,19 +36,16 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
     
     @MainActor
     func loadRoomMapsPosition(floor: Floor, room: Room, borders: Bool) {
-        for room in floor.rooms{
-            if let nodeToRemove = scnView.scene?.rootNode.childNode(withName: room.name, recursively: true) {
-                nodeToRemove.removeFromParentNode()
-                print("Pipi")
-            } else {
-                print("Nodo con il nome non trovato nella scena.")
-            }
+        
+        for room in floor.rooms {
+            scnView.scene?.rootNode.childNode(withName: room.name, recursively: true)?.removeFromParentNode()
         }
         
         self.floor = floor
-        
         self.roomName = room.name
-        let floorFileURL = floor.floorURL.appendingPathComponent("MapUsdz")
+        
+        let floorFileURL = floor.floorURL
+            .appendingPathComponent("MapUsdz")
             .appendingPathComponent("\(floor.name).usdz")
         
         do{
@@ -61,7 +59,6 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         self.rotoTraslation = floor.associationMatrix[room.name] ?? RotoTraslationMatrix(
             name: "",
             translation: floor.associationMatrix[room.name]?.translation ?? matrix_identity_float4x4,
-            
             r_Y: floor.associationMatrix[room.name]?.r_Y ?? matrix_identity_float4x4
         )
         
@@ -105,16 +102,14 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
             return containerNode
         }
         
-        var roomNode = createSceneNode(from: roomScene!)
+        let roomNode = createSceneNode(from: roomScene!)
         roomNode.name = room.name
         
-        roomNode.simdWorldPosition = simd_float3(0,4,0)
+        roomNode.simdWorldPosition = simd_float3(0,5,0)
         
-        if let rotoTraslationMatrix = floor.associationMatrix[room.name] {
-            applyRotoTraslation(to: roomNode, with: rotoTraslationMatrix)
-        } else {
-            print("No RotoTraslationMatrix found for room: \(room.name)")
-        }
+        floor.associationMatrix[room.name].map {
+            applyRotoTraslation(to: roomNode, with: $0)
+        } ?? print("No RotoTraslationMatrix found for room: \(room.name)")
         
         scnView.scene?.rootNode.addChildNode(roomNode)
         self.roomNode = roomNode
@@ -126,12 +121,12 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
     }
     
     func rotateClockwise() {
-        self.rotateLeft()
+        self.rotateRight()
     }
 
     func rotateCounterClockwise() {
         
-        self.rotateRight()
+        self.rotateLeft()
     }
 
     func moveUp() {
@@ -153,7 +148,6 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
 
     func moveRoomPositionUp() {
         guard let roomNode = roomNode else {
-            print("No room node available for movement")
             return
         }
         roomNode.worldPosition.z += Float(translationStep)
@@ -162,7 +156,6 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
 
     func moveRoomPositionDown() {
         guard let roomNode = roomNode else {
-            print("No room node available for movement")
             return
         }
         
@@ -173,7 +166,6 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
 
     func moveRoomPositionRight() {
         guard let roomNode = roomNode else {
-            print("No room node available for movement")
             return
         }
         roomNode.worldPosition.x += Float(translationStep)
@@ -183,7 +175,6 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
 
     func moveRoomPositionLeft() {
         guard let roomNode = roomNode else {
-            print("No room node available for movement")
             return
         }
         roomNode.worldPosition.x -= Float(translationStep)
@@ -192,24 +183,60 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
 
     func rotateRight() {
         guard let roomNode = roomNode else {
-            print("No room node available for rotation")
+            print("DEBUG: No roomNode found!")
             return
         }
+        
+        // Debug: Stampa l'angolo attuale prima della rotazione
+        print("DEBUG: Current eulerAngles.y before rotation (Right): \(roomNode.eulerAngles.y)")
+        
+        // Rotazione
         roomNode.eulerAngles.y -= rotationStep
-
-        let rotationMatrix = simd_float4x4(SCNMatrix4MakeRotation(-rotationStep, 0, 1, 0))
-        floor?.associationMatrix[roomName ?? ""]?.r_Y = matrix_multiply(floor?.associationMatrix[roomName ?? ""]?.r_Y ?? matrix_identity_float4x4, rotationMatrix)
+        
+        // Debug: Stampa l'angolo attuale dopo la rotazione
+        print("DEBUG: Updated eulerAngles.y after rotation (Right): \(roomNode.eulerAngles.y)")
+        
+        // Applica la matrice di rotazione
+        let rotationMatrix = simd_float4x4(SCNMatrix4MakeRotation(rotationStep, 0, 1, 0))
+        let previousMatrix = floor?.associationMatrix[roomName ?? ""]?.r_Y ?? matrix_identity_float4x4
+        let updatedMatrix = matrix_multiply(previousMatrix, rotationMatrix)
+        
+        // Debug: Stampa la matrice prima e dopo
+        print("DEBUG: Previous r_Y matrix: \(previousMatrix)")
+        print("DEBUG: Updated r_Y matrix: \(updatedMatrix)")
+        
+        // Salva la matrice aggiornata
+        floor?.associationMatrix[roomName ?? ""]?.r_Y = updatedMatrix
     }
+    
+    
 
     func rotateLeft() {
         guard let roomNode = roomNode else {
-            print("No room node available for rotation")
+            print("DEBUG: No roomNode found!")
             return
         }
+        
+        // Debug: Stampa l'angolo attuale prima della rotazione
+        print("DEBUG: Current eulerAngles.y before rotation (Left): \(roomNode.eulerAngles.y)")
+        
+        // Rotazione
         roomNode.eulerAngles.y += rotationStep
-        let rotationMatrix = simd_float4x4(SCNMatrix4MakeRotation(rotationStep, 0, 1, 0))
-        floor?.associationMatrix[roomName ?? ""]?.r_Y = matrix_multiply(floor?.associationMatrix[roomName ?? ""]?.r_Y ?? matrix_identity_float4x4, rotationMatrix)
-        print("rotateCounterClockwise: \(String(describing: floor?.associationMatrix[roomName ?? ""]?.r_Y) )")
+        
+        // Debug: Stampa l'angolo attuale dopo la rotazione
+        print("DEBUG: Updated eulerAngles.y after rotation (Left): \(roomNode.eulerAngles.y)")
+        
+        // Applica la matrice di rotazione
+        let rotationMatrix = simd_float4x4(SCNMatrix4MakeRotation(-rotationStep, 0, 1, 0))
+        let previousMatrix = floor?.associationMatrix[roomName ?? ""]?.r_Y ?? matrix_identity_float4x4
+        let updatedMatrix = matrix_multiply(previousMatrix, rotationMatrix)
+        
+        // Debug: Stampa la matrice prima e dopo
+        print("DEBUG: Previous r_Y matrix: \(previousMatrix)")
+        print("DEBUG: Updated r_Y matrix: \(updatedMatrix)")
+        
+        // Salva la matrice aggiornata
+        floor?.associationMatrix[roomName ?? ""]?.r_Y = updatedMatrix
     }
     
     func handlePinch(_ gesture: UIPinchGestureRecognizer) {
@@ -228,95 +255,12 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         gesture.setTranslation(.zero, in: scnView)
     }
     
-//    func drawSceneObjects(borders: Bool) {
-//
-//        var drawnNodes = Set<String>()
-//        
-//        scnView.scene?
-//            .rootNode
-//            .childNodes(passingTest: { n, _ in
-//                n.name != nil &&
-//                n.name! != "Room" &&
-//                n.name! != "Floor0" &&
-//                n.name! != "Geom" &&
-//                String(n.name!.suffix(4)) != "_grp" &&
-//                n.name! != "__selected__"
-//            })
-//            .forEach {
-//                let nodeName = $0.name
-//                let material = SCNMaterial()
-//                if nodeName == "Floor0" {
-//                    material.diffuse.contents = UIColor.green
-//                } else {
-//                    material.diffuse.contents = UIColor.black
-//                    if nodeName?.prefix(5) == "Floor" {
-//                        material.diffuse.contents = UIColor.white.withAlphaComponent(0.2)
-//                    }
-//                    if nodeName!.prefix(6) == "Transi" {
-//                        material.diffuse.contents = UIColor.white
-//                    }
-//                    if nodeName!.prefix(4) == "Door" {
-//                        material.diffuse.contents = UIColor.white
-//                    }
-//                    if nodeName!.prefix(4) == "Open"{
-//                        material.diffuse.contents = UIColor.systemGray5
-//                    }
-//                    if nodeName!.prefix(4) == "Tabl" {
-//                        material.diffuse.contents = UIColor.brown
-//                    }
-//                    if nodeName!.prefix(4) == "Chai"{
-//                        material.diffuse.contents = UIColor.brown.withAlphaComponent(0.4)
-//                    }
-//                    if nodeName!.prefix(4) == "Stor"{
-//                        material.diffuse.contents = UIColor.systemGray
-//                    }
-//                    if nodeName!.prefix(4) == "Sofa"{
-//                        material.diffuse.contents = UIColor(red: 0.0, green: 0.0, blue: 0.5, alpha: 0.6)
-//                    }
-//                    if nodeName!.prefix(4) == "Tele"{
-//                        material.diffuse.contents = UIColor.orange
-//                    }
-//                    material.lightingModel = .physicallyBased
-//                    $0.geometry?.materials = [material]
-//                    
-//                    if borders {
-//                        $0.scale.x = $0.scale.x < 0.2 ? $0.scale.x + 0.1 : $0.scale.x
-//                        $0.scale.z = $0.scale.z < 0.2 ? $0.scale.z + 0.1 : $0.scale.z
-//                        $0.scale.y = ($0.name!.prefix(4) == "Wall") ? 0.1 : $0.scale.y
-//                    }
-//                }
-//                drawnNodes.insert(nodeName!)
-//            }
-//    }
-    
-//    private func drawContent(borders: Bool) {
-//        scnView.scene?
-//            .rootNode
-//            .childNodes(passingTest: {
-//                n,_ in n.name != nil && n.name! != "Room" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp" && n.name! != "__selected__"
-//            })
-//            .forEach{
-//                let material = SCNMaterial()
-//                material.diffuse.contents = UIColor.black
-//                if ($0.name!.prefix(5) == "Floor") { material.diffuse.contents = UIColor.white.withAlphaComponent(0.2) }
-//                if ($0.name!.prefix(4) == "Door" || $0.name!.prefix(4) == "Open") { material.diffuse.contents = UIColor.white }
-//                material.lightingModel = .physicallyBased
-//                $0.geometry?.materials = [material]
-//                
-//            }
-//    }
-    
     @MainActor
     func applyRotoTraslation(to node: SCNNode, with rotoTraslation: RotoTraslationMatrix) {
-        print("APPLY TO NODE: \(node.name ?? "Unnamed Node")")
-        print("Initial Transform:")
-        //printSimdFloat4x4(node.simdWorldTransform)
-
+        
         let combinedMatrix = rotoTraslation.translation * rotoTraslation.r_Y
         node.simdWorldTransform = combinedMatrix * node.simdWorldTransform
 
-        print("Updated Transform:")
-        //printSimdFloat4x4(node.simdWorldTransform)
     }
 }
 
@@ -372,5 +316,32 @@ struct SCNViewUpdatePositionRoomContainer: UIViewRepresentable {
 struct SCNViewUpdatePositionRoomContainer_Previews: PreviewProvider {
     static var previews: some View {
         SCNViewUpdatePositionRoomContainer()
+    }
+}
+
+
+struct FaceIDSuccessView: View {
+    @State private var isAnimating = false
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(lineWidth: 5)
+                .foregroundColor(.green)
+                .frame(width: 100, height: 100)
+
+            Path { path in
+                path.move(to: CGPoint(x: 35, y: 50))
+                path.addLine(to: CGPoint(x: 45, y: 65))
+                path.addLine(to: CGPoint(x: 70, y: 40))
+            }
+            .trim(from: 0, to: isAnimating ? 1 : 0)
+            .stroke(Color.green, lineWidth: 5)
+            .frame(width: 100, height: 100)
+            .animation(.easeInOut(duration: 0.5), value: isAnimating)
+        }
+        .onAppear {
+            isAnimating = true
+        }
     }
 }

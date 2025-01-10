@@ -74,17 +74,15 @@ class SCNViewMapHandler: ObservableObject {
                     return containerNode
                 }
                 
-                var roomNode = createSceneNode(from: roomScene)
+                let roomNode = createSceneNode(from: roomScene)
                 roomNode.name = room.name
                 
                 roomNode.simdWorldPosition = simd_float3(0,5,0)
                 
-                if let rotoTraslationMatrix = floor.associationMatrix[room.name] {
-                    applyRotoTraslation(to: roomNode, with: rotoTraslationMatrix)
-                } else {
-                    print("No RotoTraslationMatrix found for room: \(room.name)")
-                }
-
+                floor.associationMatrix[room.name].map {
+                    applyRotoTraslation(to: roomNode, with: $0)
+                } ?? print("No RotoTraslationMatrix found for room: \(room.name)")
+                
                 scnView.scene?.rootNode.addChildNode(roomNode)
 
             }
@@ -97,64 +95,7 @@ class SCNViewMapHandler: ObservableObject {
             print("Error loading scene from URL: \(error)")
         }
     }
-    
-//    func drawSceneObjects(borders: Bool) {
-//
-//        var drawnNodes = Set<String>()
-//        
-//        scnView.scene?
-//            .rootNode
-//            .childNodes(passingTest: { n, _ in
-//                n.name != nil &&
-//                n.name! != "Room" &&
-//                n.name! != "Floor0" &&
-//                n.name! != "Geom" &&
-//                String(n.name!.suffix(4)) != "_grp" &&
-//                n.name! != "__selected__"
-//            })
-//            .forEach {
-//                let nodeName = $0.name
-//                let material = SCNMaterial()
-//                if nodeName == "Floor0" {
-//                    material.diffuse.contents = UIColor.green
-//                } else {
-//                    material.diffuse.contents = UIColor.black
-//                    if nodeName?.prefix(5) == "Floor" {
-//                        material.diffuse.contents = UIColor.white.withAlphaComponent(0.2)
-//                    }
-//                    if nodeName!.prefix(6) == "Transi" {
-//                        material.diffuse.contents = UIColor.white
-//                    }
-//                    if nodeName!.prefix(4) == "Door" {
-//                        material.diffuse.contents = UIColor.white
-//                    }
-//                    if nodeName!.prefix(4) == "Open"{
-//                        material.diffuse.contents = UIColor.systemGray5
-//                    }
-//                    if nodeName!.prefix(4) == "Tabl" {
-//                        material.diffuse.contents = UIColor.brown
-//                    }
-//                    if nodeName!.prefix(4) == "Chai"{
-//                        material.diffuse.contents = UIColor.brown.withAlphaComponent(0.4)
-//                    }
-//                    if nodeName!.prefix(4) == "Stor"{
-//                        material.diffuse.contents = UIColor.systemGray
-//                    }
-//                    if nodeName!.prefix(4) == "Sofa"{
-//                        material.diffuse.contents = UIColor(red: 0.0, green: 0.0, blue: 0.5, alpha: 0.6)
-//                    }
-//                    if nodeName!.prefix(4) == "Tele"{
-//                        material.diffuse.contents = UIColor.orange
-//                    }
-//                    
-//                    material.lightingModel = .physicallyBased
-//                    $0.geometry?.materials = [material]
-//                    
-//                }
-//                drawnNodes.insert(nodeName!)
-//            }
-//    }
-    
+
     func zoomIn() { cameraNode.camera?.orthographicScale -= 0.5 }
     
     func zoomOut() { cameraNode.camera?.orthographicScale += 0.5 }

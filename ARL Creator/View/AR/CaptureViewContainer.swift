@@ -45,24 +45,22 @@ struct CaptureViewContainer: UIViewRepresentable {
         } else {
             roomCaptureView.captureSession.stop()
         }
-        
-//        if !pauseARSession {
-//            arSession.pause()
-//
-////            let emptyConfiguration = ARWorldTrackingConfiguration()
-////            arSession.run(emptyConfiguration, options: [.resetTracking, .removeExistingAnchors])
-//            
-//            //arSession.delegate = nil
-//            
-//            //arSession = ARSession()
-//        }
-    }
-    
-    func continueCapture() {
-        roomCaptureView.captureSession.run(configuration: configuration)
     }
     
     func redoCapture() {
+        roomCaptureView.captureSession.run(configuration: RoomCaptureSession.Configuration())
+    }
+    
+    func stopCapture() {
+        roomCaptureView.captureSession.stop()
+        arSession.pause()
+    }
+    
+    func restartCapture() {
+        stopCapture()
+
+        sessionDelegate.roomBuilder = RoomBuilder(options: [.beautifyObjects])
+
         roomCaptureView.captureSession.run(configuration: RoomCaptureSession.Configuration())
     }
     
@@ -94,7 +92,6 @@ struct CaptureViewContainer: UIViewRepresentable {
         
         func captureSession(_ session: RoomCaptureSession, didUpdate room: CapturedRoom) {
             
-            //previewVisualizer.update(model: room)
             session.arSession.getCurrentWorldMap { worldMap, error in
                 guard let worldMap = worldMap else {
                     print("Can't get current world map")
@@ -115,6 +112,7 @@ struct CaptureViewContainer: UIViewRepresentable {
                 }
             }
         }
+        
         func captureSession(_ session: RoomCaptureSession, didEndWith data: CapturedRoomData, error: Error?) {
             print(SessionDelegate.save)
             if !SessionDelegate.save { return }
@@ -175,7 +173,6 @@ struct CaptureViewContainer: UIViewRepresentable {
         }
         
         func session(_ session: ARSession, didUpdate frame: ARFrame) {
-            // Handle world map status updates
             switch frame.worldMappingStatus {
             case .notAvailable:
                 NotificationCenter.default.post(name: .genericMessage, object: "Map Status: Not available")
@@ -192,9 +189,4 @@ struct CaptureViewContainer: UIViewRepresentable {
     }
 }
 
-//struct CaptureViewContainer_Previews: PreviewProvider {
-//    static var previews: some View {
-//        CaptureViewContainer(namedUrl: Room(_name: "Sample Room", _lastUpdate: Date(), _referenceMarkers: [], _transitionZones: [], _scene: nil, _sceneObjects: [], _roomURL: URL(fileURLWithPath:"")))
-//    }
-//}
 

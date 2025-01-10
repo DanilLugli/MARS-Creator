@@ -182,19 +182,13 @@ struct BuildingView: View {
                     addNewFloor()
                     isAddFloorSheetPresented = false
                 }) {
-                    HStack {
-                        Text("Add")
-                            .font(.title) // Imposta la dimensione del font direttamente
-                            .bold()
-                            .foregroundColor(.white)
-                        
-                        Image(systemName: "checkmark.circle")
-                            .font(.title)
-                            .foregroundColor(.white)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.green.cornerRadius(10))
+                    Text("Add")
+                        .font(.title)
+                        .bold()
+                        .padding()
+                        .background(Color.green)
+                        .foregroundColor(.white)
+                        .cornerRadius(30)
                 }
                 .disabled(newFloorName.isEmpty)
             }

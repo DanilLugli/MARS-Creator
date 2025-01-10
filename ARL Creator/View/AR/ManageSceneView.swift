@@ -183,7 +183,7 @@ func drawSceneObjects(scnView: SCNView, borders: Bool) {
                     material.diffuse.contents = UIColor.white
                 }
                 if nodeName!.prefix(4) == "Open"{
-                    material.diffuse.contents = UIColor.systemGray5
+                    material.diffuse.contents = UIColor.white
                 }
                 if nodeName!.prefix(4) == "Tabl" {
                     material.diffuse.contents = UIColor.brown

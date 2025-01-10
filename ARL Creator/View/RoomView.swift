@@ -33,7 +33,7 @@ struct RoomView: View {
     @State private var isColorPickerPopoverPresented = false
     
     @State private var showUpdateOptionsAlert = false
-    @State private var showUpdateAlert = false
+    @State private var showRoomUpdatePlanimetryAlert = false
     @State private var showDeleteConfirmation = false
     
     @State private var selectedColor = Color(
@@ -123,22 +123,27 @@ struct RoomView: View {
                             isOptionsSheetPresented = true
                         }) {
                             Label("Create Planimetry", systemImage: "plus")
-                        }.disabled(FileManager.default.fileExists(atPath: room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz").path))
-                        
+                        }
+                        .disabled(FileManager.default.fileExists(atPath: room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz").path))
                         
                         Button(action: {
-                            alertMessage = "If you proceed with the update, the current floor plan will be deleted.\nThis action is irreversible, are you sure you want to continue?"
-                            showUpdateAlert = true
+                            alertMessage = """
+                                Proceeding with this update will permanently delete the current \(room.name)'s planimetry.
+                                
+                                This action cannot be undone. Are you sure you want to continue?
+                                """
+                            print("Alert Triggered: \(showRoomUpdatePlanimetryAlert)")
+                            showRoomUpdatePlanimetryAlert = true
+                            print("Alert Triggered: \(showRoomUpdatePlanimetryAlert)")
                         }) {
                             Label("Update Planimetry", systemImage: "arrow.clockwise")
-                        }.disabled(!FileManager.default.fileExists(atPath: room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz").path))
+                        }
+                        .disabled(!FileManager.default.fileExists(atPath: room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz").path))
                         
                         Divider()
                         
                         Button(action: {
                             isColorPickerPopoverPresented = true
-                            //                                ColorPicker("Choose a color", selection: $selectedColor)
-                            //                                    .padding()
                         }) {
                             Label("Change Room Color", systemImage: "paintpalette")
                         }
@@ -185,7 +190,6 @@ struct RoomView: View {
                         NavigationLink(destination:ManualRoomPositionView(floor: self.floor, room: self.room)){
                             Button(action: {
                                 isCreateManualRoomPosition = true
-                                print("isCreateManualRoomPosition set to true") // Debug
                             }) {
                                 Label("Correct Room Position", systemImage: "mappin")
                             }
@@ -269,11 +273,47 @@ struct RoomView: View {
                 }
             }
         }
+        .alert("ATTENTION", isPresented: $showRoomUpdatePlanimetryAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("OK", role: .destructive) {
+                isOptionsSheetPresented = true
+            }
+        } message: {
+            Text(alertMessage)
+        }
+        .alert("Rename Room", isPresented: $isRenameSheetPresented, actions: {
+            TextField("New Room Name", text: $newRoomName)
+                .padding()
+            
+            Button("SAVE", action: {
+                if !newRoomName.isEmpty {
+                    do {
+                        try BuildingModel.getInstance().getBuilding(building)?.getFloor(floor)?.renameRoom(floor: floor, room: room, newName: newRoomName)
+                    } catch {
+                        print("Errore durante la rinomina: \(error.localizedDescription)")
+                    }
+                    isRenameSheetPresented = false
+                }
+            })
+            
+            Button("Cancel", role: .cancel, action: {
+                isRenameSheetPresented = false
+            })
+        }, message: {
+            Text("Enter a new name for the Room.")
+        })
+        .alert(isPresented: $isErrorAlertPresented) {
+            Alert(
+                title: Text("Error"),
+                message: Text(errorMessage),
+                dismissButton: .default(Text("OK"))
+            )
+        }
         .sheet(isPresented: $isColorPickerPopoverPresented) {
             ZStack {
-                // Rettangolo che riempie l'intera sheet
+                
                 Color.customBackground
-                    .edgesIgnoringSafeArea(.all)  // Assicura che lo sfondo copra tutta l'area
+                    .edgesIgnoringSafeArea(.all)
                 
                 VStack {
                     Text("Change Room Color")
@@ -341,7 +381,6 @@ struct RoomView: View {
                         print("Image added successfully to ReferenceMarkers: \(destinationURL)")
                         
                     } catch {
-                        // In caso di errore, aggiorna lo stato e mostra l'alert
                         errorMessage = "Failed to save the image: \(error.localizedDescription)"
                         isErrorAlertPresented = true
                     }
@@ -396,65 +435,6 @@ struct RoomView: View {
             
             Button("Cancel", role: .cancel) {}
         }
-        .alert(isPresented: $isErrorAlertPresented) {
-            Alert(
-                title: Text("Error"),
-                message: Text(errorMessage),
-                dismissButton: .default(Text("OK"))
-            )
-        }
-        .alert("Rename Room", isPresented: $isRenameSheetPresented, actions: {
-            TextField("New Room Name", text: $newRoomName)
-                .padding()
-            
-            Button("SAVE", action: {
-                if !newRoomName.isEmpty {
-                    do {
-                        try BuildingModel.getInstance().getBuilding(building)?.getFloor(floor)?.renameRoom(floor: floor, room: room, newName: newRoomName)
-                    } catch {
-                        print("Errore durante la rinomina: \(error.localizedDescription)")
-                    }
-                    isRenameSheetPresented = false
-                }
-            })
-            
-            Button("Cancel", role: .cancel, action: {
-                isRenameSheetPresented = false
-            })
-        }, message: {
-            Text("Enter a new name for the Room.")
-        })
-        .alert(isPresented: $isErrorAlertPresented) {
-            Alert(
-                title: Text("Error"),
-                message: Text(errorMessage),
-                dismissButton: .default(Text("OK"))
-            )
-        }
-        
-//        NavigationLink(
-//            destination: ScanningView(namedUrl: room),
-//            isActive: $isNavigationScanRoomActive,
-//            label: {
-//                EmptyView()
-//            }
-//        )
-        
-//        NavigationLink(
-//            destination: RoomPositionView(floor: self.floor, room: self.room),
-//            isActive: $isCreateRoomPosition,
-//            label: {
-//                EmptyView()
-//            }
-//        )
-        
-//        NavigationLink(
-//            destination: ManualRoomPositionView(floor: self.floor, room: self.room),
-//            isActive: $isCreateManualRoomPosition,
-//            label: {
-//                EmptyView()
-//            }
-//        )
     }
 }
 

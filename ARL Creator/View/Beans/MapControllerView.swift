@@ -3,97 +3,115 @@ import SwiftUI
 struct MapControllerView: View {
 
     @State private var scaleWidth: Double = 0
-    
+    @State private var timer: Timer? = nil // Timer per la pressione continua
+    @State private var isPressed = false  // Stato per controllare il rilascio
+
     var moveObject: MoveObject
     
     var body: some View {
         HStack {
+            // Rotazione
             VStack {
-                Button(action: {
-                    moveObject.rotateCounterClockwise()
-                }) {
-                    Image(systemName: "arrow.counterclockwise")
-                        .bold()
-                        .foregroundColor(.white)
-                }.buttonStyle(.bordered)
-                    .background(Color.blue.opacity(0.4))
-                    .cornerRadius(8)
+                // Ruota in senso antiorario
+                pressableButton(
+                    action: { moveObject.rotateCounterClockwise() },
+                    imageName: "arrow.counterclockwise"
+                )
                 
-                Button(action: {
-                    moveObject.rotateClockwise()
-                }) {
-                    Image(systemName: "arrow.clockwise")
-                        .bold()
-                        .foregroundColor(.white)
-                }.buttonStyle(.bordered)
-                    .background(Color.blue.opacity(0.4))
-                    .cornerRadius(8)
-                
+                // Ruota in senso orario
+                pressableButton(
+                    action: { moveObject.rotateClockwise() },
+                    imageName: "arrow.clockwise"
+                )
             }
             
+            // Slider per modifica dimensione
             if moveObject is MoveDimensionObject {
-                VStack{
-                    
+                VStack {
                     Slider(value: $scaleWidth, in: 0...1, step: 0.01) {
                         Text("Width")
-                    }.onChange(of: scaleWidth){
+                    }
+                    .onChange(of: scaleWidth) { _, _ in
                         if let moveDimensionObject = moveObject as? MoveDimensionObject {
-                            moveDimensionObject.incrementWidht(by: Int(scaleWidth*100))
+                            moveDimensionObject.incrementWidht(by: Int(scaleWidth * 100))
                         }
                     }
                     .padding()
                 }
-            }
-            else{
+            } else {
                 Spacer()
             }
             
+            // Movimenti
             VStack {
-                Button(action: {
-                    moveObject.moveUp()
-                }) {
-                    Image(systemName: "arrow.up")
-                        .bold()
-                        .foregroundColor(.white)
-                }.buttonStyle(.bordered)
-                    .background(Color.blue.opacity(0.4))
-                    .cornerRadius(8)
-                
+                // Muovi in alto
+                pressableButton(
+                    action: { moveObject.moveUp() },
+                    imageName: "arrow.up"
+                )
                 
                 HStack(spacing: 20) {
-                    Button(action: {
-                        moveObject.moveLeft()
-                    }) {
-                        Image(systemName: "arrow.left")
-                            .bold()
-                            .foregroundColor(.white)
-                    }.buttonStyle(.bordered)
-                        .background(Color.blue.opacity(0.4))
-                        .cornerRadius(8)
+                    // Muovi a sinistra
+                    pressableButton(
+                        action: { moveObject.moveLeft() },
+                        imageName: "arrow.left"
+                    )
                     
-                    Button(action: {
-                        moveObject.moveRight()
-                    }) {
-                        Image(systemName: "arrow.right")
-                            .bold()
-                            .foregroundColor(.white)
-                    }.buttonStyle(.bordered)
-                        .background(Color.blue.opacity(0.4))
-                        .cornerRadius(8)
-                    
+                    // Muovi a destra
+                    pressableButton(
+                        action: { moveObject.moveRight() },
+                        imageName: "arrow.right"
+                    )
                 }
                 
-                Button(action: {
-                    moveObject.moveDown()
-                }) {
-                    Image(systemName: "arrow.down")
-                        .bold()
-                        .foregroundColor(.white)
-                }.buttonStyle(.bordered)
-                    .background(Color.blue.opacity(0.4))
-                    .cornerRadius(8)
-                
+                // Muovi in basso
+                pressableButton(
+                    action: { moveObject.moveDown() },
+                    imageName: "arrow.down"
+                )
             }
         }
+    }
+
+    // MARK: - Pressable Button Component
+    private func pressableButton(action: @escaping () -> Void, imageName: String) -> some View {
+        Button(action: {
+            action() // Esegui una sola volta al click singolo
+        }) {
+            Image(systemName: imageName)
+                .bold()
+                .foregroundColor(.white)
+        }
+        .buttonStyle(.bordered)
+        .background(Color.blue.opacity(0.4))
+        .cornerRadius(8)
+        .simultaneousGesture(
+            LongPressGesture(minimumDuration: 0.2) // Pressione prolungata
+                .onEnded { _ in
+                    startTimer(action: action) // Avvia il timer dopo 0.2 secondi
+                }
+        )
+        .onChange(of: isPressed) { newValue in
+            if !newValue { // Se il pulsante è stato rilasciato, ferma il timer
+                stopTimer()
+            }
+        }
+        .onLongPressGesture(minimumDuration: 0.2, pressing: { isPressing in
+            isPressed = isPressing // Aggiorna lo stato del pulsante
+        }, perform: {})
+    }
+
+    // MARK: - Timer Management
+    private func startTimer(action: @escaping () -> Void) {
+        stopTimer() // Ferma eventuali timer esistenti
+        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
+            action()
+        }
+        timer?.fire() // Esegui l'azione immediatamente al primo tocco
+    }
+
+    private func stopTimer() {
+        timer?.invalidate()
+        timer = nil
     }
 }

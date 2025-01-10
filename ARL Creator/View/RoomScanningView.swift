@@ -28,7 +28,7 @@ struct RoomScanningView: View {
                 if isScanningRoom, let captureView = captureView {
                     captureView
                         .edgesIgnoringSafeArea(.all)
-                        .toolbar(.hidden, for: .automatic)
+                        .toolbarBackground(.hidden, for: .navigationBar) 
                 } else {
                     Text("Press Start to begin scanning of \(namedUrl.name)")
                         .foregroundColor(.gray)
@@ -46,6 +46,12 @@ struct RoomScanningView: View {
                                     //let finalMapName = mapName.isEmpty ? "Map_\(Date().timeIntervalSince1970)" : mapName
                                     
                                     captureView?.stopCapture(pauseARSession: false)
+                                },
+                                onRestart: {
+                                    captureView?.redoCapture()
+                                },
+                                saveMap: {
+                                    print("saveMap")
                                 }
                             )
                             .padding()
@@ -64,11 +70,12 @@ struct RoomScanningView: View {
                             captureView = CaptureViewContainer(namedUrl: namedUrl)
                         }) {
                             Text("Start")
-                                .font(.largeTitle).bold()
+                                .font(.title)
+                                .bold()
                                 .padding()
                                 .background(Color.green)
                                 .foregroundColor(.white)
-                                .cornerRadius(10)
+                                .cornerRadius(30)
                         }
                         .padding()
                     }

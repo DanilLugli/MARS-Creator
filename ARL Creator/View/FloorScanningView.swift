@@ -9,7 +9,7 @@ struct FloorScanningView: View {
     @State private var worldMapNewFeatures: Int = 0
     @State private var worldMapCounter: Int = 0
     @State private var placeSquare = false
-    @State var isScanningRoom = false
+    @State var isScanningFloor = false
     
     @State var captureView: FloorCaptureViewContainer?
     
@@ -17,6 +17,7 @@ struct FloorScanningView: View {
     @State var message = ""
     @State private var mapName: String = ""
     @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) var dismiss
 
     init(namedUrl: NamedURL) {
         self._namedUrl = State(initialValue: namedUrl)
@@ -25,11 +26,13 @@ struct FloorScanningView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                if isScanningRoom, let captureView = captureView {
+                if isScanningFloor, let captureView = captureView {
                     captureView
                         .edgesIgnoringSafeArea(.all)
-                        .toolbar(.hidden, for: .automatic)
-                } else {
+                        .toolbarBackground(.hidden, for: .navigationBar) 
+                }
+                
+                else {
                     Text("Press Start to begin scanning of \(namedUrl.name)")
                         .foregroundColor(.gray)
                         .bold()
@@ -37,14 +40,24 @@ struct FloorScanningView: View {
                 
                 VStack {
                     HStack {
-                        if isScanningRoom {
+                        if isScanningFloor {
+                            
+                            //SAVE ALTITUDE
+                            
                             ScanningCardView(
                                 messagesFromWorldMap: messagesFromWorldMap,
                                 newFeatures: namedUrl is Room ? worldMapNewFeatures : nil,
+                                
                                 onSave: {
-                                    isScanningRoom = true
+                                    isScanningFloor = true
                                     _ = mapName.isEmpty ? "Map_\(Date().timeIntervalSince1970)" : mapName
                                     captureView?.stopCapture()
+                                },
+                                onRestart: {
+                                    captureView?.redoCapture()
+                                },
+                                saveMap: {
+                                    print("saveMap")
                                 }
                             )
                             .ignoresSafeArea()
@@ -58,17 +71,18 @@ struct FloorScanningView: View {
                     
                     Spacer()
                     
-                    if !isScanningRoom {
+                    if !isScanningFloor {
                         Button(action: {
-                            isScanningRoom = true
+                            isScanningFloor = true
                             captureView = FloorCaptureViewContainer(namedUrl: namedUrl)
                         }) {
                             Text("Start")
-                                .font(.largeTitle).bold()
+                                .font(.title)
+                                .bold()
                                 .padding()
                                 .background(Color.green)
                                 .foregroundColor(.white)
-                                .cornerRadius(10)
+                                .cornerRadius(30)
                         }
                         .padding()
                     }
@@ -90,16 +104,21 @@ struct FloorScanningView: View {
                         self.worldMapNewFeatures = newFeatures
                     }
                 }
-            }
-            .background(Color.customBackground.ignoresSafeArea())
-            .onReceive(NotificationCenter.default.publisher(for: .genericMessage)) { notification in
-                if let message = notification.object as? String {
-                    self.message = message
+                .onReceive(NotificationCenter.default.publisher(for: .genericMessage)) { notification in
+                    if let message = notification.object as? String {
+                        self.message = message
+                    }
                 }
             }
-            .navigationTitle(namedUrl.name)
-            .onDisappear {
-                //captureView?.stopCapture(pauseARSession: false, saveData: false)
+            
+            .background(Color.customBackground.ignoresSafeArea())
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text(namedUrl.name)
+                        .font(.system(size: 26, weight: .heavy))
+                        .foregroundColor(.white)
+                }
             }
         }
     }
