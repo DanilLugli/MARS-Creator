@@ -324,50 +324,47 @@ struct FloorView: View {
     
     private var addRoomSheet: some View {
         VStack(spacing: 16) {
-            Text("Add New Room")
-                .font(.title)
-                .foregroundColor(.customBackground)
-                .bold()
-                .padding(.top)
+            HStack {
+                Image(systemName: "plus.viewfinder")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 24, height: 24)
+                    .foregroundColor(.blue)
+                
+                Text("New Room")
+                    .font(.title)
+                    .foregroundColor(.customBackground)
+                    .bold()
+            }
             
-            Image(systemName: "plus.viewfinder")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 50, height: 50)
-                .foregroundColor(.blue)
-            
-            TextField("Enter New Room Name", text: $newRoomName)
+            TextField("Room Name", text: $newRoomName)
                 .padding()
                 .foregroundColor(.customBackground)
                 .background(Color(.systemGray6))
                 .cornerRadius(8)
                 .padding(.horizontal)
             
-            HStack {
-                Button(action: {
-                    addNewRoom()
-                    isRoomSheetPresented = false
-                }) {
-                    Text("Add")
-                        .font(.title)
-                        .bold()
-                        .padding()
-                        .background(Color.green)
-                        .foregroundColor(.white)
-                        .cornerRadius(30)
-                }
-                .disabled(newRoomName.isEmpty)
+            Button(action: {
+                addNewRoom()
+                isRoomSheetPresented = false
+            }) {
+                Text("Create Room")
+                    .font(.headline)
+                    .bold()
+                    .padding()
+                    .background(newRoomName.isEmpty ? Color.gray : Color.green)
+                    .foregroundColor(.white)
+                    .cornerRadius(30)
             }
+            .disabled(newRoomName.isEmpty)
             .padding(.horizontal)
-            .padding(.bottom)
-
+            .padding(.top, 20)
         }
-        .presentationDetents([.height(370)])
+        .presentationDetents([.height(280)])
         .presentationDragIndicator(.visible)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.white)
         .cornerRadius(16)
-        .padding()
     }
     
     private func addNewRoom() {

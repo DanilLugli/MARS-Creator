@@ -157,51 +157,47 @@ struct BuildingView: View {
     // Custom sheet content for adding a new floor
     private var addFloorSheet: some View {
         VStack(spacing: 16) {
-            Text("Add New Floor")
-                .font(.title)
-                .foregroundColor(.customBackground)
-                .bold()
-                .padding(.top)
+            HStack {
+                Image(systemName: "plus.viewfinder")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 24, height: 24)
+                    .foregroundColor(.blue)
+                
+                Text("New Floor")
+                    .font(.title)
+                    .foregroundColor(.customBackground)
+                    .bold()
+            }
             
-            Image(systemName: "plus.viewfinder")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 50, height: 50)
-                .foregroundColor(.blue)
-            
-            TextField("Enter New Floor Name", text: $newFloorName)
+            TextField("Floor Name", text: $newFloorName)
                 .padding()
                 .foregroundColor(.customBackground)
                 .background(Color(.systemGray6))
                 .cornerRadius(8)
                 .padding(.horizontal)
             
-            
-            HStack {
-                Button(action: {
-                    addNewFloor()
-                    isAddFloorSheetPresented = false
-                }) {
-                    Text("Add")
-                        .font(.title)
-                        .bold()
-                        .padding()
-                        .background(Color.green)
-                        .foregroundColor(.white)
-                        .cornerRadius(30)
-                }
-                .disabled(newFloorName.isEmpty)
+            Button(action: {
+                addNewFloor()
+                isAddFloorSheetPresented = false
+            }) {
+                Text("Create Floor")
+                    .font(.headline)
+                    .bold()
+                    .padding()
+                    .background(newFloorName.isEmpty ? Color.gray : Color.green)
+                    .foregroundColor(.white)
+                    .cornerRadius(30)
             }
+            .disabled(newFloorName.isEmpty)
             .padding(.horizontal)
-            .padding(.bottom)
-
+            .padding(.top, 20)
         }
-        .presentationDetents([.height(370)])
+        .presentationDetents([.height(280)])
         .presentationDragIndicator(.visible)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.white)
         .cornerRadius(16)
-        .padding()
     }
     
     // Function to handle adding a new floor

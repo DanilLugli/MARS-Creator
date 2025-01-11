@@ -80,51 +80,47 @@ struct BuildingsView: View {
     // Custom sheet content
     private var addBuildingSheet: some View {
         VStack(spacing: 16) {
-            Text("Add New Building")
-                .font(.title)
-                .foregroundColor(.customBackground)
-                .bold()
-                .padding(.top)
+            HStack {
+                Image(systemName: "plus.viewfinder")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 24, height: 24)
+                    .foregroundColor(.blue)
+                
+                Text("New Building")
+                    .font(.title)
+                    .foregroundColor(.customBackground)
+                    .bold()
+            }
             
-            Image(systemName: "plus.viewfinder")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 50, height: 50)
-                .foregroundColor(.blue)
-            
-            TextField("Enter new Building Name", text: $newBuildingName)
+            TextField("Building Name", text: $newBuildingName)
                 .padding()
                 .background(Color(.systemGray6))
                 .foregroundColor(.customBackground)
                 .cornerRadius(8)
                 .padding(.horizontal)
             
-            HStack {
-                Button(action: {
-                    addNewBuilding()
-                    isAddBuildingSheetPresented = false
-                }) {
-                    Text("Add")
-                        .font(.title)
-                        .bold()
-                        .padding()
-                        .background(Color.green)
-                        .foregroundColor(.white)
-                        .cornerRadius(30)
-                }
-                .disabled(newBuildingName.isEmpty)
+            Button(action: {
+                addNewBuilding()
+                isAddBuildingSheetPresented = false
+            }) {
+                Text("Create Building")
+                    .font(.headline)
+                    .bold()
+                    .padding()
+                    .background(newBuildingName.isEmpty ? Color.gray : Color.green)
+                    .foregroundColor(.white)
+                    .cornerRadius(30)
             }
+            .disabled(newBuildingName.isEmpty)
             .padding(.horizontal)
-            .padding(.bottom)
-
-            
+            .padding(.top, 20)
         }
-        .presentationDetents([.height(370)])
+        .presentationDetents([.height(280)])
         .presentationDragIndicator(.visible)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.white)
         .cornerRadius(16)
-        .padding()
     }
     
     // Function to handle building creation
