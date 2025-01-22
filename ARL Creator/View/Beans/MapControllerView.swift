@@ -92,7 +92,7 @@ struct MapControllerView: View {
                 }
         )
         .onChange(of: isPressed) { newValue in
-            if !newValue { // Se il pulsante è stato rilasciato, ferma il timer
+            if !newValue {
                 stopTimer()
             }
         }
@@ -107,7 +107,7 @@ struct MapControllerView: View {
         timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
             action()
         }
-        timer?.fire() // Esegui l'azione immediatamente al primo tocco
+        timer?.fire() 
     }
 
     private func stopTimer() {

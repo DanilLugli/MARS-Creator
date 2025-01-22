@@ -113,7 +113,6 @@ func saveConversionGlobalLocal(_ conversions: [String: Any], _ URLFile: URL, _ f
 
 func updateJSONFile(_ dict: [String: Any], _ URLFile: URL, _ floor: Floor) {
     
-    print("CALLING updateJSONFile ")
     let fileManager = FileManager.default
     let fileURL = URLFile.appending(path: "\(floor.name).json")
     
@@ -145,13 +144,12 @@ func updateJSONFile(_ dict: [String: Any], _ URLFile: URL, _ floor: Floor) {
         }
     } else {
         do {
-            // Creazione della directory se non esiste
+
             let directory = fileURL.deletingLastPathComponent()
             if !fileManager.fileExists(atPath: directory.path) {
                 try fileManager.createDirectory(at: directory, withIntermediateDirectories: true, attributes: nil)
             }
-            
-            // Creazione del nuovo file JSON
+
             let jsonData = try JSONSerialization.data(withJSONObject: dict, options: .prettyPrinted)
             try jsonData.write(to: fileURL)
         } catch {

@@ -9,6 +9,7 @@ import SwiftUI
 import Foundation
 import UIKit
 import UniformTypeIdentifiers
+import AlertToast
 
 
 struct ManualRoomPositionView: View {
@@ -16,9 +17,11 @@ struct ManualRoomPositionView: View {
     @ObservedObject var floor: Floor
     @ObservedObject var room: Room
     
-    @State private var showUpdateAlert = false
+    @State private var showSaveMatrixToast = false
     
     @State var mapPositionView = SCNViewUpdatePositionRoomContainer()
+    
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View{
         VStack{
@@ -51,28 +54,26 @@ struct ManualRoomPositionView: View {
         }
         .background(Color.customBackground)
         .foregroundColor(.white)
-        .navigationTitle("Positioning Room")
+        .navigationTitle("Positioning \(room.name)")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button(action: {
                     floor.updateAssociationMatrixInJSON(for: room.name, fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"))
-                    showUpdateAlert = true
+                    
+                    floor.planimetryRooms.handler.loadRoomsMaps(floor: floor, rooms: floor.rooms)
+                    
+                    showSaveMatrixToast = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        dismiss()
+                    }
                 }) {
                     Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 24))  // Dimensione dell'icona
+                        .font(.system(size: 24))  
                         .foregroundStyle(.white, .green, .green)
                 }
             }
-        }
-        .alert(isPresented: $showUpdateAlert) {
-            Alert(
-                title: Text("ATTENTION").foregroundColor(.red),
-                message: Text("Room Position Saved"),
-                dismissButton: .default(Text("OK")){
-                    floor.planimetryRooms.handler.loadRoomsMaps(floor: floor, rooms: floor.rooms, borders: true)
-                    floor.objectWillChange.send()
-                }
-            )
+        }.toast(isPresenting: $showSaveMatrixToast){
+            AlertToast(type: .complete(Color.green), title: "Room position saved successfully ")
         }
     }
 }

@@ -4,18 +4,26 @@ import SceneKit
 import SwiftUI
 
 class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
+
     private var _id: UUID = UUID()
     @Published private var _name: String
-    private var _lastUpdate: Date
-    @Published private var _planimetry: SCNViewContainer?
-    @Published private var _referenceMarkers: [ReferenceMarker]
-    @Published private var _transitionZones: [TransitionZone]
+
     @Published private var _scene: SCNScene?
     @Published private var _sceneObjects: [SCNNode]?
+    
+    @Published private var _planimetry: SCNViewContainer?
+    //@Published private var _roomPosition: SCNViewMapContainer?
+    @Published private var _referenceMarkers: [ReferenceMarker]
+    @Published private var _transitionZones: [TransitionZone]
+    
+    @Published private var _connections: [AdjacentFloorsConnection] = []
+    
     private var _roomURL: URL
     @Published private var _color: UIColor
+    private var _lastUpdate: Date
     
     weak var parentFloor: Floor?
+
     
     init(_id: UUID = UUID(), _name: String, _lastUpdate: Date, _planimetry: SCNViewContainer? = nil, _referenceMarkers: [ReferenceMarker], _transitionZones: [TransitionZone], _scene: SCNScene? = SCNScene(), _sceneObjects: [SCNNode]? = nil, _roomURL: URL, parentFloor: Floor? = nil) {
         self._name = _name
@@ -26,7 +34,15 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         self._scene = _scene ?? SCNScene()
         self._sceneObjects = _sceneObjects
         self._roomURL = _roomURL
-        self._color = Room.randomColor().withAlphaComponent(0.3)
+        // Carica il colore salvato o genera un nuovo colore casuale
+        if let savedColor = Room.loadColor(for: _name) {
+            self._color = savedColor
+        } else {
+            let randomColor = Room.randomColor().withAlphaComponent(0.3)
+            self._color = randomColor
+            Room.saveColor(randomColor, for: _name) // Salva il nuovo colore
+        }
+        
         self.parentFloor = parentFloor
     }
     
@@ -90,6 +106,15 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         }
     }
     
+    var connections: [AdjacentFloorsConnection] {
+        get {
+            return _connections
+        }
+        set {
+            _connections = newValue
+        }
+    }
+    
     var roomURL: URL {
         get {
             return _roomURL
@@ -112,13 +137,34 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         return room.parentFloor
     }
     
-    var color: UIColor{
-        get{
+    var color: UIColor {
+        get {
             return _color
         }
-        set{
+        set {
             _color = newValue
+            Room.saveColor(newValue, for: _name) // Salva il colore ogni volta che viene aggiornato
         }
+    }
+    
+    // MARK: - Persistenza del colore
+    private static func saveColor(_ color: UIColor, for roomName: String) {
+        guard let data = try? NSKeyedArchiver.archivedData(withRootObject: color, requiringSecureCoding: false) else {
+            print("Failed to encode color for room \(roomName)")
+            return
+        }
+        
+        UserDefaults.standard.set(data, forKey: "RoomColor_\(roomName)")
+        print("Color saved for room \(roomName)")
+    }
+    
+    private static func loadColor(for roomName: String) -> UIColor? {
+        guard let data = UserDefaults.standard.data(forKey: "RoomColor_\(roomName)"),
+              let color = try? NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? UIColor else {
+            return nil
+        }
+        print("Color loaded for room \(roomName)")
+        return color
     }
     
     func hasConnections() -> Bool {
@@ -205,39 +251,31 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         print("-----------------------------\n")
     }
     
-    func addConnection(from fromTransitionZone: TransitionZone, to targetRoom: Room, targetTransitionZone: TransitionZone) {
-
+    func addConnection(to targetRoom: Room, altitude: Float) {
+        // Crea la connessione dalla stanza corrente alla stanza di destinazione
         let connectionFrom = AdjacentFloorsConnection(
             name: "Connection to \(targetRoom.name)",
-            fromTransitionZone: fromTransitionZone.name,
             targetFloor: targetRoom.getFloor(of: targetRoom)?.name ?? "Error ParentFloor",
             targetRoom: targetRoom.name,
-            targetTransitionZone: targetTransitionZone.name
+            altitude: altitude
         )
         
+        // Crea la connessione inversa dalla stanza di destinazione alla stanza corrente
         let connectionTo = AdjacentFloorsConnection(
             name: "Connection to \(self.name)",
-            fromTransitionZone: targetTransitionZone.name,
             targetFloor: self.roomURL.lastPathComponent,
             targetRoom: self.name,
-            targetTransitionZone: fromTransitionZone.name
+            altitude: -altitude // L'altitudine inversa rispetto alla connessione iniziale
         )
         
-        fromTransitionZone.connection?.append(connectionFrom)
-        targetTransitionZone.connection?.append(connectionTo)
+        // Aggiungi la connessione alla stanza corrente
+        self.connections.append(connectionFrom)
         
-        if let index = _transitionZones.firstIndex(where: { $0.id == fromTransitionZone.id }) {
-            _transitionZones[index].connection?.append(connectionFrom)
-        }
+        // Aggiungi la connessione inversa alla stanza di destinazione
+        targetRoom.connections.append(connectionTo)
         
-        if let targetIndex = targetRoom._transitionZones.firstIndex(where: { $0.id == targetTransitionZone.id }) {
-            targetRoom._transitionZones[targetIndex].connection?.append(connectionTo)
-        }
-        
-
-        print("Connection added from \(fromTransitionZone.name) in room \(self.name) to \(targetTransitionZone.name) in room \(targetRoom.name).")
-        print("Connection from \(fromTransitionZone.name) to \(targetTransitionZone.name): \(connectionFrom.name)")
-        print("Connection from \(targetTransitionZone.name) to \(fromTransitionZone.name): \(connectionTo.name)")
+        print("Connection added from room \(self.name) to room \(targetRoom.name) with altitude \(altitude).")
+        print("Reverse connection added from room \(targetRoom.name) to room \(self.name) with altitude \(-altitude).")
     }
     
     func saveConnectionToJSON(for transitionZoneName: String, connection: AdjacentFloorsConnection, to url: URL) throws {
@@ -245,24 +283,80 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     }
     
     func debugConnectionPrint() {
-            print("Room: \(self.name)")
-            print("Transition Zones and their Connections:")
-
-            for transitionZone in self.transitionZones {
-                print("Transition Zone: \(transitionZone.name)")
-                
-                if let connections = transitionZone.connection, !connections.isEmpty {
-                    for (index, connection) in connections.enumerated() {
-                        print("\tConnection \(index + 1): \(connection.name)")
-                        
-                        if let adjacentConnection = connection as? AdjacentFloorsConnection {
-                            print("\t\tTarget Room: \(adjacentConnection.targetRoom)")
-                            print("\t\tTarget Floor: \(adjacentConnection.targetFloor)")
-                        }
+        print("Room: \(self.name)")
+        print("Transition Zones and their Connections:")
+        
+        for transitionZone in self.transitionZones {
+            print("Transition Zone: \(transitionZone.name)")
+            
+            if let connections = transitionZone.connection, !connections.isEmpty {
+                for (index, connection) in connections.enumerated() {
+                    print("\tConnection \(index + 1): \(connection.name)")
+                    
+                    if let adjacentConnection = connection as? AdjacentFloorsConnection {
+                        print("\t\tTarget Room: \(adjacentConnection.targetRoom)")
+                        print("\t\tTarget Floor: \(adjacentConnection.targetFloor)")
                     }
-                } else {
-                    print("\tNo connections found.")
                 }
+            } else {
+                print("\tNo connections found.")
             }
         }
+    }
+    
+    func validateRoom() {
+        print("Validating Room: \(self.name)")
+        
+        // Verifica il nome
+        if _name.isEmpty {
+            print("Error: Room name is missing.")
+        }
+        
+        // Verifica la data di ultimo aggiornamento
+        if _lastUpdate.timeIntervalSince1970 == 0 {
+            print("Error: Last update date is invalid or missing.")
+        }
+        
+        // Verifica la planimetria
+        if _planimetry == nil {
+            print("Error: Planimetry is missing.")
+        }
+        
+        // Verifica i marker di riferimento
+        if _referenceMarkers.isEmpty {
+            print("Error: No reference markers are defined.")
+        }
+        
+        // Verifica le zone di transizione
+        if _transitionZones.isEmpty {
+            print("Error: No transition zones are defined.")
+        }
+        
+        // Verifica la scena
+        if _scene == nil {
+            print("Error: Scene is missing.")
+        }
+        
+        // Verifica gli oggetti della scena
+        if _sceneObjects == nil || _sceneObjects?.isEmpty == true {
+            print("Error: Scene objects are missing.")
+        }
+        
+        // Verifica l'URL della stanza
+        if _roomURL.path.isEmpty || !FileManager.default.fileExists(atPath: _roomURL.path) {
+            print("Error: Room URL is invalid or does not exist.")
+        }
+        
+        // Verifica il colore
+        if _color == .clear {
+            print("Error: Room color is invalid.")
+        }
+        
+        // Verifica il piano padre (opzionale, ma utile per debugging)
+        if parentFloor == nil {
+            print("Warning: Room does not have an associated parent floor.")
+        }
+        
+        print("Validation complete for Room: \(self.name)")
+    }
 }

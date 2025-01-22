@@ -34,10 +34,11 @@ struct ConnectedDotsView: View {
                         
                         if index < labels.count - 1 {
                             VStack(alignment: .leading) {
-                                Line()
-                                    .stroke(Color.white, lineWidth: 2)
-                                    .frame(width: dotSize, height: 1)
-                                    .padding(.top, 8) // Per distanziare la linea dal cerchio
+                                Image(systemName: "arrow.right")
+                                    .font(.system(size: 16))
+                                    .bold()
+                                    .foregroundColor(.white)
+                                    .padding(.top,3) // Per distanziare la freccia dal cerchio
                                 Spacer()
                             }.frame(height: 34)                        }
                     }

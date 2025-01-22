@@ -1,4 +1,5 @@
 import SwiftUI
+import AlertToast
 import Foundation
 
 struct BuildingView: View {
@@ -12,6 +13,12 @@ struct BuildingView: View {
     @State private var showDeleteConfirmation = false
     @State private var isAddFloorSheetPresented = false
     @State private var newFloorName = ""
+    
+    @State private var showAddFloorToast = false
+    @State private var showDeleteBuildingToast = false
+    @State private var showRenameBuildingToast = false
+    
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
         NavigationStack {
@@ -31,10 +38,19 @@ struct BuildingView: View {
                     
                     if building.floors.isEmpty {
                         VStack {
-                            Text("Add Floor to \(building.name) with + icon")
-                                .foregroundColor(.gray)
-                                .font(.headline)
-                                .padding()
+                            HStack(spacing: 4) {
+                                Text("Add Floor with")
+                                    .foregroundColor(.gray)
+                                    .font(.headline)
+                                
+                                Image(systemName: "plus.circle")
+                                    .foregroundColor(.gray)
+                                
+                                Text("icon")
+                                    .foregroundColor(.gray)
+                                    .font(.headline)
+                            }
+                            .padding()
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(Color.customBackground)
@@ -76,6 +92,7 @@ struct BuildingView: View {
                         print("Errore durante la rinomina: \(error.localizedDescription)")
                     }
                     isRenameSheetPresented = false
+                    showRenameBuildingToast = true
                 }
             })
             
@@ -131,6 +148,10 @@ struct BuildingView: View {
         .confirmationDialog("Confirm Deletion", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
             Button("Delete", role: .destructive) {
                 BuildingModel.getInstance().deleteBuilding(building: building)
+                showDeleteBuildingToast = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    dismiss()
+                }
                 print("Building eliminato")
             }
             
@@ -141,13 +162,19 @@ struct BuildingView: View {
         .sheet(isPresented: $isAddFloorSheetPresented) {
             addFloorSheet
         }
+        .toast(isPresenting: $showAddFloorToast) {
+            AlertToast(type: .complete(Color.green), title: "Floor added")
+        }
+        .toast(isPresenting: $showDeleteBuildingToast) {
+            AlertToast(type: .complete(Color.green), title: "Building deleted successfully")
+        }
+        .toast(isPresenting: $showRenameBuildingToast){
+            AlertToast(displayMode: .banner(.slide), type: .regular, title: "Building Renamed")
+        }
     }
     
     var filteredFloors: [Floor] {
         if searchText.isEmpty {
-//            building.floors.forEach { building in
-//                building.debugPrint()
-//            }
             return building.floors
         } else {
             return building.floors.filter { $0.name.lowercased().contains(searchText.lowercased()) }
@@ -218,12 +245,12 @@ struct BuildingView: View {
             _rooms: [],
             _sceneObjects: nil,
             _scene: nil,
-            _sceneConfiguration: nil,
             _floorURL: URL(fileURLWithPath: "")
         )
         
         building.addFloor(floor: newFloor)
-        newFloorName = "" // Reset the input field
+        newFloorName = ""
+        showAddFloorToast = true
     }
 }
 

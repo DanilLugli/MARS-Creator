@@ -1,4 +1,5 @@
 import SwiftUI
+import AlertToast
 import Foundation
 
 struct BuildingsView: View {
@@ -8,19 +9,30 @@ struct BuildingsView: View {
     @State private var selectedBuilding: Building? = nil
     @State private var navigationPath = NavigationPath()
     
-    // State variables for the custom "alert" using a sheet
     @State private var isAddBuildingSheetPresented = false
     @State private var newBuildingName = ""
     
+    @State private var showAddBuildingToast = false
+   
+
     var body: some View {
         NavigationStack(path: $navigationPath) {
             VStack {
                 if buildingsModel.getBuildings().isEmpty {
                     VStack {
-                        Text("Add Building with + icon")
-                            .foregroundColor(.gray)
-                            .font(.headline)
-                            .padding()
+                        HStack(spacing: 4) {
+                            Text("Add Building with")
+                                .foregroundColor(.gray)
+                                .font(.headline)
+                            
+                            Image(systemName: "plus.circle")
+                                .foregroundColor(.gray)
+                            
+                            Text("icon")
+                                .foregroundColor(.gray)
+                                .font(.headline)
+                        }
+                        .padding()
                     }
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -65,6 +77,9 @@ struct BuildingsView: View {
             }
             .sheet(isPresented: $isAddBuildingSheetPresented) {
                 addBuildingSheet
+            }
+            .toast(isPresenting: $showAddBuildingToast) {
+                AlertToast(type: .complete(Color.green), title: "Building added")
             }
         }
     }
@@ -122,15 +137,16 @@ struct BuildingsView: View {
         .background(Color.white)
         .cornerRadius(16)
     }
-    
-    // Function to handle building creation
+
     private func addNewBuilding() {
         guard !newBuildingName.isEmpty else { return }
         
         let newBuilding = Building(name: newBuildingName, lastUpdate: Date(), floors: [], buildingURL: URL(fileURLWithPath: "") )
         buildingsModel.addBuilding(building: newBuilding)
-        newBuildingName = "" // Reset the input field
+        newBuildingName = ""
         isAddBuildingSheetPresented = false
+        showAddBuildingToast = true
+        
     }
 }
 

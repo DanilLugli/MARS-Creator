@@ -4,6 +4,7 @@ struct ConnectionCardView: View {
     var name: String
     var date: Date?
     var isSelected: Bool
+    var isFloor: Bool
 
     var body: some View {
         ZStack {
@@ -12,9 +13,21 @@ struct ConnectionCardView: View {
                 .background(RoundedRectangle(cornerRadius: 10).fill(Color.white))
             
             VStack(alignment: .leading) {
+                if isFloor{
+                    Text("Floor")
+                        .font(.system(size: 12))
+                        .foregroundColor(.gray)
+                }
+                else{
+                    Text("Room")
+                        .font(.system(size: 12))
+                        .foregroundColor(.gray)
+                }
+                
                 Text(name)
                     .font(.system(size: 14, weight: .bold))
                     .foregroundColor(.black)
+                    .padding(.top, 2)
                 
                 if let date = date {
                     Text("\(dateFormatter.string(from: date))")
@@ -33,7 +46,7 @@ struct ConnectionCardView: View {
 
 struct ConnectionCardView_Previews: PreviewProvider {
     static var previews: some View {
-        ConnectionCardView(name: "Room", date: nil, isSelected: true)
+        ConnectionCardView(name: "Room", date: nil, isSelected: true, isFloor: true)
     }
 }
 

@@ -2,6 +2,7 @@
 import Foundation
 import SwiftUI
 import SceneKit
+import AlertToast
 
 struct AutomaticRoomPositionView: View {
     
@@ -22,6 +23,7 @@ struct AutomaticRoomPositionView: View {
     
     @State private var showButton1 = false
     @State private var showButton2 = false
+    @State private var showAddRoomPositionToast = false
     @State private var showAlert = false
     @State private var showSheet = false
     
@@ -107,7 +109,7 @@ struct AutomaticRoomPositionView: View {
                             .shadow(color: Color.gray, radius: 3)
                     }.onAppear{
                         originalRoomNodes = room.sceneObjects ?? []
-                        roomNodes = originalRoomNodes // Imposta i nodi originali alla comparsa
+                        roomNodes = originalRoomNodes
                     }
                     
                     HStack {
@@ -122,16 +124,10 @@ struct AutomaticRoomPositionView: View {
                             }
                         }
                         .onChange(of: selectedRoomNodeName) { oldValue, newValue in
-                            print("CHANGE COLOR")
-                            
-                            // Cambia il colore del nodo con il nome selezionato
                             room.planimetry.changeColorOfNode(nodeName: selectedRoomNodeName, color: UIColor.red)
-                            
-                            // Aggiorna il nodo selezionato basandoti sul nuovo valore
                             selectedRoomNode = room.sceneObjects?.first(where: { node in
                                 node.name == newValue
                             })
-                            print("SELEZIONATO: \(String(describing: selectedRoomNode))")
                         }
                     }
                 }
@@ -141,18 +137,13 @@ struct AutomaticRoomPositionView: View {
                        let _selectedGlobalNode = selectedFloorNode {
                         Button("Confirm Relation") {
                             matchingNodesForAPI.append((_selectedLocalNode, _selectedGlobalNode))
-
+                            
                             selectedRoomNode = nil
                             selectedFloorNode = nil
-
-//                            floor.planimetry.drawSceneObjects(borders: true)
-//                            room.planimetry.drawSceneObjects(borders: true)
-
-                            print(_selectedLocalNode)
-                            print(_selectedGlobalNode)
-                            print(selectedMap.lastPathComponent)
-                            print(matchingNodesForAPI)
-
+                            
+                            room.planimetry.resetColorNode()
+                            floor.planimetry.resetColorNode()
+                            
                             resetRoomNodes()
                         }.frame(width: 160, height: 50)
                             .foregroundStyle(.white)
@@ -164,6 +155,9 @@ struct AutomaticRoomPositionView: View {
                     if matchingNodesForAPI.count >= 3{
                         Button("Create Matrix") {
                             Task {
+                                room.planimetry.resetColorNode()
+                                floor.planimetry.resetColorNode()
+                                
                                 print(matchingNodesForAPI)
                                 response = try await fetchAPIConversionLocalGlobal(localName: room.name, nodesList: matchingNodesForAPI)
                                 if let httpResponse = response.0 {
@@ -174,7 +168,15 @@ struct AutomaticRoomPositionView: View {
                                 }
                                 
                                 responseFromServer = true
-                                showAlert = true
+                                //showAlert = true
+                                saveConversionGlobalLocal(response.1, floor.floorURL, floor)
+                                
+                                floor.planimetryRooms.handler.loadRoomsMaps(
+                                    floor: floor,
+                                    rooms: [room]
+                                )
+                                
+                                showAddRoomPositionToast = true
                             }
                         }.frame(width: 160, height: 50)
                             .foregroundColor(.white)
@@ -186,19 +188,22 @@ struct AutomaticRoomPositionView: View {
             }
             .background(Color.customBackground)
             .navigationTitle("Create Room Position")
-            .alert(isPresented: $showAlert) {
-                Alert(
-                    title: Text("ROOM POSITION CREATED")
-                        .font(.system(size: 26, weight: .heavy))
-                        .foregroundColor(.white),
-                    message: Text("Do you want to save the room position?"),
-                    primaryButton: .default(Text("SAVE ROOM POSITION")) {
-                        saveConversionGlobalLocal(response.1, floor.floorURL, floor)
-                        showAlert = false
-                    },
-                    secondaryButton: .cancel(Text("Cancel"))
-                )
+            .toast(isPresenting: $showAddRoomPositionToast) {
+                AlertToast(type: .complete(Color.green), title: "Room position created successfully")
             }
+//            .alert(isPresented: $showAlert) {
+//                Alert(
+//                    title: Text("ROOM POSITION CREATED")
+//                        .font(.system(size: 26, weight: .heavy))
+//                        .foregroundColor(.white),
+//                    message: Text("Do you want to save the room position?"),
+//                    primaryButton: .default(Text("SAVE ROOM POSITION")) {
+//                        saveConversionGlobalLocal(response.1, floor.floorURL, floor)
+//                        showAlert = false
+//                    },
+//                    secondaryButton: .cancel(Text("Cancel"))
+//                )
+//            }
         }
     }
     
@@ -212,7 +217,6 @@ struct AutomaticRoomPositionView: View {
             return nodeType == selectedType
         }
         
-        // Aggiorna il nodo selezionato nel picker della room
         if let firstNodeName = roomNodes.first?.name {
             selectedRoomNodeName = firstNodeName
         } else {
@@ -224,6 +228,27 @@ struct AutomaticRoomPositionView: View {
     func resetRoomNodes() {
         roomNodes = originalRoomNodes
     }
+    
+//    func resetColorOfNode(nodeName: String) {
+//        // Trova tutti i nodi aggiunti con il nome "__selected__"
+//        if let nodes = scnView.scene?.rootNode.childNodes(passingTest: { n, _ in
+//            n.name == "__selected__"
+//        }) {
+//            // Rimuove i nodi copiati dalla scena
+//            for node in nodes {
+//                node.removeFromParentNode()
+//            }
+//        }
+//        
+//        // Ripristina il nodo originale
+//        if let originalNode = scnView.scene?.rootNode.childNodes(passingTest: { n, _ in
+//            n.name == nodeName
+//        }).first {
+//            if let originalMaterial = originalNode.geometry?.firstMaterial {
+//                originalMaterial.diffuse.contents = UIColor.white // Colore originale o predefinito
+//            }
+//        }
+//    }
     
     func calculateVolume(of node: SCNNode) -> Float {
         let min = node.boundingBox.min

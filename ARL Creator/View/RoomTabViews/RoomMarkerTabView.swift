@@ -16,10 +16,20 @@ struct RoomMarkerTabView: View {
     var body: some View {
         VStack {
             if room.referenceMarkers.isEmpty {
-                Text("Add Marker to \(room.name) with + icon.")
-                    .foregroundColor(.gray)
-                    .font(.headline)
-                    .padding()
+                HStack{
+                    HStack{
+                        Text("Add Marker with")
+                            .foregroundColor(.gray)
+                            .font(.headline)
+                        
+                        Image(systemName: "plus.circle")
+                            .foregroundColor(.gray)
+                        
+                        Text("icon")
+                            .foregroundColor(.gray)
+                            .font(.headline)
+                    }
+                }
             } else {
                 ScrollView {
                     LazyVStack(spacing: 50) {
@@ -62,7 +72,7 @@ struct MarkerDetailView: View {
         self.oldName = marker.imageName
         
         _newName = State(initialValue: marker.imageName)
-        _newSize = State(initialValue: "\(marker.physicalWidth)") // Mostra la dimensione attuale
+        _newSize = State(initialValue: "\(marker.physicalWidth)")
     }
     
     var body: some View {
@@ -71,51 +81,42 @@ struct MarkerDetailView: View {
                 .edgesIgnoringSafeArea(.all)
             
             VStack {
-                Text("Marker Details")
-                    .font(.title)
-                    .bold()
-                    .foregroundColor(.customBackground)
-                    .padding(.top)
-                
-                if marker.physicalWidth == 0.0 {
-                    Text("Width can't be 0.0")
+                HStack {
+                    Image(systemName: "photo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 24, height: 24)
+                        .foregroundColor(.blue)
+                    
+                    Text("Marker Details")
+                        .font(.title)
+                        .foregroundColor(.customBackground)
                         .bold()
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(
-                            RoundedRectangle(cornerRadius: 10)
-                                .fill(LinearGradient(
-                                    gradient: Gradient(colors: [Color.red.opacity(0.8), Color.red]),
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                ))
-                        )
-                        .padding()
-                }
-                
+                }.padding(.bottom)
                 
                 VStack(alignment: .leading, spacing: 10) {
                     HStack {
                         Image(systemName: "characters.lowercase")
                             .foregroundColor(.customBackground)
                         
-                            Text("Name:")
-                                .font(.headline)
-                                .bold()
-                                .foregroundColor(.customBackground)
-
-                        }
+                        Text("Name:")
+                            .font(.headline)
+                            .bold()
+                            .foregroundColor(.customBackground)
+                        
+                    }
                     
                     TextField("Enter marker name", text: $newName)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .foregroundColor(.customBackground)
+                        .bold()
                         .padding(.bottom)
                     
                     HStack{
                         Image(systemName: "ruler")
                             .foregroundColor(.customBackground)
                         
-                        Text("Size (Meters):")
+                        Text("Width (Meters):")
                             .font(.headline)
                             .bold()
                             .foregroundColor(.customBackground)
@@ -124,30 +125,39 @@ struct MarkerDetailView: View {
                     TextField("Enter marker size", text: $newSize)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .keyboardType(.decimalPad)
-                        .foregroundColor(.customBackground)
+                        .foregroundColor(marker.physicalWidth == 0.0 ? .red: .customBackground)
+                        .bold()
                         .padding(.bottom)
                 }
-                .padding()
                 
-                Button(action: saveChanges) {
-                    Text("Save")
-                        .font(.headline)
-                        .bold()
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .cornerRadius(10)
+                HStack{
+                    Button(action: {
+                        deleteMarker(markerName: marker.imageName)
+                    }) {
+                        Text("Delete")
+                            .font(.headline)
+                            .bold()
+                            .padding()
+                            .background(Color.red)
+                            .foregroundColor(.white)
+                            .cornerRadius(30)
+                    }
+                    
+                    Button(action: saveChanges) {
+                        Text("Save")
+                            .font(.headline)
+                            .bold()
+                            .padding()
+                            .background(Color.green)
+                            .foregroundColor(.white)
+                            .cornerRadius(30)
+                    }
                 }
-                .padding(.top)
-                .padding(.horizontal)
-                
-                Spacer()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding()
         }
-        .presentationDetents(marker.physicalWidth == 0.0 ? [.height(435)] : [.height(370)])
+        .presentationDetents(marker.physicalWidth == 0.0 ? [.height(355)] : [.height(355)])
         .presentationDragIndicator(.visible)
         .alert(isPresented: $showAlert) {
             Alert(
@@ -174,7 +184,21 @@ struct MarkerDetailView: View {
         marker.imageName = newName
         marker.physicalWidth = CGFloat(size)
         
-        let fileMarkerDataURL = room.roomURL.appendingPathComponent("ReferenceMarker").appendingPathComponent("Marker Data.json")
+        let referenceMarkerURL = room.roomURL.appendingPathComponent("ReferenceMarker")
+        let fileMarkerDataURL = referenceMarkerURL.appendingPathComponent("Marker Data.json")
+        let oldFileURL = referenceMarkerURL.appendingPathComponent("\(oldName).jpg")
+        let newFileURL = referenceMarkerURL.appendingPathComponent("\(newName).jpg")
+        
+        do {
+            if FileManager.default.fileExists(atPath: oldFileURL.path) {
+                try FileManager.default.moveItem(at: oldFileURL, to: newFileURL)
+            }
+        }
+        catch {
+            alertMessage = "Failed to rename the image file: \(error.localizedDescription)"
+            showAlert = true
+            return
+        }
         
         marker.saveMarkerData(to: fileMarkerDataURL,
                               old: oldName,
@@ -182,6 +206,33 @@ struct MarkerDetailView: View {
                               size: marker.physicalWidth
         )
         
+        dismiss()
+    }
+    
+    private func deleteMarker(markerName: String) {
+        let referenceMarkerURL = room.roomURL.appendingPathComponent("ReferenceMarker")
+        let markerFileURL = referenceMarkerURL.appendingPathComponent("\(markerName).jpg")
+
+        if let index = room.referenceMarkers.firstIndex(where: { $0.imageName == markerName }) {
+            room.referenceMarkers.remove(at: index)
+        } else {
+            alertMessage = "Marker not found in the room."
+            showAlert = true
+            return
+        }
+
+        do {
+            if FileManager.default.fileExists(atPath: markerFileURL.path) {
+                try FileManager.default.removeItem(at: markerFileURL)
+                print("Marker file deleted successfully.")
+            }
+        } catch {
+            alertMessage = "Failed to delete the marker file: \(error.localizedDescription)"
+            showAlert = true
+        }
+        
+        marker.deleteMarkerData(from: referenceMarkerURL.appendingPathComponent("Marker Data.json"), markerName: marker.imageName)
+
         dismiss()
     }
 }

@@ -1,26 +1,31 @@
 import SwiftUI
+import AlertToast
 import ARKit
 import RoomPlan
 
 struct FloorScanningView: View {
-    @State var namedUrl: NamedURL
+    @State var floor: Floor
     
     @State private var messagesFromWorldMap: String = ""
     @State private var worldMapNewFeatures: Int = 0
     @State private var worldMapCounter: Int = 0
     @State private var placeSquare = false
+    
     @State var isScanningFloor = false
+    @State var showScanningFloorCard = true
+    
+    @State var showCreateFloorPlanimetryToast = false
     
     @State var captureView: FloorCaptureViewContainer?
     
     @State private var dimensions: [String] = []
     @State var message = ""
     @State private var mapName: String = ""
-    @Environment(\.presentationMode) var presentationMode
+    
     @Environment(\.dismiss) var dismiss
 
-    init(namedUrl: NamedURL) {
-        self._namedUrl = State(initialValue: namedUrl)
+    init(floor: Floor) {
+        self.floor = floor
     }
     
     var body: some View {
@@ -33,7 +38,7 @@ struct FloorScanningView: View {
                 }
                 
                 else {
-                    Text("Press Start to begin scanning of \(namedUrl.name)")
+                    Text("Press Start to begin scanning of \(floor.name)")
                         .foregroundColor(.gray)
                         .bold()
                 }
@@ -42,27 +47,54 @@ struct FloorScanningView: View {
                     HStack {
                         if isScanningFloor {
                             
-                            //SAVE ALTITUDE
-                            
-                            ScanningCardView(
-                                messagesFromWorldMap: messagesFromWorldMap,
-                                newFeatures: namedUrl is Room ? worldMapNewFeatures : nil,
-                                
-                                onSave: {
-                                    isScanningFloor = true
-                                    _ = mapName.isEmpty ? "Map_\(Date().timeIntervalSince1970)" : mapName
-                                    captureView?.stopCapture()
-                                },
-                                onRestart: {
-                                    captureView?.redoCapture()
-                                },
-                                saveMap: {
-                                    print("saveMap")
+                            if showScanningFloorCard == true{
+                                ScanningCardView(
+                                    messagesFromWorldMap: messagesFromWorldMap,
+                                    newFeatures: floor is Room ? worldMapNewFeatures : nil,
+                                    
+                                    onSave: {
+                                        isScanningFloor = true
+                                        _ = mapName.isEmpty ? "Map_\(Date().timeIntervalSince1970)" : mapName
+                                        
+                                        captureView?.stopCapture()
+                                        showScanningFloorCard = false
+                                    },
+                                    onRestart: {
+                                        captureView?.redoCapture()
+                                    },
+                                    saveMap: {
+                                        print("saveMap")
+                                    }
+                                )
+                                .ignoresSafeArea()
+                                .padding()
+                                .zIndex(1)
+                            }
+                            else{
+                                VStack{
+                                    Spacer()
+                                    HStack{
+                                        
+                                        Button(action: {
+                                            showCreateFloorPlanimetryToast = true
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                                dismiss()
+                                            }
+                                        }) {
+                                            Text("Done")
+                                                .font(.system(size: 16, weight: .bold, design: .default))
+                                                .bold()
+                                                .padding()
+                                                .background(Color.green)
+                                                .foregroundColor(.white)
+                                                .cornerRadius(30)
+                                                .frame(maxWidth: 150) // Larghezza massima del bottone
+                                        }
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                        
                                 }
-                            )
-                            .ignoresSafeArea()
-                            .padding()
-                            .zIndex(1)
+                            }
                         }
                         
                         Spacer()
@@ -74,10 +106,10 @@ struct FloorScanningView: View {
                     if !isScanningFloor {
                         Button(action: {
                             isScanningFloor = true
-                            captureView = FloorCaptureViewContainer(namedUrl: namedUrl)
+                            captureView = FloorCaptureViewContainer(floor: floor)
                         }) {
                             Text("Start")
-                                .font(.title)
+                                .font(.system(size: 24, weight: .bold, design: .default))
                                 .bold()
                                 .padding()
                                 .background(Color.green)
@@ -110,15 +142,17 @@ struct FloorScanningView: View {
                     }
                 }
             }
-            
             .background(Color.customBackground.ignoresSafeArea())
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
-                    Text(namedUrl.name)
+                    Text(floor.name)
                         .font(.system(size: 26, weight: .heavy))
                         .foregroundColor(.white)
                 }
+            }
+            .toast(isPresenting: $showCreateFloorPlanimetryToast) {
+                AlertToast(type: .complete(Color.green), title: "Floor Planimetry created")
             }
         }
     }
@@ -126,6 +160,6 @@ struct FloorScanningView: View {
 
 struct FloorScanningView_Previews: PreviewProvider {
     static var previews: some View {
-        FloorScanningView(namedUrl: Floor(_name: "Sample Floor", _lastUpdate: Date(), _planimetry: SCNViewContainer(), _associationMatrix: [:], _rooms: [], _sceneObjects: [], _scene: nil, _sceneConfiguration: nil, _floorURL: URL(fileURLWithPath: "")))
+        FloorScanningView(floor: Floor(_name: "Sample Floor", _lastUpdate: Date(), _planimetry: SCNViewContainer(), _associationMatrix: [:], _rooms: [], _sceneObjects: [], _scene: nil, _floorURL: URL(fileURLWithPath: "")))
     }
 }

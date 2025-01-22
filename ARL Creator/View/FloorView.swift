@@ -1,4 +1,5 @@
 import SwiftUI
+import AlertToast
 import SceneKit
 import Foundation
 import UIKit
@@ -29,8 +30,17 @@ struct FloorView: View {
     @State private var showDeleteConfirmation = false
     @State private var showFloorUpdatePlanimetryAlert = false
     
+    @State private var showAddRoomToast = false
+    @State private var showDeleteFloorToast = false
+    @State private var showRenameFloorToast = false
+    
+    
     @State private var alertMessage = ""
     @State private var errorMessage: String = ""
+    
+    
+    @Environment(\.dismiss) private var dismiss
+
     
     var body: some View {
         
@@ -49,81 +59,21 @@ struct FloorView: View {
                 .fontWeight(.heavy)
                 
                 TabView(selection: $selectedTab) {
-                    VStack {
-                        if floor.planimetry.scnView.scene == nil {
-                            Text("Add Planimetry with + icon")
-                                .foregroundColor(.gray)
-                                .font(.headline)
-                                .padding()
-                        } else {
-                            VStack {
-                                Toggle(isOn: $showFloorMap) {
-                                    Text("Show Rooms")
-                                        .font(.system(size: 20))
-                                        .bold()
-                                }
-                                .toggleStyle(SwitchToggleStyle())
-                                .padding()
-                    
-                                ZStack {
-                                    if showFloorMap {
-                                        floor.planimetryRooms
-                                            .border(Color.white)
-                                            .cornerRadius(10)
-                                            .padding()
-                                            .shadow(color: Color.gray, radius: 3)
-                                    } else {
-                                        floor.planimetry
-                                            .border(Color.white)
-                                            .cornerRadius(10)
-                                            .padding()
-                                            .shadow(color: Color.gray, radius: 3)
-                                    }
-                                }
-                            }
+                    FloorPlanimetryView(floor: floor, showFloorMap: $showFloorMap)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color.customBackground)
+                        .tabItem {
+                            Label("Floor Planimetry", systemImage: "map.fill")
                         }
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color.customBackground)
-                    .tabItem {
-                        Label("Floor Planimetry", systemImage: "map.fill")
-                    }
-                    .tag(0)
-                    
-                    VStack {
-                        if floor.rooms.isEmpty {
-                            VStack {
-                                Text("Add Room to \(floor.name) with + icon")
-                                    .foregroundColor(.gray)
-                                    .font(.headline)
-                                    .padding()
-                            }
-                        } else {
-                            TextField("Search", text: $searchText)
-                                .padding(7)
-                                .background(Color(.systemGray6))
-                                .cornerRadius(8)
-                                .padding(.horizontal, 13)
-                                .frame(maxWidth: .infinity)
-                            
-                            ScrollView {
-                                LazyVStack(spacing: 50) {
-                                    ForEach(filteredRooms, id: \.id) { room in
-                                        NavigationLink(destination: RoomView(room: room, floor: floor, building: building )) {
-                                            let isSelected = floor.isMatrixPresent(named: room.name, inFileAt: floor.floorURL.appendingPathComponent("\(floor.name).json"))
-                                            RoomCardView(name: room.name, date: room.lastUpdate, position: isSelected, color: room.color, rowSize: 1, isSelected: false).padding()
-                                        }
-                                    }
-                                }
-                            }
+                        .tag(0)
+
+                    RoomsListView(floor: floor, building: building, searchText: $searchText)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color.customBackground)
+                        .tabItem {
+                            Label("Rooms", systemImage: "list.dash")
                         }
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color.customBackground)
-                    .tabItem {
-                        Label("Rooms", systemImage: "list.dash")
-                    }
-                    .tag(1)
+                        .tag(1)
                 }
             }
             .background(Color.customBackground)
@@ -190,27 +140,41 @@ struct FloorView: View {
                                 .foregroundStyle(.white, .blue, .blue)
                         }
                     }
+                    else if selectedTab == 2 {
+                        Button(action: {
+                            isRoomSheetPresented = true
+                        }) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.system(size: 22))
+                                .foregroundStyle(.white, .blue, .blue)
+                        }
+                    }
                 }
             }
         }
         .confirmationDialog("How do you want to create the \(floor.name) planimetry?", isPresented: $isOptionsSheetPresented, titleVisibility: .visible) {
             
-            NavigationLink(destination: FloorScanningView(namedUrl: floor)){
+            NavigationLink(destination: FloorScanningView(floor: floor)){
                 Button("Create With AR") {
                     let fileManager = FileManager.default
-                    let filePath = floor.floorURL
-                        .appendingPathComponent("MapUsdz")
-                        .appendingPathComponent("\(floor.name).usdz")
-                    
+                    let filePaths = [
+                        floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz"),
+                        floor.floorURL.appendingPathComponent("JsonParametric").appendingPathComponent("\(floor.name).json"),
+                        floor.floorURL.appendingPathComponent("PlistMetadata").appendingPathComponent("\(floor.name).plist")
+                    ]
+
                     do {
-                        try fileManager.removeItem(at: filePath)
-                        print("File eliminato correttamente")
+                        for filePath in filePaths {
+                            try fileManager.removeItem(at: filePath)
+                            print("File at \(filePath) eliminato correttamente")
+                        }
                     } catch {
-                        print("Errore durante l'eliminazione del file: \(error)")
+                        print("Errore durante l'eliminazione di un file: \(error)")
                     }
-                    
+
                     self.isOptionsSheetPresented = false
                     self.isScanningFloorPlanimetry = true
+
                 }
                 .font(.system(size: 20))
                 .bold()
@@ -218,10 +182,25 @@ struct FloorView: View {
             
             
             Button("Update From File") {
-                // Chiudi il dialogo
+                let fileManager = FileManager.default
+                let filePaths = [
+                    floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz"),
+                    floor.floorURL.appendingPathComponent("JsonParametric").appendingPathComponent("\(floor.name).json"),
+                    floor.floorURL.appendingPathComponent("PlistMetadata").appendingPathComponent("\(floor.name).plist")
+                ]
+
+                do {
+                    for filePath in filePaths {
+                        try fileManager.removeItem(at: filePath)
+                        print("File at \(filePath) eliminato correttamente")
+                    }
+                } catch {
+                    print("Errore durante l'eliminazione di un file: \(error)")
+                }
+                
                 self.isOptionsSheetPresented = false
                 
-                // Apri la Sheet del file picker dopo aver chiuso quella corrente
+                
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                     self.isFloorPlanimetryUploadPicker = true
                 }
@@ -236,6 +215,10 @@ struct FloorView: View {
         .confirmationDialog("Are you sure to delete Floor?", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
             Button("Yes", role: .destructive) {
                 building.deleteFloor(floor: floor)
+                showDeleteFloorToast = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    dismiss()
+                }
                 print("Floor eliminato")
             }
             
@@ -268,14 +251,20 @@ struct FloorView: View {
             
             Button("SAVE", action: {
                 if !newFloorName.isEmpty {
-                    do {
-                        if ((try? building.renameFloor(floor: floor, newName: newFloorName)) != nil){
-                            print("Piano rinominato con successo.")
-                        } else {
-                            print("Errore durante la rinomina del piano.")
+                    Task {
+                        do {
+                            if (try await building.renameFloor(floor: floor, newName: newFloorName)) != false {
+                                
+                                showRenameFloorToast = true
+                            } else {
+                                print("Errore durante la rinomina del piano.")
+                            }
+                        } catch {
+                            print("Errore: \(error.localizedDescription)")
+                            errorMessage = "Errore durante la rinomina del piano: \(error.localizedDescription)"
+                            isErrorUpdateAlertPresented = true
                         }
                     }
-                    
                     isRenameSheetPresented = false
                 }
             })
@@ -318,6 +307,15 @@ struct FloorView: View {
         }
         .sheet(isPresented: $isRoomSheetPresented) {
             addRoomSheet
+        }
+        .toast(isPresenting: $showAddRoomToast) {
+            AlertToast(type: .complete(Color.green), title: "Room added")
+        }
+        .toast(isPresenting: $showDeleteFloorToast) {
+            AlertToast(type: .complete(Color.green), title: "Floor deleted successfully")
+        }
+        .toast(isPresenting: $showRenameFloorToast){
+            AlertToast(displayMode: .banner(.slide), type: .regular, title: "Floor Renamed")
         }
         
     }
@@ -369,26 +367,28 @@ struct FloorView: View {
     
     private func addNewRoom() {
         guard !newRoomName.isEmpty else { return }
+        
         let newRoom = Room(
             _name: newRoomName,
             _lastUpdate: Date(),
-            _planimetry: nil,
+            _planimetry: SCNViewContainer(),
             _referenceMarkers: [],
             _transitionZones: [],
+            _scene: nil,
             _sceneObjects: [],
-            _roomURL: URL(fileURLWithPath: "")
+            _roomURL: URL(fileURLWithPath: ""),
+            parentFloor: floor
         )
         
+        newRoom.planimetry.loadRoomPlanimetry(room: newRoom, borders: true)
         floor.addRoom(room: newRoom)
-        newRoomName = ""
+        showAddRoomToast = true
+        newRoom.validateRoom()
+       
     }
     
     var filteredRooms: [Room] {
         if searchText.isEmpty {
-            
-            floor.rooms.forEach { room in
-                //room.debugPrintRoom()
-            }
             return floor.rooms
         } else {
             return floor.rooms.filter { $0.name.lowercased().contains(searchText.lowercased()) }

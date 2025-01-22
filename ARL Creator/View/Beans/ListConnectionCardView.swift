@@ -1,91 +1,94 @@
-//
-//  MatrixCardView.swift
-//  ScanBuild
-//
-//  Created by Danil Lugli on 30/07/24.
-//
-
 import SwiftUI
 
 struct ListConnectionCardView: View {
-    
     var floor: String
     var room: String
-    var transitionZone: String
     var targetFloor: String
     var targetRoom: String
-    var targetTransitionZone: String
+    var altitudeDifference: Float
     var exist: Bool
     var date: Date
     var rowSize: Int
-   
-    init(floor: String, room: String, transitionZone: String, targetFloor: String, targetRoom: String, targetTransitionZone: String, exist: Bool, date: Date, rowSize: Int) {
+
+    init(floor: String, room: String, targetFloor: String, targetRoom: String, altitudeDifference: Float, exist: Bool, date: Date, rowSize: Int) {
         self.floor = floor
         self.room = room
-        self.transitionZone = transitionZone
         self.targetFloor = targetFloor
         self.targetRoom = targetRoom
-        self.targetTransitionZone = targetTransitionZone
+        self.altitudeDifference = altitudeDifference
         self.exist = exist
         self.date = date
         self.rowSize = rowSize
     }
-    
+
     var body: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 10)
                 .fill(Color.white)
             
             VStack(alignment: .leading) {
-                VStack{
-                    VStack{
-                        HStack{
-                            ConnectionCardView(name: floor, isSelected: false)
-                            
-                            Text(Image(systemName: "arrow.right"))
-                                .font(.system(size: 15, weight: .bold))
-                                .foregroundColor(.black)
-                            ConnectionCardView(name: room, isSelected: false)
-                            
-                            Text(Image(systemName: "arrow.right"))
-                                .font(.system(size: 15, weight: .bold))
-                                .foregroundColor(.black)
-                            ConnectionCardView(name: transitionZone, isSelected: false)
-                        }.padding(.top, -8)
+                VStack {
+                    HStack {
+                        ConnectionCardView(name: floor, isSelected: false, isFloor: true)
                         
-                        Text("Has a connection To:").font(.system(size: 18, weight: .bold))
-                            .foregroundColor(.green)
-                            .padding(.top, 8)
+                        Text(Image(systemName: "arrow.right"))
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundColor(.black)
                         
-                        HStack{
-                            ConnectionCardView(name: targetFloor, isSelected: false)
-                            
-                            Text(Image(systemName: "arrow.right"))
-                                .font(.system(size: 15, weight: .bold))
-                                .foregroundColor(.black)
-                            ConnectionCardView(name: targetRoom, isSelected: false)
-                            
-                            Text(Image(systemName: "arrow.right"))
-                                .font(.system(size: 15, weight: .bold))
-                                .foregroundColor(.black)
-                            ConnectionCardView(name: targetTransitionZone, isSelected: false)
-                        }.padding(.top, 8)
+                        ConnectionCardView(name: room, isSelected: false, isFloor: false)
                     }
+                    .padding(.top, -8)
+                    
+                    Text("HAS A CONNECTION TO")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.green)
+                        .padding(.top, 8)
+                    
+                    HStack {
+                        ConnectionCardView(name: targetFloor, isSelected: false, isFloor: true)
+                        
+                        Text(Image(systemName: "arrow.right"))
+                            .font(.system(size: 15, weight: .bold))
+                            .foregroundColor(.black)
+                        
+                        ConnectionCardView(name: targetRoom, isSelected: false, isFloor: false)
+                    }
+                    .padding(.top, 8)
+                    
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(String(format: "Altitude Difference: %.2f", altitudeDifference))
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundColor(.black)
+                    }
+                    .padding(.top)
                 }
-                Text("Created: \(dateFormatter.string(from: date))")
-                    .font(.system(size: 14))
-                    .foregroundColor(.gray)
-                    .padding(10)
+
+                    
+                    Text("Created: \(dateFormatter.string(from: date))")
+                        .font(.system(size: 14))
+                        .foregroundColor(.gray)
+                        .padding(.top, 10)
+                
             }
+            .padding()
         }
-        .frame(width: 380, height: 300) // Imposta un'altezza fissa di 300 punti e larghezza massima
+        .frame(width: 360, height: 345)
         .cornerRadius(10)
         .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 2)
     }
 }
 
 #Preview {
-    ListConnectionCardView(floor: "Floor1", room: "Room2", transitionZone: "TZ", targetFloor: "floor", targetRoom: "room", targetTransitionZone: "tTZ", exist: false, date: Date(), rowSize: 1)
+    ListConnectionCardView(
+        floor: "Floor1",
+        room: "Room2",
+        targetFloor: "Floor3",
+        targetRoom: "Room4",
+        altitudeDifference: 12.5,
+        exist: false,
+        date: Date(),
+        rowSize: 1
+    )
 }
 
 private let dateFormatter: DateFormatter = {

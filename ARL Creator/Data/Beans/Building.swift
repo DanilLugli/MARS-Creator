@@ -144,7 +144,7 @@ class Building: Encodable, ObservableObject, Hashable {
         }
     }
     
-    @MainActor func renameFloor(floor: Floor, newName: String) throws -> Bool {
+    func renameFloor(floor: Floor, newName: String) async throws -> Bool {
 
         floor.name = newName
         
@@ -181,7 +181,7 @@ class Building: Encodable, ObservableObject, Hashable {
         BuildingModel.getInstance().buildings = []
 
         do {
-            try BuildingModel.getInstance().loadBuildingsFromRoot()
+            try await BuildingModel.getInstance().loadBuildingsFromRoot()
         } catch {
             print("Errore durante il caricamento dei buildings: \(error)")
         }
@@ -243,4 +243,38 @@ class Building: Encodable, ObservableObject, Hashable {
     func createARLFile(fileURL: URL) {
         // TODO: Implement logic to create ARL file
     }
+    
+    
+    func validateBuilding() {
+        // Verifica il nome del building
+        if _name.isEmpty {
+            print("Error: Building name is missing.")
+        }
+        
+        // Verifica la data di ultimo aggiornamento
+        if _lastUpdate.timeIntervalSince1970 == 0 {
+            print("Error: Last update date is invalid or missing.")
+        }
+        
+        // Verifica se ci sono piani
+        if _floors.isEmpty {
+            print("Error: No floors are associated with the building.")
+        }
+        
+        // Verifica che il percorso URL del building sia valido
+        if _buildingURL.path.isEmpty || !FileManager.default.fileExists(atPath: _buildingURL.path) {
+            print("Error: Building URL is invalid or does not exist.")
+        }
+        
+        // Controlla se ogni piano ha i parametri obbligatori
+        for (index, floor) in _floors.enumerated() {
+            if floor.name.isEmpty {
+                print("Error: Floor \(index + 1) is missing a name.")
+            }
+            if floor.floorURL.path.isEmpty || !FileManager.default.fileExists(atPath: floor.floorURL.path) {
+                print("Error: Floor \(index + 1) URL is invalid or does not exist.")
+            }
+        }
+    }
+    
 }

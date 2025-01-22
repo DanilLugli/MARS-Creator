@@ -12,9 +12,9 @@ struct FloorCaptureViewContainer: UIViewRepresentable {
     
     private let configuration: RoomCaptureSession.Configuration
     
-    init(namedUrl: NamedURL) {
+    init(floor: Floor) {
         
-        sessionDelegate = SessionDelegate(namedUrl: namedUrl)
+        sessionDelegate = SessionDelegate(floor: floor)
         configuration = RoomCaptureSession.Configuration()
         
         if #available(iOS 17.0, *) {
@@ -60,11 +60,11 @@ struct FloorCaptureViewContainer: UIViewRepresentable {
         var currentMapName: String?
         var finalResults: CapturedRoom?
         var roomBuilder = RoomBuilder(options: [.beautifyObjects])
-        @State var namedUrl: NamedURL
+        @State var floor: Floor
         
-        init(namedUrl: NamedURL) {
-            self.namedUrl = namedUrl
-            self.currentMapName = namedUrl.name
+        init(floor: Floor) {
+            self.floor = floor
+            self.currentMapName = floor.name
             super.init(nibName: nil, bundle: nil)
         }
         
@@ -73,7 +73,6 @@ struct FloorCaptureViewContainer: UIViewRepresentable {
         }
         
         func setCaptureView(_ r: FloorCaptureViewContainer) {
-            // Se è necessaria una configurazione aggiuntiva
         }
         
         func captureSession(_ session: RoomCaptureSession, didEndWith data: CapturedRoomData, error: Error?) {
@@ -88,8 +87,43 @@ struct FloorCaptureViewContainer: UIViewRepresentable {
                     let name = currentMapName ?? "ScannedRoom_\(DateFormatter.localizedString(from: Date(), dateStyle: .medium, timeStyle: .short))"
                     let finalRoom = try await self.roomBuilder.capturedRoom(from: data)
                     
-                    saveUSDZMap(finalRoom, name, at: namedUrl.url)
-                    print("Room saved as USDZ at \(namedUrl.url)")
+                    saveUSDZMap(finalRoom, name, at: floor.url)
+                    
+                    let usdzURL = floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz")
+                    floor.scene = try SCNScene(url: usdzURL)
+                    floor.planimetry.loadFloorPlanimetry(borders: true, floor: floor)
+                    
+                    var seenNodeNames = Set<String>()
+                    
+                    floor.sceneObjects = floor.scene?.rootNode.childNodes(passingTest: { n, _ in
+                        if let nodeName = n.name {
+                            if seenNodeNames.contains(nodeName) {
+                                return false
+                            }
+
+                            guard n.geometry != nil else {
+                                return false
+                            }
+
+                            let isValidNode = nodeName != "Room" &&
+                                              nodeName != "Geom" &&
+                                              !nodeName.hasSuffix("_grp") &&
+                                              !nodeName.hasPrefix("unidentified") &&
+                                              !(nodeName.first?.isNumber ?? false) &&
+                                              !nodeName.hasPrefix("_")
+
+                            if isValidNode {
+                                seenNodeNames.insert(nodeName)
+                                return true
+                            }
+                        }
+                        
+                        return false
+                    }).sorted(by: {
+                        ($0.name ?? "").localizedCaseInsensitiveCompare($1.name ?? "") == .orderedAscending
+                    })
+                    ?? []
+                    
                     
                 } catch {
                     print("Error during room capturing or saving: \(error)")
@@ -103,6 +137,7 @@ struct FloorCaptureViewContainer: UIViewRepresentable {
         func captureSession(_ session: RoomCaptureSession, didAdd room: CapturedRoom) {}
         func captureSession(_ session: RoomCaptureSession, didChange room: CapturedRoom) {}
         func captureSession(_ session: RoomCaptureSession, didRemove room: CapturedRoom) {}
+        
         
         func captureView(didPresent processedResult: CapturedRoom, error: Error?) {
             self.finalResults = processedResult

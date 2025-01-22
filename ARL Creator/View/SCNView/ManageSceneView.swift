@@ -86,7 +86,8 @@ func setCamera(scnView: SCNView, cameraNode: SCNNode, massCenter: SCNNode) {
     cameraNode.worldPosition = SCNVector3(
         massCenter.worldPosition.x,
         massCenter.worldPosition.y + 10,
-        massCenter.worldPosition.z)
+        massCenter.worldPosition.z
+    )
     
     cameraNode.camera?.usesOrthographicProjection = true
     cameraNode.camera?.orthographicScale = 10
@@ -95,15 +96,9 @@ func setCamera(scnView: SCNView, cameraNode: SCNNode, massCenter: SCNNode) {
     let ambientLight = SCNNode()
     ambientLight.light = SCNLight()
     ambientLight.light!.type = .ambient
-    ambientLight.light!.color = UIColor(white: 0.5, alpha: 1.0)
-    //scnView.scene?.rootNode.addChildNode(ambientLight)
-    
-    let directionalLight = SCNNode()
-    directionalLight.light = SCNLight()
-    directionalLight.light!.type = .directional
-    directionalLight.light!.color = UIColor(white: 1.0, alpha: 1.0)
-    directionalLight.eulerAngles = SCNVector3(-Float.pi / 3, 0, 0)
-    scnView.scene?.rootNode.addChildNode(directionalLight)
+    ambientLight.light!.color = UIColor(red: 0.9, green: 0.9, blue: 0.9, alpha: 1.0)
+    ambientLight.light!.intensity = 1200
+    scnView.scene?.rootNode.addChildNode(ambientLight)
         
     scnView.pointOfView = cameraNode
     scnView.scene?.rootNode.addChildNode(cameraNode)
@@ -202,7 +197,6 @@ func drawSceneObjects(scnView: SCNView, borders: Bool) {
                 }
                 material.lightingModel = .physicallyBased
                 $0.geometry?.materials = [material]
-                
             }
             drawnNodes.insert(nodeName!)
         }

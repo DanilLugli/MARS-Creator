@@ -4,7 +4,6 @@ import SceneKit
 class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
     
     private let identityMatrix = matrix_identity_float4x4
-    @State private var isFaceIDSuccess = false
 
     @Published var rotoTraslation: RotoTraslationMatrix = RotoTraslationMatrix(
         name: "",
@@ -36,25 +35,14 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
     
     @MainActor
     func loadRoomMapsPosition(floor: Floor, room: Room, borders: Bool) {
-        
-        for room in floor.rooms {
-            scnView.scene?.rootNode.childNode(withName: room.name, recursively: true)?.removeFromParentNode()
-        }
+//        for room in floor.rooms {
+//            scnView.scene?.rootNode.childNode(withName: room.name, recursively: true)?.removeFromParentNode()
+//        }
         
         self.floor = floor
         self.roomName = room.name
         
-        let floorFileURL = floor.floorURL
-            .appendingPathComponent("MapUsdz")
-            .appendingPathComponent("\(floor.name).usdz")
-        
-        do{
-            scnView.scene = try SCNScene(url: floorFileURL)
-        }
-        catch{
-            print("Error loading scene from URL: \(error)")
-        }
-        
+        loadFloorScene(for: floor, into: self.scnView)
         
         self.rotoTraslation = floor.associationMatrix[room.name] ?? RotoTraslationMatrix(
             name: "",
@@ -65,60 +53,129 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         let roomScene = room.scene
         
         func createSceneNode(from scene: SCNScene) -> SCNNode {
-
             let containerNode = SCNNode()
             containerNode.name = "SceneContainer"
-            
+
             if let floorNode = scene.rootNode.childNode(withName: "Floor0", recursively: true) {
-                floorNode.name = "Floor0"
-                let material = SCNMaterial()
-                material.diffuse.contents = UIColor.green.withAlphaComponent(0.2)
-                floorNode.geometry?.materials = [material]
-                containerNode.addChildNode(floorNode)
+                let clonedFloorNode = floorNode.clone()
+                clonedFloorNode.name = "Floor0"
+                
+                // Copia la geometria del nodo originale
+                if let originalGeometry = floorNode.geometry {
+                    let clonedGeometry = originalGeometry.copy() as! SCNGeometry
+                    
+                    // Crea un nuovo materiale per evitare di condividere quello esistente
+                    let newMaterial = SCNMaterial()
+                    newMaterial.diffuse.contents = floor.getRoomByName(room.name)?.color
+                    clonedGeometry.materials = [newMaterial]
+                    
+                    // Assegna la nuova geometria al nodo clonato
+                    clonedFloorNode.geometry = clonedGeometry
+                }
+                
+                containerNode.addChildNode(clonedFloorNode)
             } else {
-                print("Node 'Floor0' not found in the provided scene.")
+                print("DEBUG: Node 'Floor0' not found in the provided scene for room \(room.name).")
             }
-            
+
+            // Aggiungi un puntino centrale come marker
             let sphereNode = SCNNode()
             sphereNode.name = "SceneCenterMarker"
-            sphereNode.position = SCNVector3(0, 0, 0)
-            
-            let sphereGeometry = SCNSphere(radius: 0.1) // Raggio piccolo per rappresentare il punto
+
+            let sphereGeometry = SCNSphere(radius: 0)
             let sphereMaterial = SCNMaterial()
-            sphereMaterial.emission.contents = UIColor.orange // Colore fluorescente
-            sphereMaterial.diffuse.contents = UIColor.orange
+            sphereMaterial.emission.contents = UIColor.orange.withAlphaComponent(0)
+            sphereMaterial.diffuse.contents = UIColor.orange.withAlphaComponent(0)
             sphereGeometry.materials = [sphereMaterial]
             sphereNode.geometry = sphereGeometry
             containerNode.addChildNode(sphereNode)
-            
+
             if let markerNode = containerNode.childNode(withName: "SceneCenterMarker", recursively: true) {
-                let localMarkerPosition = markerNode.position // Posizione locale del puntino
+                let localMarkerPosition = markerNode.position
                 containerNode.pivot = SCNMatrix4MakeTranslation(localMarkerPosition.x, localMarkerPosition.y, localMarkerPosition.z)
-                print("Pivot impostato su SceneCenterMarker")
             } else {
-                print("SceneCenterMarker non trovato, pivot non modificato.")
+                print("DEBUG: SceneCenterMarker not found in the container for room \(room.name), pivot not modified.")
             }
             
+            let targetPrefixes = ["Table", "Storage", "Chair", "Door", "Opening"]
+            let matchingNodes = scene.rootNode.childNodes.filter { node in
+                targetPrefixes.contains(where: { prefix in node.name?.hasPrefix(prefix) == true })
+            }
+
+            matchingNodes.forEach { node in
+                node.scale = SCNVector3(1, 1, 1)
+                if let geometry = node.geometry {
+                    let material = SCNMaterial()
+                    material.diffuse.contents = UIColor.black
+                    geometry.materials = [material]
+                } else {
+                    print("DEBUG: Node \(node.name ?? "Unnamed Node") has no geometry.")
+                }
+                print("ADD")
+                containerNode.addChildNode(node.clone())
+            }
+
             return containerNode
         }
+
         
         let roomNode = createSceneNode(from: roomScene!)
         roomNode.name = room.name
+        roomNode.scale = SCNVector3(1, 1, 1)
         
-        roomNode.simdWorldPosition = simd_float3(0,5,0)
+        if let existingNode = scnView.scene?.rootNode.childNode(withName: room.name, recursively: true) {
+            existingNode.removeFromParentNode() // Rimuovi il nodo esistente
+            print("DEBUG: Existing node '\(room.name)' removed from the scene.")
+        }
         
-        floor.associationMatrix[room.name].map {
-            applyRotoTraslation(to: roomNode, with: $0)
-        } ?? print("No RotoTraslationMatrix found for room: \(room.name)")
+        if let matrix = floor.associationMatrix[room.name] {
+            
+            applyRotoTraslation(to: roomNode, with: matrix)
+            print("DEBUG: Applied roto-translation matrix for room \(room.name).")
+        } else {
+            print("DEBUG: No roto-translation matrix found for room \(room.name).")
+        }
+        roomNode.simdWorldPosition.y = 5
+
+        debugNodeProperties(roomNode)
         
         scnView.scene?.rootNode.addChildNode(roomNode)
+        print("Local transform: \(roomNode.simdTransform)")
+        print("World transform: \(roomNode.worldTransform)")
         self.roomNode = roomNode
         
         drawSceneObjects(scnView: self.scnView, borders: true)
         setMassCenter(scnView: self.scnView)
         setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: self.massCenter)
+        createAxesNode()
+    }
+    
+    func createAxesNode(length: CGFloat = 1.0, radius: CGFloat = 0.02) {
+        let axisNode = SCNNode()
+
+        let xAxis = SCNNode(geometry: SCNCylinder(radius: radius, height: length))
+        xAxis.geometry?.firstMaterial?.diffuse.contents = UIColor.red
+        xAxis.position = SCNVector3(length / 2, 0, 0) // Offset by half length
+        xAxis.eulerAngles = SCNVector3(0, 0, Float.pi / 2) // Rotate cylinder along X-axis
+
+        let yAxis = SCNNode(geometry: SCNCylinder(radius: radius, height: length))
+        yAxis.geometry?.firstMaterial?.diffuse.contents = UIColor.green
+        yAxis.position = SCNVector3(0, length / 2, 0) // Offset by half length
+        
+        // Z Axis (Blue)
+        let zAxis = SCNNode(geometry: SCNCylinder(radius: radius, height: length))
+        zAxis.geometry?.firstMaterial?.diffuse.contents = UIColor.blue
+        zAxis.position = SCNVector3(0, 0, length / 2) // Offset by half length
+        zAxis.eulerAngles = SCNVector3(Float.pi / 2, 0, 0) // Rotate cylinder along Z-axis
+        
+        // Add axes to parent node
+        axisNode.addChildNode(xAxis)
+        axisNode.addChildNode(yAxis)
+        axisNode.addChildNode(zAxis)
+        self.scnView.scene?.rootNode.addChildNode(axisNode)
         
     }
+
     
     func rotateClockwise() {
         self.rotateRight()
@@ -187,56 +244,48 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
             return
         }
         
-        // Debug: Stampa l'angolo attuale prima della rotazione
+        // Debug: Stato corrente prima della rotazione
         print("DEBUG: Current eulerAngles.y before rotation (Right): \(roomNode.eulerAngles.y)")
         
-        // Rotazione
-        roomNode.eulerAngles.y -= rotationStep
+        // Crea una matrice di rotazione per il passo definito
+        let rotationMatrix = simd_float4x4(SCNMatrix4MakeRotation(-rotationStep, 0, 1, 0)) // Rotazione a destra (orario)
+
+        // Combina la matrice di trasformazione corrente con quella di rotazione
+        roomNode.simdTransform = matrix_multiply(roomNode.simdTransform, rotationMatrix)
         
-        // Debug: Stampa l'angolo attuale dopo la rotazione
-        print("DEBUG: Updated eulerAngles.y after rotation (Right): \(roomNode.eulerAngles.y)")
-        
-        // Applica la matrice di rotazione
-        let rotationMatrix = simd_float4x4(SCNMatrix4MakeRotation(rotationStep, 0, 1, 0))
+        // Aggiorna la matrice di rotazione associata (r_Y)
         let previousMatrix = floor?.associationMatrix[roomName ?? ""]?.r_Y ?? matrix_identity_float4x4
         let updatedMatrix = matrix_multiply(previousMatrix, rotationMatrix)
-        
-        // Debug: Stampa la matrice prima e dopo
-        print("DEBUG: Previous r_Y matrix: \(previousMatrix)")
-        print("DEBUG: Updated r_Y matrix: \(updatedMatrix)")
-        
-        // Salva la matrice aggiornata
         floor?.associationMatrix[roomName ?? ""]?.r_Y = updatedMatrix
+        
+        // Debug: Stato dopo la rotazione
+        print("DEBUG: Updated simdTransform matrix: \(roomNode.simdTransform)")
+        print("DEBUG: Updated r_Y matrix: \(updatedMatrix)")
     }
     
-    
-
     func rotateLeft() {
         guard let roomNode = roomNode else {
             print("DEBUG: No roomNode found!")
             return
         }
         
-        // Debug: Stampa l'angolo attuale prima della rotazione
+        // Debug: Stato corrente prima della rotazione
         print("DEBUG: Current eulerAngles.y before rotation (Left): \(roomNode.eulerAngles.y)")
         
-        // Rotazione
-        roomNode.eulerAngles.y += rotationStep
+        // Crea una matrice di rotazione per il passo definito
+        let rotationMatrix = simd_float4x4(SCNMatrix4MakeRotation(rotationStep, 0, 1, 0)) // Rotazione a sinistra (antiorario)
         
-        // Debug: Stampa l'angolo attuale dopo la rotazione
-        print("DEBUG: Updated eulerAngles.y after rotation (Left): \(roomNode.eulerAngles.y)")
+        // Combina la matrice di trasformazione corrente con quella di rotazione
+        roomNode.simdTransform = matrix_multiply(roomNode.simdTransform, rotationMatrix)
         
-        // Applica la matrice di rotazione
-        let rotationMatrix = simd_float4x4(SCNMatrix4MakeRotation(-rotationStep, 0, 1, 0))
+        // Aggiorna la matrice di rotazione associata (r_Y)
         let previousMatrix = floor?.associationMatrix[roomName ?? ""]?.r_Y ?? matrix_identity_float4x4
         let updatedMatrix = matrix_multiply(previousMatrix, rotationMatrix)
-        
-        // Debug: Stampa la matrice prima e dopo
-        print("DEBUG: Previous r_Y matrix: \(previousMatrix)")
-        print("DEBUG: Updated r_Y matrix: \(updatedMatrix)")
-        
-        // Salva la matrice aggiornata
         floor?.associationMatrix[roomName ?? ""]?.r_Y = updatedMatrix
+        
+        // Debug: Stato dopo la rotazione
+        print("DEBUG: Updated simdTransform matrix: \(roomNode.simdTransform)")
+        print("DEBUG: Updated r_Y matrix: \(updatedMatrix)")
     }
     
     func handlePinch(_ gesture: UIPinchGestureRecognizer) {
@@ -257,11 +306,30 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
     
     @MainActor
     func applyRotoTraslation(to node: SCNNode, with rotoTraslation: RotoTraslationMatrix) {
-        
+        print("Manual Room Position PRE\n")
+        printMatrix(node.simdWorldTransform)
         let combinedMatrix = rotoTraslation.translation * rotoTraslation.r_Y
+        print("CombinedMatrix\n")
+        printMatrix(combinedMatrix)
         node.simdWorldTransform = combinedMatrix * node.simdWorldTransform
+        print("POST\n")
+        printMatrix(node.simdWorldTransform)
 
+        
     }
+    
+    func loadFloorScene(for floor: Floor, into scnView: SCNView) {
+        let floorFileURL = floor.floorURL
+            .appendingPathComponent("MapUsdz")
+            .appendingPathComponent("\(floor.name).usdz")
+        
+        do {
+            scnView.scene = try SCNScene(url: floorFileURL)
+        } catch let error {
+            print("Error loading scene from URL \(floorFileURL): \(error.localizedDescription)")
+        }
+    }
+    
 }
 
 struct SCNViewUpdatePositionRoomContainer: UIViewRepresentable {
@@ -316,32 +384,5 @@ struct SCNViewUpdatePositionRoomContainer: UIViewRepresentable {
 struct SCNViewUpdatePositionRoomContainer_Previews: PreviewProvider {
     static var previews: some View {
         SCNViewUpdatePositionRoomContainer()
-    }
-}
-
-
-struct FaceIDSuccessView: View {
-    @State private var isAnimating = false
-
-    var body: some View {
-        ZStack {
-            Circle()
-                .stroke(lineWidth: 5)
-                .foregroundColor(.green)
-                .frame(width: 100, height: 100)
-
-            Path { path in
-                path.move(to: CGPoint(x: 35, y: 50))
-                path.addLine(to: CGPoint(x: 45, y: 65))
-                path.addLine(to: CGPoint(x: 70, y: 40))
-            }
-            .trim(from: 0, to: isAnimating ? 1 : 0)
-            .stroke(Color.green, lineWidth: 5)
-            .frame(width: 100, height: 100)
-            .animation(.easeInOut(duration: 0.5), value: isAnimating)
-        }
-        .onAppear {
-            isAnimating = true
-        }
     }
 }

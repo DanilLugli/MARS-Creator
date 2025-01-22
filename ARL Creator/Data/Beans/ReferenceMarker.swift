@@ -121,7 +121,6 @@ class ReferenceMarker: ObservableObject, Codable, Identifiable {
             }
         }
         
-        // Controlla se esiste un record per oldName e aggiorna i dati
         if let markerData = markersData[oldName] {
             markersData.removeValue(forKey: oldName)
             markersData[newName] = MarkerData(name: newName, width: markerData.width)
@@ -137,6 +136,39 @@ class ReferenceMarker: ObservableObject, Codable, Identifiable {
             try data.write(to: fileURL)
         } catch {
             print("Errore nel salvataggio del file JSON: \(error)")
+        }
+    }
+    
+    public func deleteMarkerData(from fileURL: URL, markerName: String) {
+        let fileManager = FileManager.default
+        var markersData: [String: MarkerData] = [:]
+
+        if fileManager.fileExists(atPath: fileURL.path) {
+            do {
+                let data = try Data(contentsOf: fileURL)
+                let decoder = JSONDecoder()
+                markersData = try decoder.decode([String: MarkerData].self, from: data)
+            } catch {
+                print("Errore nella lettura del file JSON esistente: \(error)")
+                return
+            }
+        } else {
+            print("File JSON non trovato a \(fileURL.path).")
+            return
+        }
+
+        if markersData.removeValue(forKey: markerName) != nil {
+            do {
+                let encoder = JSONEncoder()
+                encoder.outputFormatting = .prettyPrinted
+                let data = try encoder.encode(markersData)
+                try data.write(to: fileURL)
+                print("Marker \(markerName) eliminato correttamente dal file JSON.")
+            } catch {
+                print("Errore nel salvataggio del file JSON aggiornato: \(error)")
+            }
+        } else {
+            print("Marker con il nome \(markerName) non trovato nel file JSON.")
         }
     }
     

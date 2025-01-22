@@ -7,18 +7,32 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
 
     private var _id = UUID()
     @Published private var _name: String
-    private var _lastUpdate: Date
+
+    @Published private var _rooms: [Room]
+    @Published private var _scene: SCNScene? = nil
+    @Published private var _sceneObjects: [SCNNode]? = nil
+    
     @Published private var _planimetry: SCNViewContainer?
     @Published private var _planimetryRooms: SCNViewMapContainer?
     @Published var _associationMatrix: [String: RotoTraslationMatrix]
-    @Published private var _rooms: [Room]
-    @Published private var _sceneObjects: [SCNNode]? = nil
-    @Published private var _scene: SCNScene? = nil
-    @Published private var _sceneConfiguration: SCNScene?
+    
     @Published var isPlanimetryLoaded: Bool = false
+    @Published var altitude: Float = 0
+    var initialFloor: Bool {
+        get {
+                return UserDefaults.standard.bool(forKey: "initialFloor_\(name)")
+            }
+            set {
+                UserDefaults.standard.set(newValue, forKey: "initialFloor_\(name)")
+                objectWillChange.send() // Notifica SwiftUI del cambiamento
+            }
+        }
+    
     private var _floorURL: URL
+    
+    private var _lastUpdate: Date
 
-    init(_id: UUID = UUID(), _name: String, _lastUpdate: Date, _planimetry: SCNViewContainer? = nil, _planimetryRooms: SCNViewMapContainer? = nil, _associationMatrix: [String : RotoTraslationMatrix], _rooms: [Room], _sceneObjects: [SCNNode]? = nil, _scene: SCNScene? = nil, _sceneConfiguration: SCNScene? = nil, _floorURL: URL) {
+    init(_id: UUID = UUID(), _name: String, _lastUpdate: Date, _planimetry: SCNViewContainer? = nil, _planimetryRooms: SCNViewMapContainer? = nil, _associationMatrix: [String : RotoTraslationMatrix], _rooms: [Room], _sceneObjects: [SCNNode]? = nil, _scene: SCNScene? = nil, _floorURL: URL) {
         self._name = _name
         self._lastUpdate = _lastUpdate
         self._planimetry = _planimetry
@@ -27,7 +41,6 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
         self._rooms = _rooms
         self._sceneObjects = _sceneObjects
         self._scene = _scene
-        self._sceneConfiguration = _sceneConfiguration
         self._floorURL = _floorURL
     }
     
@@ -105,10 +118,6 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
         }
     }
     
-    var sceneConfiguration: SCNScene? {
-        return _sceneConfiguration
-    }
-    
     var floorURL: URL {
         get {
             return _floorURL
@@ -148,7 +157,6 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
         room.parentFloor = self
         _rooms.append(room)
         
-        // Creare la directory della stanza all'interno di "<floor_name>_Rooms"
         let roomsDirectory = floorURL.appendingPathComponent(BuildingModel.FLOOR_ROOMS_FOLDER)
         let roomURL = roomsDirectory.appendingPathComponent(room.name)
         
@@ -156,7 +164,6 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
             try FileManager.default.createDirectory(at: roomURL, withIntermediateDirectories: true, attributes: nil)
             room.roomURL = roomURL
             
-            // Creare le cartelle all'interno della directory della stanza
             let subdirectories = ["JsonMaps", "JsonParametric", "Maps", "MapUsdz", "PlistMetadata", "ReferenceMarker", "TransitionZone"]
             
             for subdirectory in subdirectories {
@@ -229,15 +236,8 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
         ///   - baseTransform: (Opzionale) Una matrice di trasformazione base. Default: utilizza la trasformazione attuale del nodo.
         @MainActor
         func applyRotoTraslation(to node: SCNNode, with rotoTraslation: RotoTraslationMatrix) {
-            print("APPLY TO NODE: \(node.name ?? "Unnamed Node")")
-            print("Initial Transform:")
-            //printSimdFloat4x4(node.simdWorldTransform)
-
             let combinedMatrix = rotoTraslation.translation * rotoTraslation.r_Y
             node.simdWorldTransform = combinedMatrix * node.simdWorldTransform
-
-            print("Updated Transform:")
-            //printSimdFloat4x4(node.simdWorldTransform)
         }
     }
 
@@ -507,5 +507,62 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
     
     private func simd_float4x4(rows: [simd_float4]) -> simd_float4x4 {
         return simd.simd_float4x4(rows[0], rows[1], rows[2], rows[3])
+    }
+    
+    func validateFloor() {
+        // Verifica il nome del floor
+        if _name.isEmpty {
+            print("Error: Floor name is missing.")
+        }
+        
+        // Verifica la data di ultimo aggiornamento
+        if _lastUpdate.timeIntervalSince1970 == 0 {
+            print("Error: Last update date is invalid or missing.")
+        }
+        
+        // Verifica la planimetria
+        if _planimetry == nil {
+            print("Error: Planimetry is missing.")
+        }
+        
+        // Verifica la planimetria delle stanze
+        if _planimetryRooms == nil {
+            print("Error: Planimetry rooms are missing.")
+        }
+        
+        // Verifica l'URL del floor
+        if _floorURL.path.isEmpty || !FileManager.default.fileExists(atPath: _floorURL.path) {
+            print("Error: Floor URL is invalid or does not exist.")
+        }
+        
+        // Verifica la matrice di associazione
+        if _associationMatrix.isEmpty {
+            print("Error: Association matrix is empty.")
+        }
+        
+        // Verifica le stanze associate
+        if _rooms.isEmpty {
+            print("Error: No rooms are associated with the floor.")
+        } else {
+            // Controlla che ogni stanza abbia parametri validi
+            for (index, room) in _rooms.enumerated() {
+                if room.name.isEmpty {
+                    print("Error: Room \(index + 1) is missing a name.")
+                }
+                if room.roomURL.path.isEmpty || !FileManager.default.fileExists(atPath: room.roomURL.path) {
+                    print("Error: Room \(index + 1) URL is invalid or does not exist.")
+                }
+            }
+        }
+        
+        // Verifica gli oggetti della scena
+        if _sceneObjects == nil {
+            print("Error: Scene objects are missing.")
+        }
+        
+        // Verifica la scena
+        if _scene == nil {
+            print("Error: Scene is missing.")
+        }
     }
 }
