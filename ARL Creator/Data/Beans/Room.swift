@@ -304,6 +304,95 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         }
     }
     
+    func deleteConnection(from room: Room, connectionName: String, within building: Building) {
+        let connectionFileURL = room.roomURL.appendingPathComponent("Connection.json")
+        var connections: [AdjacentFloorsConnection] = []
+
+        if FileManager.default.fileExists(atPath: connectionFileURL.path) {
+            do {
+                let jsonData = try Data(contentsOf: connectionFileURL)
+                connections = try JSONDecoder().decode([AdjacentFloorsConnection].self, from: jsonData)
+            } catch {
+                print("Errore durante la lettura del file Connection.json per la stanza \(room.name): \(error)")
+            }
+        } else {
+            print("Nessun file Connection.json trovato per la stanza \(room.name).")
+        }
+
+        // Trova e rimuove la connessione dalla stanza corrente
+        if let index = connections.firstIndex(where: { $0.name == connectionName }) {
+            let removedConnection = connections.remove(at: index)
+            print("Connessione \(removedConnection.name) eliminata dalla stanza \(room.name).")
+
+            // Aggiorna il file Connection.json con la lista aggiornata
+            do {
+                let jsonData = try JSONEncoder().encode(connections)
+                try jsonData.write(to: connectionFileURL)
+                print("File Connection.json aggiornato per la stanza \(room.name).")
+            } catch {
+                print("Errore durante l'aggiornamento del file Connection.json per la stanza \(room.name): \(error)")
+            }
+
+            // Rimuovi anche dalla lista in memoria
+            if let memoryIndex = room.connections.firstIndex(where: { $0.name == connectionName }) {
+                room.connections.remove(at: memoryIndex)
+                print("Connessione rimossa anche dalla memoria.")
+            }
+
+            // Elimina la connessione inversa nella stanza di destinazione
+            deleteInverseConnection(from: removedConnection, originRoom: room, building: building)
+        } else {
+            print("Connessione \(connectionName) non trovata nella stanza \(room.name).")
+        }
+    }
+
+    private func deleteInverseConnection(from connection: AdjacentFloorsConnection, originRoom: Room, building: Building) {
+        let targetFloor = connection.targetFloor
+        let targetRoomName = connection.targetRoom
+
+        guard let floor = building.floors.first(where: { $0.name == targetFloor }) else {
+            print("Piano di destinazione \(targetFloor) non trovato.")
+            return
+        }
+
+        guard let targetRoom = floor.rooms.first(where: { $0.name == targetRoomName }) else {
+            print("Stanza di destinazione \(targetRoomName) non trovata nel piano \(targetFloor).")
+            return
+        }
+
+        let inverseConnectionName = "Connection to \(originRoom.name)"
+
+        let connectionFileURL = targetRoom.roomURL.appendingPathComponent("Connection.json")
+        var targetConnections: [AdjacentFloorsConnection] = []
+
+        if FileManager.default.fileExists(atPath: connectionFileURL.path) {
+            do {
+                let jsonData = try Data(contentsOf: connectionFileURL)
+                targetConnections = try JSONDecoder().decode([AdjacentFloorsConnection].self, from: jsonData)
+            } catch {
+                return
+            }
+        }
+
+        if let index = targetConnections.firstIndex(where: { $0.name == inverseConnectionName }) {
+            targetConnections.remove(at: index)
+
+            do {
+                let jsonData = try JSONEncoder().encode(targetConnections)
+                try jsonData.write(to: connectionFileURL)
+            } catch {
+                print("Error \(targetRoom.name): \(error)")
+            }
+
+            if let memoryIndex = targetRoom.connections.firstIndex(where: { $0.name == inverseConnectionName }) {
+                targetRoom.connections.remove(at: memoryIndex)
+            }
+        } else {
+            print("Connessione inversa \(inverseConnectionName) non trovata nella stanza \(targetRoom.name).")
+        }
+    }
+    
+    
     func validateRoom() {
         print("Validating Room: \(self.name)")
         

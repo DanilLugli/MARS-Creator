@@ -59,8 +59,6 @@ func fetchAPIConversionLocalGlobal(localName: String, nodesList: [(SCNNode, SCNN
         jsonObj[localName]?.append(e)
     }
     
-    //print(jsonObj)
-    
     do {
         let data = try JSONSerialization.data(withJSONObject: jsonObj, options: .prettyPrinted)
         let s:String = String(data: data, encoding: .utf8)!
@@ -125,19 +123,12 @@ func updateJSONFile(_ dict: [String: Any], _ URLFile: URL, _ floor: Floor) {
             }
             jsonData = try JSONSerialization.data(withJSONObject: json, options: .prettyPrinted)
             try jsonData.write(to: fileURL)
-            
-            print("PRIMA: \(floor.associationMatrix)")
-            // Ricarica il `floor` utilizzando la funzione `loadRoomPositionFromJson`
+           
             if let updatedAssociationMatrix = loadRoomPositionFromJson(from: fileURL) {
                 floor.associationMatrix = updatedAssociationMatrix
-                print("Floor updated with new associationMatrix")
-                
-                print("DOPO: \(floor.associationMatrix)")
             } else {
                 print("Failed to load associationMatrix from JSON.")
             }
-            
-            
         } catch {
             print("Errore_1")
             print(error.localizedDescription)

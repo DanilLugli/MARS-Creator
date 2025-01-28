@@ -15,6 +15,9 @@ struct FloorScanningView: View {
     @State var showScanningFloorCard = true
     
     @State var showCreateFloorPlanimetryToast = false
+    @State var showDoneButton = false
+    @State var showContinueScanButton = false
+    @State var showCreateFloorPlanimetryButton = false
     
     @State var captureView: FloorCaptureViewContainer?
     
@@ -44,62 +47,75 @@ struct FloorScanningView: View {
                 }
                 
                 VStack {
-                    HStack {
-                        if isScanningFloor {
-                            
-                            if showScanningFloorCard == true{
-                                ScanningCardView(
-                                    messagesFromWorldMap: messagesFromWorldMap,
-                                    newFeatures: floor is Room ? worldMapNewFeatures : nil,
-                                    
-                                    onSave: {
-                                        isScanningFloor = true
-                                        _ = mapName.isEmpty ? "Map_\(Date().timeIntervalSince1970)" : mapName
-                                        
-                                        captureView?.stopCapture()
-                                        showScanningFloorCard = false
-                                    },
-                                    onRestart: {
-                                        captureView?.redoCapture()
-                                    },
-                                    saveMap: {
-                                        print("saveMap")
-                                    }
-                                )
-                                .ignoresSafeArea()
-                                .padding()
-                                .zIndex(1)
+                    VStack {
+                        Spacer()
+
+                        HStack {
+                            if showContinueScanButton {
+                                Button(action: {
+                                    captureView?.continueCapture()
+                                    _ = mapName.isEmpty ? "Map_\(Date().timeIntervalSince1970)" : mapName
+                                    showDoneButton = true
+                                    showContinueScanButton = false
+                                    showCreateFloorPlanimetryButton = false
+                                }) {
+                                    Text("Continue Scan")
+                                        .font(.system(size: 16, weight: .bold))
+                                        .padding()
+                                        .background(Color.orange)
+                                        .foregroundColor(.white)
+                                        .cornerRadius(30)
+                                        .frame(maxWidth: 150)
+                                }
                             }
-                            else{
-                                VStack{
-                                    Spacer()
-                                    HStack{
-                                        
-                                        Button(action: {
-                                            showCreateFloorPlanimetryToast = true
-                                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                                dismiss()
-                                            }
-                                        }) {
-                                            Text("Done")
-                                                .font(.system(size: 16, weight: .bold, design: .default))
-                                                .bold()
-                                                .padding()
-                                                .background(Color.green)
-                                                .foregroundColor(.white)
-                                                .cornerRadius(30)
-                                                .frame(maxWidth: 150) // Larghezza massima del bottone
-                                        }
+
+                            Spacer()
+
+                            VStack {
+                                
+                                if showDoneButton {
+                                    Button(action: {
+                                        captureView?.stopCapture(pauseARSession: false)
+                                        showDoneButton = false
+                                        showContinueScanButton = true
+                                        showCreateFloorPlanimetryButton = true
+                                    }) {
+                                        Text("Done")
+                                            .font(.system(size: 16, weight: .bold))
+                                            .padding()
+                                            .background(Color.green)
+                                            .foregroundColor(.white)
+                                            .cornerRadius(30)
+                                            .frame(maxWidth: 100)
                                     }
-                                    .frame(maxWidth: .infinity)
-                                        
+                                    
+                                }
+
+                                if showCreateFloorPlanimetryButton {
+                                    Button(action: {
+                                        captureView?.stopCapture(pauseARSession: true)
+                                        Task {
+                                            await captureView?.sessionDelegate.generateCapturedStructureAndExport(to: floor.floorURL)
+                                        }
+                                        _ = mapName.isEmpty ? "Map_\(Date().timeIntervalSince1970)" : mapName
+                                        showCreateFloorPlanimetryToast = true
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                            dismiss()
+                                        }
+                                    }) {
+                                        Text("Save Floor")
+                                            .font(.system(size: 16, weight: .bold))
+                                            .padding()
+                                            .background(Color.blue)
+                                            .foregroundColor(.white)
+                                            .cornerRadius(30)
+                                            //.frame(maxWidth: 150)
+                                    }
                                 }
                             }
                         }
-                        
-                        Spacer()
+                        .padding([.leading, .trailing, .bottom], 12)
                     }
-                    .padding(.top)
                     
                     Spacer()
                     
@@ -107,9 +123,12 @@ struct FloorScanningView: View {
                         Button(action: {
                             isScanningFloor = true
                             captureView = FloorCaptureViewContainer(floor: floor)
+                            showDoneButton = true
+                            showContinueScanButton = false
+                            showCreateFloorPlanimetryButton = false
                         }) {
                             Text("Start")
-                                .font(.system(size: 24, weight: .bold, design: .default))
+                                .font(.system(size: 18, weight: .bold, design: .default))
                                 .bold()
                                 .padding()
                                 .background(Color.green)

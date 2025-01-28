@@ -56,14 +56,6 @@ struct RoomCaptureViewContainer: UIViewRepresentable {
         arSession.pause()
     }
     
-    func restartCapture() {
-        stopCapture()
-
-        sessionDelegate.roomBuilder = RoomBuilder(options: [.beautifyObjects])
-
-        roomCaptureView.captureSession.run(configuration: RoomCaptureSession.Configuration())
-    }
-    
     class SessionDelegate: UIViewController, RoomCaptureSessionDelegate, RoomCaptureViewDelegate, ARSessionDelegate {
         
         var currentMapName: String?
@@ -102,14 +94,14 @@ struct RoomCaptureViewContainer: UIViewRepresentable {
                 }
                 self.worldMapCounter += 1
                 NotificationCenter.default.post(name: .worldMapMessage, object: worldMap)
-                if self.room is Room {
-                    NotificationCenter.default.post(
-                        name: .worldMapNewFeatures,
-                        object: worldMap.rawFeaturePoints.identifiers.difference(from: self.featuresPoints).count
-                    )
-                    
-                    NotificationCenter.default.post(name: .worldMapCounter, object: self.worldMapCounter)
-                }
+                
+                NotificationCenter.default.post(
+                    name: .worldMapNewFeatures,
+                    object: worldMap.rawFeaturePoints.identifiers.difference(from: self.featuresPoints).count
+                )
+                
+                NotificationCenter.default.post(name: .worldMapCounter, object: self.worldMapCounter)
+                
             }
         }
 

@@ -18,7 +18,6 @@ class SCNViewMapHandler: ObservableObject {
     }
    
     func showAllRooms(floor: Floor) {
-        print("Eseguo")
         guard let scene = self.scnView.scene else { return }
 
         scene.rootNode.enumerateChildNodes { node, _ in

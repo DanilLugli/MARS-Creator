@@ -23,7 +23,7 @@ struct RoomScanningView: View {
     @State private var mapName: String = ""
     
     @Environment(\.dismiss) var dismiss
-
+    
     init(room: Room) {
         self._room = State(initialValue: room)
     }
@@ -31,21 +31,23 @@ struct RoomScanningView: View {
     var body: some View {
         NavigationStack {
             ZStack {
+                Color.customBackground.ignoresSafeArea()
                 if isScanningRoom, let captureView = captureView {
                     captureView
                         .edgesIgnoringSafeArea(.all)
-                        .toolbarBackground(.hidden, for: .navigationBar) 
-                } else {
+                        .toolbarBackground(.hidden, for: .navigationBar)
+                }
+                else {
                     Text("Press Start to begin scanning of \(room.name)")
                         .foregroundColor(.gray)
                         .bold()
                 }
                 
                 VStack {
-                    HStack {
+                    VStack {
                         if isScanningRoom {
-                            if showScanningRoomCard == true{
-                                VStack{
+                            if showScanningRoomCard {
+                                VStack {
                                     Text(String(format: "Features Point: %d", worldMapNewFeatures))
                                         .font(.system(size: 18, weight: .bold, design: .default))
                                         .foregroundColor(.black)
@@ -53,85 +55,48 @@ struct RoomScanningView: View {
                                         .background(Color.white)
                                         .cornerRadius(10)
                                         .shadow(radius: 5)
-                                        .padding()
-                                    
-//                                    Spacer()
-//                                    Button(action: {
-//                                        isScanningRoom = true
-//                                        
-//                                        captureView?.stopCapture()
-//                                        showScanningRoomCard = false
-//                                        let finalMapName = mapName.isEmpty ? "Map_\(Date().timeIntervalSince1970)" : mapName
-//                                    }) {
-//                                        Text("Done")
-//                                            .font(.system(size: 16, weight: .bold, design: .default))
-//                                            .bold()
-//                                            .padding()
-//                                            .background(Color.green)
-//                                            .foregroundColor(.white)
-//                                            .cornerRadius(30)
-//                                            .frame(maxWidth: 150)
-//                                    }.padding()
+                                        .padding(.top, 60)
+                                        .frame(maxWidth: .infinity)
                                 }
+                               
 
-                                
-//                                ScanningCardView(
-//                                    messagesFromWorldMap: messagesFromWorldMap,
-//                                    newFeatures: room is Room ? worldMapNewFeatures : nil,
-//                                    onSave: {
-//                                        isScanningRoom = true
-//                                        //let finalMapName = mapName.isEmpty ? "Map_\(Date().timeIntervalSince1970)" : mapName
-//                                        
-//                                        captureView?.stopCapture()
-//                                        showScanningRoomCard = false
-//                                    },
-//                                    onRestart: {
-//                                        captureView?.redoCapture()
-//                                    },
-//                                    saveMap: {
-//                                        print("saveMap")
-//                                    }
-//                                )
-//                                .padding()
-//                                .zIndex(1)
                             }
 
-//                            else{
-                                VStack{
-                                    Spacer()
-                                    HStack{
-                                
-                                        Button(action: {
-                                            if showScanningRoomCard{
-                                                isScanningRoom = true
-                                                
-                                                captureView?.stopCapture()
-                                                showScanningRoomCard = false
-                                                let finalMapName = mapName.isEmpty ? "Map_\(Date().timeIntervalSince1970)" : mapName
-                                            }
-                                            else{
-                                                showCreateRoomPlanimetryToast = true
-                                                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                                    dismiss()
-                                                }
-                                            }
-                                        }) {
-                                            Text("Done")
-                                                .font(.system(size: 16, weight: .bold, design: .default))
-                                                .bold()
-                                                .padding()
-                                                .background(Color.green)
-                                                .foregroundColor(.white)
-                                                .cornerRadius(30)
-                                                .frame(maxWidth: 150)
+                            VStack{
+                                Spacer()
+                                HStack{
+                                   Spacer()
+                                    Button(action: {
+                                        if showScanningRoomCard{
+                                            isScanningRoom = true
+                                            
+                                            captureView?.stopCapture()
+                                            showScanningRoomCard = false
+                                            _ = mapName.isEmpty ? "Map_\(Date().timeIntervalSince1970)" : mapName
                                         }
-                                    }
-                                    .frame(maxWidth: .infinity)
-                                        
+                                        else{
+                                            showCreateRoomPlanimetryToast = true
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                                dismiss()
+                                            }
+                                        }
+                                    }) {
+                                        Text("Done")
+                                            .font(.system(size: 16, weight: .bold, design: .default))
+                                            .bold()
+                                            .padding()
+                                            .background(Color.green)
+                                            .foregroundColor(.white)
+                                            .cornerRadius(30)
+                                    }.padding(.trailing, 20)
+                                    
                                 }
-//                            }
+                                .frame(maxWidth: .infinity)
+                               
+                            }.frame(maxWidth: .infinity, maxHeight: .infinity)
+                           
                         }
-  
+                        
                         Spacer()
                     }
                     .padding(.top)
@@ -144,7 +109,7 @@ struct RoomScanningView: View {
                             captureView = RoomCaptureViewContainer(room: room)
                         }) {
                             Text("Start")
-                                .font(.title)
+                                .font(.system(size: 18, weight: .bold, design: .default))
                                 .bold()
                                 .padding()
                                 .background(Color.green)
@@ -172,7 +137,6 @@ struct RoomScanningView: View {
                     }
                 }
             }
-            .background(Color.customBackground.ignoresSafeArea())
             .onReceive(NotificationCenter.default.publisher(for: .genericMessage)) { notification in
                 if let message = notification.object as? String {
                     self.message = message
@@ -190,5 +154,16 @@ struct RoomScanningView: View {
                 AlertToast(type: .complete(Color.green), title: "Room Planimetry created")
             }
         }
+    }
+}
+
+struct RoomScanningView_Previews: PreviewProvider {
+    static var previews: some View {
+        let buildingModel = BuildingModel.getInstance()
+        let building = buildingModel.initTryData()
+        let floor = building.floors.first!
+        let room = floor.rooms.first!
+        return RoomScanningView(room: room).environmentObject(buildingModel)
+        //        FloorScanningView(floor: Room(_name: "Sample Floor", _lastUpdate: Date(), _planimetry: SCNViewContainer(), _associationMatrix: [:], _rooms: [], _sceneObjects: [], _scene: nil, _floorURL: URL(fileURLWithPath: "")))
     }
 }

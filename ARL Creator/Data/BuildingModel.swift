@@ -64,6 +64,7 @@ class BuildingModel: ObservableObject {
         let buildingURLs = try await Task {
             try fileManager.contentsOfDirectory(at: BuildingModel.SCANBUILD_ROOT, includingPropertiesForKeys: [.isDirectoryKey], options: .skipsHiddenFiles)
         }.value
+        
         for buildingURL in buildingURLs {
             var isDirectory: ObjCBool = false
             if fileManager.fileExists(atPath: buildingURL.path, isDirectory: &isDirectory), isDirectory.boolValue {
@@ -87,8 +88,10 @@ class BuildingModel: ObservableObject {
         
         var floors: [Floor] = []
         for floorURL in floorURLs {
+            
             var isDirectory: ObjCBool = false
             if fileManager.fileExists(atPath: floorURL.path, isDirectory: &isDirectory), isDirectory.boolValue {
+                
                 let attributes = try fileManager.attributesOfItem(atPath: floorURL.path)
                 if let lastModifiedDate = attributes[.modificationDate] as? Date {
                     
@@ -207,12 +210,20 @@ class BuildingModel: ObservableObject {
 
                     let referenceMarkerURL = roomURL.appendingPathComponent("ReferenceMarker")
                     
-                    // Carica i ReferenceMarker
                     if fileManager.fileExists(atPath: referenceMarkerURL.path) {
                         let referenceMarkerContents = try fileManager.contentsOfDirectory(at: referenceMarkerURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
                         let markerDataURL = referenceMarkerURL.appendingPathComponent("Marker Data.json")
                         
                         var markersData: [String: ReferenceMarker.MarkerData] = [:]
+                        if !fileManager.fileExists(atPath: markerDataURL.path) {
+                            
+                            let emptyData = "{}".data(using: .utf8)
+                            fileManager.createFile(atPath: markerDataURL.path, contents: emptyData, attributes: nil)
+                            
+                        } else {
+                            print("Il file 'Marker Data.json' esiste già.")
+                        }
+                        
                         if fileManager.fileExists(atPath: markerDataURL.path) {
                             let jsonData = try Data(contentsOf: markerDataURL)
                             markersData = try JSONDecoder().decode([String: ReferenceMarker.MarkerData].self, from: jsonData)
@@ -253,8 +264,8 @@ class BuildingModel: ObservableObject {
                         parentFloor: floor
                     )
 
-                    // Carica il file .usdz, se esiste
                     if fileManager.fileExists(atPath: roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz").path) {
+                        
                         let usdzURL = room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz")
                         room.scene = try SCNScene(url: usdzURL)
                         
@@ -287,7 +298,6 @@ class BuildingModel: ObservableObject {
                     
                     room.planimetry.loadRoomPlanimetry(room: room, borders: true)
                     
-                    // Carica le connessioni da Connection.json
                     let connectionFileURL = roomURL.appendingPathComponent("Connection.json")
                     if fileManager.fileExists(atPath: connectionFileURL.path) {
                         do {
@@ -298,7 +308,6 @@ class BuildingModel: ObservableObject {
                             print("Error loading connections for room \(room.name): \(error)")
                         }
                     } else {
-                        // Crea il file Connection.json se non esiste
                         do {
                             let emptyConnections: [AdjacentFloorsConnection] = []
                             let jsonData = try JSONEncoder().encode(emptyConnections)

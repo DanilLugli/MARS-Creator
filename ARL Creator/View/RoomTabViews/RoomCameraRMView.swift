@@ -49,10 +49,12 @@ struct RoomCameraRMView: UIViewControllerRepresentable {
 
     func saveImageToFileSystem(image: UIImage) {
         let filename = room.roomURL.appendingPathComponent("ReferenceMarker").appendingPathComponent("room_photo.jpg")
-        guard let data = image.jpegData(compressionQuality: 0.8) else { return }
+        guard let data = image.jpegData(compressionQuality: 0.8)
+        else { return }
 
         do {
             try data.write(to: filename)
+            
             let newMarker = ReferenceMarker(
                 _imagePath: room.roomURL.appendingPathComponent("ReferenceMarker").appendingPathComponent("room_photo.jpg"),
                 _imageName: "room_photo.jpg",
@@ -60,8 +62,17 @@ struct RoomCameraRMView: UIViewControllerRepresentable {
                 _rmUML: room.roomURL.appendingPathComponent("ReferenceMarker"),
                 _physicalWidth: 0.0
             )
+            
             room.referenceMarkers.append(newMarker)
-            print("Image saved to: \(filename)")
+            
+            let referenceMarkerURL = room.roomURL.appendingPathComponent("ReferenceMarker")
+            newMarker.saveMarkerData(
+                to: referenceMarkerURL.appendingPathComponent("Marker Data.json"),
+                old: newMarker.imageName,
+                new: newMarker.imageName,
+                size: 0.0
+            )
+            
             DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                 dismiss()
             }

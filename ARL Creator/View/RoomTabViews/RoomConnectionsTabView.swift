@@ -1,13 +1,21 @@
 import Foundation
+import AlertToast
 import SwiftUI
 
 struct RoomConnectionsTabView: View {
+    @ObservedObject var building: Building
     @ObservedObject var room: Room
     @ObservedObject var floor: Floor
     @State private var searchText: String = ""
 
+    // Stato per gestire il confirmationDialog
+    @State private var showDeleteConfirmation = false
+    @State private var showConnectionDeletedToast = false
+    
+    @State private var selectedConnection: AdjacentFloorsConnection? = nil
+
     var filteredConnections: [AdjacentFloorsConnection] {
-        let connections = room.connections // Ora accede direttamente alle connessioni della stanza
+        let connections = room.connections
 
         if searchText.isEmpty {
             return connections
@@ -19,7 +27,7 @@ struct RoomConnectionsTabView: View {
     var body: some View {
         VStack {
             if filteredConnections.isEmpty {
-                HStack {
+                VStack {
                     HStack {
                         Text("Create Connection with")
                             .foregroundColor(.gray)
@@ -31,6 +39,14 @@ struct RoomConnectionsTabView: View {
                         Text("icon")
                             .foregroundColor(.gray)
                             .font(.headline)
+                    }
+                    
+                    if building.floors.count < 2 {
+                        HStack {
+                            Text("You need two or more floors to create a connection.")
+                                .foregroundColor(.gray)
+                                .font(.headline)
+                        }
                     }
                 }
             } else {
@@ -44,9 +60,14 @@ struct RoomConnectionsTabView: View {
                                 targetRoom: connection.targetRoom,
                                 altitudeDifference: connection.altitude,
                                 exist: true,
-                                date: Date(), // Puoi sostituirlo con una data reale se disponibile
+                                date: Date(),
                                 rowSize: 1
                             )
+                            .onTapGesture {
+                                // Mostra il confirmationDialog
+                                selectedConnection = connection
+                                showDeleteConfirmation = true
+                            }
                         }
                     }
                 }
@@ -57,5 +78,23 @@ struct RoomConnectionsTabView: View {
         .background(Color.customBackground)
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
         .navigationTitle("Connections")
+        .confirmationDialog(
+            "Do you want to delete this connection?",
+            isPresented: $showDeleteConfirmation,
+            titleVisibility: .visible
+        ) {
+            Button("Yes, delete", role: .destructive) {
+                if let connection = selectedConnection {
+                   
+                    let buildingModel = BuildingModel.getInstance()
+                    room.deleteConnection(from: room, connectionName: connection.name, within: building)
+                    showConnectionDeletedToast = true
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        }
+        .toast(isPresenting: $showConnectionDeletedToast){
+            AlertToast(displayMode: .banner(.slide), type: .regular, title: "Floor Renamed")
+        }
     }
 }

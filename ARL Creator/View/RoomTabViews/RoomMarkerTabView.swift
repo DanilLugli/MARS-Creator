@@ -1,9 +1,11 @@
 import SwiftUI
+import AlertToast
 
 struct RoomMarkerTabView: View {
     @ObservedObject var room: Room
     @State private var searchText: String = ""
     @State private var selectedMarker: ReferenceMarker? = nil
+    
     
     var filteredMarker: [ReferenceMarker] {
         if searchText.isEmpty {
@@ -64,6 +66,11 @@ struct MarkerDetailView: View {
     @State private var showAlert = false
     @State private var alertMessage = ""
     
+    
+    @State private var showDeleteRMToast: Bool = false
+    @State private var showUpdateRMToast: Bool = false
+
+    
     private var oldName: String
     
     init(marker: ReferenceMarker, room: Room) {
@@ -97,6 +104,8 @@ struct MarkerDetailView: View {
                 VStack(alignment: .leading, spacing: 10) {
                     HStack {
                         Image(systemName: "characters.lowercase")
+                            .font(.headline)
+                            .bold()
                             .foregroundColor(.customBackground)
                         
                         Text("Name:")
@@ -133,6 +142,7 @@ struct MarkerDetailView: View {
                 HStack{
                     Button(action: {
                         deleteMarker(markerName: marker.imageName)
+                        showDeleteRMToast = true
                     }) {
                         Text("Delete")
                             .font(.headline)
@@ -143,7 +153,10 @@ struct MarkerDetailView: View {
                             .cornerRadius(30)
                     }
                     
-                    Button(action: saveChanges) {
+                    Button(action: {
+                        saveChanges()
+                        showUpdateRMToast = true
+                    }){
                         Text("Save")
                             .font(.headline)
                             .bold()
@@ -166,6 +179,12 @@ struct MarkerDetailView: View {
                 dismissButton: .default(Text("OK"))
             )
         }
+        .toast(isPresenting: $showDeleteRMToast){
+            AlertToast(displayMode: .banner(.slide), type: .regular, title: "Reference Marker Deleted")
+        }
+        .toast(isPresenting: $showUpdateRMToast){
+            AlertToast(displayMode: .banner(.slide), type: .regular, title: "Reference Marker Updated")
+        }
     }
     
     private func saveChanges() {
@@ -174,8 +193,8 @@ struct MarkerDetailView: View {
             showAlert = true
             return
         }
-        
-        guard let size = Double(newSize), size > 0 else {
+
+        guard let size = Double(newSize), size > 0.0 else {
             alertMessage = "Size must be a valid positive number."
             showAlert = true
             return
@@ -186,7 +205,7 @@ struct MarkerDetailView: View {
         
         let referenceMarkerURL = room.roomURL.appendingPathComponent("ReferenceMarker")
         let fileMarkerDataURL = referenceMarkerURL.appendingPathComponent("Marker Data.json")
-        let oldFileURL = referenceMarkerURL.appendingPathComponent("\(oldName).jpg")
+        let oldFileURL = referenceMarkerURL.appendingPathComponent("\(oldName)")
         let newFileURL = referenceMarkerURL.appendingPathComponent("\(newName).jpg")
         
         do {
@@ -202,11 +221,13 @@ struct MarkerDetailView: View {
         
         marker.saveMarkerData(to: fileMarkerDataURL,
                               old: oldName,
-                              new: marker.imageName,
+                              new: newName,
                               size: marker.physicalWidth
         )
         
-        dismiss()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            dismiss()
+        }
     }
     
     private func deleteMarker(markerName: String) {
@@ -215,7 +236,8 @@ struct MarkerDetailView: View {
 
         if let index = room.referenceMarkers.firstIndex(where: { $0.imageName == markerName }) {
             room.referenceMarkers.remove(at: index)
-        } else {
+        }
+        else {
             alertMessage = "Marker not found in the room."
             showAlert = true
             return
@@ -226,13 +248,16 @@ struct MarkerDetailView: View {
                 try FileManager.default.removeItem(at: markerFileURL)
                 print("Marker file deleted successfully.")
             }
-        } catch {
+        }
+        catch {
             alertMessage = "Failed to delete the marker file: \(error.localizedDescription)"
             showAlert = true
         }
         
         marker.deleteMarkerData(from: referenceMarkerURL.appendingPathComponent("Marker Data.json"), markerName: marker.imageName)
 
-        dismiss()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            dismiss()
+        }
     }
 }

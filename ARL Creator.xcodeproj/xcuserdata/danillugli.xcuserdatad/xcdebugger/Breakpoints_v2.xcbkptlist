@@ -375,16 +375,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "E96D1A5F-66A2-48C3-AAE1-72813F286A4F"
+            uuid = "E55DA1A9-BAAF-4FFE-827A-51CE5A98E232"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "ARL Creator/View/SCNView/SCNViewUpdatePositionRoomContainer.swift"
+            filePath = "ARL Creator/View/RoomTabViews/RoomMarkerTabView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "339"
-            endingLineNumber = "339"
-            landmarkName = "init()"
+            startingLineNumber = "253"
+            endingLineNumber = "253"
+            landmarkName = "deleteMarker(markerName:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

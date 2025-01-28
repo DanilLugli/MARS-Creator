@@ -40,15 +40,12 @@ class ReferenceMarker: ObservableObject, Codable, Identifiable {
     }
     
     var image: Image {
-        if _image == nil {
-            if let imageData = try? Data(contentsOf: _imagePath),
-               let uiImage = UIImage(data: imageData) {
-                _image = Image(uiImage: uiImage)
-            } else {
-                _image = Image(systemName: "photo")
-            }
+        if let imageData = try? Data(contentsOf: _imagePath),
+           let uiImage = UIImage(data: imageData) {
+            return Image(uiImage: uiImage)
+        } else {
+            return Image(systemName: "photo")
         }
-        return _image!
     }
     
     var imageName: String {
@@ -90,7 +87,6 @@ class ReferenceMarker: ObservableObject, Codable, Identifiable {
         }
     }
     
-    /// Salva o aggiorna i dati del marker nel file JSON
     public func saveMarkerData(to fileURL: URL, old oldName: String, new newName: String, size newWidth: CGFloat) {
         let referenceMarkerURL = fileURL.deletingLastPathComponent()
         var markersData: [String: MarkerData] = [:]
@@ -110,7 +106,6 @@ class ReferenceMarker: ObservableObject, Codable, Identifiable {
             print("File con il nome \(oldName) non trovato.")
         }
         
-        // Carica i dati dal file JSON, se esiste
         if fileManager.fileExists(atPath: fileURL.path) {
             do {
                 let data = try Data(contentsOf: fileURL)
@@ -121,9 +116,9 @@ class ReferenceMarker: ObservableObject, Codable, Identifiable {
             }
         }
         
-        if let markerData = markersData[oldName] {
+        if markersData[oldName] != nil {
             markersData.removeValue(forKey: oldName)
-            markersData[newName] = MarkerData(name: newName, width: markerData.width)
+            markersData[newName] = MarkerData(name: newName, width: newWidth)
             
         } else {
             markersData[newName] = MarkerData(name: newName, width: newWidth)

@@ -33,7 +33,7 @@ struct FloorPlanimetryView: View {
                         VStack {
                             ZStack {
                                 RoundedRectangle(cornerRadius: 10)
-                                    .fill(Color.white) 
+                                    .fill(Color.white)
                                     .shadow(color: Color.gray.opacity(0.5), radius: 5, x: 0, y: 2)
                                 Toggle(isOn: $showFloorMap) {
                                     HStack {

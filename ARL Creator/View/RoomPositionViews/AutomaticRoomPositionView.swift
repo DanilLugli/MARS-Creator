@@ -24,11 +24,15 @@ struct AutomaticRoomPositionView: View {
     @State private var showButton1 = false
     @State private var showButton2 = false
     @State private var showAddRoomPositionToast = false
+    @State private var showLoadingPositionToast = false
     @State private var showAlert = false
     @State private var showSheet = false
     
     @State private var selectedMap: URL = URL(fileURLWithPath: "")
     @State private var filteredLocalMaps: [String] = []
+    
+    @Environment(\.dismiss) private var dismiss
+    
     
     @State var responseFromServer = false {
         didSet {
@@ -37,6 +41,7 @@ struct AutomaticRoomPositionView: View {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
                     showAlert = false
                     responseFromServer = false
+                    showLoadingPositionToast = false
                 }
             }
         }
@@ -81,7 +86,7 @@ struct AutomaticRoomPositionView: View {
                             }
                         }
                         .onChange(of: selectedFloorNodeName) { oldValue, newValue in
-                            floor.planimetry.changeColorOfNode(nodeName: newValue, color: UIColor.red)
+                            floor.planimetry.changeColorOfNode(nodeName: newValue, color: UIColor.green)
                             
                             selectedFloorNode = floor.sceneObjects?.first(where: { node in
                                 node.name == newValue
@@ -124,7 +129,7 @@ struct AutomaticRoomPositionView: View {
                             }
                         }
                         .onChange(of: selectedRoomNodeName) { oldValue, newValue in
-                            room.planimetry.changeColorOfNode(nodeName: selectedRoomNodeName, color: UIColor.red)
+                            room.planimetry.changeColorOfNode(nodeName: selectedRoomNodeName, color: UIColor.green)
                             selectedRoomNode = room.sceneObjects?.first(where: { node in
                                 node.name == newValue
                             })
@@ -145,18 +150,18 @@ struct AutomaticRoomPositionView: View {
                             floor.planimetry.resetColorNode()
                             
                             resetRoomNodes()
-                        }.frame(width: 160, height: 50)
-                            .foregroundStyle(.white)
-                            .background(Color.blue.opacity(0.4))
-                            .cornerRadius(20)
-                            .bold()
+                        }.font(.system(size: 16, weight: .bold, design: .default))
+                        .frame(width: 160, height: 50)
+                        .foregroundStyle(.white)
+                        .background(Color.blue.opacity(0.4))
+                        .cornerRadius(30)
+                        .bold()
                     }
                     
                     if matchingNodesForAPI.count >= 3{
-                        Button("Create Matrix") {
+                        Button("Calculate Position") {
                             Task {
-                                room.planimetry.resetColorNode()
-                                floor.planimetry.resetColorNode()
+                                showLoadingPositionToast = true
                                 
                                 print(matchingNodesForAPI)
                                 response = try await fetchAPIConversionLocalGlobal(localName: room.name, nodesList: matchingNodesForAPI)
@@ -168,20 +173,28 @@ struct AutomaticRoomPositionView: View {
                                 }
                                 
                                 responseFromServer = true
-                                //showAlert = true
+                                
                                 saveConversionGlobalLocal(response.1, floor.floorURL, floor)
                                 
                                 floor.planimetryRooms.handler.loadRoomsMaps(
                                     floor: floor,
                                     rooms: [room]
                                 )
+                                room.planimetry.resetColorNode()
+                                floor.planimetry.resetColorNode()
                                 
+                                showLoadingPositionToast = false
                                 showAddRoomPositionToast = true
+                                
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                    dismiss()
+                                }
                             }
-                        }.frame(width: 160, height: 50)
+                        }.font(.system(size: 16, weight: .bold, design: .default))
+                            .frame(width: 160, height: 50)
                             .foregroundColor(.white)
                             .background(Color(red: 62/255, green: 206/255, blue: 76/255))
-                            .cornerRadius(20)
+                            .cornerRadius(30)
                             .bold()
                     }
                 }
@@ -191,19 +204,9 @@ struct AutomaticRoomPositionView: View {
             .toast(isPresenting: $showAddRoomPositionToast) {
                 AlertToast(type: .complete(Color.green), title: "Room position created successfully")
             }
-//            .alert(isPresented: $showAlert) {
-//                Alert(
-//                    title: Text("ROOM POSITION CREATED")
-//                        .font(.system(size: 26, weight: .heavy))
-//                        .foregroundColor(.white),
-//                    message: Text("Do you want to save the room position?"),
-//                    primaryButton: .default(Text("SAVE ROOM POSITION")) {
-//                        saveConversionGlobalLocal(response.1, floor.floorURL, floor)
-//                        showAlert = false
-//                    },
-//                    secondaryButton: .cancel(Text("Cancel"))
-//                )
-//            }
+            .toast(isPresenting: $showLoadingPositionToast) {
+                AlertToast(type: .loading, title: "Creating Position")
+            }
         }
     }
     

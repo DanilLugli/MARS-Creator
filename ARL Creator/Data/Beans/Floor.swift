@@ -72,11 +72,19 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
     }
     
     var planimetry: SCNViewContainer {
-        return _planimetry ?? SCNViewContainer()
+        get{
+            return _planimetry ?? SCNViewContainer()
+        }set{
+            _planimetry = newValue
+        }
     }
     
     var planimetryRooms: SCNViewMapContainer {
-        return _planimetryRooms ?? SCNViewMapContainer()
+        get{
+            return _planimetryRooms ?? SCNViewMapContainer()
+        }set{
+            _planimetryRooms = newValue
+        }
     }
     
     var associationMatrix: [String: RotoTraslationMatrix] {

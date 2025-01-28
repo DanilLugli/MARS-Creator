@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct MarkerCardView: View {
-    @State var image: ReferenceMarker
+    @ObservedObject var image: ReferenceMarker
     
     init(imageName: ReferenceMarker) {
         self.image = imageName
@@ -23,7 +23,7 @@ struct MarkerCardView: View {
             if image.physicalWidth == 0.0 {
                 Image(systemName: "exclamationmark.circle")
                     .foregroundColor(.red)
-                    .font(.system(size: 30))
+                    .font(.system(size: 24))
                     .padding(10)
             }
         }

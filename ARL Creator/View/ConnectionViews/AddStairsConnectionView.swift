@@ -168,8 +168,9 @@ struct AddStairsConnectionView: View {
                                 }
                             }
                             
-                            Text(String(format: "Altitude Difference: %.2f", altitude))
+                            Text(String(format: "Altitude Difference: %.2f", altitude != 0 ? altitude : 10.0))
                                 .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(Color.customBackground)
                                 .padding()
                                 .background(Color.white)
                                 .cornerRadius(10)
@@ -295,7 +296,7 @@ struct AddStairsConnectionView: View {
     private func createConnection() {
         print("Creating connection...")
         let initialRoom = initialSelectedRoom
-        var targetRoom = selectedRoom
+        let targetRoom = selectedRoom
         
         
         // Determina l'altitudine
@@ -333,14 +334,13 @@ struct AddStairsConnectionView: View {
                 _sceneObjects: nil,              // Nessun oggetto di scena
                 _roomURL: URL(fileURLWithPath: "/tmp") // URL di default (ad esempio una directory temporanea)
             ), connection: connectionTo, to: targetRoom?.roomURL ?? URL(fileURLWithPath: ""))
-            print("Connection successfully created and saved between \(initialRoom.name) and \(String(describing: targetRoom?.name)).")
+            
         } catch {
-            print("Error saving connection: \(error)")
+            print("\(error)")
         }
         showConnectionCreateToast = true
     }
     
-    // Funzione per salvare una connessione in Connection.json
     private func saveConnectionToJSON(for room: Room, connection: AdjacentFloorsConnection, to url: URL) throws {
         let connectionFileURL = url.appendingPathComponent("Connection.json")
         var connections: [AdjacentFloorsConnection] = []

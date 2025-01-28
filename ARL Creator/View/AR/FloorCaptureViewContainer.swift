@@ -13,9 +13,9 @@ struct FloorCaptureViewContainer: UIViewRepresentable {
     private let configuration: RoomCaptureSession.Configuration
     
     init(floor: Floor) {
-        
         sessionDelegate = SessionDelegate(floor: floor)
         configuration = RoomCaptureSession.Configuration()
+        
         
         if #available(iOS 17.0, *) {
             roomCaptureView = RoomCaptureView(frame: .zero, arSession: arSession)
@@ -37,27 +37,35 @@ struct FloorCaptureViewContainer: UIViewRepresentable {
     
     func updateUIView(_ uiView: RoomCaptureView, context: Context) {}
     
-    func stopCapture() {
-        roomCaptureView.captureSession.stop()
-        arSession.pause()
+    func stopCapture(pauseARSession: Bool) {
+        
+        if #available(iOS 17.0, *) {
+            roomCaptureView.captureSession.stop(pauseARSession: pauseARSession)
+        } else {
+            roomCaptureView.captureSession.stop()
+        }
+        
     }
     
-    func redoCapture() {
-        roomCaptureView.captureSession.run(configuration: RoomCaptureSession.Configuration())
-    }
-    
-    func restartCapture() {
-
-        stopCapture()
-
-        sessionDelegate.roomBuilder = RoomBuilder(options: [.beautifyObjects])
-
+    func continueCapture() {
         roomCaptureView.captureSession.run(configuration: RoomCaptureSession.Configuration())
     }
 
+    func redoLastCapture() {
+        _ = sessionDelegate.capturedRooms.popLast()
+        
+        let config = RoomCaptureSession.Configuration()
+        roomCaptureView.captureSession.run(configuration: config)
+    }
+    
+    func exportCapturedStructure(to destinationURL: URL ) async {
+        await sessionDelegate.generateCapturedStructureAndExport(to: destinationURL)
+    }
+    
     class SessionDelegate: UIViewController, RoomCaptureSessionDelegate, RoomCaptureViewDelegate, ARSessionDelegate {
         
         var currentMapName: String?
+        var capturedRooms: [CapturedRoom] = []
         var finalResults: CapturedRoom?
         var roomBuilder = RoomBuilder(options: [.beautifyObjects])
         @State var floor: Floor
@@ -73,62 +81,46 @@ struct FloorCaptureViewContainer: UIViewRepresentable {
         }
         
         func setCaptureView(_ r: FloorCaptureViewContainer) {
+            
         }
         
         func captureSession(_ session: RoomCaptureSession, didEndWith data: CapturedRoomData, error: Error?) {
-            if let error = error {
-                print("Error in captureSession(_:didEndWith:error:)")
-                print(error)
-                return
-            }
-            
+            guard error == nil else { return }
+
             Task {
                 do {
-                    let name = currentMapName ?? "ScannedRoom_\(DateFormatter.localizedString(from: Date(), dateStyle: .medium, timeStyle: .short))"
-                    let finalRoom = try await self.roomBuilder.capturedRoom(from: data)
+                    let finalRoom = try await roomBuilder.capturedRoom(from: data)
                     
-                    saveUSDZMap(finalRoom, name, at: floor.url)
-                    
-                    let usdzURL = floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz")
-                    floor.scene = try SCNScene(url: usdzURL)
-                    floor.planimetry.loadFloorPlanimetry(borders: true, floor: floor)
-                    
-                    var seenNodeNames = Set<String>()
-                    
-                    floor.sceneObjects = floor.scene?.rootNode.childNodes(passingTest: { n, _ in
-                        if let nodeName = n.name {
-                            if seenNodeNames.contains(nodeName) {
-                                return false
-                            }
-
-                            guard n.geometry != nil else {
-                                return false
-                            }
-
-                            let isValidNode = nodeName != "Room" &&
-                                              nodeName != "Geom" &&
-                                              !nodeName.hasSuffix("_grp") &&
-                                              !nodeName.hasPrefix("unidentified") &&
-                                              !(nodeName.first?.isNumber ?? false) &&
-                                              !nodeName.hasPrefix("_")
-
-                            if isValidNode {
-                                seenNodeNames.insert(nodeName)
-                                return true
-                            }
-                        }
-                        
-                        return false
-                    }).sorted(by: {
-                        ($0.name ?? "").localizedCaseInsensitiveCompare($1.name ?? "") == .orderedAscending
-                    })
-                    ?? []
-                    
-                    
+                    capturedRooms.append(finalRoom)
+                    updateFloorSceneObjects()
                 } catch {
-                    print("Error during room capturing or saving: \(error)")
+                    print("Error processing captured room: \(error)")
                 }
             }
+        }
+
+        private func updateFloorSceneObjects() {
+            var seenNodeNames = Set<String>()
+            floor.sceneObjects = floor.scene?.rootNode.childNodes(passingTest: { node, _ in
+                guard let nodeName = node.name else { return false }
+                
+                if seenNodeNames.contains(nodeName) { return false }
+                guard node.geometry != nil else { return false }
+
+                let isValidNode = nodeName != "Room" &&
+                                  nodeName != "Geom" &&
+                                  !nodeName.hasSuffix("_grp") &&
+                                  !nodeName.hasPrefix("unidentified") &&
+                                  !(nodeName.first?.isNumber ?? false) &&
+                                  !nodeName.hasPrefix("_")
+
+                if isValidNode {
+                    seenNodeNames.insert(nodeName)
+                    return true
+                }
+                return false
+            })
+            .sorted { ($0.name ?? "").localizedCaseInsensitiveCompare($1.name ?? "") == .orderedAscending }
         }
         
         func captureSession(_ session: RoomCaptureSession, didUpdate room: CapturedRoom) {}
@@ -138,6 +130,38 @@ struct FloorCaptureViewContainer: UIViewRepresentable {
         func captureSession(_ session: RoomCaptureSession, didChange room: CapturedRoom) {}
         func captureSession(_ session: RoomCaptureSession, didRemove room: CapturedRoom) {}
         
+        @available(iOS 17.0, *)
+        func generateCapturedStructureAndExport(to destinationURL: URL) async {
+            guard !capturedRooms.isEmpty else {
+                print("No rooms to combine.")
+                return
+            }
+            print("Destination: \(destinationURL)\n\n\n")
+            do {
+                
+                let structureBuilder = StructureBuilder(options: [.beautifyObjects])
+                let capturedStructure = try await structureBuilder.capturedStructure(from: capturedRooms)
+                
+                
+                let usdzURL = destinationURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz")
+                let plistURL = destinationURL.appendingPathComponent("PlistMetadata").appendingPathComponent("\(floor.name).plist")
+                
+                
+                try capturedStructure.export(to: usdzURL,
+                                             metadataURL: plistURL,
+                                             exportOptions: [.mesh])
+                
+                guard FileManager.default.fileExists(atPath: usdzURL.path) else {
+                    return
+                }
+                
+                floor.scene = try SCNScene(url: usdzURL)
+                floor.planimetry.loadFloorPlanimetry(borders: true, floor: floor)
+                
+            } catch {
+                print("Error during structure generation, export, or scene loading: \(error.localizedDescription)")
+            }
+        }
         
         func captureView(didPresent processedResult: CapturedRoom, error: Error?) {
             self.finalResults = processedResult

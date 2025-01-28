@@ -77,7 +77,7 @@ struct RoomView: View {
                         }
                         .tag(2)
                     
-                    RoomConnectionsTabView(building: building, room: room, floor: floor)
+                    RoomConnectionsTabView(room: room, floor: floor)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(Color.customBackground)
                         .tabItem {
@@ -402,8 +402,6 @@ struct RoomView: View {
                     NavigationLink(destination: ManualRoomPositionView(floor: self.floor, room: self.room)) {
                         Label("Correct Room Position", systemImage: "arrow.up.and.down.and.arrow.left.and.right")
                     }
-                    .disabled(!doesMatrixExist(for: room.name, in: floor.associationMatrix))
-                    
                 } label: {
                     Image(systemName: "plus.circle.fill")
                         .font(.system(size: 22))
@@ -444,8 +442,7 @@ struct RoomView: View {
                     ) {
                         Label("Create Adjacent Floors Connection", systemImage: "arrow.up.arrow.down")
                             .font(.system(size: 16))
-                    }.disabled(building.floors.count < 2)
-                    
+                    }
                 } label: {
                     Image(systemName: "plus.circle.fill")
                         .font(.system(size: 22))
