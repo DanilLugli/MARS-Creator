@@ -163,7 +163,7 @@ struct RoomView: View {
                         
                         let referenceMarker = ReferenceMarker(
                             _imagePath: room.roomURL.appendingPathComponent("ReferenceMarker").appendingPathComponent("\(url.lastPathComponent)"),
-                           _imageName:  url.lastPathComponent,
+                            _imageName:  url.lastPathComponent,
                            _coordinates: Coordinates(x: Float(Double.random(in: -100...100)), y: Float(Double.random(in: -100...100))),
                            _rmUML: room.roomURL.appendingPathComponent("ReferenceMarker"),
                            _physicalWidth: 0.0

@@ -206,7 +206,7 @@ struct MarkerDetailView: View {
         let referenceMarkerURL = room.roomURL.appendingPathComponent("ReferenceMarker")
         let fileMarkerDataURL = referenceMarkerURL.appendingPathComponent("Marker Data.json")
         let oldFileURL = referenceMarkerURL.appendingPathComponent("\(oldName)")
-        let newFileURL = referenceMarkerURL.appendingPathComponent("\(newName).jpg")
+        let newFileURL = referenceMarkerURL.appendingPathComponent("\(newName)")
         
         do {
             if FileManager.default.fileExists(atPath: oldFileURL.path) {

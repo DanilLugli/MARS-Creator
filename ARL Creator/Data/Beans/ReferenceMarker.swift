@@ -92,20 +92,7 @@ class ReferenceMarker: ObservableObject, Codable, Identifiable {
         var markersData: [String: MarkerData] = [:]
         let fileManager = FileManager.default
         
-        if let fileWithExtension = try? fileManager.contentsOfDirectory(at: referenceMarkerURL, includingPropertiesForKeys: nil)
-            .first(where: { $0.deletingPathExtension().lastPathComponent == oldName }) {
-
-            let newFileURL = fileWithExtension.deletingLastPathComponent().appendingPathComponent(newName).appendingPathExtension(fileWithExtension.pathExtension)
-            
-            do {
-                try fileManager.moveItem(at: fileWithExtension, to: newFileURL)
-            } catch {
-                print("Errore nel rinominare il file: \(error)")
-            }
-        } else {
-            print("File con il nome \(oldName) non trovato.")
-        }
-        
+        // Carica il JSON esistente se il file esiste
         if fileManager.fileExists(atPath: fileURL.path) {
             do {
                 let data = try Data(contentsOf: fileURL)
@@ -116,19 +103,42 @@ class ReferenceMarker: ObservableObject, Codable, Identifiable {
             }
         }
         
-        if markersData[oldName] != nil {
-            markersData.removeValue(forKey: oldName)
-            markersData[newName] = MarkerData(name: newName, width: newWidth)
-            
+        // Se oldName e newName sono uguali, aggiorna solo il width nel JSON
+        if oldName == newName {
+            if var existingMarker = markersData[oldName] {
+                existingMarker.width = newWidth
+                markersData[oldName] = existingMarker
+            } else {
+                markersData[oldName] = MarkerData(name: newName, width: newWidth)
+            }
         } else {
+            // Rinominazione del file
+            if let fileWithExtension = try? fileManager.contentsOfDirectory(at: referenceMarkerURL, includingPropertiesForKeys: nil)
+                .first(where: { $0.deletingPathExtension().lastPathComponent == oldName }) {
+                
+                let newFileURL = fileWithExtension.deletingLastPathComponent().appendingPathComponent(newName).appendingPathExtension(fileWithExtension.pathExtension)
+                
+                do {
+                    try fileManager.moveItem(at: fileWithExtension, to: newFileURL)
+                } catch {
+                    print(" Errore nel rinominare il file: \(error)")
+                }
+            } else {
+                print("File con il nome \(oldName) non trovato.")
+            }
+            
+            // Aggiornamento del JSON con il nuovo nome
+            markersData.removeValue(forKey: oldName)
             markersData[newName] = MarkerData(name: newName, width: newWidth)
         }
         
+        // Salva il JSON aggiornato
         do {
             let encoder = JSONEncoder()
             encoder.outputFormatting = .prettyPrinted
             let data = try encoder.encode(markersData)
             try data.write(to: fileURL)
+            print(" File JSON aggiornato con successo!")
         } catch {
             print("Errore nel salvataggio del file JSON: \(error)")
         }
