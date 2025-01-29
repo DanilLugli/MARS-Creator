@@ -28,17 +28,19 @@ struct RoomConnectionsTabView: View {
         VStack {
             if filteredConnections.isEmpty {
                 VStack {
-                    HStack {
-                        Text("Create Connection with")
-                            .foregroundColor(.gray)
-                            .font(.headline)
-                        
-                        Image(systemName: "plus.circle")
-                            .foregroundColor(.gray)
-                        
-                        Text("icon")
-                            .foregroundColor(.gray)
-                            .font(.headline)
+                    if building.floors.count >= 2 {
+                        HStack {
+                            Text("Create Connection with")
+                                .foregroundColor(.gray)
+                                .font(.headline)
+                            
+                            Image(systemName: "plus.circle")
+                                .foregroundColor(.gray)
+                            
+                            Text("icon")
+                                .foregroundColor(.gray)
+                                .font(.headline)
+                        }
                     }
                     
                     if building.floors.count < 2 {

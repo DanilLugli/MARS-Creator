@@ -71,7 +71,7 @@ class BuildingModel: ObservableObject {
                 let attributes = try fileManager.attributesOfItem(atPath: buildingURL.path)
                 if let lastModifiedDate = attributes[.modificationDate] as? Date {
                     
-                    let floors = try loadFloors(from: buildingURL)
+                    let floors = try await loadFloors(from: buildingURL)
                     let building = Building(name: buildingURL.lastPathComponent, lastUpdate: lastModifiedDate, floors: floors, buildingURL: buildingURL)
                     
                     await MainActor.run {
@@ -82,6 +82,7 @@ class BuildingModel: ObservableObject {
         }
     }
     
+    @MainActor
     func loadFloors(from buildingURL: URL) throws -> [Floor] {
         let fileManager = FileManager.default
         let floorURLs = try fileManager.contentsOfDirectory(at: buildingURL, includingPropertiesForKeys: [.isDirectoryKey], options: .skipsHiddenFiles)
@@ -142,7 +143,7 @@ class BuildingModel: ObservableObject {
                         
                         floor.scene = try SCNScene(url: usdzURL)
                         
-                        floor.planimetry.loadFloorPlanimetry(borders: true, floor: floor)
+                        floor.planimetry = SCNViewContainer(empty: true)
                         
                         floor.planimetryRooms.handler.loadRoomsMaps(
                             floor: floor,
@@ -190,6 +191,7 @@ class BuildingModel: ObservableObject {
         return floors
     }
     
+    @MainActor
     func loadRooms(from floorURL: URL, floor: Floor) throws -> [Room] {
         let fileManager = FileManager.default
         let roomsDirectoryURL = floorURL.appendingPathComponent(BuildingModel.FLOOR_ROOMS_FOLDER)
@@ -296,7 +298,7 @@ class BuildingModel: ObservableObject {
                         print("File .usdz for \(room.name) planimetry is not available.")
                     }
                     
-                    room.planimetry.loadRoomPlanimetry(room: room, borders: true)
+                    room.planimetry = SCNViewContainer(empty: true)
                     
                     let connectionFileURL = roomURL.appendingPathComponent("Connection.json")
                     if fileManager.fileExists(atPath: connectionFileURL.path) {

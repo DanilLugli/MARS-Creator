@@ -156,6 +156,35 @@ struct FloorCaptureViewContainer: UIViewRepresentable {
                 }
                 
                 floor.scene = try SCNScene(url: usdzURL)
+                var seenNodeNames = Set<String>()
+                floor.sceneObjects = floor.scene?.rootNode.childNodes(passingTest: { n, _ in
+                    if let nodeName = n.name {
+                        if seenNodeNames.contains(nodeName) {
+                            return false
+                        }
+
+                        guard n.geometry != nil else {
+                            return false
+                        }
+
+                        let isValidNode = nodeName != "Room" &&
+                                          nodeName != "Geom" &&
+                                          !nodeName.hasSuffix("_grp") &&
+                                          !nodeName.hasPrefix("unidentified") &&
+                                          !(nodeName.first?.isNumber ?? false) &&
+                                          !nodeName.hasPrefix("_")
+
+                        if isValidNode {
+                            seenNodeNames.insert(nodeName)
+                            return true
+                        }
+                    }
+                    
+                    return false
+                }).sorted(by: {
+                    ($0.name ?? "").localizedCaseInsensitiveCompare($1.name ?? "") == .orderedAscending
+                })
+                ?? []
                 floor.planimetry.loadFloorPlanimetry(borders: true, floor: floor)
                 
             } catch {

@@ -51,6 +51,7 @@ struct FloorScanningView: View {
                         Spacer()
 
                         HStack {
+                            
                             if showContinueScanButton {
                                 Button(action: {
                                     captureView?.continueCapture()

@@ -10,6 +10,8 @@ struct FloorPlanimetryView: View {
     @ObservedObject var floor: Floor
     @Binding var showFloorMap: Bool
     
+    @State var floorPlanimetry: SCNViewContainer = SCNViewContainer()
+    
     var body: some View {
         VStack {
             if floor.scene == nil {
@@ -44,7 +46,6 @@ struct FloorPlanimetryView: View {
                                             .font(.system(size: 20))
                                             .bold()
                                             .foregroundColor(Color.customBackground)
-
                                     }
                                 }
                                 .toggleStyle(SwitchToggleStyle())
@@ -64,7 +65,7 @@ struct FloorPlanimetryView: View {
                                             floor.planimetryRooms.handler.showAllRooms(floor: floor)
                                         }
                                 } else {
-                                    floor.planimetry
+                                    floorPlanimetry
                                         .border(Color.white)
                                         .cornerRadius(10)
                                         .padding()
@@ -75,6 +76,11 @@ struct FloorPlanimetryView: View {
                     }
                 }
             }
+        }.onAppear{
+            floorPlanimetry.loadFloorPlanimetry(borders: false, floor: floor)
+        }
+        .onDisappear {
+            showFloorMap = false
         }
     }
 }

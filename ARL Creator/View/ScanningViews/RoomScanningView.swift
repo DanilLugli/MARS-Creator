@@ -14,7 +14,10 @@ struct RoomScanningView: View {
     @State var isScanningRoom = false
     @State var showScanningRoomCard = true
     
+    @State private var scanningError: String?
+    
     @State var showCreateRoomPlanimetryToast = false
+    @State var showRestartButton = false
     
     @State var captureView: RoomCaptureViewContainer?
     
@@ -57,15 +60,43 @@ struct RoomScanningView: View {
                                         .shadow(radius: 5)
                                         .padding(.top, 60)
                                         .frame(maxWidth: .infinity)
+                                    
+                                    if let errorMessage = scanningError {
+                                        if errorMessage == "World tracking failure"{
+//                                            Text("\(errorMessage)")
+//                                                .foregroundColor(.red)
+//                                                .bold()
+//                                                .padding()
+//                                                .background(Color.white)
+//                                                .cornerRadius(10)
+//                                                .shadow(radius: 5)
+//                                                .padding(.top, 60)
+                                        }
+                                        
+                                    }
                                 }
-                               
-
                             }
 
                             VStack{
                                 Spacer()
                                 HStack{
-                                   Spacer()
+                                    
+                                    
+                                    Button(action: {
+                                        captureView?.restartCapture()
+                                    }) {
+                                        Text("Restart Scan")
+                                            .font(.system(size: 16, weight: .bold, design: .default))
+                                            .bold()
+                                            .padding()
+                                            .background(Color.red)
+                                            .foregroundColor(.white)
+                                            .cornerRadius(30)
+                                    }.padding(.leading, 20)
+                                    
+                                    
+                                    Spacer()
+                                    
                                     Button(action: {
                                         if showScanningRoomCard{
                                             isScanningRoom = true
@@ -140,6 +171,14 @@ struct RoomScanningView: View {
             .onReceive(NotificationCenter.default.publisher(for: .genericMessage)) { notification in
                 if let message = notification.object as? String {
                     self.message = message
+                }
+            }.onReceive(NotificationCenter.default.publisher(for: .genericMessage)) { notification in
+                if let message = notification.object as? String {
+                    print(message)
+                    if message == "World tracking failure" {
+                        self.scanningError = message
+                    }
+                    
                 }
             }
             .navigationBarTitleDisplayMode(.inline)

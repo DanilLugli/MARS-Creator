@@ -51,6 +51,11 @@ struct RoomCaptureViewContainer: UIViewRepresentable {
         roomCaptureView.captureSession.run(configuration: RoomCaptureSession.Configuration())
     }
     
+    func restartCapture() {
+        //stopCapture() 
+        roomCaptureView.captureSession.run(configuration: RoomCaptureSession.Configuration()) // Avvia una nuova scansione
+    }
+    
     func stopCapture() {
         roomCaptureView.captureSession.stop()
         arSession.pause()
@@ -106,13 +111,17 @@ struct RoomCaptureViewContainer: UIViewRepresentable {
         }
 
         func captureSession(_ session: RoomCaptureSession, didEndWith data: CapturedRoomData, error: Error?) {
-            //if !SessionDelegate.save { return }
             
             if let error = error {
-                print("Error in captureSession(_:didEndWith:error:)")
-                print(error)
-                return
-            }
+                    print(error.localizedDescription)
+                    
+                    // Aggiorna la variabile scanningError sulla main thread
+                    DispatchQueue.main.async {
+                        NotificationCenter.default.post(name: .genericMessage, object: error.localizedDescription)
+                    }
+                    
+                    return
+                }
             
             Task {
                 do {

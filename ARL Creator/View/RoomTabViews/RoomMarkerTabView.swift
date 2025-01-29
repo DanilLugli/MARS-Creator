@@ -125,7 +125,7 @@ struct MarkerDetailView: View {
                         Image(systemName: "ruler")
                             .foregroundColor(.customBackground)
                         
-                        Text("Width (Meters):")
+                        Text("Width (cm):")
                             .font(.headline)
                             .bold()
                             .foregroundColor(.customBackground)

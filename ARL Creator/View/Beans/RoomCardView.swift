@@ -8,69 +8,68 @@
 import SwiftUI
 
 struct RoomCardView: View {
-    var name: String
-    var date: Date
-    var position: Bool
-    var color : UIColor?
+    @ObservedObject var room: Room
+    
     var rowSize: Int
     var isSelected: Bool
-    
+
     @State private var showAlert = false
-    
-    init(name: String, date: Date, position: Bool, color: UIColor, rowSize: Int, isSelected: Bool) {
-        self.name = name
-        self.date = date
-        self.position = position
-        self.color = color.withAlphaComponent(0.4)
-        self.rowSize = rowSize
-        self.isSelected = isSelected
-    }
-    
+
     var body: some View {
         GeometryReader { geometry in
             ZStack {
                 RoundedRectangle(cornerRadius: 10)
                     .stroke(isSelected ? Color.green : Color.clear, lineWidth: 6)
                     .background(RoundedRectangle(cornerRadius: 10).fill(Color.white))
-                HStack{
+                
+                HStack {
                     
-                    HStack{
-                        VStack(alignment: .leading) {
-                            Text(name)
-                                .font(.system(size: 20, weight: .bold))
-                                .foregroundColor(.customBackground)
-                            
-                            Text("Last modified \(dateFormatter.string(from: date))")
-                                .font(.system(size: 14))
-                                .foregroundColor(.gray)
-                                
-                        }
-                        Spacer()
+                    VStack(alignment: .leading) {
+                        Text(room.name)
+                            .font(.system(size: 20, weight: .bold))
+                            .foregroundColor(.customBackground)
+
+                        Text("Last modified \(dateFormatter.string(from: room.lastUpdate))")
+                            .font(.system(size: 14))
+                            .foregroundColor(.gray)
                     }
-                    .padding()
-                    
-                    
-                }
-                HStack{
                     Spacer()
-                    if position == false {
+                }
+                .padding()
+
+                HStack {
+                    Spacer()
+                    
+                    if !room.isMatrixPresent(named: room.name) {
                         Image(systemName: "exclamationmark.circle")
                             .foregroundColor(.red)
-                            .font(.system(size: 30))
-                            .padding(.trailing) // Regola la posizione
-                            .padding(20) // Aggiungi padding per aumentare l'area di tap
-                            .onTapGesture {
-                                showAlert = true // Mostra l'alert quando premi l'immagine
-                            }
-                    }else{
-                        Image(systemName: "circle.fill")
-                            .foregroundColor(Color(color ?? UIColor.white)) // Usa il colore specificato
-                            .font(.system(size: 30))
+                            .font(.system(size: 35))
+                            .frame(width: 70, height: 70)
+                            .contentShape(SwiftUI.Rectangle())
                             .padding(.trailing)
-                            .padding(20)
+                            .onTapGesture {
+                                showAlert = true
+                            }
+                    } else {
+                        Image(systemName: "circle.fill")
+                            .foregroundColor(Color(room.color))
+                            .font(.system(size: 30))
+                            .frame(width: 70, height: 70)
+                            .padding(.trailing)
+                    }
+                    
+                    if !room.hasValidScene() {
+                        Image(systemName: "exclamationmark.triangle")
+                            .foregroundColor(.red)
+                            .font(.system(size: 35))
+                            .frame(width: 70, height: 70)
+                            .contentShape(SwiftUI.Rectangle())
+                            .padding(.trailing)
+                            .onTapGesture {
+                                showAlert = true
+                            }
                     }
                 }
-               
             }
             .frame(width: geometry.size.width / CGFloat(rowSize), height: 80)
             .cornerRadius(10)
@@ -78,23 +77,36 @@ struct RoomCardView: View {
             .alert(isPresented: $showAlert) {
                 Alert(
                     title: Text("ATTENTION!").foregroundColor(.red),
-                    message: Text("\(name) has no position in his Floor.\nYou have to calculate in Room Position page.\n\n(\(name) -> Tab: Room Position -> Add Room Position)"),
+                    message: Text("\(room.name) has no position in his Floor.\nYou have to calculate in Room Position page.\n\n(\(room.name) -> Tab: Room Position -> Add Room Position)"),
                     dismissButton: .default(Text("OK"))
                 )
             }
-            
         }
     }
 }
 
+
 struct RoomCardView_Previews: PreviewProvider {
     static var previews: some View {
-        RoomCardView(name: "Room", date: Date(), position: true, color: UIColor.green, rowSize: 1, isSelected: true)
+        let sampleRoom = Room(
+            _name: "Room",
+            _lastUpdate: Date(),
+            _planimetry: SCNViewContainer(),
+            _referenceMarkers: [],
+            _transitionZones: [],
+            _scene: nil,
+            _sceneObjects: [],
+            _roomURL: URL(fileURLWithPath: ""),
+            parentFloor: nil
+        )
+        
+        return RoomCardView(room: sampleRoom, rowSize: 1, isSelected: false)
     }
 }
+
+// 📆 Formattatore per le date
 private let dateFormatter: DateFormatter = {
     let formatter = DateFormatter()
     formatter.dateStyle = .medium
     return formatter
 }()
-

@@ -34,7 +34,7 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         self._scene = _scene ?? SCNScene()
         self._sceneObjects = _sceneObjects
         self._roomURL = _roomURL
-        // Carica il colore salvato o genera un nuovo colore casuale
+
         if let savedColor = Room.loadColor(for: _name) {
             self._color = savedColor
         } else {
@@ -124,7 +124,13 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     }
     
     var planimetry: SCNViewContainer {
-        return _planimetry ?? SCNViewContainer()
+       // return _planimetry ?? SCNViewContainer()
+        get {
+            return _planimetry ?? SCNViewContainer(empty: true)
+        }
+        set {
+            _planimetry = newValue
+        }
     }
     
     var url: URL {
@@ -171,6 +177,30 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         return _transitionZones.contains { $0.connection != nil }
     }
     
+    func isMatrixPresent(named matrixName: String) -> Bool {
+            guard let floor = parentFloor else {
+                print("Error: Room \(self.name) has no parentFloor.")
+                return false
+            }
+            
+            let fileURL = floor.floorURL.appendingPathComponent("\(floor.name).json") 
+            
+            do {
+                let data = try Data(contentsOf: fileURL)
+                let json = try JSONSerialization.jsonObject(with: data, options: [])
+                
+                guard let matricesDict = json as? [String: [String: [[Double]]]] else {
+                    return false
+                }
+                
+                return matricesDict[matrixName] != nil
+                
+            } catch {
+                print("Error reading matrix data from \(fileURL): \(error)")
+                return false
+            }
+        }
+    
     static func randomColor() -> UIColor {
         let colors: [UIColor] = [
             UIColor(red: 1.0, green: 0.35, blue: 0.0, alpha: 1.0),    // #FF5800
@@ -211,6 +241,10 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
             return String(data: jsonData, encoding: .utf8)
         }
         return nil
+    }
+    
+    func hasValidScene() -> Bool {
+        return _sceneObjects?.count != 0 
     }
     
     func addReferenceMarker(referenceMarker: ReferenceMarker) {

@@ -10,10 +10,11 @@ import ARKit
 
 struct RoomPlanimetryTabView: View {
     @ObservedObject var room: Room
+    @State var roomPlanimetry: SCNViewContainer = SCNViewContainer()
 
     var body: some View {
         VStack {
-            if room.scene == nil {
+            if room.sceneObjects?.count == 0 {
                 HStack{
                     Text("Add planimetry with")
                         .foregroundColor(.gray)
@@ -32,7 +33,7 @@ struct RoomPlanimetryTabView: View {
             } else {
                 VStack {
                     ZStack {
-                        room.planimetry
+                        roomPlanimetry
                             .border(Color.white)
                             .cornerRadius(10)
                             .padding()
@@ -40,6 +41,8 @@ struct RoomPlanimetryTabView: View {
                     }
                 }
             }
+        }.onAppear{
+            roomPlanimetry.loadRoomPlanimetry(room: room, borders: false)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.customBackground)

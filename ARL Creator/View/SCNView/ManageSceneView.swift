@@ -92,7 +92,13 @@ func setCamera(scnView: SCNView, cameraNode: SCNNode, massCenter: SCNNode) {
     cameraNode.camera?.usesOrthographicProjection = true
     cameraNode.camera?.orthographicScale = 10
     cameraNode.eulerAngles = SCNVector3(-Double.pi / 2, 0, 0)
-    
+
+    // 🔴 Rimuove eventuali luci ambientali esistenti
+    scnView.scene?.rootNode.childNodes
+        .filter { $0.light?.type == .ambient }
+        .forEach { $0.removeFromParentNode() }
+
+    // ✅ Aggiunge solo una luce ambientale, evitando duplicati
     let ambientLight = SCNNode()
     ambientLight.light = SCNLight()
     ambientLight.light!.type = .ambient

@@ -15,7 +15,8 @@ struct AutomaticRoomPositionView: View {
     @State var selectedRoomNodeName: String = ""
     @State var selectedFloorNodeName: String = ""
     
-    var roomView: SCNViewContainer = SCNViewContainer()
+    var floorView: SCNViewContainer = SCNViewContainer(empty: true)
+    var roomView: SCNViewContainer = SCNViewContainer(empty: true)
     var roomsMaps: [URL]?
     
     @State var floorNodes: [String] = []
@@ -62,57 +63,85 @@ struct AutomaticRoomPositionView: View {
                 
                 VStack{
                     VStack {
-                        Text("Floor: \(floor.name)").bold().font(.title3).foregroundColor(.white)
+                        
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color.white)
+                                .shadow(color: Color.gray.opacity(0.5), radius: 5, x: 0, y: 2)
+                            Text("Floor: \(floor.name)")
+                                .bold()
+                                .font(.title3)
+                                .foregroundColor(Color.customBackground)
+                        }
+                        .padding(.horizontal, 20)
+                        .frame(maxWidth: .infinity, maxHeight: 40)
+                        
                     }
                     
                     ZStack {
-                        floor.planimetry
+                        floorView
                             .border(Color.white)
                             .cornerRadius(10)
-                            .padding()
                             .shadow(color: Color.gray, radius: 3)
+                            .padding(.horizontal, 20)
+                    }.onAppear{
+                        floorView.loadFloorPlanimetry(borders: false, floor: floor)
                     }
                        
                     HStack {
                         Picker(selection: $selectedFloorNodeName, label: Text("")) {
                             ForEach(sortSceneObjects(nodes: floor.sceneObjects ?? []), id: \.self) { node in
-                                Text(node.name ?? "Unnamed").tag(node.name ?? "")
-                            }
+                                Text(node.name ?? "Unnamed").tag(node.name ?? "").bold()
+                            }.bold()
                         }
                         .onAppear {
-                            print("Floor Scene Objects onAppear: \(floor.sceneObjects?.compactMap { $0.name } ?? [])")
                             if let firstNodeName = floor.sceneObjects?.first?.name {
                                 selectedFloorNodeName = firstNodeName
                             }
                         }
                         .onChange(of: selectedFloorNodeName) { oldValue, newValue in
-                            floor.planimetry.changeColorOfNode(nodeName: newValue, color: UIColor.green)
-                            
+                            floorView.resetColorNode()
+                            floorView.changeColorOfNode(nodeName: newValue, color: UIColor.green)
+
                             selectedFloorNode = floor.sceneObjects?.first(where: { node in
                                 node.name == newValue
                             })
-                            
                             if let selectedFloorNode = selectedFloorNode {
                                 filterRoomNodes(byTypeOf: selectedFloorNode)
                             }
                         }
                     }
+                    .background(Color.white)
+                    .cornerRadius(10)
+                    .shadow(radius: 5)
                 }
                 
-                Divider().background(Color.black).shadow(radius: 100)
+                Divider()
+                    .frame(height: 2)
+                    .background(Color.white)
                 
                 VStack{
                     HStack {
-                        Text("Room: \(room.name)").bold().font(.title3).foregroundColor(.white)
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 10)
+                                .fill(Color.white)
+                                .shadow(color: Color.gray.opacity(0.5), radius: 5, x: 0, y: 2)
+                            Text("Room: \(room.name)").bold().font(.title3).foregroundColor(Color.customBackground)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: 40)
+                        .padding(.horizontal, 20)
+                        
+                        
                     }
                     
                     ZStack {
-                        room.planimetry
+                        roomView
                             .border(Color.white)
                             .cornerRadius(10)
-                            .padding()
+                            .padding(.horizontal, 20)
                             .shadow(color: Color.gray, radius: 3)
                     }.onAppear{
+                        roomView.loadRoomPlanimetry(room: room, borders: false)
                         originalRoomNodes = room.sceneObjects ?? []
                         roomNodes = originalRoomNodes
                     }
@@ -129,65 +158,87 @@ struct AutomaticRoomPositionView: View {
                             }
                         }
                         .onChange(of: selectedRoomNodeName) { oldValue, newValue in
-                            room.planimetry.changeColorOfNode(nodeName: selectedRoomNodeName, color: UIColor.green)
+                            roomView.resetColorNode()
+                            roomView.changeColorOfNode(nodeName: selectedRoomNodeName, color: UIColor.green)
                             selectedRoomNode = room.sceneObjects?.first(where: { node in
                                 node.name == newValue
                             })
                         }
                     }
+                    .background(Color.white)
+                    .cornerRadius(10)
+                    .shadow(radius: 5)
                 }
                 
                 HStack {
-                    if let _selectedLocalNode = selectedRoomNode,
-                       let _selectedGlobalNode = selectedFloorNode {
-                        Button("Confirm Relation") {
-                            matchingNodesForAPI.append((_selectedLocalNode, _selectedGlobalNode))
+                    Button("Confirm Relation") {
+                        if let _selectedLocalNode = selectedRoomNode,
+                           let _selectedGlobalNode = selectedFloorNode {
                             
+                            matchingNodesForAPI.append((_selectedLocalNode, _selectedGlobalNode))
+
                             selectedRoomNode = nil
                             selectedFloorNode = nil
-                            
-                            room.planimetry.resetColorNode()
-                            floor.planimetry.resetColorNode()
-                            
+                            selectedFloorNodeName = ""
+
+                            roomView.resetColorNode()
+                            floorView.resetColorNode()
+
                             resetRoomNodes()
-                        }.font(.system(size: 16, weight: .bold, design: .default))
-                        .frame(width: 160, height: 50)
-                        .foregroundStyle(.white)
-                        .background(Color.blue.opacity(0.4))
-                        .cornerRadius(30)
-                        .bold()
+                        }
                     }
+                    .font(.system(size: 16, weight: .bold, design: .default))
+                    .frame(width: 160, height: 50)
+                    .foregroundStyle(.white)
+                    .background((selectedRoomNode != nil && selectedFloorNode != nil) ? Color.blue.opacity(0.4) : Color.gray.opacity(0.6))
+                    .cornerRadius(30)
+                    .bold()
                     
-                    if matchingNodesForAPI.count >= 3{
+                    
+                    if matchingNodesForAPI.count >= 3 {
                         Button("Calculate Position") {
                             Task {
                                 showLoadingPositionToast = true
+
+                                do {
+                                    
+                                    response = try await fetchAPIConversionLocalGlobal(localName: room.name, nodesList: matchingNodesForAPI)
+
+                                    if let httpResponse = response.0 {
+                                        print("Status code: \(httpResponse.statusCode)")
+                                        print("Response JSON: \(response.1)")
+                                    } else {
+                                        print("Error: \(response.1)")
+                                    }
+
+                                    responseFromServer = true
+
+                                   
+                                    saveConversionGlobalLocal(response.1, floor.floorURL, floor)
+
                                 
-                                print(matchingNodesForAPI)
-                                response = try await fetchAPIConversionLocalGlobal(localName: room.name, nodesList: matchingNodesForAPI)
-                                if let httpResponse = response.0 {
-                                    print("Status code: \(httpResponse.statusCode)")
-                                    print("Response JSON: \(response.1)")
-                                } else {
-                                    print("Error: \(response.1)")
-                                }
+                                    floor.updateAssociationMatrixInJSON(for: room.name, fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"))
+
+                    
+                                    floor.planimetryRooms.handler.loadRoomsMaps(
+                                        floor: floor,
+                                        rooms: floor.rooms
+                                    )
+
                                 
-                                responseFromServer = true
-                                
-                                saveConversionGlobalLocal(response.1, floor.floorURL, floor)
-                                
-                                floor.planimetryRooms.handler.loadRoomsMaps(
-                                    floor: floor,
-                                    rooms: [room]
-                                )
-                                room.planimetry.resetColorNode()
-                                floor.planimetry.resetColorNode()
-                                
-                                showLoadingPositionToast = false
-                                showAddRoomPositionToast = true
-                                
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                    dismiss()
+                                    roomView.resetColorNode()
+                                    floorView.resetColorNode()
+
+                               
+                                    showLoadingPositionToast = false
+                                    showAddRoomPositionToast = true
+
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                        dismiss()
+                                    }
+                                    
+                                } catch {
+                                    showLoadingPositionToast = false
                                 }
                             }
                         }.font(.system(size: 16, weight: .bold, design: .default))
@@ -198,6 +249,10 @@ struct AutomaticRoomPositionView: View {
                             .bold()
                     }
                 }
+            }
+            .onDisappear{
+                floorView.resetColorNode()
+                roomView.resetColorNode()
             }
             .background(Color.customBackground)
             .navigationTitle("Create Room Position")
@@ -281,18 +336,15 @@ struct AutomaticRoomPositionView: View {
         let typeOrder = ["wall", "storage", "chair", "table", "window", "door"]
         
         return nodes.sorted { (node1, node2) -> Bool in
-            // Estrai le tipologie dai nomi dei nodi
             let type1 = extractType(from: node1.name ?? "")
             let type2 = extractType(from: node2.name ?? "")
             
-            // Ottieni l'indice delle tipologie nell'array typeOrder
             let typeIndex1 = typeOrder.firstIndex(of: type1) ?? typeOrder.count
             let typeIndex2 = typeOrder.firstIndex(of: type2) ?? typeOrder.count
             
             if typeIndex1 != typeIndex2 {
                 return typeIndex1 < typeIndex2
             } else {
-                // I nodi hanno la stessa tipologia, ordina per dimensione dal più grande al più piccolo
                 let size1 = calculateVolume(of: node1)
                 let size2 = calculateVolume(of: node2)
                 return size1 > size2

@@ -495,14 +495,12 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
             let json = try JSONSerialization.jsonObject(with: data, options: [])
             
             guard let matricesDict = json as? [String: [String: [[Double]]]] else {
-                print("Il formato del file JSON non è corretto.")
                 return false
             }
             
             return matricesDict[matrixName] != nil
             
         } catch {
-            print("Errore durante la lettura del file JSON: \(error)")
             return false
         }
     }

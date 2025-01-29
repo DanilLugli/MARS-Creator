@@ -10,15 +10,15 @@ struct MapControllerView: View {
     
     var body: some View {
         HStack {
-            // Rotazione
+            
             VStack {
-                // Ruota in senso antiorario
+                Text("Rotate Anticlockwise:").foregroundColor(Color.customBackground)
                 pressableButton(
                     action: { moveObject.rotateCounterClockwise() },
                     imageName: "arrow.counterclockwise"
                 )
                 
-                // Ruota in senso orario
+                Text("Rotate Clockwise:").foregroundColor(Color.customBackground)
                 pressableButton(
                     action: { moveObject.rotateClockwise() },
                     imageName: "arrow.clockwise"
@@ -44,7 +44,8 @@ struct MapControllerView: View {
             
             // Movimenti
             VStack {
-                // Muovi in alto
+                
+                Text("Move along 4 axes: ").foregroundColor(Color.customBackground)
                 pressableButton(
                     action: { moveObject.moveUp() },
                     imageName: "arrow.up"

@@ -19,6 +19,9 @@ struct AddStairsConnectionView: View {
     @State var mapViewFromRoom = SCNViewContainer()
     @State var mapViewToRoom = SCNViewContainer()
     
+    @State var mapFinalViewFromRoom = SCNViewContainer()
+    @State var mapFInalViewToRoom = SCNViewContainer()
+    
     @State var altitude: Float = 0
     
     @State private var step: Int = 1
@@ -107,7 +110,7 @@ struct AddStairsConnectionView: View {
                     switch step {
                     case 1:
                         ZStack {
-                            fromRoom.planimetry
+                            mapViewFromRoom
                                 .border(Color.white)
                                 .frame(width: 360, height: 360)
                                 .cornerRadius(10)
@@ -115,12 +118,12 @@ struct AddStairsConnectionView: View {
                                 .shadow(color: Color.gray, radius: 3)
                         }
                         .onAppear {
-                            //loadMap(for: fromRoom, on: mapViewFromRoom)
+                            loadMap(for: fromRoom, on: mapViewFromRoom)
                         }
                         
                     case 2:
                         ZStack {
-                            selectedRoom?.planimetry
+                            mapViewToRoom
                                 .border(Color.white)
                                 .frame(width: 360, height: 360)
                                 .cornerRadius(10)
@@ -209,10 +212,11 @@ struct AddStairsConnectionView: View {
                             Text("Next").bold()
                             Image(systemName: "arrow.right").bold()
                         }
-                        .frame(width: 160, height: 60)
+                        .font(.system(size: 16, weight: .bold, design: .default))
+                        .frame(width: 160, height: 50)
                         .foregroundStyle(.white)
                         .background(Color.blue.opacity(0.4))
-                        .cornerRadius(20)
+                        .cornerRadius(30)
                         .bold()
                     }
                     .disabled(step == 2 && (selectedFloor == nil || selectedRoom == nil))
@@ -223,10 +227,11 @@ struct AddStairsConnectionView: View {
                         showConfirmDialog = true
                     }) {
                         Text("Confirm Connection")
-                            .frame(width: 190, height: 60)
+                            .font(.system(size: 16, weight: .bold, design: .default))
+                            .frame(width: 200, height: 50)
                             .foregroundStyle(.white)
-                            .background(Color(red: 62/255, green: 206/255, blue: 76/255).opacity(0.9))
-                            .cornerRadius(20)
+                            .background(Color.green)
+                            .cornerRadius(30)
                             .bold()
                     }
                     .confirmationDialog("Do you confirm this connection?", isPresented: $showConfirmDialog) {
@@ -259,7 +264,7 @@ struct AddStairsConnectionView: View {
         if let room = room {
             mapView.loadRoomPlanimetry(
                 room: room,
-                borders: true
+                borders: false
             )
         }
     }

@@ -22,11 +22,14 @@ struct SCNViewContainer: UIViewRepresentable {
     var rotoTraslation: [RotoTraslationMatrix] = []
     @State var rotoTraslationActive: Int = 0
     
-    init() {
-        massCenter.worldPosition = SCNVector3(0, 0, 0)
-        origin.simdWorldTransform = simd_float4x4([1.0,0,0,0],[0,1.0,0,0],[0,0,1.0,0],[0,0,0,1.0])
+    init(empty: Bool = false) {
+        if !empty {
+            massCenter.worldPosition = SCNVector3(0, 0, 0)
+            origin.simdWorldTransform = simd_float4x4([1.0,0,0,0],[0,1.0,0,0],[0,0,1.0,0],[0,0,0,1.0])
+        }
     }
     
+    @MainActor
     func loadRoomPlanimetry(room: Room, borders: Bool) {
         DispatchQueue.global(qos: .userInitiated).async {
             let scene = room.scene
@@ -40,21 +43,18 @@ struct SCNViewContainer: UIViewRepresentable {
         }
     }
     
+    @MainActor
     func loadFloorPlanimetry(borders: Bool, floor: Floor) {
-        DispatchQueue.global(qos: .userInitiated).async{
-            
-            let scene = floor.scene
-            
-            DispatchQueue.main.async {
-                self.scnView.scene = scene
-                drawSceneObjects(scnView: self.scnView, borders: borders)
-                setMassCenter(scnView: self.scnView)
-                setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: self.massCenter)
-                floor.isPlanimetryLoaded = true
-            }
-            
-        }
+        
+        let scene = floor.scene
+        
+        self.scnView.scene = scene
+        drawSceneObjects(scnView: self.scnView, borders: borders)
+        setMassCenter(scnView: self.scnView)
+        setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: self.massCenter)
+        floor.isPlanimetryLoaded = true
     }
+    
     
     func createAxesNode(length: CGFloat = 1.0, radius: CGFloat = 0.02) {
         let axisNode = SCNNode()
@@ -130,28 +130,45 @@ struct SCNViewContainer: UIViewRepresentable {
 //    }
         
     func changeColorOfNode(nodeName: String, color: UIColor) {
-        drawSceneObjects(scnView: self.scnView, borders: false)
-        if let _node = scnView.scene?.rootNode.childNodes(passingTest: { n,_ in n.name != nil && n.name! == nodeName }).first {
-            let copy = _node.copy() as! SCNNode
-            copy.name = "__selected__"
-            let material = SCNMaterial()
-            material.diffuse.contents = color
-            material.lightingModel = .physicallyBased
-            copy.geometry?.materials = [material]
-            copy.worldPosition.y += 4
-            copy.scale.x = _node.scale.x < 0.2 ? _node.scale.x + 0.1 : _node.scale.x
-            copy.scale.z = _node.scale.z < 0.2 ? _node.scale.z + 0.1 : _node.scale.z
-            scnView.scene?.rootNode.addChildNode(copy)
+        guard let originalNode = scnView.scene?.rootNode.childNode(withName: nodeName, recursively: true) else {
+            print("❌ Node \(nodeName) not found.")
+            return
         }
+
+        let clonedNode = originalNode.clone()
+
+        if let originalGeometry = originalNode.geometry {
+            clonedNode.geometry = originalGeometry.copy() as? SCNGeometry
+        }
+
+        clonedNode.name = "__selected__"
+
+        let material = SCNMaterial()
+        material.diffuse.contents = color
+        material.lightingModel = .physicallyBased
+
+        clonedNode.geometry?.materials = [material]
+
+        clonedNode.worldPosition.y += 4
+
+        if clonedNode.scale.x < 0.2 {
+            clonedNode.scale.x += 0.1
+        }
+        if clonedNode.scale.z < 0.2 {
+            clonedNode.scale.z += 0.1
+        }
+
+        scnView.scene?.rootNode.addChildNode(clonedNode)
+
+        print("✅ Cloned node \(clonedNode.name ?? "Unnamed") added to scene!")
     }
     
     func resetColorNode() {
-        // Trova tutti i nodi nella scena con il prefisso "__selected__"
         if let nodes = scnView.scene?.rootNode.childNodes(passingTest: { n, _ in
             n.name?.hasPrefix("__selected__") ?? false
         }) {
-            // Rimuove ogni nodo trovato dalla scena
             for node in nodes {
+                print("Nodo \(node.name ?? "PINO") eliminato!!")
                 node.removeFromParentNode()
             }
         } else {
