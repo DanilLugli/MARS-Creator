@@ -40,7 +40,7 @@ struct RoomView: View {
     @State private var showAddRoomPlanimetryToast = false
     @State private var showDeleteRoomToast = false
     @State private var showRenameRoomToast = false
-    
+
     @State private var selectedColor = Color(
         .sRGB,
         red: 0.98,
@@ -163,7 +163,7 @@ struct RoomView: View {
                         
                         let referenceMarker = ReferenceMarker(
                             _imagePath: room.roomURL.appendingPathComponent("ReferenceMarker").appendingPathComponent("\(url.lastPathComponent)"),
-                            _imageName:  url.lastPathComponent,
+                            _imageName:  url.deletingPathExtension().lastPathComponent,
                            _coordinates: Coordinates(x: Float(Double.random(in: -100...100)), y: Float(Double.random(in: -100...100))),
                            _rmUML: room.roomURL.appendingPathComponent("ReferenceMarker"),
                            _physicalWidth: 0.0

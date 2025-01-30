@@ -91,8 +91,11 @@ class ReferenceMarker: ObservableObject, Codable, Identifiable {
         let referenceMarkerURL = fileURL.deletingLastPathComponent()
         var markersData: [String: MarkerData] = [:]
         let fileManager = FileManager.default
-        
-        // Carica il JSON esistente se il file esiste
+
+
+        let oldNameWithoutExtension = URL(fileURLWithPath: oldName).deletingPathExtension().lastPathComponent
+        let newNameWithoutExtension = URL(fileURLWithPath: newName).deletingPathExtension().lastPathComponent
+
         if fileManager.fileExists(atPath: fileURL.path) {
             do {
                 let data = try Data(contentsOf: fileURL)
@@ -102,43 +105,43 @@ class ReferenceMarker: ObservableObject, Codable, Identifiable {
                 print("Errore nella lettura del file JSON esistente: \(error)")
             }
         }
-        
-        // Se oldName e newName sono uguali, aggiorna solo il width nel JSON
-        if oldName == newName {
-            if var existingMarker = markersData[oldName] {
+
+        if oldNameWithoutExtension == newNameWithoutExtension {
+            if var existingMarker = markersData[oldNameWithoutExtension] {
                 existingMarker.width = newWidth
-                markersData[oldName] = existingMarker
+                markersData[oldNameWithoutExtension] = existingMarker
             } else {
-                markersData[oldName] = MarkerData(name: newName, width: newWidth)
+                markersData[oldNameWithoutExtension] = MarkerData(name: newNameWithoutExtension, width: newWidth)
             }
         } else {
-            // Rinominazione del file
+
             if let fileWithExtension = try? fileManager.contentsOfDirectory(at: referenceMarkerURL, includingPropertiesForKeys: nil)
-                .first(where: { $0.deletingPathExtension().lastPathComponent == oldName }) {
-                
-                let newFileURL = fileWithExtension.deletingLastPathComponent().appendingPathComponent(newName).appendingPathExtension(fileWithExtension.pathExtension)
+                .first(where: { $0.deletingPathExtension().lastPathComponent == oldNameWithoutExtension }) {
+
+                let newFileURL = fileWithExtension.deletingLastPathComponent()
+                    .appendingPathComponent(newNameWithoutExtension)
+                    .appendingPathExtension(fileWithExtension.pathExtension)
                 
                 do {
                     try fileManager.moveItem(at: fileWithExtension, to: newFileURL)
                 } catch {
-                    print(" Errore nel rinominare il file: \(error)")
+                    print("Errore nel rinominare il file: \(error)")
                 }
             } else {
-                print("File con il nome \(oldName) non trovato.")
+                print("File con il nome \(oldNameWithoutExtension) non trovato.")
             }
-            
-            // Aggiornamento del JSON con il nuovo nome
-            markersData.removeValue(forKey: oldName)
-            markersData[newName] = MarkerData(name: newName, width: newWidth)
+
+            markersData.removeValue(forKey: oldNameWithoutExtension)
+            markersData[newNameWithoutExtension] = MarkerData(name: newNameWithoutExtension, width: newWidth)
         }
-        
-        // Salva il JSON aggiornato
+
+        // Salva il JSON aggiornato senza estensioni nei nomi
         do {
             let encoder = JSONEncoder()
             encoder.outputFormatting = .prettyPrinted
             let data = try encoder.encode(markersData)
             try data.write(to: fileURL)
-            print(" File JSON aggiornato con successo!")
+            print("File JSON aggiornato con successo!")
         } catch {
             print("Errore nel salvataggio del file JSON: \(error)")
         }
@@ -193,7 +196,6 @@ class ReferenceMarker: ObservableObject, Codable, Identifiable {
         return nil
     }
     
-    // Implementazione di `Codable`
     private enum CodingKeys: String, CodingKey {
         case id, imageName, coordinates, rmUML, imagePath, physicalWidth
     }

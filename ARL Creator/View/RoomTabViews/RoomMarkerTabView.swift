@@ -2,10 +2,11 @@ import SwiftUI
 import AlertToast
 
 struct RoomMarkerTabView: View {
+    
     @ObservedObject var room: Room
+    
     @State private var searchText: String = ""
     @State private var selectedMarker: ReferenceMarker? = nil
-    
     
     var filteredMarker: [ReferenceMarker] {
         if searchText.isEmpty {
@@ -63,16 +64,14 @@ struct MarkerDetailView: View {
     
     @State private var newName: String
     @State private var newSize: String
-    @State private var showAlert = false
-    @State private var alertMessage = ""
+    private var oldName: String
     
+    @State private var alertMessage = ""
     
     @State private var showDeleteRMToast: Bool = false
     @State private var showUpdateRMToast: Bool = false
+    @State private var showAlert = false
 
-    
-    private var oldName: String
-    
     init(marker: ReferenceMarker, room: Room) {
         self.room = room
         self.marker = marker
@@ -200,29 +199,42 @@ struct MarkerDetailView: View {
             return
         }
         
-        marker.imageName = newName
+        // Rimuove l'estensione dai nomi
+        let oldNameWithoutExtension = URL(fileURLWithPath: oldName).deletingPathExtension().lastPathComponent
+        let newNameWithoutExtension = URL(fileURLWithPath: newName).deletingPathExtension().lastPathComponent
+        
+        marker.imageName = newNameWithoutExtension
         marker.physicalWidth = CGFloat(size)
         
         let referenceMarkerURL = room.roomURL.appendingPathComponent("ReferenceMarker")
         let fileMarkerDataURL = referenceMarkerURL.appendingPathComponent("Marker Data.json")
-        let oldFileURL = referenceMarkerURL.appendingPathComponent("\(oldName)")
-        let newFileURL = referenceMarkerURL.appendingPathComponent("\(newName)")
-        
-        do {
-            if FileManager.default.fileExists(atPath: oldFileURL.path) {
-                try FileManager.default.moveItem(at: oldFileURL, to: newFileURL)
+
+        // Trova il file esistente con qualsiasi estensione
+        if let oldFileWithExtension = try? FileManager.default.contentsOfDirectory(at: referenceMarkerURL, includingPropertiesForKeys: nil)
+            .first(where: { $0.deletingPathExtension().lastPathComponent == oldNameWithoutExtension }) {
+            
+            let newFileURL = oldFileWithExtension.deletingLastPathComponent()
+                .appendingPathComponent(newNameWithoutExtension)
+                .appendingPathExtension(oldFileWithExtension.pathExtension)
+
+            do {
+                try FileManager.default.moveItem(at: oldFileWithExtension, to: newFileURL)
+            } catch {
+                alertMessage = "Failed to rename the image file: \(error.localizedDescription)"
+                showAlert = true
+                return
             }
-        }
-        catch {
-            alertMessage = "Failed to rename the image file: \(error.localizedDescription)"
+        } else {
+            alertMessage = "File with name \(oldName) not found."
             showAlert = true
             return
         }
-        
-        marker.saveMarkerData(to: fileMarkerDataURL,
-                              old: oldName,
-                              new: newName,
-                              size: marker.physicalWidth
+
+        marker.saveMarkerData(
+            to: fileMarkerDataURL,
+            old: oldNameWithoutExtension,
+            new: newNameWithoutExtension,
+            size: marker.physicalWidth
         )
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {

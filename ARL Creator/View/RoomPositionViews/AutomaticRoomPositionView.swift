@@ -28,6 +28,9 @@ struct AutomaticRoomPositionView: View {
     @State private var showLoadingPositionToast = false
     @State private var showAlert = false
     @State private var showSheet = false
+    @State private var showInfoPositionAlert = false
+    @State private var isChangingColors = false
+    
     
     @State private var selectedMap: URL = URL(fileURLWithPath: "")
     @State private var filteredLocalMaps: [String] = []
@@ -100,15 +103,20 @@ struct AutomaticRoomPositionView: View {
                             }
                         }
                         .onChange(of: selectedFloorNodeName) { oldValue, newValue in
-                            floorView.resetColorNode()
+                            guard !isChangingColors else { return }
+                            if oldValue != newValue{
+                                floorView.resetColorNode()
+                            }
+                            
                             floorView.changeColorOfNode(nodeName: newValue, color: UIColor.green)
 
                             selectedFloorNode = floor.sceneObjects?.first(where: { node in
                                 node.name == newValue
                             })
-                            if let selectedFloorNode = selectedFloorNode {
-                                filterRoomNodes(byTypeOf: selectedFloorNode)
-                            }
+                            
+//                            if let selectedFloorNode = selectedFloorNode {
+//                                filterRoomNodes(byTypeOf: selectedFloorNode)
+//                            }
                         }
                     }
                     .background(Color.white)
@@ -142,27 +150,33 @@ struct AutomaticRoomPositionView: View {
                             .shadow(color: Color.gray, radius: 3)
                     }.onAppear{
                         roomView.loadRoomPlanimetry(room: room, borders: false)
-                        originalRoomNodes = room.sceneObjects ?? []
-                        roomNodes = originalRoomNodes
                     }
                     
                     HStack {
                         Picker(selection: $selectedRoomNodeName, label: Text("")) {
-                            ForEach(sortSceneObjects(nodes: roomNodes), id: \.self) { node in
+                            ForEach(sortSceneObjects(nodes: room.sceneObjects ?? []), id: \.self) { node in
                                 Text(node.name ?? "Unnamed").tag(node.name ?? "")
                             }
                         }
                         .onAppear {
-                            if let firstNodeName = roomNodes.first?.name {
+                            
+                            if let firstNodeName = room.sceneObjects?.first?.name {
                                 selectedRoomNodeName = firstNodeName
+                                selectedRoomNode = room.sceneObjects?.first
+                               // roomView.changeColorOfNode(nodeName: selectedRoomNodeName, color: UIColor.green)
+
                             }
                         }
                         .onChange(of: selectedRoomNodeName) { oldValue, newValue in
-                            roomView.resetColorNode()
-                            roomView.changeColorOfNode(nodeName: selectedRoomNodeName, color: UIColor.green)
+                            guard !isChangingColors else { return }
+                            if oldValue != newValue{
+                                roomView.resetColorNode()
+                            }
+                            
                             selectedRoomNode = room.sceneObjects?.first(where: { node in
                                 node.name == newValue
                             })
+                            roomView.changeColorOfNode(nodeName: newValue, color: UIColor.green)
                         }
                     }
                     .background(Color.white)
@@ -171,29 +185,47 @@ struct AutomaticRoomPositionView: View {
                 }
                 
                 HStack {
-                    Button("Confirm Relation") {
-                        if let _selectedLocalNode = selectedRoomNode,
-                           let _selectedGlobalNode = selectedFloorNode {
+                    if matchingNodesForAPI.count <= 2 {
+                        Button("Confirm Relation") {
+                           
+                            if let _selectedLocalNode = selectedRoomNode,
+                               let _selectedGlobalNode = selectedFloorNode {
+                                
+                                matchingNodesForAPI.append((_selectedLocalNode, _selectedGlobalNode))
+
+                                selectedRoomNode = nil
+                                selectedFloorNode = nil
+                                
+                                selectedFloorNodeName = ""
+                                selectedRoomNodeName = ""
+                                
+                                roomView.resetColorNode()
+                                floorView.resetColorNode()
+                            }
                             
-                            matchingNodesForAPI.append((_selectedLocalNode, _selectedGlobalNode))
+                            if matchingNodesForAPI.count == 3{
+                                let colors: [UIColor] = [.red, .green, .blue]
+                                isChangingColors = true 
 
-                            selectedRoomNode = nil
-                            selectedFloorNode = nil
-                            selectedFloorNodeName = ""
+                                for (index, nodePair) in matchingNodesForAPI.prefix(3).enumerated() {
+                                    let (roomNode, floorNode) = nodePair
+                                    let color = colors[index]
 
-                            roomView.resetColorNode()
-                            floorView.resetColorNode()
+                                    roomView.changeColorOfNode(nodeName: roomNode.name ?? "", color: color)
 
-                            resetRoomNodes()
+                                    floorView.changeColorOfNode(nodeName: floorNode.name ?? "", color: color)
+                                }
+                            }
                         }
+                        .font(.system(size: 16, weight: .bold, design: .default))
+                        .frame(width: 160, height: 50)
+                        .foregroundStyle(.white)
+                        .background((selectedRoomNode != nil && selectedFloorNode != nil) ? Color.blue.opacity(0.4) : Color.gray.opacity(0.6))
+                        .cornerRadius(30)
+                        .bold()
+                        
                     }
-                    .font(.system(size: 16, weight: .bold, design: .default))
-                    .frame(width: 160, height: 50)
-                    .foregroundStyle(.white)
-                    .background((selectedRoomNode != nil && selectedFloorNode != nil) ? Color.blue.opacity(0.4) : Color.gray.opacity(0.6))
-                    .cornerRadius(30)
-                    .bold()
-                    
+
                     
                     if matchingNodesForAPI.count >= 3 {
                         Button("Calculate Position") {
@@ -213,10 +245,8 @@ struct AutomaticRoomPositionView: View {
 
                                     responseFromServer = true
 
-                                   
                                     saveConversionGlobalLocal(response.1, floor.floorURL, floor)
 
-                                
                                     floor.updateAssociationMatrixInJSON(for: room.name, fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"))
 
                     
@@ -229,13 +259,9 @@ struct AutomaticRoomPositionView: View {
                                     roomView.resetColorNode()
                                     floorView.resetColorNode()
 
-                               
-                                    showLoadingPositionToast = false
-                                    showAddRoomPositionToast = true
 
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                        dismiss()
-                                    }
+                                    showLoadingPositionToast = false
+                                    showInfoPositionAlert = true
                                     
                                 } catch {
                                     showLoadingPositionToast = false
@@ -256,6 +282,19 @@ struct AutomaticRoomPositionView: View {
             }
             .background(Color.customBackground)
             .navigationTitle("Create Room Position")
+            .alert(isPresented: $showInfoPositionAlert) {
+                Alert(
+                    title: Text("ATTENTION"),
+                    message: Text("If the room position is tilted, repeat the calculation using the association method."),
+                    dismissButton: .default(Text("OK")) {
+                        showAddRoomPositionToast = true
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                            dismiss()
+                        }
+                    }
+                )
+            }
             .toast(isPresenting: $showAddRoomPositionToast) {
                 AlertToast(type: .complete(Color.green), title: "Room position created successfully")
             }
@@ -268,12 +307,11 @@ struct AutomaticRoomPositionView: View {
     
     func filterRoomNodes(byTypeOf selectedFloorNode: SCNNode) {
         let selectedType = extractType(from: selectedFloorNode.name ?? "")
-        print("Tipo selezionato: \(selectedType)")
         
-        roomNodes = originalRoomNodes.filter { node in
-            let nodeType = extractType(from: node.name ?? "")
-            return nodeType == selectedType
-        }
+//        roomNodes = originalRoomNodes.filter { node in
+//            let nodeType = extractType(from: node.name ?? "")
+//            return nodeType == selectedType
+//        }
         
         if let firstNodeName = roomNodes.first?.name {
             selectedRoomNodeName = firstNodeName
@@ -317,7 +355,6 @@ struct AutomaticRoomPositionView: View {
         return length * width * height
     }
     
-    // Funzione per estrarre il tipo dal nome del nodo
     func extractType(from nodeName: String) -> String {
         // Estrae tutti i caratteri dall'inizio fino al primo numero
         let name = nodeName.lowercased()

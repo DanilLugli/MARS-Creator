@@ -10,6 +10,7 @@ import SwiftUI
 struct RoomPositionTabView: View {
     @ObservedObject var room: Room
     @ObservedObject var floor: Floor
+    
 
     var body: some View {
         VStack {

@@ -57,7 +57,7 @@ struct RoomCameraRMView: UIViewControllerRepresentable {
             
             let newMarker = ReferenceMarker(
                 _imagePath: room.roomURL.appendingPathComponent("ReferenceMarker").appendingPathComponent("room_photo.jpg"),
-                _imageName: "room_photo.jpg",
+                _imageName: "room_photo",
                 _coordinates: Coordinates(x: Float(Double.random(in: -100...100)), y: Float(Double.random(in: -100...100))),
                 _rmUML: room.roomURL.appendingPathComponent("ReferenceMarker"),
                 _physicalWidth: 0.0

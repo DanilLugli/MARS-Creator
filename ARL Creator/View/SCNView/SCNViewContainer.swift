@@ -31,16 +31,14 @@ struct SCNViewContainer: UIViewRepresentable {
     
     @MainActor
     func loadRoomPlanimetry(room: Room, borders: Bool) {
-        DispatchQueue.global(qos: .userInitiated).async {
-            let scene = room.scene
-            
-            DispatchQueue.main.async {
-                self.scnView.scene = scene
-                drawSceneObjects(scnView: self.scnView, borders: borders)
-                setMassCenter(scnView: self.scnView)
-                setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: self.massCenter)
-            }
-        }
+        let scene = room.scene
+        
+        
+        self.scnView.scene = scene
+        drawSceneObjects(scnView: self.scnView, borders: borders)
+        setMassCenter(scnView: self.scnView)
+        setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: self.massCenter)
+        
     }
     
     @MainActor
@@ -130,6 +128,19 @@ struct SCNViewContainer: UIViewRepresentable {
 //    }
         
     func changeColorOfNode(nodeName: String, color: UIColor) {
+        guard let scene = scnView.scene else {
+            print("⚠️ Scene is nil.")
+            return
+        }
+        
+        // Stampa tutti i nodi disponibili nella scena
+        let allNodes = scene.rootNode.childNodes { _, _ in true } // Closure valida
+        print("🌲 Available nodes in scene:")
+        for node in allNodes {
+            print("- \(node.name ?? "Unnamed")")
+        }
+        
+        
         guard let originalNode = scnView.scene?.rootNode.childNode(withName: nodeName, recursively: true) else {
             print("❌ Node \(nodeName) not found.")
             return
