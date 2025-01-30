@@ -110,14 +110,7 @@ class BuildingModel: ObservableObject {
 
                     }
                     
-                    let associationMatrixURL = floorURL.appendingPathComponent("\(floorURL.lastPathComponent).json")
-                    if fileManager.fileExists(atPath: associationMatrixURL.path),
-                       let loadedMatrix = loadRoomPositionFromJson(from: associationMatrixURL) {
-                        associationMatrix = loadedMatrix
-                    } else {
-                        print("Failed to load RotoTraslationMatrix from JSON file for floor \(floorURL.lastPathComponent)")
-                    }
-                    
+                   
                     var rooms: [Room] = []
                     
                     
@@ -131,9 +124,17 @@ class BuildingModel: ObservableObject {
                                       _scene: scene,
                                       _floorURL: floorURL
                     )
-                    
+                   
                     rooms = try loadRooms(from: floorURL, floor: floor)
                     floor.rooms = rooms
+                    
+                    let associationMatrixURL = floorURL.appendingPathComponent("\(floorURL.lastPathComponent).json")
+                    if fileManager.fileExists(atPath: associationMatrixURL.path),
+                       let loadedMatrix = loadRoomPositionFromJson(from: associationMatrixURL, for: floor) {
+                        floor._associationMatrix = loadedMatrix
+                    } else {
+                        print("Failed to load RotoTraslationMatrix from JSON file for floor \(floorURL.lastPathComponent)")
+                    }
                     
                     let floorRooms: [Room] = floor.rooms.map {$0}
                     

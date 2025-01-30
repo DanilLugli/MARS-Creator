@@ -59,7 +59,7 @@ struct SIMDMatrix4x4: Codable {
     }
 }
 
-func loadRoomPositionFromJson(from fileURL: URL) -> [String: RotoTraslationMatrix]? {
+func loadRoomPositionFromJson(from fileURL: URL, for floor: Floor) -> [String: RotoTraslationMatrix]? {
     do {
         // Leggi il contenuto del file JSON
         let data = try Data(contentsOf: fileURL)
@@ -94,6 +94,7 @@ func loadRoomPositionFromJson(from fileURL: URL) -> [String: RotoTraslationMatri
             
             // Aggiungi l'oggetto al dizionario
             associationMatrix[roomName] = rotoTraslationMatrix
+            floor.getRoomByName(roomName)?.hasPosition = true
         }
         
         return associationMatrix
@@ -105,6 +106,5 @@ func loadRoomPositionFromJson(from fileURL: URL) -> [String: RotoTraslationMatri
 }
 
 func doesMatrixExist(for roomName: String, in associationMatrix: [String: RotoTraslationMatrix]) -> Bool {
-    // Controlla se esiste una chiave nel dizionario che corrisponde alla stringa passata
     return associationMatrix[roomName] != nil
 }

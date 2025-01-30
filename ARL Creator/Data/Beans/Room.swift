@@ -18,6 +18,8 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     
     @Published private var _connections: [AdjacentFloorsConnection] = []
     
+    @Published var hasPosition: Bool = false
+    
     private var _roomURL: URL
     @Published private var _color: UIColor
     private var _lastUpdate: Date
@@ -38,9 +40,9 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         if let savedColor = Room.loadColor(for: _name) {
             self._color = savedColor
         } else {
-            let randomColor = Room.randomColor().withAlphaComponent(0.3)
+            let randomColor = Room.randomColor().withAlphaComponent(0.6)
             self._color = randomColor
-            Room.saveColor(randomColor, for: _name) // Salva il nuovo colore
+            Room.saveColor(randomColor, for: _name) 
         }
         
         self.parentFloor = parentFloor
@@ -178,28 +180,28 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     }
     
     func isMatrixPresent(named matrixName: String) -> Bool {
-            guard let floor = parentFloor else {
-                print("Error: Room \(self.name) has no parentFloor.")
-                return false
-            }
-            
-            let fileURL = floor.floorURL.appendingPathComponent("\(floor.name).json") 
-            
-            do {
-                let data = try Data(contentsOf: fileURL)
-                let json = try JSONSerialization.jsonObject(with: data, options: [])
-                
-                guard let matricesDict = json as? [String: [String: [[Double]]]] else {
-                    return false
-                }
-                
-                return matricesDict[matrixName] != nil
-                
-            } catch {
-                print("Error reading matrix data from \(fileURL): \(error)")
-                return false
-            }
+        guard let floor = parentFloor else {
+            print("Error: Room \(self.name) has no parentFloor.")
+            return false
         }
+        
+        let fileURL = floor.floorURL.appendingPathComponent("\(floor.name).json")
+        
+        do {
+            let data = try Data(contentsOf: fileURL)
+            let json = try JSONSerialization.jsonObject(with: data, options: [])
+            
+            guard let matricesDict = json as? [String: [String: [[Double]]]] else {
+                return false
+            }
+            
+            return matricesDict[matrixName] != nil
+            
+        } catch {
+            print("Error reading matrix data from \(fileURL): \(error)")
+            return false
+        }
+    }
     
     static func randomColor() -> UIColor {
         let colors: [UIColor] = [

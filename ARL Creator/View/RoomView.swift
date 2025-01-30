@@ -418,7 +418,8 @@ struct RoomView: View {
                     }
 
                     
-                    NavigationLink(destination: RoomCameraRMView(isPresented: .constant(false), room: room).edgesIgnoringSafeArea(.all).toolbarBackground(.hidden, for: .navigationBar) ) {
+                    NavigationLink(destination: RoomCameraRMView(isPresented: .constant(false),
+                                                                 room: room).edgesIgnoringSafeArea(.all).toolbarBackground(.hidden, for: .navigationBar) ) {
                         Label("Add using Camera", systemImage: "camera.viewfinder")
                     }
                     

@@ -23,7 +23,6 @@ struct RoomsListView: View {
         }
     }
     
-    // 🔍 Barra di ricerca per filtrare le stanze
     private var searchBar: some View {
         TextField("Search", text: $searchText)
             .padding(7)
@@ -33,7 +32,6 @@ struct RoomsListView: View {
             .frame(maxWidth: .infinity)
     }
 
-    // 📜 Lista delle stanze con aggiornamenti automatici
     private var roomListView: some View {
         ScrollView {
             LazyVStack(spacing: 50) {
@@ -47,7 +45,6 @@ struct RoomsListView: View {
         }
     }
 
-    // 📌 Testo mostrato quando non ci sono stanze
     private var emptyStateView: some View {
         HStack {
             Text("Add Room with")
@@ -61,7 +58,6 @@ struct RoomsListView: View {
         }
     }
 
-    // 🔄 Filtraggio delle stanze in base alla ricerca
     private var filteredRooms: [Room] {
         if searchText.isEmpty {
             return floor.rooms

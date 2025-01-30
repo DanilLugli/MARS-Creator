@@ -249,7 +249,7 @@ struct AutomaticRoomPositionView: View {
 
                                     floor.updateAssociationMatrixInJSON(for: room.name, fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"))
 
-                    
+                                    room.hasPosition = true
                                     floor.planimetryRooms.handler.loadRoomsMaps(
                                         floor: floor,
                                         rooms: floor.rooms

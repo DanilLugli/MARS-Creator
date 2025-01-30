@@ -124,7 +124,7 @@ func updateJSONFile(_ dict: [String: Any], _ URLFile: URL, _ floor: Floor) {
             jsonData = try JSONSerialization.data(withJSONObject: json, options: .prettyPrinted)
             try jsonData.write(to: fileURL)
            
-            if let updatedAssociationMatrix = loadRoomPositionFromJson(from: fileURL) {
+            if let updatedAssociationMatrix = loadRoomPositionFromJson(from: fileURL, for: floor) {
                 floor.associationMatrix = updatedAssociationMatrix
             } else {
                 print("Failed to load associationMatrix from JSON.")

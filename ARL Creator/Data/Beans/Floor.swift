@@ -185,27 +185,33 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
     }
     
     func deleteRoom(room: Room) {
-        
-        // 1. Rimuove la stanza dalla memoria
+       
         _rooms.removeAll { $0.id == room.id }
-        
-        // 2. Costruisce il percorso della cartella della stanza da eliminare
+    
         let roomURL = floorURL
             .appendingPathComponent("Rooms")         // Directory "Rooms"
             .appendingPathComponent(room.name)      // Sottocartella con nome stanza
         
         do {
-            // 3. Controlla se la cartella esiste e la elimina
+
             if FileManager.default.fileExists(atPath: roomURL.path) {
                 try FileManager.default.removeItem(at: roomURL) // Elimina la cartella
                 print("Cartella \(room.name) eliminata con successo.")
+                try deleteRoomFromFloorJSON(nameRoom: room.name)
             } else {
                 print("La cartella della stanza \(room.name) non esiste in \(roomURL.path).")
             }
         } catch {
-            // 4. Gestisce eventuali errori
             print("Errore durante l'eliminazione della stanza \(room.name): \(error)")
         }
+//        
+//        do{
+//            
+//        }
+//        catch{
+//            print(\(error))
+//        }
+//        
     }
    
     @MainActor func processRooms(for floor: Floor) {
@@ -320,6 +326,39 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
             }
         } catch {
             throw NSError(domain: "com.example.ScanBuild", code: 9, userInfo: [NSLocalizedDescriptionKey: "Errore durante l'aggiornamento del contenuto del file JSON nel floor: \(error.localizedDescription)"])
+        }
+    }
+    
+    func deleteRoomFromFloorJSON(nameRoom: String) throws {
+        let fileManager = FileManager.default
+        let jsonFileURL = self.floorURL.appendingPathComponent("\(self.name).json")
+        
+        do {
+            let jsonData = try Data(contentsOf: jsonFileURL)
+            var jsonDict = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any]
+            
+            // Controlla se la stanza esiste nel file JSON
+            guard jsonDict?[nameRoom] != nil else {
+                throw NSError(domain: "com.example.ScanBuild", code: 10, userInfo: [NSLocalizedDescriptionKey: "La stanza \(nameRoom) non esiste nel file JSON del floor."])
+            }
+            
+            // Rimuove la stanza dal JSON
+            jsonDict?.removeValue(forKey: nameRoom)
+            
+            // Scrive i dati aggiornati nel file
+            let updatedJsonData = try JSONSerialization.data(withJSONObject: jsonDict as Any, options: .prettyPrinted)
+            try updatedJsonData.write(to: jsonFileURL)
+            
+            // Rimuove la stanza anche dall'associazione matrice
+            if self._associationMatrix[nameRoom] != nil {
+                self._associationMatrix.removeValue(forKey: nameRoom)
+                print("Stanza \(nameRoom) rimossa dalla _associationMatrix.")
+            } else {
+                print("Nessuna matrice trovata per la stanza \(nameRoom) nella _associationMatrix.")
+            }
+            
+        } catch {
+            throw NSError(domain: "com.example.ScanBuild", code: 11, userInfo: [NSLocalizedDescriptionKey: "Errore durante l'eliminazione della stanza dal file JSON del floor: \(error.localizedDescription)"])
         }
     }
     

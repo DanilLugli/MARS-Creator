@@ -135,7 +135,6 @@ class ReferenceMarker: ObservableObject, Codable, Identifiable {
             markersData[newNameWithoutExtension] = MarkerData(name: newNameWithoutExtension, width: newWidth)
         }
 
-        // Salva il JSON aggiornato senza estensioni nei nomi
         do {
             let encoder = JSONEncoder()
             encoder.outputFormatting = .prettyPrinted

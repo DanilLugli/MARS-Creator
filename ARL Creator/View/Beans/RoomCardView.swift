@@ -13,7 +13,11 @@ struct RoomCardView: View {
     var rowSize: Int
     var isSelected: Bool
 
-    @State private var showAlert = false
+    enum ActiveAlert {
+        case none, position, planimetry
+    }
+    
+    @State private var activeAlert: ActiveAlert = .none
 
     var body: some View {
         GeometryReader { geometry in
@@ -40,47 +44,68 @@ struct RoomCardView: View {
                 HStack {
                     Spacer()
                     
-                    if !room.isMatrixPresent(named: room.name) {
-                        Image(systemName: "exclamationmark.circle")
-                            .foregroundColor(.red)
-                            .font(.system(size: 35))
-                            .frame(width: 70, height: 70)
-                            .contentShape(SwiftUI.Rectangle())
-                            .padding(.trailing)
-                            .onTapGesture {
-                                showAlert = true
-                            }
+                    if !room.hasPosition{
+                        
+                        ZStack {
+                            Color.clear.frame(width: 10, height: 100) // Aggiunge spazio cliccabile
+                            Image(systemName: "exclamationmark.circle")
+                                .foregroundColor(.red)
+                                //.background(Color.yellow)
+                                .font(.system(size: 35))
+                        }
+                        .onTapGesture {
+                            print("Tapped on exclamation mark") // Debug
+                            activeAlert = .position
+                        }
+                        
                     } else {
                         Image(systemName: "circle.fill")
                             .foregroundColor(Color(room.color))
                             .font(.system(size: 30))
                             .frame(width: 70, height: 70)
-                            .padding(.trailing)
+                            //.padding(.trailing)
                     }
                     
                     if !room.hasValidScene() {
                         Image(systemName: "exclamationmark.triangle")
                             .foregroundColor(.red)
+                           // .background(Color.orange)
                             .font(.system(size: 35))
                             .frame(width: 70, height: 70)
                             .contentShape(SwiftUI.Rectangle())
-                            .padding(.trailing)
+                            //.padding(.trailing)
                             .onTapGesture {
-                                showAlert = true
+                                activeAlert = .planimetry
                             }
                     }
+                    
+                }
+            }
+            .alert(isPresented: Binding<Bool>(
+                get: { activeAlert != .none },
+                set: { if !$0 { activeAlert = .none } }
+            )) {
+                switch activeAlert {
+                case .position:
+                    return Alert(
+                        title: Text("ATTENTION"),
+                        message: Text("\(room.name) has no position in its Floor.\nYou have to calculate it in Room Position page."),
+                        dismissButton: .default(Text("OK"))
+                    )
+                case .planimetry:
+                    return Alert(
+                        title: Text("ATTENTION"),
+                        message: Text("\(room.name) has no planimetry.\nYou need to create it in the Room Planimetry page."),
+                        dismissButton: .default(Text("OK"))
+                    )
+                case .none:
+                    return Alert(title: Text(""))
                 }
             }
             .frame(width: geometry.size.width / CGFloat(rowSize), height: 80)
             .cornerRadius(10)
             .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 2)
-            .alert(isPresented: $showAlert) {
-                Alert(
-                    title: Text("ATTENTION!").foregroundColor(.red),
-                    message: Text("\(room.name) has no position in his Floor.\nYou have to calculate in Room Position page.\n\n(\(room.name) -> Tab: Room Position -> Add Room Position)"),
-                    dismissButton: .default(Text("OK"))
-                )
-            }
+
         }
     }
 }

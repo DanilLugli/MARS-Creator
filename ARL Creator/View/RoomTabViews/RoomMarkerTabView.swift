@@ -116,7 +116,7 @@ struct MarkerDetailView: View {
                     
                     TextField("Enter marker name", text: $newName)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .foregroundColor(.customBackground)
+                        .foregroundColor(self.oldName == "room_photo" ? .red : .customBackground)
                         .bold()
                         .padding(.bottom)
                     
@@ -192,6 +192,12 @@ struct MarkerDetailView: View {
             showAlert = true
             return
         }
+        
+        guard newName != "room_photo" else {
+            alertMessage = "Name cannot be 'room_photo'."
+            showAlert = true
+            return
+        }
 
         guard let size = Double(newSize), size > 0.0 else {
             alertMessage = "Size must be a valid positive number."
@@ -199,42 +205,48 @@ struct MarkerDetailView: View {
             return
         }
         
-        // Rimuove l'estensione dai nomi
+
         let oldNameWithoutExtension = URL(fileURLWithPath: oldName).deletingPathExtension().lastPathComponent
         let newNameWithoutExtension = URL(fileURLWithPath: newName).deletingPathExtension().lastPathComponent
-        
-        marker.imageName = newNameWithoutExtension
-        marker.physicalWidth = CGFloat(size)
+
         
         let referenceMarkerURL = room.roomURL.appendingPathComponent("ReferenceMarker")
         let fileMarkerDataURL = referenceMarkerURL.appendingPathComponent("Marker Data.json")
-
-        // Trova il file esistente con qualsiasi estensione
-        if let oldFileWithExtension = try? FileManager.default.contentsOfDirectory(at: referenceMarkerURL, includingPropertiesForKeys: nil)
-            .first(where: { $0.deletingPathExtension().lastPathComponent == oldNameWithoutExtension }) {
+        
+        let directoryURL = referenceMarkerURL
+        let fileNameWithoutExtension = oldNameWithoutExtension
+        var exteImage = ""
+        if let fileURL = try? FileManager.default.contentsOfDirectory(at: directoryURL, includingPropertiesForKeys: nil)
+            .first(where: { $0.deletingPathExtension().lastPathComponent == fileNameWithoutExtension }) {
             
-            let newFileURL = oldFileWithExtension.deletingLastPathComponent()
-                .appendingPathComponent(newNameWithoutExtension)
-                .appendingPathExtension(oldFileWithExtension.pathExtension)
-
-            do {
-                try FileManager.default.moveItem(at: oldFileWithExtension, to: newFileURL)
-            } catch {
-                alertMessage = "Failed to rename the image file: \(error.localizedDescription)"
-                showAlert = true
-                return
-            }
+            print("File trovato: \(fileURL.lastPathComponent)")
+            print("Estensione: \(fileURL.pathExtension)")
+            exteImage = fileURL.pathExtension
         } else {
-            alertMessage = "File with name \(oldName) not found."
-            showAlert = true
-            return
+            print("File non trovato")
         }
+
+        
+        if let index = room.referenceMarkers.firstIndex(where: { $0.imageName == oldNameWithoutExtension }) {
+            room.referenceMarkers.remove(at: index)
+        }
+
+       
+        let updatedMarker = ReferenceMarker(
+            _imagePath: referenceMarkerURL.appendingPathComponent("\(newNameWithoutExtension).\(exteImage)"),
+            _imageName: newNameWithoutExtension,
+            _coordinates: Coordinates(x: Float(Double.random(in: -100...100)), y: Float(Double.random(in: -100...100))),
+            _rmUML: referenceMarkerURL.appendingPathComponent("newNameWithoutExtension.jpg"),
+            _physicalWidth: CGFloat(size)
+        )
+
+        room.referenceMarkers.append(updatedMarker)
 
         marker.saveMarkerData(
             to: fileMarkerDataURL,
             old: oldNameWithoutExtension,
             new: newNameWithoutExtension,
-            size: marker.physicalWidth
+            size: CGFloat(size)
         )
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
@@ -244,7 +256,27 @@ struct MarkerDetailView: View {
     
     private func deleteMarker(markerName: String) {
         let referenceMarkerURL = room.roomURL.appendingPathComponent("ReferenceMarker")
-        let markerFileURL = referenceMarkerURL.appendingPathComponent("\(markerName).jpg")
+
+        let oldNameWithoutExtension = URL(fileURLWithPath: oldName).deletingPathExtension().lastPathComponent
+        let newNameWithoutExtension = URL(fileURLWithPath: newName).deletingPathExtension().lastPathComponent
+
+        let fileMarkerDataURL = referenceMarkerURL.appendingPathComponent("Marker Data.json")
+        
+        let directoryURL = referenceMarkerURL
+        let fileNameWithoutExtension = oldNameWithoutExtension
+        var exteImage = ""
+        if let fileURL = try? FileManager.default.contentsOfDirectory(at: directoryURL, includingPropertiesForKeys: nil)
+            .first(where: { $0.deletingPathExtension().lastPathComponent == fileNameWithoutExtension }) {
+            
+            print("File trovato: \(fileURL.lastPathComponent)")
+            print("Estensione: \(fileURL.pathExtension)")
+            exteImage = fileURL.pathExtension
+        } else {
+            print("File non trovato")
+        }
+
+        
+        let markerFileURL = referenceMarkerURL.appendingPathComponent("\(markerName).\(exteImage)")
 
         if let index = room.referenceMarkers.firstIndex(where: { $0.imageName == markerName }) {
             room.referenceMarkers.remove(at: index)

@@ -35,9 +35,6 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
     
     @MainActor
     func loadRoomMapsPosition(floor: Floor, room: Room, borders: Bool) {
-//        for room in floor.rooms {
-//            scnView.scene?.rootNode.childNode(withName: room.name, recursively: true)?.removeFromParentNode()
-//        }
         
         self.floor = floor
         self.roomName = room.name
@@ -55,41 +52,41 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         func createSceneNode(from scene: SCNScene) -> SCNNode {
             let containerNode = SCNNode()
             containerNode.name = "SceneContainer"
+            
+            scene.rootNode.enumerateHierarchy { node, _ in
+                print("  - \(node.name ?? "Unnamed Node")")
+            }
+            
 
             if let floorNode = scene.rootNode.childNode(withName: "Floor0", recursively: true) {
                 let clonedFloorNode = floorNode.clone()
                 clonedFloorNode.name = "Floor0"
-                
-                // Copia la geometria del nodo originale
+
                 if let originalGeometry = floorNode.geometry {
                     let clonedGeometry = originalGeometry.copy() as! SCNGeometry
-                    
-                    // Crea un nuovo materiale per evitare di condividere quello esistente
                     let newMaterial = SCNMaterial()
                     newMaterial.diffuse.contents = floor.getRoomByName(room.name)?.color
+                    newMaterial.lightingModel = .physicallyBased
                     clonedGeometry.materials = [newMaterial]
-                    
-                    // Assegna la nuova geometria al nodo clonato
                     clonedFloorNode.geometry = clonedGeometry
                 }
                 
                 containerNode.addChildNode(clonedFloorNode)
             } else {
-                print("DEBUG: Node 'Floor0' not found in the provided scene for room \(room.name).")
+                print("DEBUG: 'Floor0' not found in the provided scene for room \(room.name).")
             }
-
-            // Aggiungi un puntino centrale come marker
+            
+            // Aggiungere un marker centrale invisibile
             let sphereNode = SCNNode()
             sphereNode.name = "SceneCenterMarker"
-
-            let sphereGeometry = SCNSphere(radius: 0)
+            let sphereGeometry = SCNSphere(radius: 0.1)
             let sphereMaterial = SCNMaterial()
-            sphereMaterial.emission.contents = UIColor.orange.withAlphaComponent(0)
-            sphereMaterial.diffuse.contents = UIColor.orange.withAlphaComponent(0)
+            sphereMaterial.diffuse.contents = UIColor.orange
             sphereGeometry.materials = [sphereMaterial]
             sphereNode.geometry = sphereGeometry
             containerNode.addChildNode(sphereNode)
-
+            
+            // Impostare il pivot del container in base al marker
             if let markerNode = containerNode.childNode(withName: "SceneCenterMarker", recursively: true) {
                 let localMarkerPosition = markerNode.position
                 containerNode.pivot = SCNMatrix4MakeTranslation(localMarkerPosition.x, localMarkerPosition.y, localMarkerPosition.z)
@@ -97,25 +94,85 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
                 print("DEBUG: SceneCenterMarker not found in the container for room \(room.name), pivot not modified.")
             }
             
-            let targetPrefixes = ["Table", "Storage", "Chair", "Door", "Opening"]
-            let matchingNodes = scene.rootNode.childNodes.filter { node in
-                targetPrefixes.contains(where: { prefix in node.name?.hasPrefix(prefix) == true })
-            }
+            let targetPrefixes = ["Window", "Door", "Opening", "Wall"]
+            let matchingNodes = findNodesRecursively(in: scene.rootNode, matching: targetPrefixes)
 
             matchingNodes.forEach { node in
-                node.scale = SCNVector3(1, 1, 1)
-                if let geometry = node.geometry {
+                let clonedNode = node.clone()
+                clonedNode.scale = SCNVector3(1, 1, 1)
+                
+                
+                if let geometry = clonedNode.geometry {
+                    let clonedGeometry = geometry.copy() as! SCNGeometry
+
                     let material = SCNMaterial()
-                    material.diffuse.contents = UIColor.black
-                    geometry.materials = [material]
+                    material.lightingModel = .physicallyBased
+                    material.isDoubleSided = true
+                    material.blendMode = .alpha
+
+                    if let nodeName = clonedNode.name?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() {
+                        let nodePrefix = String(nodeName.prefix(4))
+
+                        
+                        switch nodePrefix {
+                        case "open":
+                            material.diffuse.contents = UIColor.red
+                            clonedNode.position.y += 10
+                        case "door":
+                            material.diffuse.contents = UIColor.green
+                            clonedNode.position.y += 10
+                        case "wind":
+                            material.diffuse.contents = UIColor.blue
+                            clonedNode.position.y += 10
+                        case "wall":
+                            material.diffuse.contents = UIColor.black
+                            clonedNode.scale.z *= 0.5
+                        default:
+                            print("DEFA")
+                            material.diffuse.contents = UIColor.white
+                        }
+                    }
+
+                    clonedGeometry.materials = []
+                    clonedGeometry.materials.append(material)
+                    clonedNode.geometry = clonedGeometry
+                    
+                    containerNode.addChildNode(clonedNode)
+                    
                 } else {
                     print("DEBUG: Node \(node.name ?? "Unnamed Node") has no geometry.")
                 }
-                print("ADD")
-                containerNode.addChildNode(node.clone())
             }
 
             return containerNode
+        }
+        
+        
+        /// 🔍 **Funzione per trovare nodi in modo ricorsivo**
+        func findNodesRecursively(in node: SCNNode, matching prefixes: [String]) -> [SCNNode] {
+            var resultNodes: [SCNNode] = []
+            var seenNodeNames = Set<String>()
+            
+            for child in node.childNodes {
+                if let name = child.name?.lowercased(),
+                   prefixes.contains(where: { name.hasPrefix($0.lowercased()) }) &&
+                   !name.hasSuffix("grp"),
+                   !seenNodeNames.contains(name) {
+                   
+                    resultNodes.append(child)
+                    seenNodeNames.insert(name)
+                }
+              
+                let childResults = findNodesRecursively(in: child, matching: prefixes)
+                for foundNode in childResults {
+                    if let foundNodeName = foundNode.name?.lowercased(), !seenNodeNames.contains(foundNodeName) {
+                        resultNodes.append(foundNode)
+                        seenNodeNames.insert(foundNodeName)
+                    }
+                }
+            }
+            
+            return resultNodes
         }
 
         
@@ -124,7 +181,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         roomNode.scale = SCNVector3(1, 1, 1)
         
         if let existingNode = scnView.scene?.rootNode.childNode(withName: room.name, recursively: true) {
-            existingNode.removeFromParentNode() // Rimuovi il nodo esistente
+            existingNode.removeFromParentNode()
             print("DEBUG: Existing node '\(room.name)' removed from the scene.")
         }
         
@@ -140,8 +197,8 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         debugNodeProperties(roomNode)
         
         scnView.scene?.rootNode.addChildNode(roomNode)
-        print("Local transform: \(roomNode.simdTransform)")
-        print("World transform: \(roomNode.worldTransform)")
+        
+       
         self.roomNode = roomNode
         
         drawSceneObjects(scnView: self.scnView, borders: true)

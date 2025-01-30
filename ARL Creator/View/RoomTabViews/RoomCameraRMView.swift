@@ -66,6 +66,7 @@ struct RoomCameraRMView: UIViewControllerRepresentable {
             room.referenceMarkers.append(newMarker)
             
             let referenceMarkerURL = room.roomURL.appendingPathComponent("ReferenceMarker")
+            
             newMarker.saveMarkerData(
                 to: referenceMarkerURL.appendingPathComponent("Marker Data.json"),
                 old: newMarker.imageName,
@@ -82,31 +83,3 @@ struct RoomCameraRMView: UIViewControllerRepresentable {
         }
     }
 }
-
-//struct ContentView: View {
-//    @State private var showCamera = false
-//
-//    var body: some View {
-//        VStack {
-//            Text("Room Camera")
-//                .font(.headline)
-//
-//            Button("Take Photo") {
-//                showCamera = true
-//            }
-//            .sheet(isPresented: $showCamera) {
-//                RoomCameraRMView(isPresented: $showCamera)
-//            }
-//        }
-//        .padding()
-//    }
-//}
-//
-//@main
-//struct MyApp: App {
-//    var body: some Scene {
-//        WindowGroup {
-//            ContentView()
-//        }
-//    }
-//}
