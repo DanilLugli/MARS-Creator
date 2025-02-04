@@ -224,20 +224,17 @@ struct SCNViewContainer: UIViewRepresentable {
             
             if gesture.state == .changed {
                 let newScale = camera.orthographicScale / Double(gesture.scale)
-                camera.orthographicScale = max(5.0, min(newScale, 50.0)) // Limita lo zoom tra 5x e 50x
+                camera.orthographicScale = max(5.0, min(newScale, 70.0)) // Limita lo zoom tra 5x e 50x
                 gesture.scale = 1
             }
         }
         
-        // Gestione dello spostamento tramite pan
         @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
             let translation = gesture.translation(in: parent.scnView)
+           
+            parent.cameraNode.position.x -= Float(translation.x) * 0.01
+            parent.cameraNode.position.z -= Float(translation.y) * 0.01 
             
-            // Regola la posizione della camera in base alla direzione del pan
-            parent.cameraNode.position.x -= Float(translation.x) * 0.01 // Spostamento orizzontale
-            parent.cameraNode.position.z += Float(translation.y) * 0.01 // Spostamento verticale
-            
-            // Resetta la traduzione dopo ogni movimento
             gesture.setTranslation(.zero, in: parent.scnView)
         }
     }

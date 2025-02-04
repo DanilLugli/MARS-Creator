@@ -91,7 +91,6 @@ struct RoomCaptureViewContainer: UIViewRepresentable {
             
             session.arSession.getCurrentWorldMap { worldMap, error in
                 guard let worldMap = worldMap else {
-                    print("Can't get current world map")
                     if let error = error {
                         print(error.localizedDescription)
                     }
@@ -114,12 +113,9 @@ struct RoomCaptureViewContainer: UIViewRepresentable {
             
             if let error = error {
                     print(error.localizedDescription)
-                    
-                    // Aggiorna la variabile scanningError sulla main thread
                     DispatchQueue.main.async {
                         NotificationCenter.default.post(name: .genericMessage, object: error.localizedDescription)
                     }
-                    
                     return
                 }
             

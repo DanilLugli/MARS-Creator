@@ -23,28 +23,41 @@ struct FloorAltitudeTabView: View {
     
     var body: some View {
         VStack {
-//            Toggle(isOn: $floor.initialFloor) {
-//                Text("\(floor.name) is initial Floor? ")
-//                    .font(.system(size: 20))
-//                    .bold()
-//            }
-//            .toggleStyle(SwitchToggleStyle())
-//            .padding()
-//            
-//            Picker("Select a Floor", selection: $selectedFloor) {
-//                ForEach(building.floors.filter { $0.id != floor.id }, id: \.id) { otherFloor in
-//                    Text(otherFloor.name)
-//                        .font(.system(size: 16, weight: .bold))
-//                        .tag(otherFloor)
-//                }
-//            }
-//            .pickerStyle(MenuPickerStyle())
-//            .padding()
-//            .background(Color.white)
-//            .cornerRadius(8)
-//            .shadow(radius: 5)
-//            .padding(.horizontal)
-            
+
+            VStack {
+                HStack{
+                    Image(systemName: "exclamationmark.triangle")
+                        .symbolRenderingMode(.palette)
+                        .foregroundStyle(.yellow)
+                        .font(.largeTitle)
+                    Text("To calculate the altitude, move from the starting Room to the destination Room after pressing \"Calculate Altitude.\"\nYou may also do the reverse.")
+                        .foregroundColor(.gray)
+                        .font(.headline)
+                        .padding()
+                }
+                
+                HStack{
+                    VStack{
+                        Image(systemName: "figure.walk.departure")
+                            .foregroundColor(.gray)
+                            .font(.largeTitle)
+                    }
+                    
+                    Image(systemName: "arrow.right")
+                        .foregroundColor(.gray)
+                        .font(.largeTitle)
+                    Image(systemName: "figure.stairs")
+                        .foregroundColor(.gray)
+                        .font(.largeTitle)
+                    Image(systemName: "arrow.right")
+                        .foregroundColor(.gray)
+                        .font(.largeTitle)
+                    Image(systemName: "figure.walk.arrival")
+                        .scaleEffect(x: -1, y: 1) // Inverte l'icona orizzontalmente
+                        .font(.largeTitle)
+                        .foregroundColor(.gray)
+                }.padding()
+            }
             
             Spacer()
             
@@ -60,20 +73,19 @@ struct FloorAltitudeTabView: View {
             
             Spacer()
             
-            if floor.altitude == 0.0 {
-                Button(action: {
-                    showARView = true
-                }) {
-                    Text("Calculate Altitude")
-                        .font(.system(size: 16, weight: .bold, design: .default))
-                        .bold()
-                        .padding()
-                        .background(Color.green)
-                        .foregroundColor(.white)
-                        .cornerRadius(30)
-                }
-                .padding(.bottom, 20)
+            Button(action: {
+                showARView = true
+            }) {
+                Text(floor.altitude == 0 ? "Calculate Altitude" : "Re-Calculate Altitude")
+                    .font(.system(size: 16, weight: .bold, design: .default))
+                    .bold()
+                    .padding()
+                    .background(Color.green)
+                    .foregroundColor(.white)
+                    .cornerRadius(30)
             }
+            .padding(.bottom, 20)
+            
         }
         .fullScreenCover(isPresented: $showARView) {
             ZStack {

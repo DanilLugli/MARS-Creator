@@ -238,7 +238,7 @@ struct SCNViewMapContainer: UIViewRepresentable {
             
             // Regola la posizione della camera in base alla direzione del pan
             parent.handler.cameraNode.position.x -= Float(translation.x) * 0.01 // Spostamento orizzontale
-            parent.handler.cameraNode.position.z += Float(translation.y) * 0.01 // Spostamento verticale
+            parent.handler.cameraNode.position.z -= Float(translation.y) * 0.01 // Spostamento verticale
             
             // Resetta la traduzione dopo ogni movimento
             gesture.setTranslation(.zero, in: parent.handler.scnView)

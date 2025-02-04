@@ -47,14 +47,14 @@ struct RoomCardView: View {
                     if !room.hasPosition{
                         
                         ZStack {
-                            Color.clear.frame(width: 10, height: 100) // Aggiunge spazio cliccabile
+                            Color.clear.frame(width: 10, height: 100)
                             Image(systemName: "exclamationmark.circle")
                                 .foregroundColor(.red)
                                 //.background(Color.yellow)
                                 .font(.system(size: 35))
                         }
                         .onTapGesture {
-                            print("Tapped on exclamation mark") // Debug
+                            print("Tapped on exclamation mark")
                             activeAlert = .position
                         }
                         
@@ -69,11 +69,9 @@ struct RoomCardView: View {
                     if !room.hasValidScene() {
                         Image(systemName: "exclamationmark.triangle")
                             .foregroundColor(.red)
-                           // .background(Color.orange)
                             .font(.system(size: 35))
                             .frame(width: 70, height: 70)
                             .contentShape(SwiftUI.Rectangle())
-                            //.padding(.trailing)
                             .onTapGesture {
                                 activeAlert = .planimetry
                             }

@@ -252,7 +252,7 @@ struct AddStairsConnectionView: View {
             .background(Color.customBackground)
             .foregroundColor(.white)
         }
-        .navigationTitle("Add New Stairs Connection")
+        .navigationTitle("New Connection")
         .background(Color.customBackground.ignoresSafeArea())
         .toast(isPresenting: $showConnectionCreateToast) {
             AlertToast(type: .complete(Color.green), title: "Connection created")

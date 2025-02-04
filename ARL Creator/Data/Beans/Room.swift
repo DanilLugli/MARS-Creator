@@ -7,23 +7,17 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
 
     private var _id: UUID = UUID()
     @Published private var _name: String
-
     @Published private var _scene: SCNScene?
     @Published private var _sceneObjects: [SCNNode]?
-    
     @Published private var _planimetry: SCNViewContainer?
     //@Published private var _roomPosition: SCNViewMapContainer?
     @Published private var _referenceMarkers: [ReferenceMarker]
     @Published private var _transitionZones: [TransitionZone]
-    
     @Published private var _connections: [AdjacentFloorsConnection] = []
-    
     @Published var hasPosition: Bool = false
-    
     private var _roomURL: URL
-    @Published private var _color: UIColor
+    @Published var color: UIColor
     private var _lastUpdate: Date
-    
     weak var parentFloor: Floor?
 
     
@@ -37,13 +31,7 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         self._sceneObjects = _sceneObjects
         self._roomURL = _roomURL
 
-        if let savedColor = Room.loadColor(for: _name) {
-            self._color = savedColor
-        } else {
-            let randomColor = Room.randomColor().withAlphaComponent(0.6)
-            self._color = randomColor
-            Room.saveColor(randomColor, for: _name) 
-        }
+        self.color = Room.loadColor(for: _name) ?? Room.randomColor().withAlphaComponent(0.7)
         
         self.parentFloor = parentFloor
     }
@@ -145,18 +133,18 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         return room.parentFloor
     }
     
-    var color: UIColor {
-        get {
-            return _color
-        }
-        set {
-            _color = newValue
-            Room.saveColor(newValue, for: _name) // Salva il colore ogni volta che viene aggiornato
-        }
-    }
+//    var color: UIColor {
+//        get {
+//            return _color
+//        }
+//        set {
+//            _color = newValue
+//            Room.saveColor(newValue, for: _name) // Salva il colore ogni volta che viene aggiornato
+//        }
+//    }
     
     // MARK: - Persistenza del colore
-    private static func saveColor(_ color: UIColor, for roomName: String) {
+    static func saveColor(_ color: UIColor, for roomName: String) {
         guard let data = try? NSKeyedArchiver.archivedData(withRootObject: color, requiringSecureCoding: false) else {
             print("Failed to encode color for room \(roomName)")
             return
@@ -470,11 +458,6 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         // Verifica l'URL della stanza
         if _roomURL.path.isEmpty || !FileManager.default.fileExists(atPath: _roomURL.path) {
             print("Error: Room URL is invalid or does not exist.")
-        }
-        
-        // Verifica il colore
-        if _color == .clear {
-            print("Error: Room color is invalid.")
         }
         
         // Verifica il piano padre (opzionale, ma utile per debugging)

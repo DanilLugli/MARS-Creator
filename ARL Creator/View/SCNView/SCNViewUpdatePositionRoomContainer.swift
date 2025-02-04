@@ -22,7 +22,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
     var translationStep: CGFloat = 0.02
     var rotationStep: Float = .pi / 200
     
-    private let color: UIColor = UIColor.green.withAlphaComponent(0.3)
+    private let color: UIColor = UIColor.green.withAlphaComponent(0.4)
     
     var roomNode: SCNNode?
     
@@ -66,6 +66,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
                     let clonedGeometry = originalGeometry.copy() as! SCNGeometry
                     let newMaterial = SCNMaterial()
                     newMaterial.diffuse.contents = floor.getRoomByName(room.name)?.color
+//                    newMaterial.diffuse.contents = UIColor.green.withAlphaComponent(0.3)
                     newMaterial.lightingModel = .physicallyBased
                     clonedGeometry.materials = [newMaterial]
                     clonedFloorNode.geometry = clonedGeometry
@@ -79,7 +80,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
             // Aggiungere un marker centrale invisibile
             let sphereNode = SCNNode()
             sphereNode.name = "SceneCenterMarker"
-            let sphereGeometry = SCNSphere(radius: 0.1)
+            let sphereGeometry = SCNSphere(radius: 0)
             let sphereMaterial = SCNMaterial()
             sphereMaterial.diffuse.contents = UIColor.orange
             sphereGeometry.materials = [sphereMaterial]
@@ -94,53 +95,51 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
                 print("DEBUG: SceneCenterMarker not found in the container for room \(room.name), pivot not modified.")
             }
             
-            let targetPrefixes = ["Window", "Door", "Opening", "Wall"]
-            let matchingNodes = findNodesRecursively(in: scene.rootNode, matching: targetPrefixes)
-
+            let targetPrefixes = ["Table", "Bed", "Chair", "Storage"]
+            let matchingNodes = findNodesRecursively(in: room.sceneObjects!, matching: targetPrefixes)
+            
             matchingNodes.forEach { node in
+
                 let clonedNode = node.clone()
+                clonedNode.name = "clone_" + (node.name ?? "Unnamed")
                 clonedNode.scale = SCNVector3(1, 1, 1)
-                
-                
-                if let geometry = clonedNode.geometry {
-                    let clonedGeometry = geometry.copy() as! SCNGeometry
+
+                if let originalGeometry = clonedNode.geometry {
+                    let clonedGeometry = originalGeometry.copy() as! SCNGeometry
 
                     let material = SCNMaterial()
                     material.lightingModel = .physicallyBased
-                    material.isDoubleSided = true
-                    material.blendMode = .alpha
-
+                    
                     if let nodeName = clonedNode.name?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() {
-                        let nodePrefix = String(nodeName.prefix(4))
-
+                        let nodePrefix = String(nodeName.prefix(10))
+                        
+                        print("DEBUG: nodeName -> \(nodeName), nodePrefix -> \(nodePrefix)")
                         
                         switch nodePrefix {
-                        case "open":
+                        case "clone_open":
                             material.diffuse.contents = UIColor.red
-                            clonedNode.position.y += 10
-                        case "door":
+                            //clonedNode.position.y += 2
+                        case "clone_door":
                             material.diffuse.contents = UIColor.green
-                            clonedNode.position.y += 10
-                        case "wind":
+                            //clonedNode.position.y += 2
+                        case "clone_wind":
                             material.diffuse.contents = UIColor.blue
-                            clonedNode.position.y += 10
-                        case "wall":
+                           // clonedNode.position.y += 2
+                        case "clone_wall":
                             material.diffuse.contents = UIColor.black
-                            clonedNode.scale.z *= 0.5
+                            clonedNode.scale.z *= 0.3
                         default:
                             print("DEFA")
-                            material.diffuse.contents = UIColor.white
+                            material.diffuse.contents = UIColor.black.withAlphaComponent(0.3)
                         }
                     }
+    
+                    clonedNode.geometry?.firstMaterial = material
 
-                    clonedGeometry.materials = []
-                    clonedGeometry.materials.append(material)
-                    clonedNode.geometry = clonedGeometry
-                    
                     containerNode.addChildNode(clonedNode)
-                    
+
                 } else {
-                    print("DEBUG: Node \(node.name ?? "Unnamed Node") has no geometry.")
+                    print("DEBUG: Nodo \(node.name ?? "Unnamed Node") non ha geometria.")
                 }
             }
 
@@ -149,33 +148,39 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         
         
         /// 🔍 **Funzione per trovare nodi in modo ricorsivo**
-        func findNodesRecursively(in node: SCNNode, matching prefixes: [String]) -> [SCNNode] {
+        func findNodesRecursively(in nodes: [SCNNode], matching prefixes: [String]) -> [SCNNode] {
             var resultNodes: [SCNNode] = []
             var seenNodeNames = Set<String>()
-            
-            for child in node.childNodes {
-                if let name = child.name?.lowercased(),
-                   prefixes.contains(where: { name.hasPrefix($0.lowercased()) }) &&
-                   !name.hasSuffix("grp"),
-                   !seenNodeNames.contains(name) {
-                   
-                    resultNodes.append(child)
-                    seenNodeNames.insert(name)
-                }
-              
-                let childResults = findNodesRecursively(in: child, matching: prefixes)
-                for foundNode in childResults {
-                    if let foundNodeName = foundNode.name?.lowercased(), !seenNodeNames.contains(foundNodeName) {
-                        resultNodes.append(foundNode)
-                        seenNodeNames.insert(foundNodeName)
+
+            func search(in node: SCNNode) {
+                let nodeName = node.name?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "Senza nome"
+
+                if let name = node.name?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() {
+                    let prefixMatch = prefixes.contains(where: { name.hasPrefix($0.lowercased()) })
+                    let hasGrpSuffix = name.hasSuffix("grp")
+                    let alreadySeen = seenNodeNames.contains(name)
+
+                    if prefixMatch && !hasGrpSuffix && !alreadySeen {
+                        print("DEBUG: Nodo TROVATO -> \(name)")
+                        resultNodes.append(node)
+                        seenNodeNames.insert(name)
                     }
                 }
+
+                // Ricorsione sui figli
+                for child in node.childNodes {
+                    search(in: child)
+                }
             }
-            
+
+            for node in nodes {
+                search(in: node)
+            }
+
+            print("DEBUG: Totale nodi trovati -> \(resultNodes.count)")
             return resultNodes
         }
 
-        
         let roomNode = createSceneNode(from: roomScene!)
         roomNode.name = room.name
         roomNode.scale = SCNVector3(1, 1, 1)
@@ -204,7 +209,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         drawSceneObjects(scnView: self.scnView, borders: true)
         setMassCenter(scnView: self.scnView)
         setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: self.massCenter)
-        createAxesNode()
+       // createAxesNode()
     }
     
     func createAxesNode(length: CGFloat = 1.0, radius: CGFloat = 0.02) {
@@ -357,7 +362,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
     func handlePan(_ gesture: UIPanGestureRecognizer) {
         let translation = gesture.translation(in: scnView)
         cameraNode.position.x -= Float(translation.x) * 0.01 // Spostamento orizzontale
-        cameraNode.position.z += Float(translation.y) * 0.01 // Spostamento verticale
+        cameraNode.position.z -= Float(translation.y) * 0.01 // Spostamento verticale
         gesture.setTranslation(.zero, in: scnView)
     }
     

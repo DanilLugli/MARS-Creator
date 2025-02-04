@@ -313,9 +313,10 @@ struct RoomView: View {
                     .foregroundColor(.white)
                     .bold()
                     .onChange(of: selectedColor) {
-                        let uiColor = UIColor(selectedColor)
-                        room.color = uiColor.withAlphaComponent(0.3)
                         
+                        let uiColor = UIColor(selectedColor)
+                        room.color = uiColor.withAlphaComponent(0.7)
+                        Room.saveColor(room.color, for: room.name)
                         var floorRooms: [Room] = []
                         floor.rooms.forEach { room in
                             floorRooms.append(room)

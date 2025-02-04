@@ -168,42 +168,69 @@ func drawSceneObjects(scnView: SCNView, borders: Bool) {
             n.name! != "__selected__"
         })
         .forEach {
-            let nodeName = $0.name
-            let material = SCNMaterial()
-            if nodeName == "Floor0" {
-                material.diffuse.contents = UIColor.green
-            } else {
-                material.diffuse.contents = UIColor.black
-                if nodeName?.prefix(5) == "Floor" {
-                    material.diffuse.contents = UIColor.white.withAlphaComponent(0.2)
-                }
-                if nodeName!.prefix(6) == "Transi" {
-                    material.diffuse.contents = UIColor.white
-                }
-                if nodeName!.prefix(4) == "Door" {
-                    material.diffuse.contents = UIColor.white
-                }
-                if nodeName!.prefix(4) == "Open"{
-                    material.diffuse.contents = UIColor.white
-                }
-                if nodeName!.prefix(4) == "Tabl" {
-                    material.diffuse.contents = UIColor.brown
-                }
-                if nodeName!.prefix(4) == "Chai"{
-                    material.diffuse.contents = UIColor.brown.withAlphaComponent(0.4)
-                }
-                if nodeName!.prefix(4) == "Stor"{
-                    material.diffuse.contents = UIColor.systemGray
-                }
-                if nodeName!.prefix(4) == "Sofa"{
-                    material.diffuse.contents = UIColor(red: 0.0, green: 0.0, blue: 0.5, alpha: 0.6)
-                }
-                if nodeName!.prefix(4) == "Tele"{
-                    material.diffuse.contents = UIColor.orange
-                }
-                material.lightingModel = .physicallyBased
-                $0.geometry?.materials = [material]
+            guard let nodeName = $0.name else { return }  
+           
+            if nodeName.lowercased().hasPrefix("clone") {
+                return
             }
-            drawnNodes.insert(nodeName!)
+
+            let material = SCNMaterial()
+
+            switch nodeName {
+            case "Floor0":
+                material.diffuse.contents = UIColor.green
+            default:
+                material.diffuse.contents = UIColor.black
+
+                let prefix4 = nodeName.prefix(4)
+                let prefix5 = nodeName.prefix(5)
+                let prefix6 = nodeName.prefix(6)
+
+                switch prefix4 {
+                case "Door":
+                    material.diffuse.contents = UIColor.green
+                    $0.position.y += 2
+                case "Tabl":
+                    material.diffuse.contents = UIColor.brown
+                case "Open":
+                    material.diffuse.contents = UIColor.red
+                    $0.position.y += 2
+                case "Wind":
+                    material.diffuse.contents = UIColor.blue
+                    $0.position.y += 2
+                case "Chai":
+                    material.diffuse.contents = UIColor.brown.withAlphaComponent(0.4)
+                case "Stor":
+                    material.diffuse.contents = UIColor.systemGray
+                case "Sofa":
+                    material.diffuse.contents = UIColor(red: 0.0, green: 0.0, blue: 0.5, alpha: 0.6)
+                case "Tele":
+                    material.diffuse.contents = UIColor.orange
+                case "Wall":
+                    material.diffuse.contents = UIColor.black
+                    //$0.scale.z *= 0.6
+                default:
+                    break
+                }
+
+                switch prefix5 {
+                case "Floor":
+                    material.diffuse.contents = UIColor.white.withAlphaComponent(0.2)
+                default:
+                    break
+                }
+
+                switch prefix6 {
+                case "Transi":
+                    material.diffuse.contents = UIColor.white
+                default:
+                    break
+                }
+            }
+
+            material.lightingModel = .physicallyBased
+            $0.geometry?.materials = [material]
+
+            drawnNodes.insert(nodeName)
         }
 }
