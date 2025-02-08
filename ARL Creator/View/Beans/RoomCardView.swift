@@ -51,7 +51,7 @@ struct RoomCardView: View {
                             Image(systemName: "exclamationmark.circle")
                                 .foregroundColor(.red)
                                 //.background(Color.yellow)
-                                .font(.system(size: 35))
+                                .font(.system(size: 35)).padding()
                         }
                         .onTapGesture {
                             print("Tapped on exclamation mark")

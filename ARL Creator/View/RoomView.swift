@@ -1,4 +1,5 @@
 import SwiftUI
+import SceneKit
 import AlertToast
 import Foundation
 import Combine
@@ -102,7 +103,35 @@ struct RoomView: View {
         .alert("ATTENTION", isPresented: $showRoomUpdatePlanimetryAlert) {
             Button("Cancel", role: .cancel) { }
             Button("OK", role: .destructive) {
-                isOptionsSheetPresented = true
+                let fileManager = FileManager.default
+                let filePaths = [
+                    room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"),
+                    room.roomURL.appendingPathComponent("JsonParametric").appendingPathComponent("\(room.name).json"),
+                    room.roomURL.appendingPathComponent("PlistMetadata").appendingPathComponent("\(room.name).plist"),
+                    room.roomURL.appendingPathComponent("Maps").appendingPathComponent("\(room.name).map"),
+                    room.roomURL.appendingPathComponent("JsonMaps").appendingPathComponent("\(room.name)")
+                ]
+                
+                room.sceneObjects = []
+                room.scene = SCNScene()
+
+                do {
+                    for filePath in filePaths {
+                        if fileManager.fileExists(atPath: filePath.path) {
+                            try fileManager.removeItem(at: filePath)
+                            print("✅ File at \(filePath) eliminato correttamente")
+                        } else {
+                            print("⚠️ File at \(filePath) non esiste")
+                        }
+                    }
+                } catch {
+                    print("❌ Errore durante l'eliminazione: \(error.localizedDescription)")
+                }
+
+                // Assicura che la UI venga aggiornata correttamente
+                DispatchQueue.main.async {
+                    isOptionsSheetPresented = true
+                }
             }
         } message: {
             Text(alertMessage)
@@ -164,7 +193,7 @@ struct RoomView: View {
                         let referenceMarker = ReferenceMarker(
                             _imagePath: room.roomURL.appendingPathComponent("ReferenceMarker").appendingPathComponent("\(url.lastPathComponent)"),
                             _imageName:  url.deletingPathExtension().lastPathComponent,
-                           _coordinates: Coordinates(x: Float(Double.random(in: -100...100)), y: Float(Double.random(in: -100...100))),
+                            _coordinates: simd_float3(x: 0, y: 0, z: 0),
                            _rmUML: room.roomURL.appendingPathComponent("ReferenceMarker"),
                            _physicalWidth: 0.0
                        )
@@ -176,7 +205,8 @@ struct RoomView: View {
                             to: referenceMarkerURL.appendingPathComponent("Marker Data.json"),
                             old: referenceMarker.imageName,
                             new: referenceMarker.imageName,
-                            size: 0.0
+                            size: 0.0,
+                            newCoordinates: referenceMarker.coordinates
                         )
                         
                     } catch {
@@ -190,25 +220,6 @@ struct RoomView: View {
             
             NavigationLink(destination: RoomScanningView(room: room)){
                 Button("Create With AR") {
-                    let fileManager = FileManager.default
-                    let filePaths = [
-                        room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"),
-                        room.roomURL.appendingPathComponent("JsonParametric").appendingPathComponent("\(room.name).json"),
-                        room.roomURL.appendingPathComponent("PlistMetadata").appendingPathComponent("\(room.name).plist"),
-                        room.roomURL.appendingPathComponent("Maps").appendingPathComponent("\(room.name).map"),
-                        room.roomURL.appendingPathComponent("JsonMaps").appendingPathComponent("\(room.name)")
-                    ]
-
-                    do {
-                        for filePath in filePaths {
-                            try fileManager.removeItem(at: filePath)
-                            print("File at \(filePath) eliminato correttamente")
-                        }
-                    } catch {
-                        print("Errore durante l'eliminazione di un file: \(error)")
-                    }
-
-                    
                     self.isOptionsSheetPresented = false
                     self.isNavigationScanRoomActive = true
                 }
@@ -238,7 +249,6 @@ struct RoomView: View {
                 
                 self.isOptionsSheetPresented = false
                 
-                // Apri la Sheet del file picker dopo aver chiuso quella corrente
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                     self.isRoomPlanimetryUploadPicker = true
                 }
@@ -261,6 +271,12 @@ struct RoomView: View {
             }
             
             Button("Cancel", role: .cancel) {}
+        }.toast(isPresenting: $showRenameRoomToast, duration: 2.0){
+            AlertToast(
+                type: .regular,
+                title: "Room Renamed",
+                subTitle: "Room Renamed in \(room.name)"
+            )
         }
         .toast(isPresenting: $showAddRoomPlanimetryToast) {
             AlertToast(type: .complete(Color.green), title: "Room Planimetry created")
@@ -268,9 +284,7 @@ struct RoomView: View {
         .toast(isPresenting: $showDeleteRoomToast) {
             AlertToast(type: .complete(Color.green), title: "Room deleted successfully")
         }
-        .toast(isPresenting: $showRenameRoomToast){
-            AlertToast(displayMode: .banner(.slide), type: .regular, title: "Room Renamed")
-        }
+        
     }
     
     @ViewBuilder
@@ -430,9 +444,6 @@ struct RoomView: View {
                         .symbolRenderingMode(.palette)
                         .foregroundStyle(.white, .blue, .blue)
                 }
-                
-                
-               
                 
             case 3:
                 Menu {

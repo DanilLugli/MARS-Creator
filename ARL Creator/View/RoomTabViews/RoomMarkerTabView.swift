@@ -1,4 +1,5 @@
 import SwiftUI
+import ARKit
 import AlertToast
 
 struct RoomMarkerTabView: View {
@@ -7,6 +8,46 @@ struct RoomMarkerTabView: View {
     
     @State private var searchText: String = ""
     @State private var selectedMarker: ReferenceMarker? = nil
+    
+    @StateObject private var worldMapLoader: ARWorldMapLoader
+    
+    @State private var arViewContainer: FindMarkerPositionARSession
+    
+    @State private var showDeleteRMToast: Bool = false
+    @State private var showUpdateRMToast: Bool = false
+    
+    init(room: Room) {
+            self.room = room
+            _worldMapLoader = StateObject(wrappedValue: ARWorldMapLoader(roomURL: room.roomURL, roomName: room.name))
+             arViewContainer = FindMarkerPositionARSession(worldMapURL: FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("MyARWorldMap.worldmap"), room: room)
+        }
+    
+//    let mapFileWithExtension = roomURL.appendingPathComponent("Maps").appendingPathComponent("\(room.name).map")
+//    let mapFileWithoutExtension = roomURL.appendingPathComponent("Maps").appendingPathComponent(room.name)
+//    
+//    if FileManager.default.fileExists(atPath: mapFileWithExtension.path) {
+//        guard let mapData = try? Data(contentsOf: mapFileWithExtension),
+//              let worldMap = try? NSKeyedUnarchiver.unarchivedObject(ofClass: ARWorldMap.self, from: mapData)
+//        else {
+//            print("Failed to load ARWorldMap from \(mapFileWithExtension.path)")
+//            continue
+//        }
+//       
+//        room.arWorldMap = worldMap
+//        
+//    } else if FileManager.default.fileExists(atPath: mapFileWithoutExtension.path) {
+//        guard let mapData = try? Data(contentsOf: mapFileWithoutExtension),
+//              let worldMap = try? NSKeyedUnarchiver.unarchivedObject(ofClass: ARWorldMap.self, from: mapData)
+//        else {
+//            print("Failed to load ARWorldMap from \(mapFileWithoutExtension.path)")
+//            continue
+//        }
+//        room.arWorldMap = worldMap
+//    }
+//    else {
+//        print("File ARWorldMap for \(room.name) not found.")
+//    }
+    
     
     var filteredMarker: [ReferenceMarker] {
         if searchText.isEmpty {
@@ -48,11 +89,33 @@ struct RoomMarkerTabView: View {
                 .padding(.top, 15)
             }
         }
+//        .toast(isPresenting: $showDeleteRMToast, duration: 5.0) {
+//            AlertToast(
+//                displayMode: .hud,
+//                type: .regular,
+//                title: "Deleted",
+//                subTitle: "Reference Marker Deleted"
+//            )
+//        }
+//        .toast(isPresenting: $showUpdateRMToast) {
+//            AlertToast(
+//                type: .regular,
+//                title: "Updated",
+//                subTitle: "Reference Marker Updated"
+//            )
+//        }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.customBackground)
         .sheet(item: $selectedMarker) { marker in
-            MarkerDetailView(marker: marker, room: room)
+            MarkerDetailView(
+                marker: marker,
+                room: room,
+                worldMapURL: room.roomURL.appendingPathComponent("Maps").appendingPathComponent("\(room.name).map"),
+                showDeleteRMToast: $showDeleteRMToast,
+                showUpdateRMToast: $showUpdateRMToast
+            )
         }
+        
     }
 }
 
@@ -68,14 +131,21 @@ struct MarkerDetailView: View {
     
     @State private var alertMessage = ""
     
-    @State private var showDeleteRMToast: Bool = false
-    @State private var showUpdateRMToast: Bool = false
+    @State private var isShowingARSession = false
     @State private var showAlert = false
-
-    init(marker: ReferenceMarker, room: Room) {
+    
+    @Binding var showDeleteRMToast: Bool
+    @Binding var showUpdateRMToast: Bool
+    
+    let worldMapURL: URL?
+    
+    init(marker: ReferenceMarker, room: Room, worldMapURL: URL?,  showDeleteRMToast: Binding<Bool>, showUpdateRMToast: Binding<Bool>) {
         self.room = room
         self.marker = marker
         self.oldName = marker.imageName
+        self.worldMapURL = worldMapURL
+        self._showDeleteRMToast = showDeleteRMToast
+        self._showUpdateRMToast = showUpdateRMToast
         
         _newName = State(initialValue: marker.imageName)
         _newSize = State(initialValue: "\(marker.physicalWidth)")
@@ -141,7 +211,9 @@ struct MarkerDetailView: View {
                 HStack{
                     Button(action: {
                         deleteMarker(markerName: marker.imageName)
-                        showDeleteRMToast = true
+                        DispatchQueue.main.async {
+                            showDeleteRMToast = true
+                        }
                     }) {
                         Text("Delete")
                             .font(.headline)
@@ -154,7 +226,9 @@ struct MarkerDetailView: View {
                     
                     Button(action: {
                         saveChanges()
-                        showUpdateRMToast = true
+                        DispatchQueue.main.async {
+                            showUpdateRMToast = true
+                        }
                     }){
                         Text("Save")
                             .font(.headline)
@@ -164,6 +238,28 @@ struct MarkerDetailView: View {
                             .foregroundColor(.white)
                             .cornerRadius(30)
                     }
+                    
+                   
+                    
+//                    if let worldMapURL = worldMapURL {
+//                        Button(action: {
+//                            print("✅ Button pressed!") // Debug: Controlla se il bottone viene premuto
+//                            isShowingARSession = true
+//                        }) {
+//                            Text("Calculate Position")
+//                                .font(.headline)
+//                                .bold()
+//                                .padding()
+//                                .background(Color.blue)
+//                                .foregroundColor(.white)
+//                                .cornerRadius(30)
+//                        }
+//                        .fullScreenCover(isPresented: $isShowingARSession) {
+//                           
+//                            FindMarkerPositionARSession(worldMapURL: worldMapURL, room: room)
+//                                .edgesIgnoringSafeArea(.all)
+//                        }
+//                    }
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -177,12 +273,6 @@ struct MarkerDetailView: View {
                 message: Text(alertMessage),
                 dismissButton: .default(Text("OK"))
             )
-        }
-        .toast(isPresenting: $showDeleteRMToast){
-            AlertToast(displayMode: .banner(.slide), type: .regular, title: "Reference Marker Deleted")
-        }
-        .toast(isPresenting: $showUpdateRMToast){
-            AlertToast(displayMode: .banner(.slide), type: .regular, title: "Reference Marker Updated")
         }
     }
     
@@ -231,23 +321,24 @@ struct MarkerDetailView: View {
             room.referenceMarkers.remove(at: index)
         }
 
-       
         let updatedMarker = ReferenceMarker(
-            _imagePath: referenceMarkerURL.appendingPathComponent("\(newNameWithoutExtension).\(exteImage)"),
-            _imageName: newNameWithoutExtension,
-            _coordinates: Coordinates(x: Float(Double.random(in: -100...100)), y: Float(Double.random(in: -100...100))),
-            _rmUML: referenceMarkerURL.appendingPathComponent("newNameWithoutExtension.jpg"),
-            _physicalWidth: CGFloat(size)
-        )
+                  _imagePath: referenceMarkerURL.appendingPathComponent("\(newNameWithoutExtension).\(exteImage)"),
+                  _imageName: newNameWithoutExtension,
+                  _coordinates: simd_float3(0, 0, 0),
+                  _rmUML: referenceMarkerURL.appendingPathComponent("newNameWithoutExtension.jpg"),
+                  _physicalWidth: CGFloat(size)
+              )
+        
 
         room.referenceMarkers.append(updatedMarker)
 
         marker.saveMarkerData(
-            to: fileMarkerDataURL,
-            old: oldNameWithoutExtension,
-            new: newNameWithoutExtension,
-            size: CGFloat(size)
-        )
+                   to: fileMarkerDataURL,
+                   old: oldNameWithoutExtension,
+                   new: newNameWithoutExtension,
+                   size: CGFloat(size),
+                   newCoordinates: updatedMarker.coordinates
+               )
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             dismiss()
@@ -298,10 +389,36 @@ struct MarkerDetailView: View {
             showAlert = true
         }
         
-        marker.deleteMarkerData(from: referenceMarkerURL.appendingPathComponent("Marker Data.json"), markerName: marker.imageName)
+        marker.deleteMarkerData(from: referenceMarkerURL.appendingPathComponent("Marker Data.json"), markerName: markerName)
 
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
             dismiss()
         }
     }
 }
+
+
+class ARWorldMapLoader: ObservableObject {
+    @Published var worldMapURL: URL?
+    
+    init(roomURL: URL, roomName: String) {
+        loadWorldMap(roomURL: roomURL, roomName: roomName)
+    }
+    
+    private func loadWorldMap(roomURL: URL, roomName: String) {
+        let mapFileWithExtension = roomURL.appendingPathComponent("Maps").appendingPathComponent("\(roomName).map")
+        let mapFileWithoutExtension = roomURL.appendingPathComponent("Maps").appendingPathComponent(roomName)
+        
+        if FileManager.default.fileExists(atPath: mapFileWithExtension.path) {
+            
+            self.worldMapURL = mapFileWithExtension
+        } else if FileManager.default.fileExists(atPath: mapFileWithoutExtension.path) {
+           
+            self.worldMapURL = mapFileWithoutExtension
+        } else {
+            print("⚠️ No ARWorldMap \(roomName).")
+        }
+    }
+}
+
+

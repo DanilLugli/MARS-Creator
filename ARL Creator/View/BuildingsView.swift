@@ -87,8 +87,11 @@ struct BuildingsView: View {
     var filteredBuildings: [Building] {
         if searchText.isEmpty {
             return buildingsModel.getBuildings()
+                .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
         } else {
-            return buildingsModel.getBuildings().filter { $0.name.lowercased().contains(searchText.lowercased()) }
+            return buildingsModel.getBuildings()
+                .filter { $0.name.lowercased().contains(searchText.lowercased()) }
+                .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
         }
     }
     

@@ -128,7 +128,7 @@ class SCNViewMapHandler: ObservableObject {
                 }
             }
             
-            drawSceneObjects(scnView: self.scnView, borders: false)
+            drawSceneObjects(scnView: self.scnView, borders: false, nodeOrientation: false)
             setMassCenter(scnView: self.scnView)
             setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: self.massCenter)
             
@@ -227,7 +227,7 @@ struct SCNViewMapContainer: UIViewRepresentable {
             
             if gesture.state == .changed {
                 let newScale = camera.orthographicScale / Double(gesture.scale)
-                camera.orthographicScale = max(5.0, min(newScale, 50.0)) // Limita lo zoom tra 5x e 50x
+                camera.orthographicScale = max(1.0, min(newScale, 200.0)) // Limita lo zoom tra 5x e 50x
                 gesture.scale = 1
             }
         }
@@ -237,8 +237,8 @@ struct SCNViewMapContainer: UIViewRepresentable {
             let translation = gesture.translation(in: parent.handler.scnView)
             
             // Regola la posizione della camera in base alla direzione del pan
-            parent.handler.cameraNode.position.x -= Float(translation.x) * 0.01 // Spostamento orizzontale
-            parent.handler.cameraNode.position.z -= Float(translation.y) * 0.01 // Spostamento verticale
+            parent.handler.cameraNode.position.x -= Float(translation.x) * 0.04 // Spostamento orizzontale
+            parent.handler.cameraNode.position.z -= Float(translation.y) * 0.04 // Spostamento verticale
             
             // Resetta la traduzione dopo ogni movimento
             gesture.setTranslation(.zero, in: parent.handler.scnView)

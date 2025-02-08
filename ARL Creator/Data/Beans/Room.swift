@@ -16,7 +16,12 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     @Published private var _connections: [AdjacentFloorsConnection] = []
     @Published var hasPosition: Bool = false
     private var _roomURL: URL
-    @Published var color: UIColor
+    @Published var color: UIColor {
+            didSet {
+                Room.saveColor(color, for: _name)
+            }
+        }
+    
     private var _lastUpdate: Date
     weak var parentFloor: Floor?
 
@@ -31,7 +36,13 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         self._sceneObjects = _sceneObjects
         self._roomURL = _roomURL
 
-        self.color = Room.loadColor(for: _name) ?? Room.randomColor().withAlphaComponent(0.7)
+        if let loadedColor = Room.loadColor(for: _name) {
+                    self.color = loadedColor
+                } else {
+                    let newColor = Room.randomColor().withAlphaComponent(0.7)
+                    self.color = newColor
+                    Room.saveColor(newColor, for: _name)
+                }
         
         self.parentFloor = parentFloor
     }
@@ -133,23 +144,12 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
         return room.parentFloor
     }
     
-//    var color: UIColor {
-//        get {
-//            return _color
-//        }
-//        set {
-//            _color = newValue
-//            Room.saveColor(newValue, for: _name) // Salva il colore ogni volta che viene aggiornato
-//        }
-//    }
-    
     // MARK: - Persistenza del colore
     static func saveColor(_ color: UIColor, for roomName: String) {
         guard let data = try? NSKeyedArchiver.archivedData(withRootObject: color, requiringSecureCoding: false) else {
             print("Failed to encode color for room \(roomName)")
             return
         }
-        
         UserDefaults.standard.set(data, forKey: "RoomColor_\(roomName)")
         print("Color saved for room \(roomName)")
     }
@@ -234,7 +234,7 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable {
     }
     
     func hasValidScene() -> Bool {
-        return _sceneObjects?.count != 0 
+        return _sceneObjects?.count != 0
     }
     
     func addReferenceMarker(referenceMarker: ReferenceMarker) {

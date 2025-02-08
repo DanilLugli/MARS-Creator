@@ -212,46 +212,74 @@ class BuildingModel: ObservableObject {
                     let planimetry: SCNViewContainer = SCNViewContainer()
 
                     let referenceMarkerURL = roomURL.appendingPathComponent("ReferenceMarker")
-                    
+
                     if fileManager.fileExists(atPath: referenceMarkerURL.path) {
-                        let referenceMarkerContents = try fileManager.contentsOfDirectory(at: referenceMarkerURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
-                        let markerDataURL = referenceMarkerURL.appendingPathComponent("Marker Data.json")
-                        
-                        var markersData: [String: ReferenceMarker.MarkerData] = [:]
-                        if !fileManager.fileExists(atPath: markerDataURL.path) {
-                            
-                            let emptyData = "{}".data(using: .utf8)
-                            fileManager.createFile(atPath: markerDataURL.path, contents: emptyData, attributes: nil)
-                            
-                        } else {
-                            print("Il file 'Marker Data.json' esiste già.")
-                        }
-                        
-                        if fileManager.fileExists(atPath: markerDataURL.path) {
-                            let jsonData = try Data(contentsOf: markerDataURL)
-                            markersData = try JSONDecoder().decode([String: ReferenceMarker.MarkerData].self, from: jsonData)
-                        }
-                        
-                        for fileURL in referenceMarkerContents {
-                            if fileURL.pathExtension.lowercased() == "jpg" || fileURL.pathExtension.lowercased() == "png" || fileURL.pathExtension.lowercased() == "jpeg" {
-                                let imageName = fileURL.deletingPathExtension().lastPathComponent
-                                let imagePath = fileURL
-                                
-                                let coordinates = Coordinates(x: Float(Double.random(in: -100...100)), y: Float(Double.random(in: -100...100)))
-                                let rmUML = URL(fileURLWithPath: "")
-                                let markerWidth = markersData[imageName]?.width ?? 0.0
-                                let markerName = markersData[imageName]?.name ?? imageName // Recupera il nome dal JSON o usa il nome dell'immagine
-                                
-                                let newMarker = ReferenceMarker(
-                                    _imagePath: imagePath,
-                                    _imageName: markerName,
-                                    _coordinates: coordinates,
-                                    _rmUML: rmUML,
-                                    _physicalWidth: markerWidth
-                                )
-                                
-                                referenceMarkers.append(newMarker)
+                        do {
+                            let referenceMarkerContents = try fileManager.contentsOfDirectory(at: referenceMarkerURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+                            let markerDataURL = referenceMarkerURL.appendingPathComponent("Marker Data.json")
+
+                            var markersData: [String: ReferenceMarker.MarkerData] = [:]
+
+                            // Se il file JSON non esiste, lo creiamo vuoto
+                            if !fileManager.fileExists(atPath: markerDataURL.path) {
+                                let emptyData = "{}".data(using: .utf8)
+                                fileManager.createFile(atPath: markerDataURL.path, contents: emptyData, attributes: nil)
+                                print("✅ Creato un nuovo file vuoto per i marker.")
                             }
+
+                            // Carichiamo i dati se il file esiste
+                            if fileManager.fileExists(atPath: markerDataURL.path) {
+                                let jsonData = try Data(contentsOf: markerDataURL)
+                                markersData = try JSONDecoder().decode([String: ReferenceMarker.MarkerData].self, from: jsonData)
+                            }
+
+                            var updatedMarkersData = markersData // Creiamo una copia per aggiornare i dati
+
+                            for fileURL in referenceMarkerContents {
+                                if ["jpg", "png", "jpeg"].contains(fileURL.pathExtension.lowercased()) {
+                                    let imageName = fileURL.deletingPathExtension().lastPathComponent
+                                    let imagePath = fileURL
+
+                                    // Se mancano le coordinate, le impostiamo a 0,0,0
+                                    let coordinatesDict = markersData[imageName]?.coordinates ?? ["x": 0.0, "y": 0.0, "z": 0.0]
+                                    
+                                    if markersData[imageName]?.coordinates == nil {
+                                        print("⚠️ Coordinate mancanti per '\(imageName)'. Aggiungendo (0,0,0) nel JSON.")
+                                        updatedMarkersData[imageName] = ReferenceMarker.MarkerData(
+                                            name: markersData[imageName]?.name ?? imageName,
+                                            width: markersData[imageName]?.width ?? 0.0,
+                                            coordinates: ["x": 0.0, "y": 0.0, "z": 0.0] // ✅ Aggiunto automaticamente
+                                        )
+                                    }
+
+                                    let coordinates = simd_float3.fromDictionary(coordinatesDict)
+                                    let rmUML = URL(fileURLWithPath: "")
+                                    let markerWidth = markersData[imageName]?.width ?? 0.0
+                                    let markerName = markersData[imageName]?.name ?? imageName
+
+                                    let newMarker = ReferenceMarker(
+                                        _imagePath: imagePath,
+                                        _imageName: markerName,
+                                        _coordinates: coordinates,
+                                        _rmUML: rmUML,
+                                        _physicalWidth: markerWidth
+                                    )
+
+                                    referenceMarkers.append(newMarker)
+                                }
+                            }
+
+                            // ✅ Salviamo i dati aggiornati nel JSON se ci sono stati cambiamenti
+                            if updatedMarkersData != markersData {
+                                let updatedJsonData = try JSONEncoder().encode(updatedMarkersData)
+                                try updatedJsonData.write(to: markerDataURL)
+                                print("✅ Dati aggiornati e salvati nel JSON (coordinate aggiunte dove mancavano).")
+                            } else {
+                                print("✅ Nessuna modifica necessaria, tutti i dati erano già completi.")
+                            }
+
+                        } catch {
+                            print("❌ Errore nella gestione dei file dei marker: \(error)")
                         }
                     }
                     

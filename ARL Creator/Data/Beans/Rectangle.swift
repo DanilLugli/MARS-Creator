@@ -14,14 +14,14 @@ struct Rectangle: Encodable {
     var height: Float
 
     var center: Coordinates {
-        return Coordinates(x: origin.x + width / 2, y: origin.y + height / 2)
+        return Coordinates(x: origin.x + width / 2, y: origin.y + height / 2, z: 0)
     }
     
     var area: Float {
         return width * height
     }
 
-    func contains(point: Coordinates) -> Bool {
+    func contains(point: simd_float3) -> Bool {
         return point.x >= origin.x &&
                point.x <= origin.x + width &&
                point.y >= origin.y &&

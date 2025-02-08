@@ -35,9 +35,10 @@ struct SCNViewContainer: UIViewRepresentable {
         
         
         self.scnView.scene = scene
-        drawSceneObjects(scnView: self.scnView, borders: borders)
+        drawSceneObjects(scnView: self.scnView, borders: borders, nodeOrientation: false)
         setMassCenter(scnView: self.scnView)
         setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: self.massCenter)
+        createAxesNode()
         
     }
     
@@ -47,7 +48,7 @@ struct SCNViewContainer: UIViewRepresentable {
         let scene = floor.scene
         
         self.scnView.scene = scene
-        drawSceneObjects(scnView: self.scnView, borders: borders)
+        drawSceneObjects(scnView: self.scnView, borders: borders, nodeOrientation: false)
         setMassCenter(scnView: self.scnView)
         setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: self.massCenter)
         floor.isPlanimetryLoaded = true
@@ -224,7 +225,7 @@ struct SCNViewContainer: UIViewRepresentable {
             
             if gesture.state == .changed {
                 let newScale = camera.orthographicScale / Double(gesture.scale)
-                camera.orthographicScale = max(5.0, min(newScale, 70.0)) // Limita lo zoom tra 5x e 50x
+                camera.orthographicScale = max(1.0, min(newScale, 200.0)) 
                 gesture.scale = 1
             }
         }
@@ -232,8 +233,8 @@ struct SCNViewContainer: UIViewRepresentable {
         @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
             let translation = gesture.translation(in: parent.scnView)
            
-            parent.cameraNode.position.x -= Float(translation.x) * 0.01
-            parent.cameraNode.position.z -= Float(translation.y) * 0.01 
+            parent.cameraNode.position.x -= Float(translation.x) * 0.04
+            parent.cameraNode.position.z -= Float(translation.y) * 0.04
             
             gesture.setTranslation(.zero, in: parent.scnView)
         }

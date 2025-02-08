@@ -93,9 +93,13 @@ struct AutomaticRoomPositionView: View {
                        
                     HStack {
                         Picker(selection: $selectedFloorNodeName, label: Text("")) {
-                            ForEach(sortSceneObjects(nodes: floor.sceneObjects ?? []), id: \.self) { node in
-                                Text(node.name ?? "Unnamed").tag(node.name ?? "").bold()
-                            }.bold()
+                            ForEach(groupNodesByType(nodes: floor.sceneObjects ?? []), id: \.key) { type, nodes in
+                                Section(header: Text(type.capitalized).bold()) {  // Sezione per ogni tipologia
+                                    ForEach(nodes, id: \.self) { node in
+                                        Text(node.name ?? "Unnamed").tag(node.name ?? "").bold()
+                                    }
+                                }
+                            }
                         }
                         .onAppear {
                             if let firstNodeName = floor.sceneObjects?.first?.name {
@@ -104,19 +108,21 @@ struct AutomaticRoomPositionView: View {
                         }
                         .onChange(of: selectedFloorNodeName) { oldValue, newValue in
                             guard !isChangingColors else { return }
-                            if oldValue != newValue{
+                            if oldValue != newValue {
                                 floorView.resetColorNode()
                             }
-                            
+
+                            selectedFloorNode = floor.sceneObjects?.first(where: { $0.name == newValue })
                             floorView.changeColorOfNode(nodeName: newValue, color: UIColor.green)
 
-                            selectedFloorNode = floor.sceneObjects?.first(where: { node in
-                                node.name == newValue
-                            })
-                            
-//                            if let selectedFloorNode = selectedFloorNode {
-//                                filterRoomNodes(byTypeOf: selectedFloorNode)
-//                            }
+                            if let selectedFloorNode = selectedFloorNode {
+                                let selectedType = extractType(from: selectedFloorNode.name ?? "")
+                                if let firstMatchingNode = room.sceneObjects?.first(where: { extractType(from: $0.name ?? "") == selectedType }) {
+                                    selectedRoomNodeName = firstMatchingNode.name ?? ""
+                                    selectedRoomNode = firstMatchingNode
+                                    roomView.changeColorOfNode(nodeName: selectedRoomNodeName, color: UIColor.green)
+                                }
+                            }
                         }
                     }
                     .background(Color.white)
@@ -154,25 +160,26 @@ struct AutomaticRoomPositionView: View {
                     
                     HStack {
                         Picker(selection: $selectedRoomNodeName, label: Text("")) {
-                            ForEach(sortSceneObjects(nodes: room.sceneObjects ?? []), id: \.self) { node in
-                                Text(node.name ?? "Unnamed").tag(node.name ?? "")
+                            ForEach(groupNodesByType(nodes: room.sceneObjects ?? []), id: \.key) { type, nodes in
+                                Section(header: Text(type.capitalized).bold()) { // Crea una sezione per ogni tipologia
+                                    ForEach(nodes, id: \.self) { node in
+                                        Text(node.name ?? "Unnamed").tag(node.name ?? "").bold()
+                                    }
+                                }
                             }
                         }
                         .onAppear {
-                            
                             if let firstNodeName = room.sceneObjects?.first?.name {
                                 selectedRoomNodeName = firstNodeName
                                 selectedRoomNode = room.sceneObjects?.first
-                               // roomView.changeColorOfNode(nodeName: selectedRoomNodeName, color: UIColor.green)
-
                             }
                         }
                         .onChange(of: selectedRoomNodeName) { oldValue, newValue in
                             guard !isChangingColors else { return }
-                            if oldValue != newValue{
+                            if oldValue != newValue {
                                 roomView.resetColorNode()
                             }
-                            
+
                             selectedRoomNode = room.sceneObjects?.first(where: { node in
                                 node.name == newValue
                             })
@@ -242,23 +249,36 @@ struct AutomaticRoomPositionView: View {
                                     } else {
                                         print("Error: \(response.1)")
                                     }
-
+                                    print("Test aass. Matrix 1:")
+                                    print(floor.associationMatrix.keys)
+                                    
                                     responseFromServer = true
 
                                     saveConversionGlobalLocal(response.1, floor.floorURL, floor)
-
+                                    
                                     floor.updateAssociationMatrixInJSON(for: room.name, fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"))
+                                    
+                                    let fileManager = FileManager.default
+                                    let associationMatrixURL = floor.floorURL.appendingPathComponent("\(floor.floorURL.lastPathComponent).json")
+                                    if fileManager.fileExists(atPath: associationMatrixURL.path),
+                                       let loadedMatrix = loadRoomPositionFromJson(from: associationMatrixURL, for: floor) {
+                                        floor._associationMatrix = loadedMatrix
+                                    } else {
+                                        print("Failed to load RotoTraslationMatrix from JSON file for floor \(floor.floorURL.lastPathComponent)")
+                                    }
 
                                     room.hasPosition = true
+                                    
                                     floor.planimetryRooms.handler.loadRoomsMaps(
                                         floor: floor,
                                         rooms: floor.rooms
                                     )
-
-                                
+                                    
+                                    print("Test aass. Matrix 2:")
+                                    print(floor.associationMatrix.keys)
+                                    
                                     roomView.resetColorNode()
                                     floorView.resetColorNode()
-
 
                                     showLoadingPositionToast = false
                                     showInfoPositionAlert = true
@@ -305,13 +325,13 @@ struct AutomaticRoomPositionView: View {
     }
     
     
-    func filterRoomNodes(byTypeOf selectedFloorNode: SCNNode) {
-        let selectedType = extractType(from: selectedFloorNode.name ?? "")
+    func filterRoomNodes_Original(byTypeOf selectedFloorNode: SCNNode) {
+        var selectedType = extractType(from: selectedFloorNode.name ?? "")
         
-//        roomNodes = originalRoomNodes.filter { node in
-//            let nodeType = extractType(from: node.name ?? "")
-//            return nodeType == selectedType
-//        }
+        roomNodes = originalRoomNodes.filter { node in
+            let nodeType = extractType(from: node.name ?? "")
+            return nodeType == selectedType
+        }
         
         if let firstNodeName = roomNodes.first?.name {
             selectedRoomNodeName = firstNodeName
@@ -324,6 +344,34 @@ struct AutomaticRoomPositionView: View {
     func resetRoomNodes() {
         roomNodes = originalRoomNodes
     }
+    
+    func groupNodesByType(nodes: [SCNNode]) -> [(key: String, value: [SCNNode])] {
+        let groupedDict = Dictionary(grouping: nodes) { extractType(from: $0.name ?? "Unknown") }
+        return groupedDict.sorted { $0.key < $1.key }
+    }
+    
+    func filterRoomNodes(byTypeOf selectedFloorNode: SCNNode) {
+        // 1) Ricavo il tipo del nodo selezionato
+        let selectedType = extractType(from: selectedFloorNode.name ?? "")
+
+        // 2) Non filtrare più: mantieni tutti i nodi
+        roomNodes = originalRoomNodes
+
+        // 3) Trova il primo nodo che ha lo stesso tipo
+        if let firstMatchingNode = roomNodes.first(where: {
+            let nodeType = extractType(from: $0.name ?? "")
+            return nodeType == selectedType
+        }) {
+            // Se esiste, lo selezioniamo
+            selectedRoomNodeName = firstMatchingNode.name ?? ""
+            // Qui, se serve, imposta anche `selectedRoomNode = firstMatchingNode`
+        } else {
+            // Altrimenti, nessun nodo di questo tipo
+            selectedRoomNodeName = ""
+            selectedRoomNode = nil
+        }
+    }
+    
     
 //    func resetColorOfNode(nodeName: String) {
 //        // Trova tutti i nodi aggiunti con il nome "__selected__"
@@ -367,6 +415,8 @@ struct AutomaticRoomPositionView: View {
         }
         return type.isEmpty ? "unknown" : type
     }
+    
+
     
     func sortSceneObjects(nodes: [SCNNode]) -> [SCNNode] {
         

@@ -77,7 +77,6 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
                 print("DEBUG: 'Floor0' not found in the provided scene for room \(room.name).")
             }
             
-            // Aggiungere un marker centrale invisibile
             let sphereNode = SCNNode()
             sphereNode.name = "SceneCenterMarker"
             let sphereGeometry = SCNSphere(radius: 0)
@@ -87,7 +86,6 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
             sphereNode.geometry = sphereGeometry
             containerNode.addChildNode(sphereNode)
             
-            // Impostare il pivot del container in base al marker
             if let markerNode = containerNode.childNode(withName: "SceneCenterMarker", recursively: true) {
                 let localMarkerPosition = markerNode.position
                 containerNode.pivot = SCNMatrix4MakeTranslation(localMarkerPosition.x, localMarkerPosition.y, localMarkerPosition.z)
@@ -95,7 +93,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
                 print("DEBUG: SceneCenterMarker not found in the container for room \(room.name), pivot not modified.")
             }
             
-            let targetPrefixes = ["Table", "Bed", "Chair", "Storage"]
+            let targetPrefixes = ["Window", "Opening", "Door"]
             let matchingNodes = findNodesRecursively(in: room.sceneObjects!, matching: targetPrefixes)
             
             matchingNodes.forEach { node in
@@ -117,13 +115,13 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
                         
                         switch nodePrefix {
                         case "clone_open":
-                            material.diffuse.contents = UIColor.red
+                            material.diffuse.contents = UIColor.blue
                             //clonedNode.position.y += 2
                         case "clone_door":
-                            material.diffuse.contents = UIColor.green
+                            material.diffuse.contents = UIColor.yellow
                             //clonedNode.position.y += 2
                         case "clone_wind":
-                            material.diffuse.contents = UIColor.blue
+                            material.diffuse.contents = UIColor.red
                            // clonedNode.position.y += 2
                         case "clone_wall":
                             material.diffuse.contents = UIColor.black
@@ -206,7 +204,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
        
         self.roomNode = roomNode
         
-        drawSceneObjects(scnView: self.scnView, borders: true)
+        drawSceneObjects(scnView: self.scnView, borders: true, nodeOrientation: true)
         setMassCenter(scnView: self.scnView)
         setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: self.massCenter)
        // createAxesNode()
@@ -354,7 +352,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         guard let camera = cameraNode.camera else { return }
         if gesture.state == .changed {
             let newScale = camera.orthographicScale / Double(gesture.scale)
-            camera.orthographicScale = max(5.0, min(newScale, 50.0)) // Limita lo zoom tra 5x e 50x
+            camera.orthographicScale = max(1.0, min(newScale, 200.0)) // Limita lo zoom tra 5x e 50x
             gesture.scale = 1
         }
     }

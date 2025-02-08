@@ -25,6 +25,8 @@ struct RoomScanningView: View {
     @State var message = ""
     @State private var mapName: String = ""
     
+    @State private var viewError: Bool = false
+    
     @Environment(\.dismiss) var dismiss
     
     init(room: Room) {
@@ -66,9 +68,9 @@ struct RoomScanningView: View {
 
                             VStack{
                                 Spacer()
-                                HStack{
+                                VStack{
                                     
-                                    if let scanningError = scanningError, !scanningError.isEmpty {
+                                    if let scanningError = scanningError, !scanningError.isEmpty, viewError == true {
 
                                             Text("An error occurred:")
                                                 .font(.headline)
@@ -83,6 +85,7 @@ struct RoomScanningView: View {
                                         
                                             Button(action: {
                                                 captureView?.restartCapture()
+                                                viewError = false
                                             }) {
                                                 Text("Restart Scan")
                                                     .font(.system(size: 16, weight: .bold, design: .default))
@@ -178,6 +181,7 @@ struct RoomScanningView: View {
             }.onReceive(NotificationCenter.default.publisher(for: .genericMessage)) { notification in
                 if let message = notification.object as? String {
                     if message == "World tracking failure" {
+                        viewError = true
                         self.scanningError = message
                     }
                     

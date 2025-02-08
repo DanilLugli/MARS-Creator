@@ -90,15 +90,13 @@ func setCamera(scnView: SCNView, cameraNode: SCNNode, massCenter: SCNNode) {
     )
     
     cameraNode.camera?.usesOrthographicProjection = true
-    cameraNode.camera?.orthographicScale = 10
+    cameraNode.camera?.orthographicScale = 7
     cameraNode.eulerAngles = SCNVector3(-Double.pi / 2, 0, 0)
 
-    // 🔴 Rimuove eventuali luci ambientali esistenti
     scnView.scene?.rootNode.childNodes
         .filter { $0.light?.type == .ambient }
         .forEach { $0.removeFromParentNode() }
 
-    // ✅ Aggiunge solo una luce ambientale, evitando duplicati
     let ambientLight = SCNNode()
     ambientLight.light = SCNLight()
     ambientLight.light!.type = .ambient
@@ -153,7 +151,7 @@ func setCameraUp(scnView: SCNView, cameraNode: SCNNode, massCenter: SCNNode) {
     scnView.pointOfView = cameraNode
 }
 
-func drawSceneObjects(scnView: SCNView, borders: Bool) {
+func drawSceneObjects(scnView: SCNView, borders: Bool, nodeOrientation: Bool) {
     
     var drawnNodes = Set<String>()
     
@@ -188,15 +186,27 @@ func drawSceneObjects(scnView: SCNView, borders: Bool) {
 
                 switch prefix4 {
                 case "Door":
-                    material.diffuse.contents = UIColor.green
+                    if nodeOrientation{
+                        material.diffuse.contents = UIColor.yellow
+                    }else{
+                        material.diffuse.contents = UIColor.black
+                    }
                     $0.position.y += 2
                 case "Tabl":
                     material.diffuse.contents = UIColor.brown
                 case "Open":
-                    material.diffuse.contents = UIColor.red
+                    if nodeOrientation{
+                        material.diffuse.contents = UIColor.blue
+                    }else{
+                        material.diffuse.contents = UIColor.black
+                    }
                     $0.position.y += 2
                 case "Wind":
-                    material.diffuse.contents = UIColor.blue
+                    if nodeOrientation{
+                        material.diffuse.contents = UIColor.red
+                    }else{
+                        material.diffuse.contents = UIColor.black
+                    }
                     $0.position.y += 2
                 case "Chai":
                     material.diffuse.contents = UIColor.brown.withAlphaComponent(0.4)
@@ -215,7 +225,7 @@ func drawSceneObjects(scnView: SCNView, borders: Bool) {
 
                 switch prefix5 {
                 case "Floor":
-                    material.diffuse.contents = UIColor.white.withAlphaComponent(0.2)
+                    material.diffuse.contents = UIColor.white.withAlphaComponent(0)
                 default:
                     break
                 }

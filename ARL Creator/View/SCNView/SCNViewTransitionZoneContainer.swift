@@ -240,8 +240,8 @@ struct SCNViewTransitionZoneContainer: UIViewRepresentable {
         
         @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
             let translation = gesture.translation(in: viewModel.scnView)
-            viewModel.cameraNode.position.x -= Float(translation.x) * 0.01
-            viewModel.cameraNode.position.z += Float(translation.y) * 0.01
+            viewModel.cameraNode.position.x -= Float(translation.x) * 0.04
+            viewModel.cameraNode.position.z += Float(translation.y) * 0.04
             gesture.setTranslation(.zero, in: viewModel.scnView)
         }
         

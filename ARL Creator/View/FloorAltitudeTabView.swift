@@ -30,7 +30,7 @@ struct FloorAltitudeTabView: View {
                         .symbolRenderingMode(.palette)
                         .foregroundStyle(.yellow)
                         .font(.largeTitle)
-                    Text("To calculate the altitude, move from the starting Room to the destination Room after pressing \"Calculate Altitude.\"\nYou may also do the reverse.")
+                    Text("To calculate the altitude, move from the starting Room to the destination Room after tapping \"Calculate Altitude.\"\nYou may also do the reverse.")
                         .foregroundColor(.gray)
                         .font(.headline)
                         .padding()

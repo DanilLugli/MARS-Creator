@@ -58,7 +58,7 @@ struct RoomCameraRMView: UIViewControllerRepresentable {
             let newMarker = ReferenceMarker(
                 _imagePath: room.roomURL.appendingPathComponent("ReferenceMarker").appendingPathComponent("room_photo.jpg"),
                 _imageName: "room_photo",
-                _coordinates: Coordinates(x: Float(Double.random(in: -100...100)), y: Float(Double.random(in: -100...100))),
+                _coordinates: simd_float3(x: 0, y: 0, z: 0),
                 _rmUML: room.roomURL.appendingPathComponent("ReferenceMarker"),
                 _physicalWidth: 0.0
             )
@@ -71,7 +71,8 @@ struct RoomCameraRMView: UIViewControllerRepresentable {
                 to: referenceMarkerURL.appendingPathComponent("Marker Data.json"),
                 old: newMarker.imageName,
                 new: newMarker.imageName,
-                size: 0.0
+                size: 0.0,
+                newCoordinates: newMarker.coordinates
             )
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 2) {

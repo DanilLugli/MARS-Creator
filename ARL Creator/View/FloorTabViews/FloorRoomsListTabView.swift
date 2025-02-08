@@ -61,8 +61,11 @@ struct RoomsListView: View {
     private var filteredRooms: [Room] {
         if searchText.isEmpty {
             return floor.rooms
+                .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
         } else {
-            return floor.rooms.filter { $0.name.lowercased().contains(searchText.lowercased()) }
+            return floor.rooms
+                .filter { $0.name.lowercased().contains(searchText.lowercased()) }
+                .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
         }
     }
 }

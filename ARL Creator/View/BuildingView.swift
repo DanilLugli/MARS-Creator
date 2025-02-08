@@ -169,15 +169,22 @@ struct BuildingView: View {
             AlertToast(type: .complete(Color.green), title: "Building deleted successfully")
         }
         .toast(isPresenting: $showRenameBuildingToast){
-            AlertToast(displayMode: .banner(.slide), type: .regular, title: "Building Renamed")
+            AlertToast(
+                type: .regular,
+                title: "Building Renamed",
+                subTitle: "Building Renamed in \(building.name)"
+            )
         }
     }
     
     var filteredFloors: [Floor] {
         if searchText.isEmpty {
             return building.floors
+                .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
         } else {
-            return building.floors.filter { $0.name.lowercased().contains(searchText.lowercased()) }
+            return building.floors
+                .filter { $0.name.lowercased().contains(searchText.lowercased()) }
+                .sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
         }
     }
     

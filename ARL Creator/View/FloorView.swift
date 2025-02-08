@@ -156,22 +156,7 @@ struct FloorView: View {
             
             NavigationLink(destination: FloorScanningView(floor: floor)){
                 Button("Create With AR") {
-                    let fileManager = FileManager.default
-                    let filePaths = [
-                        floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz"),
-                        floor.floorURL.appendingPathComponent("JsonParametric").appendingPathComponent("\(floor.name).json"),
-                        floor.floorURL.appendingPathComponent("PlistMetadata").appendingPathComponent("\(floor.name).plist")
-                    ]
-
-                    do {
-                        for filePath in filePaths {
-                            try fileManager.removeItem(at: filePath)
-                            print("File at \(filePath) eliminato correttamente")
-                        }
-                    } catch {
-                        print("Errore durante l'eliminazione di un file: \(error)")
-                    }
-
+        
                     self.isOptionsSheetPresented = false
                     self.isScanningFloorPlanimetry = true
 
@@ -237,6 +222,27 @@ struct FloorView: View {
                 title: Text("ATTENTION"),
                 message: Text(alertMessage),
                 primaryButton: .destructive(Text("OK")) {
+                    let fileManager = FileManager.default
+                    let filePaths = [
+                        floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz"),
+                        floor.floorURL.appendingPathComponent("JsonParametric").appendingPathComponent("\(floor.name).json"),
+                        floor.floorURL.appendingPathComponent("PlistMetadata").appendingPathComponent("\(floor.name).plist")
+                    ]
+
+                    do {
+                        for filePath in filePaths {
+                            try fileManager.removeItem(at: filePath)
+                            print("File at \(filePath) eliminato correttamente")
+                        }
+                    } catch {
+                        print("Errore durante l'eliminazione di un file: \(error)")
+                    }
+
+                    floor.associationMatrix = [:]
+                    floor.planimetryRooms = SCNViewMapContainer()
+                    floor.scene = SCNScene()
+                    floor.sceneObjects = []
+                    
                     isOptionsSheetPresented = true
                 },
                 secondaryButton: .cancel(Text("Cancel")) {
@@ -254,7 +260,6 @@ struct FloorView: View {
                     Task {
                         do {
                             if (try await building.renameFloor(floor: floor, newName: newFloorName)) != false {
-                                
                                 showRenameFloorToast = true
                             } else {
                                 print("Errore durante la rinomina del piano.")
@@ -315,9 +320,12 @@ struct FloorView: View {
             AlertToast(type: .complete(Color.green), title: "Floor deleted successfully")
         }
         .toast(isPresenting: $showRenameFloorToast){
-            AlertToast(displayMode: .banner(.slide), type: .regular, title: "Floor Renamed")
+            AlertToast(
+                type: .regular,
+                title: "Floor Renamed",
+                subTitle: "Floor Renamed in \(floor.name)"
+            )
         }
-        
     }
     
     private var addRoomSheet: some View {
