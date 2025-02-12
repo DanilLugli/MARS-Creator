@@ -252,9 +252,9 @@ struct BuildingView: View {
             _rooms: [],
             _sceneObjects: nil,
             _scene: nil,
-            _floorURL: URL(fileURLWithPath: "")
+            _floorURL: building.buildingURL.appendingPathComponent("\(newFloorName)")
         )
-        
+        print("DEBUGG: \(newFloor.floorURL)")
         building.addFloor(floor: newFloor)
         newFloorName = ""
         showAddFloorToast = true

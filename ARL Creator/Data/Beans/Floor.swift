@@ -182,6 +182,10 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
         } catch {
             print("Error creating folder for room \(room.name): \(error)")
         }
+        
+//        self._associationMatrix[room.name] = RotoTraslationMatrix(name: room.name, translation: matrix_identity_float4x4, r_Y: matrix_identity_float4x4)
+//        saveAssociationMatrixToJSON(fileURL: floorURL.appendingPathComponent("\(floorURL.lastPathComponent).json"))
+        
     }
     
     func deleteRoom(room: Room) {
@@ -255,7 +259,6 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
         }
     }
 
-        
     @MainActor func renameRoom(floor: Floor, room: Room, newName: String) throws {
         let fileManager = FileManager.default
         let oldRoomURL = room.roomURL
@@ -455,7 +458,7 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
     
     func saveAssociationMatrixToJSON(fileURL: URL) {
         do {
-            // Crea un dizionario per contenere i dati da salvare in JSON
+           
             var dictionary: [String: [String: [[Double]]]] = [:]
             
             // Itera su tutte le chiavi e valori nell'association matrix
@@ -528,6 +531,24 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
         }
     }
     
+    public func createIdentityRotoTraslationMatrix(forRoom roomName: String) -> [String: Any] {
+    
+        let identityMatrix: [[Double]] = [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+        ]
+        
+       
+        let rotoTraslation: [String: Any] = [
+            "translation": identityMatrix,
+            "R_Y": identityMatrix
+        ]
+        
+        return [roomName: rotoTraslation]
+    }
+    
     func isMatrixPresent(named matrixName: String, inFileAt url: URL) -> Bool {
         do {
             let data = try Data(contentsOf: url)
@@ -543,8 +564,6 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
             return false
         }
     }
-    
-    
     
     private func simd_float4(_ array: [Float]) -> simd_float4 {
         return simd.simd_float4(array[0], array[1], array[2], array[3])

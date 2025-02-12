@@ -43,9 +43,36 @@ struct RoomScanningView: View {
                         .toolbarBackground(.hidden, for: .navigationBar)
                 }
                 else {
-                    Text("Press Start to begin scanning of \(room.name)")
+                    
+                    VStack{
+                        Text("How to Scan a Room")
+                            .font(.system(size: 24, weight: .bold))
+                            .foregroundColor(.gray)
+                        
+                        Image(systemName: "camera.viewfinder")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 70, height: 70)
+                            .foregroundColor(.gray)
+                        
+                        Spacer()
+                    }
+                    VStack{
+                        Text("""
+                        • Scan one room at a time, focusing on objects within the space that help capture feature points, such as paintings, colorful objects, and furniture.
+                        • You can monitor the number of detected feature points during the scanning process.
+                        • Once the scan is complete, press **Done**.
+                        """)
+                        .multilineTextAlignment(.leading)
+                        .padding()
                         .foregroundColor(.gray)
-                        .bold()
+                        .font(.system(size: 16))
+                        
+                        Text("PRESS START TO SCAN \(room.name)")
+                            .foregroundColor(.gray)
+                            .bold()
+                    }
+                    
                 }
                 
                 VStack {

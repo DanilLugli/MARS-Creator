@@ -38,22 +38,22 @@ struct AddTransitionZoneView: View {
                 .padding([.leading, .trailing, .bottom])
             
             ZStack{
-                 SCNViewTransitionZoneContainer(viewModel: viewModel)
-                    .border(Color.white)
-                    .cornerRadius(10)
-                    .padding()
-                    .shadow(color: Color.gray, radius: 3)
+//                 SCNViewTransitionZoneContainer(viewModel: viewModel)
+//                    .border(Color.white)
+//                    .cornerRadius(10)
+//                    .padding()
+//                    .shadow(color: Color.gray, radius: 3)
                 VStack {
                     Spacer()
                     
-                    MapControllerView(moveObject: viewModel)
-                        .padding()
-                        .background(
-                            Color.white.opacity(0.8)
-                                
-                        )
-                        .cornerRadius(10) // BorderRadius
-                        .shadow(radius: 4) // Shadow valore 4
+//                    MapControllerView(moveObject: viewModel)
+//                        .padding()
+//                        .background(
+//                            Color.white.opacity(0.8)
+//                                
+//                        )
+//                        .cornerRadius(10) // BorderRadius
+//                        .shadow(radius: 4) // Shadow valore 4
                 }.padding(26)
                 
             }.onAppear {

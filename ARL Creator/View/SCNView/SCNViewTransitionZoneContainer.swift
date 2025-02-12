@@ -5,7 +5,7 @@ import RoomPlan
 import CoreMotion
 import ComplexModule
 
-class SCNViewModel: ObservableObject, MoveDimensionObject{
+class SCNViewModel: ObservableObject{
     
     @Published var scnView = SCNView(frame: .zero)
     @Published var lastAddedBoxNode: SCNNode? = nil
@@ -72,8 +72,8 @@ class SCNViewModel: ObservableObject, MoveDimensionObject{
         do {
             scnView.scene = try SCNScene(url: usdzURL)
             drawContent(borders: borders)
-            setMassCenter(scnView: self.scnView)
-            setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: self.massCenter)
+            
+            setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: setMassCenter(scnView: self.scnView))
         } catch {
             print("Error loading scene from URL: \(error)")
         }

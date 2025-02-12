@@ -8,11 +8,16 @@
 import Foundation
 
 protocol MoveObject {
-    func moveUp()
-    func moveDown()
-    func moveLeft()
-    func moveRight()
+    // I metodi di movimento ora ricevono un parametro 'continuous'
+    // Se true viene eseguito uno step maggiore (per pressione continua)
+    // Se false viene eseguito uno step normale (tap singolo)
+    func moveUp(continuous: Bool)
+    func moveDown(continuous: Bool)
+    func moveLeft(continuous: Bool)
+    func moveRight(continuous: Bool)
     
+    // Anche la rotazione può essere gestita in modo analogo, se necessario.
+    // Se non serve differenziare il comportamento, puoi anche mantenere le versioni senza parametro.
     func rotateClockwise()
     func rotateCounterClockwise()
 }

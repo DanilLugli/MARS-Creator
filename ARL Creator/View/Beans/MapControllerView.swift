@@ -14,18 +14,17 @@ struct MapControllerView: View {
             VStack {
                 Text("Rotate Anticlockwise:").foregroundColor(Color.customBackground)
                 pressableButton(
-                    action: { moveObject.rotateCounterClockwise() },
+                    action: { continuous in moveObject.rotateCounterClockwise() },
                     imageName: "arrow.counterclockwise"
                 )
                 
                 Text("Rotate Clockwise:").foregroundColor(Color.customBackground)
                 pressableButton(
-                    action: { moveObject.rotateClockwise() },
+                    action: { continuous in moveObject.rotateClockwise() },
                     imageName: "arrow.clockwise"
                 )
             }
             
-            // Slider per modifica dimensione
             if moveObject is MoveDimensionObject {
                 VStack {
                     Slider(value: $scaleWidth, in: 0...1, step: 0.01) {
@@ -44,40 +43,43 @@ struct MapControllerView: View {
             
             // Movimenti
             VStack {
-                
                 Text("Move along 4 axes: ").foregroundColor(Color.customBackground)
+                
+                // Bottone per muovere in alto (up)
                 pressableButton(
-                    action: { moveObject.moveUp() },
+                    action: { continuous in moveObject.moveUp(continuous: continuous) },
                     imageName: "arrow.up"
                 )
                 
                 HStack(spacing: 20) {
-                    // Muovi a sinistra
+                    // Bottone per muovere a sinistra
                     pressableButton(
-                        action: { moveObject.moveLeft() },
+                        action: { continuous in moveObject.moveLeft(continuous: continuous) },
                         imageName: "arrow.left"
                     )
                     
-                    // Muovi a destra
+                    // Bottone per muovere a destra
                     pressableButton(
-                        action: { moveObject.moveRight() },
+                        action: { continuous in moveObject.moveRight(continuous: continuous) },
                         imageName: "arrow.right"
                     )
                 }
                 
-                // Muovi in basso
+                // Bottone per muovere in basso (down)
                 pressableButton(
-                    action: { moveObject.moveDown() },
+                    action: { continuous in moveObject.moveDown(continuous: continuous) },
                     imageName: "arrow.down"
                 )
             }
+            .padding()
         }
     }
 
     // MARK: - Pressable Button Component
-    private func pressableButton(action: @escaping () -> Void, imageName: String) -> some View {
+    private func pressableButton(action: @escaping (_ continuous: Bool) -> Void, imageName: String) -> some View {
         Button(action: {
-            action() // Esegui una sola volta al click singolo
+            // Azione eseguita al tap singolo
+            action(false)
         }) {
             Image(systemName: imageName)
                 .bold()
@@ -87,9 +89,9 @@ struct MapControllerView: View {
         .background(Color.blue.opacity(0.4))
         .cornerRadius(8)
         .simultaneousGesture(
-            LongPressGesture(minimumDuration: 0.2) // Pressione prolungata
+            LongPressGesture(minimumDuration: 0.2)
                 .onEnded { _ in
-                    startTimer(action: action) // Avvia il timer dopo 0.2 secondi
+                    startTimer(action: action)
                 }
         )
         .onChange(of: isPressed) { newValue in
@@ -98,17 +100,17 @@ struct MapControllerView: View {
             }
         }
         .onLongPressGesture(minimumDuration: 0.2, pressing: { isPressing in
-            isPressed = isPressing // Aggiorna lo stato del pulsante
+            isPressed = isPressing
         }, perform: {})
     }
 
-    // MARK: - Timer Management
-    private func startTimer(action: @escaping () -> Void) {
+    // Timer: ogni intervallo (0.1 secondi) chiama l'azione in modalità continua
+    private func startTimer(action: @escaping (_ continuous: Bool) -> Void) {
         stopTimer() // Ferma eventuali timer esistenti
         timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
-            action()
+            action(true)
         }
-        timer?.fire() 
+        timer?.fire()
     }
 
     private func stopTimer() {

@@ -9,12 +9,13 @@ class SCNViewMapHandler: ObservableObject {
     var massCenter: SCNNode = SCNNode()
     var origin: SCNNode = SCNNode()
     
+    var roomNode: String = ""
+    
     init(scnView: SCNView, cameraNode: SCNNode, massCenter: SCNNode) {
         self.scnView = scnView
         self.cameraNode = cameraNode
         self.massCenter.worldPosition = SCNVector3(0, 0, 0)
         self.origin.simdWorldTransform = simd_float4x4([1.0,0,0,0], [0,1.0,0,0], [0,0,1.0,0], [0,0,0,1.0])
-        //setCamera()
     }
    
     func showAllRooms(floor: Floor) {
@@ -51,9 +52,11 @@ class SCNViewMapHandler: ObservableObject {
                 roomNode.isHidden = (room.name != roomName)
             }
         }
+
+        setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: setMassCenter(scnView: self.scnView, forNodeName: roomName))
     }
 
-    func loadRoomsMaps(floor: Floor, rooms: [Room]) {
+    func loadRoomsMaps(floor: Floor, rooms: [Room], nameRoom: String? = nil) {
 
         do {
             
@@ -82,7 +85,8 @@ class SCNViewMapHandler: ObservableObject {
                                 material.lightingModel = .constant
                                 clonedFloorNode.geometry?.materials = [material]
                                 containerNode.addChildNode(clonedFloorNode)
-                            } else {
+                            }
+                            else {
                                 print("DEBUG: Node 'Floor0' not found in the provided scene for room \(room.name).")
                             }
                             
@@ -109,6 +113,7 @@ class SCNViewMapHandler: ObservableObject {
                         
                         let roomNode = createSceneNode(from: roomScene)
                         roomNode.name = room.name
+                        self.roomNode = roomNode.name ?? "Error"
                         roomNode.scale = SCNVector3(1, 1, 1)
    
                         if let matrix = floor.associationMatrix[room.name] {
@@ -129,8 +134,7 @@ class SCNViewMapHandler: ObservableObject {
             }
             
             drawSceneObjects(scnView: self.scnView, borders: false, nodeOrientation: false)
-            setMassCenter(scnView: self.scnView)
-            setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: self.massCenter)
+            setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: setMassCenter(scnView: self.scnView, forNodeName: nameRoom))
             
         } catch {
             print("Error loading scene from URL: \(error)")

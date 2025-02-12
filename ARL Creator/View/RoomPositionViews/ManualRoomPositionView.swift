@@ -17,6 +17,8 @@ struct ManualRoomPositionView: View {
     @ObservedObject var floor: Floor
     @ObservedObject var room: Room
     
+    @State private var showFornitures = false
+    
     @State private var showSaveMatrixToast = false
     
     @State var mapPositionView = SCNViewUpdatePositionRoomContainer()
@@ -25,6 +27,37 @@ struct ManualRoomPositionView: View {
     
     var body: some View{
         VStack{
+            
+            ZStack {
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color.white)
+                    .shadow(color: Color.gray.opacity(0.5), radius: 5, x: 0, y: 2)
+                Toggle(isOn: $showFornitures){
+                    HStack {
+                        Image(systemName: "table.furniture")
+                            .font(.system(size: 20))
+                            .foregroundColor(Color.customBackground)
+                        Text("Show Fornitures")
+                            .font(.system(size: 20))
+                            .bold()
+                            .foregroundColor(Color.customBackground)
+                    }
+                }
+                .padding()
+                .bold()
+                .onChange(of: showFornitures) { newValue in
+                    // Ricarichiamo la scena passando il flag aggiornato
+                    mapPositionView.handler.loadRoomMapsPosition(
+                        floor: floor,
+                        room: room,
+                        fornitures: newValue
+                    )
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: 40)
+            .padding()
+            
+            
             ZStack{
                 mapPositionView
                     .border(Color.white)
@@ -48,7 +81,7 @@ struct ManualRoomPositionView: View {
                     mapPositionView.handler.loadRoomMapsPosition(
                         floor: floor,
                         room: room,
-                        borders: true
+                        fornitures: false
                     )
                 }
         }
@@ -60,7 +93,10 @@ struct ManualRoomPositionView: View {
                 Button(action: {
                     floor.updateAssociationMatrixInJSON(for: room.name, fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"))
                     
-                    floor.planimetryRooms.handler.loadRoomsMaps(floor: floor, rooms: floor.rooms)
+                    floor.planimetryRooms.handler.loadRoomsMaps(
+                        floor: floor,
+                        rooms: floor.rooms
+                    )
                     
                     showSaveMatrixToast = true
                     DispatchQueue.main.asyncAfter(deadline: .now() + 2) {

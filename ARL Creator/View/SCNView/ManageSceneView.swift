@@ -7,32 +7,42 @@
 import SwiftUI
 import SceneKit
 
-///Manage Center Scene Node
-func setMassCenter(scnView: SCNView) {
+/// Manage Center Scene Node
+func setMassCenter(scnView: SCNView, forNodeName nodeName: String? = nil) -> SCNNode {
     let massCenter = SCNNode()
     massCenter.worldPosition = SCNVector3(0, 0, 0)
     
-    if let nodes = scnView.scene?.rootNode.childNodes(passingTest: { n, _ in
-        n.name != nil && n.name! != "Room" && n.name! != "Geom" && String(n.name!.suffix(4)) != "_grp"
-    }) {
-        let calculatedMassCenter = findMassCenter(nodes)
-        massCenter.worldPosition = calculatedMassCenter.worldPosition
-        //drawCross(at: massCenter)
+    var nodesToConsider: [SCNNode] = []
+    
+    if let nodeName = nodeName,
+       let targetNode = scnView.scene?.rootNode.childNode(withName: nodeName, recursively: true) {
+        nodesToConsider = targetNode.childNodes
+      
+    } else {
+        if let nodes = scnView.scene?.rootNode.childNodes(passingTest: { n, _ in
+            guard let name = n.name else { return false }
+            return name != "Room" && name != "Geom" && !name.hasSuffix("_grp")
+        }) {
+            nodesToConsider = nodes
+        }
     }
     
+    let calculatedMassCenter = findMassCenter(nodesToConsider)
+    massCenter.worldPosition = calculatedMassCenter.worldPosition
     scnView.scene?.rootNode.addChildNode(massCenter)
+    return massCenter
 }
 
+/// Calcola il centro di massa (centro geometrico) di un insieme di nodi
 func findMassCenter(_ nodes: [SCNNode]) -> SCNNode {
     let massCenter = SCNNode()
     
-    // Variabili per calcolare la media delle posizioni dei nodi
     var totalX: Float = 0.0
     var totalY: Float = 0.0
     var totalZ: Float = 0.0
     var nodeCount: Float = 0.0
     
-    // Itera su tutti i nodi per calcolare la somma delle posizioni
+    // Somma le posizioni world di tutti i nodi
     for node in nodes {
         totalX += node.worldPosition.x
         totalY += node.worldPosition.y
@@ -40,18 +50,17 @@ func findMassCenter(_ nodes: [SCNNode]) -> SCNNode {
         nodeCount += 1.0
     }
     
-    // Evita la divisione per zero nel caso non ci siano nodi
+    // Se non ci sono nodi, restituisce (0,0,0)
     guard nodeCount > 0 else {
         massCenter.worldPosition = SCNVector3(0, 0, 0)
         return massCenter
     }
     
-    // Calcola la posizione media (centro geometrico)
+    // Calcola la media delle coordinate
     let averageX = totalX / nodeCount
     let averageY = totalY / nodeCount
     let averageZ = totalZ / nodeCount
     
-    // Imposta la posizione del nodo centro di massa
     massCenter.worldPosition = SCNVector3(averageX, averageY, averageZ)
     return massCenter
 }
@@ -60,7 +69,6 @@ private func drawCross(at node: SCNNode) {
     let lineMaterial = SCNMaterial()
     lineMaterial.diffuse.contents = UIColor.green.withAlphaComponent(0.8) // Verde fluorescente
     
-    // Linea lungo l'asse X
     let xLineGeometry = SCNCylinder(radius: 0.02, height: 1.0)
     xLineGeometry.materials = [lineMaterial]
     let xLineNode = SCNNode(geometry: xLineGeometry)
@@ -85,12 +93,12 @@ func setCamera(scnView: SCNView, cameraNode: SCNNode, massCenter: SCNNode) {
     cameraNode.camera = SCNCamera()
     cameraNode.worldPosition = SCNVector3(
         massCenter.worldPosition.x,
-        massCenter.worldPosition.y + 10,
+        massCenter.worldPosition.y + 20,
         massCenter.worldPosition.z
     )
     
     cameraNode.camera?.usesOrthographicProjection = true
-    cameraNode.camera?.orthographicScale = 7
+    cameraNode.camera?.orthographicScale = 12
     cameraNode.eulerAngles = SCNVector3(-Double.pi / 2, 0, 0)
 
     scnView.scene?.rootNode.childNodes
@@ -244,3 +252,5 @@ func drawSceneObjects(scnView: SCNView, borders: Bool, nodeOrientation: Bool) {
             drawnNodes.insert(nodeName)
         }
 }
+
+

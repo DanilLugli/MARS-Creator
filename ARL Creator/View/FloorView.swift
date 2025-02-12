@@ -194,7 +194,6 @@ struct FloorView: View {
             .bold()
 
             Button("Cancel", role: .cancel) {
-                // Azione di annullamento, facoltativa
             }
         }
         .confirmationDialog("Are you sure to delete Floor?", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
@@ -392,7 +391,11 @@ struct FloorView: View {
         floor.addRoom(room: newRoom)
         showAddRoomToast = true
         newRoom.validateRoom()
-       
+
+//        // Add identity matrix for the new room
+//        floor._associationMatrix[newRoom.name] = RotoTraslationMatrix(name: newRoom.name, translation: matrix_identity_float4x4, r_Y: matrix_identity_float4x4)
+//        //floor.saveAssociationMatrixToJSON(fileURL: floor.floorURL.appendingPathComponent("\(floor.floorURL.lastPathComponent).json"))
+//        floor.updateAssociationMatrixInJSON(for: newRoom.name, fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"))
     }
     
     var filteredRooms: [Room] {

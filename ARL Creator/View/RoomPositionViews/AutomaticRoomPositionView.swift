@@ -25,6 +25,7 @@ struct AutomaticRoomPositionView: View {
     @State private var showButton1 = false
     @State private var showButton2 = false
     @State private var showAddRoomPositionToast = false
+    @State private var showErrorHTTPResponseToast = false
     @State private var showLoadingPositionToast = false
     @State private var showAlert = false
     @State private var showSheet = false
@@ -240,18 +241,32 @@ struct AutomaticRoomPositionView: View {
                                 showLoadingPositionToast = true
 
                                 do {
-                                    
                                     response = try await fetchAPIConversionLocalGlobal(localName: room.name, nodesList: matchingNodesForAPI)
 
                                     if let httpResponse = response.0 {
-                                        print("Status code: \(httpResponse.statusCode)")
+                                        let statusCode = httpResponse.statusCode
+                                        print("Status code: \(statusCode)")
+                                        
+                                        if statusCode >= 400 {
+                                            showLoadingPositionToast = false
+                                            showErrorHTTPResponseToast = true
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                                dismiss()
+                                            }
+                                            print("Error status code: \(statusCode)")
+                                            return
+                                        }
                                         print("Response JSON: \(response.1)")
                                     } else {
                                         print("Error: \(response.1)")
+                                        showErrorHTTPResponseToast = true
+                                        return
                                     }
+                                    
+                                    // Se la risposta è valida, esegue il codice successivo
                                     print("Test aass. Matrix 1:")
                                     print(floor.associationMatrix.keys)
-                                    
+
                                     responseFromServer = true
 
                                     saveConversionGlobalLocal(response.1, floor.floorURL, floor)
@@ -285,8 +300,7 @@ struct AutomaticRoomPositionView: View {
                                     
                                 } catch {
                                     showLoadingPositionToast = false
-                                }
-                            }
+                                }                            }
                         }.font(.system(size: 16, weight: .bold, design: .default))
                             .frame(width: 160, height: 50)
                             .foregroundColor(.white)
@@ -316,7 +330,10 @@ struct AutomaticRoomPositionView: View {
                 )
             }
             .toast(isPresenting: $showAddRoomPositionToast) {
-                AlertToast(type: .complete(Color.green), title: "Room position created successfully")
+                AlertToast(type: .complete(Color.green), title: "Room position Created Successfully")
+            }
+            .toast(isPresenting: $showErrorHTTPResponseToast) {
+                AlertToast(type: .error(Color.red), title: "Error Response Creation Position")
             }
             .toast(isPresenting: $showLoadingPositionToast) {
                 AlertToast(type: .loading, title: "Creating Position")

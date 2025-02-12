@@ -3,6 +3,8 @@ import SceneKit
 
 class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
     
+
+    
     private let identityMatrix = matrix_identity_float4x4
 
     @Published var rotoTraslation: RotoTraslationMatrix = RotoTraslationMatrix(
@@ -18,8 +20,11 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
     @Published var floor: Floor?
     var roomName: String?
     
+    @Published var showFornitures: Bool = false // 🔥 Toggle per mobili
+
     var zoomStep: CGFloat = 0.1
     var translationStep: CGFloat = 0.02
+    var translationStepPressable: CGFloat = 0.15
     var rotationStep: Float = .pi / 200
     
     private let color: UIColor = UIColor.green.withAlphaComponent(0.4)
@@ -34,10 +39,11 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
     }
     
     @MainActor
-    func loadRoomMapsPosition(floor: Floor, room: Room, borders: Bool) {
+    func loadRoomMapsPosition(floor: Floor, room: Room, fornitures: Bool) {
         
         self.floor = floor
         self.roomName = room.name
+        self.showFornitures = fornitures
         
         loadFloorScene(for: floor, into: self.scnView)
         
@@ -56,7 +62,6 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
             scene.rootNode.enumerateHierarchy { node, _ in
                 print("  - \(node.name ?? "Unnamed Node")")
             }
-            
 
             if let floorNode = scene.rootNode.childNode(withName: "Floor0", recursively: true) {
                 let clonedFloorNode = floorNode.clone()
@@ -93,7 +98,12 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
                 print("DEBUG: SceneCenterMarker not found in the container for room \(room.name), pivot not modified.")
             }
             
-            let targetPrefixes = ["Window", "Opening", "Door"]
+            var targetPrefixes = ["Window", "Opening", "Door"]
+            if self.showFornitures {
+                // Se il toggle è attivo, includi anche mobili come Table e Storage
+                targetPrefixes.append(contentsOf: ["Table", "Storage"])
+            }
+            
             let matchingNodes = findNodesRecursively(in: room.sceneObjects!, matching: targetPrefixes)
             
             matchingNodes.forEach { node in
@@ -143,7 +153,6 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
 
             return containerNode
         }
-        
         
         /// 🔍 **Funzione per trovare nodi in modo ricorsivo**
         func findNodesRecursively(in nodes: [SCNNode], matching prefixes: [String]) -> [SCNNode] {
@@ -205,8 +214,8 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         self.roomNode = roomNode
         
         drawSceneObjects(scnView: self.scnView, borders: true, nodeOrientation: true)
-        setMassCenter(scnView: self.scnView)
-        setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: self.massCenter)
+        
+        setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: setMassCenter(scnView: self.scnView))
        // createAxesNode()
     }
     
@@ -236,7 +245,6 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         
     }
 
-    
     func rotateClockwise() {
         self.rotateRight()
     }
@@ -246,56 +254,58 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         self.rotateLeft()
     }
 
-    func moveUp() {
-        self.moveRoomPositionDown()
+    func moveUp(continuous: Bool) {
+        let step: CGFloat = continuous ? translationStepPressable : translationStep
+        moveRoomPositionDown(step: step)
     }
 
-    func moveDown() {
-        self.moveRoomPositionUp()
-        
+    func moveDown(continuous: Bool) {
+        let step: CGFloat = continuous ? translationStepPressable : translationStep
+        // Per il movimento "down" chiamiamo moveRoomPositionUp, come nell'originale
+        moveRoomPositionUp(step: step)
     }
 
-    func moveLeft() {
-        self.moveRoomPositionLeft()
+    func moveLeft(continuous: Bool) {
+        let step: CGFloat = continuous ? translationStepPressable : translationStep
+        moveRoomPositionLeft(step: step)
     }
 
-    func moveRight() {
-        self.moveRoomPositionRight()
+    func moveRight(continuous: Bool) {
+        let step: CGFloat = continuous ? translationStepPressable : translationStep
+        moveRoomPositionRight(step: step)
     }
 
-    func moveRoomPositionUp() {
-        guard let roomNode = roomNode else {
-            return
-        }
-        roomNode.worldPosition.z += Float(translationStep)
-        floor?.associationMatrix[roomName!]?.translation[3][2] += Float(translationStep)
+//    func moveRoomPositionUp() {
+//        guard let roomNode = roomNode else {
+//            return
+//        }
+//        roomNode.worldPosition.z += Float(translationStep)
+//        floor?.associationMatrix[roomName!]?.translation[3][2] += Float(translationStep)
+//    }
+
+    func moveRoomPositionDown(step: CGFloat) {
+        guard let roomNode = roomNode else { return }
+        roomNode.worldPosition.z -= Float(step)
+        floor?.associationMatrix[roomName!]?.translation[3][2] -= Float(step)
     }
 
-    func moveRoomPositionDown() {
-        guard let roomNode = roomNode else {
-            return
-        }
-        
-        roomNode.worldPosition.z -= Float(translationStep)
-        
-        floor?.associationMatrix[roomName!]?.translation[3][2] -= Float(translationStep)
+    func moveRoomPositionUp(step: CGFloat) {
+        guard let roomNode = roomNode else { return }
+        roomNode.worldPosition.z += Float(step)
+        floor?.associationMatrix[roomName!]?.translation[3][2] += Float(step)
     }
 
-    func moveRoomPositionRight() {
-        guard let roomNode = roomNode else {
-            return
-        }
-        roomNode.worldPosition.x += Float(translationStep)
-        floor?.associationMatrix[roomName!]?.translation[3][0] += Float(translationStep)
+    func moveRoomPositionLeft(step: CGFloat) {
+        guard let roomNode = roomNode else { return }
+        roomNode.worldPosition.x -= Float(step)
+        floor?.associationMatrix[roomName!]?.translation[3][0] -= Float(step)
+    }
+
+    func moveRoomPositionRight(step: CGFloat) {
+        guard let roomNode = roomNode else { return }
+        roomNode.worldPosition.x += Float(step)
+        floor?.associationMatrix[roomName!]?.translation[3][0] += Float(step)
         print(floor?.associationMatrix[roomName!]?.translation[3][0] ?? 0)
-    }
-
-    func moveRoomPositionLeft() {
-        guard let roomNode = roomNode else {
-            return
-        }
-        roomNode.worldPosition.x -= Float(translationStep)
-        floor?.associationMatrix[roomName!]?.translation[3][0] -= Float(translationStep)
     }
 
     func rotateRight() {
@@ -329,23 +339,15 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
             return
         }
         
-        // Debug: Stato corrente prima della rotazione
         print("DEBUG: Current eulerAngles.y before rotation (Left): \(roomNode.eulerAngles.y)")
         
-        // Crea una matrice di rotazione per il passo definito
         let rotationMatrix = simd_float4x4(SCNMatrix4MakeRotation(rotationStep, 0, 1, 0)) // Rotazione a sinistra (antiorario)
         
-        // Combina la matrice di trasformazione corrente con quella di rotazione
         roomNode.simdTransform = matrix_multiply(roomNode.simdTransform, rotationMatrix)
         
-        // Aggiorna la matrice di rotazione associata (r_Y)
         let previousMatrix = floor?.associationMatrix[roomName ?? ""]?.r_Y ?? matrix_identity_float4x4
         let updatedMatrix = matrix_multiply(previousMatrix, rotationMatrix)
         floor?.associationMatrix[roomName ?? ""]?.r_Y = updatedMatrix
-        
-        // Debug: Stato dopo la rotazione
-        print("DEBUG: Updated simdTransform matrix: \(roomNode.simdTransform)")
-        print("DEBUG: Updated r_Y matrix: \(updatedMatrix)")
     }
     
     func handlePinch(_ gesture: UIPinchGestureRecognizer) {
@@ -359,8 +361,8 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
     
     func handlePan(_ gesture: UIPanGestureRecognizer) {
         let translation = gesture.translation(in: scnView)
-        cameraNode.position.x -= Float(translation.x) * 0.01 // Spostamento orizzontale
-        cameraNode.position.z -= Float(translation.y) * 0.01 // Spostamento verticale
+        cameraNode.position.x -= Float(translation.x) * 0.04 // Spostamento orizzontale
+        cameraNode.position.z -= Float(translation.y) * 0.04 // Spostamento verticale
         gesture.setTranslation(.zero, in: scnView)
     }
     
@@ -374,8 +376,6 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         node.simdWorldTransform = combinedMatrix * node.simdWorldTransform
         print("POST\n")
         printMatrix(node.simdWorldTransform)
-
-        
     }
     
     func loadFloorScene(for floor: Floor, into scnView: SCNView) {

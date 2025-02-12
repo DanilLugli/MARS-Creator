@@ -417,7 +417,7 @@ struct RoomView: View {
                     NavigationLink(destination: ManualRoomPositionView(floor: self.floor, room: self.room)) {
                         Label("Correct Room Position", systemImage: "arrow.up.and.down.and.arrow.left.and.right")
                     }
-                    .disabled(!doesMatrixExist(for: room.name, in: floor.associationMatrix))
+                    //.disabled(!doesMatrixExist(for: room.name, in: floor.associationMatrix))
                     
                 } label: {
                     Image(systemName: "plus.circle.fill")
