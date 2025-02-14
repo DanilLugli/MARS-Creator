@@ -383,12 +383,13 @@ struct FloorView: View {
             _transitionZones: [],
             _scene: nil,
             _sceneObjects: [],
-            _roomURL: URL(fileURLWithPath: ""),
+            _roomURL: floor.floorURL.appendingPathComponent("Rooms").appendingPathComponent(newRoomName),
             parentFloor: floor
         )
-        
+        print("DEBUG: ROOMURL -> \(newRoom.roomURL)")
         newRoom.planimetry.loadRoomPlanimetry(room: newRoom, borders: true)
         floor.addRoom(room: newRoom)
+        
         showAddRoomToast = true
         newRoom.validateRoom()
 

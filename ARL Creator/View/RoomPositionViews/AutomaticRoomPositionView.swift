@@ -262,21 +262,19 @@ struct AutomaticRoomPositionView: View {
                                         showErrorHTTPResponseToast = true
                                         return
                                     }
-                                    
-                                    // Se la risposta è valida, esegue il codice successivo
-                                    print("Test aass. Matrix 1:")
+                                
                                     print(floor.associationMatrix.keys)
 
                                     responseFromServer = true
 
                                     saveConversionGlobalLocal(response.1, floor.floorURL, floor)
                                     
-                                    floor.updateAssociationMatrixInJSON(for: room.name, fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"))
+                                    //floor.updateRoomPositionMatrixInJSON(for: room.name, fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"))
                                     
                                     let fileManager = FileManager.default
                                     let associationMatrixURL = floor.floorURL.appendingPathComponent("\(floor.floorURL.lastPathComponent).json")
                                     if fileManager.fileExists(atPath: associationMatrixURL.path),
-                                       let loadedMatrix = loadRoomPositionFromJson(from: associationMatrixURL, for: floor) {
+                                       let loadedMatrix = loadRoomPositionMatrixFromJson(from: associationMatrixURL, for: floor) {
                                         floor._associationMatrix = loadedMatrix
                                     } else {
                                         print("Failed to load RotoTraslationMatrix from JSON file for floor \(floor.floorURL.lastPathComponent)")

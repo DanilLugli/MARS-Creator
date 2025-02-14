@@ -22,7 +22,7 @@
 		AA4C4B902CF78B3D0033A4DF /* Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4C4B8F2CF78B3D0033A4DF /* Extension.swift */; };
 		AA4D2CDB2C7358EE000312A7 /* RoomCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4D2CDA2C7358EE000312A7 /* RoomCardView.swift */; };
 		AA6110112C621CF400B61D0B /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA6110102C621CF400B61D0B /* Utils.swift */; };
-		AA64CC822C47FDA8005C883B /* RotoTraslationMatrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA64CC812C47FDA8005C883B /* RotoTraslationMatrix.swift */; };
+		AA64CC822C47FDA8005C883B /* RoomPositionMatrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA64CC812C47FDA8005C883B /* RoomPositionMatrix.swift */; };
 		AA64CC862C495D73005C883B /* Rectangle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA64CC852C495D73005C883B /* Rectangle.swift */; };
 		AA64CC882C495F51005C883B /* Coordinates.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA64CC872C495F51005C883B /* Coordinates.swift */; };
 		AA6AE55A2D32DDAE00595591 /* AlertToast in Frameworks */ = {isa = PBXBuildFile; productRef = AA6AE5592D32DDAE00595591 /* AlertToast */; };
@@ -75,7 +75,7 @@
 		AA4C4B8F2CF78B3D0033A4DF /* Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension.swift; sourceTree = "<group>"; };
 		AA4D2CDA2C7358EE000312A7 /* RoomCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomCardView.swift; sourceTree = "<group>"; };
 		AA6110102C621CF400B61D0B /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
-		AA64CC812C47FDA8005C883B /* RotoTraslationMatrix.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RotoTraslationMatrix.swift; sourceTree = "<group>"; };
+		AA64CC812C47FDA8005C883B /* RoomPositionMatrix.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomPositionMatrix.swift; sourceTree = "<group>"; };
 		AA64CC852C495D73005C883B /* Rectangle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rectangle.swift; sourceTree = "<group>"; };
 		AA64CC872C495F51005C883B /* Coordinates.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Coordinates.swift; sourceTree = "<group>"; };
 		AA78F5D12C2C69E90044F825 /* Building.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Building.swift; sourceTree = "<group>"; };
@@ -196,7 +196,7 @@
 				AA78F5D52C2C6BAC0044F825 /* Room.swift */,
 				AA2CA5582C3EF87A00C88C94 /* ReferenceMarker.swift */,
 				AAE57FA52C382C6D00F0196F /* TransitionZone.swift */,
-				AA64CC812C47FDA8005C883B /* RotoTraslationMatrix.swift */,
+				AA64CC812C47FDA8005C883B /* RoomPositionMatrix.swift */,
 				AA8E0A5A2C52C69D0097BDCD /* NamedURL.swift */,
 				AA64CC852C495D73005C883B /* Rectangle.swift */,
 				AA64CC872C495F51005C883B /* Coordinates.swift */,
@@ -384,7 +384,7 @@
 				AA88EE832D552F26009E8014 /* FindMarkerPositionARSession.swift in Sources */,
 				AA0A80782C9477A300501EB4 /* MoveDimensionObject.swift in Sources */,
 				AA4C4B902CF78B3D0033A4DF /* Extension.swift in Sources */,
-				AA64CC822C47FDA8005C883B /* RotoTraslationMatrix.swift in Sources */,
+				AA64CC822C47FDA8005C883B /* RoomPositionMatrix.swift in Sources */,
 				AAFB3A022C4DB73400DBC593 /* SaveFile.swift in Sources */,
 				AA31B8A62D350BAC0059C685 /* FloorAltitudeTabView.swift in Sources */,
 				AAE57FA62C382C6D00F0196F /* TransitionZone.swift in Sources */,

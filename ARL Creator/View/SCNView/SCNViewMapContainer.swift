@@ -2,7 +2,7 @@ import SwiftUI
 import SceneKit
 
 class SCNViewMapHandler: ObservableObject {
-    @Published var rotoTraslation: [RotoTraslationMatrix] = []
+    @Published var rotoTraslation: [RoomPositionMatrix] = []
     
     var scnView: SCNView = SCNView(frame: .zero)
     var cameraNode: SCNNode
@@ -177,7 +177,7 @@ class SCNViewMapHandler: ObservableObject {
         cameraNode.position.x += 1.0
     }
     
-    func applyRotoTraslation(to node: SCNNode, with rotoTraslation: RotoTraslationMatrix) {
+    func applyRotoTraslation(to node: SCNNode, with rotoTraslation: RoomPositionMatrix) {
         print(" ViewMap PRE\n")
         printMatrix(node.simdWorldTransform)
         let combinedMatrix = rotoTraslation.translation * rotoTraslation.r_Y

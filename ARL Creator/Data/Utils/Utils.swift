@@ -51,3 +51,88 @@ func printMatrix(_ matrix: simd_float4x4, label: String = "Matrix") {
     }
     print("\n")
 }
+
+func loadRoomPositionMatrixFromJson(from fileURL: URL, for floor: Floor) -> [String: RoomPositionMatrix]? {
+    do {
+        
+        let data = try Data(contentsOf: fileURL)
+        
+        
+        let jsonObject = try JSONSerialization.jsonObject(with: data, options: [])
+        guard let jsonDict = jsonObject as? [String: [String: [[Double]]]] else {
+            print("Invalid JSON format")
+            return nil
+        }
+        
+        // Dizionario per memorizzare i risultati
+        var associationMatrix: [String: RoomPositionMatrix] = [:]
+        
+        // Cicla attraverso ogni voce del dizionario
+        for (roomName, matrices) in jsonDict {
+            // Estrai le matrici di rotazione e traslazione
+            guard let translationMatrix = matrices["translation"],
+                  let r_YMatrix = matrices["R_Y"],
+                  translationMatrix.count == 4,
+                  r_YMatrix.count == 4 else {
+                print("Invalid JSON structure for room: \(roomName)")
+                continue
+            }
+            
+            // Converti i valori in matrici `simd_float4x4`
+            let translation = simd_float4x4(rows: translationMatrix.map { simd_float4($0.map { Float($0) }) })
+            let r_Y = simd_float4x4(rows: r_YMatrix.map { simd_float4($0.map { Float($0) }) })
+            
+            // Crea un oggetto `RotoTraslationMatrix`
+            let rotoTraslationMatrix = RoomPositionMatrix(name: roomName, translation: translation, r_Y: r_Y)
+            
+            // Aggiungi l'oggetto al dizionario
+            associationMatrix[roomName] = rotoTraslationMatrix
+            floor.getRoomByName(roomName)?.hasPosition = true
+        }
+        
+        return associationMatrix
+        
+    } catch {
+        print("Error loading or parsing JSON: \(error)")
+        return nil
+    }
+}
+
+/// Funzione helper che restituisce la riga `row` della matrice 4x4.
+/// Poiché la matrice è organizzata in colonne, la riga viene ricostruita estraendo l'elemento `row` da ciascuna colonna.
+func getRow(from matrix: simd_float4x4, row: Int) -> simd_float4 {
+    return simd_float4(matrix.columns.0[row],
+                       matrix.columns.1[row],
+                       matrix.columns.2[row],
+                       matrix.columns.3[row])
+}
+
+/// Verifica se esiste una voce per la room data in `associationMatrix`.
+/// Prima di restituire il risultato, stampa il contenuto di ogni voce (nome, translation e r_Y).
+func doesMatrixExist(for roomName: String, in associationMatrix: [String: RoomPositionMatrix]) -> Bool {
+    print("Contenuto di associationMatrix:")
+    for (_, matrixStruct) in associationMatrix {
+        print("Room Name: \(matrixStruct.name)")
+        
+        // Stampa la matrice di traslazione
+        print("Translation Matrix:")
+        for i in 0..<4 {
+            let row = getRow(from: matrixStruct.translation, row: i)
+            let rowString = String(format: "[%.2f, %.2f, %.2f, %.2f]", row.x, row.y, row.z, row.w)
+            print(rowString)
+        }
+        
+        // Stampa la matrice di rotazione (r_Y)
+        print("Rotation Y Matrix:")
+        for i in 0..<4 {
+            let row = getRow(from: matrixStruct.r_Y, row: i)
+            let rowString = String(format: "[%.2f, %.2f, %.2f, %.2f]", row.x, row.y, row.z, row.w)
+            print(rowString)
+        }
+        print("-----")
+    }
+    
+    print("RESULT: \(associationMatrix[roomName] != nil)")
+    return associationMatrix[roomName] != nil
+}
+

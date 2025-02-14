@@ -40,7 +40,6 @@ class TransitionZone: Codable, Identifiable, Equatable, ObservableObject {
         }
     }
     
-    // Implementazione personalizzata di Codable
     private enum CodingKeys: String, CodingKey {
         case id
         case name

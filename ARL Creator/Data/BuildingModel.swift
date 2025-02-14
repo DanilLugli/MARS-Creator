@@ -101,7 +101,7 @@ class BuildingModel: ObservableObject {
                     let sceneObjects: [SCNNode] = []
                     let scene: SCNScene? = nil
 
-                    var associationMatrix: [String : RotoTraslationMatrix]?
+                    var associationMatrix: [String : RoomPositionMatrix]?
                     let planimetry: SCNViewContainer = SCNViewContainer()
                     let planimetryRooms: SCNViewMapContainer = SCNViewMapContainer()
                     
@@ -130,10 +130,9 @@ class BuildingModel: ObservableObject {
                     
                     let associationMatrixURL = floorURL.appendingPathComponent("\(floorURL.lastPathComponent).json")
                     if fileManager.fileExists(atPath: associationMatrixURL.path),
-                       let loadedMatrix = loadRoomPositionFromJson(from: associationMatrixURL, for: floor) {
+                       let loadedMatrix = loadRoomPositionMatrixFromJson(from: associationMatrixURL, for: floor) {
                         floor._associationMatrix = loadedMatrix
 
-                        // Debug: stampa il contenuto dell'association matrix
                         print("BUILDING: \(buildingURL.lastPathComponent)")
                         print("Loaded Association Matrix for floor \(floorURL.lastPathComponent):")
                         for (roomName, matrix) in floor._associationMatrix {
@@ -435,7 +434,7 @@ class BuildingModel: ObservableObject {
             let building = Building(name: "Building \(i)", lastUpdate: Date(), floors: [], buildingURL: URL(fileURLWithPath: ""))
 
             for j in 1...5 {
-                let floor = Floor(_name: "Floor \(j)", _lastUpdate: Date(), _planimetry: SCNViewContainer(), _planimetryRooms: SCNViewMapContainer(), _associationMatrix: [String : RotoTraslationMatrix](), _rooms: [], _sceneObjects: nil, _scene: nil, _floorURL: URL(fileURLWithPath: ""))
+                let floor = Floor(_name: "Floor \(j)", _lastUpdate: Date(), _planimetry: SCNViewContainer(), _planimetryRooms: SCNViewMapContainer(), _associationMatrix: [String : RoomPositionMatrix](), _rooms: [], _sceneObjects: nil, _scene: nil, _floorURL: URL(fileURLWithPath: ""))
                 
                 for k in 1...5 {
 
@@ -458,11 +457,10 @@ class BuildingModel: ObservableObject {
                                 altitude: randomAltitude
                             )
                             
-                            // Aggiungiamo la connessione alla lista di connessioni della TransitionZone
                             transitionZone.connection?.append(connection)
                         }
 
-                        // Aggiungi la TransitionZone alla Room
+
                         room.addTransitionZone(transitionZone: transitionZone)
                     }
                     floor.addRoom(room: room)

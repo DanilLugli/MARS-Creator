@@ -19,7 +19,7 @@ struct SCNViewContainer: UIViewRepresentable {
     
     var delegate = RenderDelegate()
     
-    var rotoTraslation: [RotoTraslationMatrix] = []
+    var rotoTraslation: [RoomPositionMatrix] = []
     @State var rotoTraslationActive: Int = 0
     
     init(empty: Bool = false) {

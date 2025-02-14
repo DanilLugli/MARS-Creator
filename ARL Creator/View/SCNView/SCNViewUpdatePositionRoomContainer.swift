@@ -7,7 +7,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
     
     private let identityMatrix = matrix_identity_float4x4
 
-    @Published var rotoTraslation: RotoTraslationMatrix = RotoTraslationMatrix(
+    @Published var rotoTraslation: RoomPositionMatrix = RoomPositionMatrix(
         name: "",
         translation: matrix_identity_float4x4,
         r_Y: matrix_identity_float4x4
@@ -47,7 +47,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         
         loadFloorScene(for: floor, into: self.scnView)
         
-        self.rotoTraslation = floor.associationMatrix[room.name] ?? RotoTraslationMatrix(
+        self.rotoTraslation = floor.associationMatrix[room.name] ?? RoomPositionMatrix(
             name: "",
             translation: floor.associationMatrix[room.name]?.translation ?? matrix_identity_float4x4,
             r_Y: floor.associationMatrix[room.name]?.r_Y ?? matrix_identity_float4x4
@@ -367,7 +367,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
     }
     
     @MainActor
-    func applyRotoTraslation(to node: SCNNode, with rotoTraslation: RotoTraslationMatrix) {
+    func applyRotoTraslation(to node: SCNNode, with rotoTraslation: RoomPositionMatrix) {
         print("Manual Room Position PRE\n")
         printMatrix(node.simdWorldTransform)
         let combinedMatrix = rotoTraslation.translation * rotoTraslation.r_Y

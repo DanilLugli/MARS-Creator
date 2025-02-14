@@ -91,7 +91,7 @@ struct ManualRoomPositionView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button(action: {
-                    floor.updateAssociationMatrixInJSON(for: room.name, fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"))
+                    floor.updateRoomPositionMatrixInJSON(for: room.name, fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"))
                     
                     floor.planimetryRooms.handler.loadRoomsMaps(
                         floor: floor,

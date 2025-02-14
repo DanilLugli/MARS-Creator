@@ -248,7 +248,7 @@ struct BuildingView: View {
             _lastUpdate: Date(),
             _planimetry: SCNViewContainer(),
             _planimetryRooms: SCNViewMapContainer(),
-            _associationMatrix: [String : RotoTraslationMatrix](),
+            _associationMatrix: [String : RoomPositionMatrix](),
             _rooms: [],
             _sceneObjects: nil,
             _scene: nil,

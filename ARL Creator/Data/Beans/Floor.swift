@@ -7,15 +7,12 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
 
     private var _id = UUID()
     @Published private var _name: String
-
     @Published private var _rooms: [Room]
     @Published private var _scene: SCNScene? = nil
     @Published private var _sceneObjects: [SCNNode]? = nil
-    
     @Published private var _planimetry: SCNViewContainer?
     @Published private var _planimetryRooms: SCNViewMapContainer?
-    @Published var _associationMatrix: [String: RotoTraslationMatrix]
-    
+    @Published var _associationMatrix: [String: RoomPositionMatrix]
     @Published var isPlanimetryLoaded: Bool = false
     @Published var altitude: Float = 0
     var initialFloor: Bool {
@@ -24,15 +21,13 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
             }
             set {
                 UserDefaults.standard.set(newValue, forKey: "initialFloor_\(name)")
-                objectWillChange.send() // Notifica SwiftUI del cambiamento
+                objectWillChange.send()
             }
         }
-    
     private var _floorURL: URL
-    
     private var _lastUpdate: Date
 
-    init(_id: UUID = UUID(), _name: String, _lastUpdate: Date, _planimetry: SCNViewContainer? = nil, _planimetryRooms: SCNViewMapContainer? = nil, _associationMatrix: [String : RotoTraslationMatrix], _rooms: [Room], _sceneObjects: [SCNNode]? = nil, _scene: SCNScene? = nil, _floorURL: URL) {
+    init(_id: UUID = UUID(), _name: String, _lastUpdate: Date, _planimetry: SCNViewContainer? = nil, _planimetryRooms: SCNViewMapContainer? = nil, _associationMatrix: [String : RoomPositionMatrix], _rooms: [Room], _sceneObjects: [SCNNode]? = nil, _scene: SCNScene? = nil, _floorURL: URL) {
         self._name = _name
         self._lastUpdate = _lastUpdate
         self._planimetry = _planimetry
@@ -44,6 +39,7 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
         self._floorURL = _floorURL
     }
     
+    //MARK: - Equatable & Hashable
     static func ==(lhs: Floor, rhs: Floor) -> Bool {
         return lhs.id == rhs.id 
     }
@@ -56,14 +52,30 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
         hasher.combine(id)
     }
     
+    private enum CodingKeys: String, CodingKey {
+        case name
+        case lastUpdate
+        case rooms
+        case associationMatrix
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(_name, forKey: .name)
+        try container.encode(_lastUpdate, forKey: .lastUpdate)
+        try container.encode(_rooms, forKey: .rooms)
+        try container.encode(_associationMatrix, forKey: .associationMatrix)
+    }
+    
+    //MARK: - Getter & Setter
+    
     var name: String {
         get {
             return _name
         }
         set {
             _name = newValue
-            objectWillChange.send() // Forza la notifica di cambiamento
-            
+            objectWillChange.send()
         }
     }
     
@@ -87,7 +99,7 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
         }
     }
     
-    var associationMatrix: [String: RotoTraslationMatrix] {
+    var associationMatrix: [String: RoomPositionMatrix] {
         get{
             return _associationMatrix
         }set{
@@ -102,10 +114,6 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
         set {
             _rooms = newValue
         }
-    }
-    
-    func getRoom(_ room: Room) -> Room? {
-        return rooms.first { $0.id == room.id}
     }
     
     var sceneObjects: [SCNNode]? {
@@ -141,24 +149,7 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
         }
     }
     
-    private enum CodingKeys: String, CodingKey {
-        case name
-        case lastUpdate
-        case rooms
-        case associationMatrix
-    }
-    
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(_name, forKey: .name)
-        try container.encode(_lastUpdate, forKey: .lastUpdate)
-        try container.encode(_rooms, forKey: .rooms)
-        try container.encode(_associationMatrix, forKey: .associationMatrix)
-    }
-    
-    func getRoomByName(_ name: String) -> Room? {
-        return rooms.first { $0.name == name }
-    }
+    //MARK: - Manage Room
     
     func addRoom(room: Room) {
         
@@ -188,77 +179,6 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
         
     }
     
-    func deleteRoom(room: Room) {
-       
-        _rooms.removeAll { $0.id == room.id }
-    
-        let roomURL = floorURL
-            .appendingPathComponent("Rooms")         // Directory "Rooms"
-            .appendingPathComponent(room.name)      // Sottocartella con nome stanza
-        
-        do {
-
-            if FileManager.default.fileExists(atPath: roomURL.path) {
-                try FileManager.default.removeItem(at: roomURL) // Elimina la cartella
-                print("Cartella \(room.name) eliminata con successo.")
-                try deleteRoomFromFloorJSON(nameRoom: room.name)
-            } else {
-                print("La cartella della stanza \(room.name) non esiste in \(roomURL.path).")
-            }
-        } catch {
-            print("Errore durante l'eliminazione della stanza \(room.name): \(error)")
-        }
-//        
-//        do{
-//            
-//        }
-//        catch{
-//            print(\(error))
-//        }
-//        
-    }
-   
-    @MainActor func processRooms(for floor: Floor) {
-        for room in floor.rooms {
-            let roomScene = room.scene
-            
-            if let roomNode = roomScene?.rootNode.childNode(withName: "Floor0", recursively: true) {
-                let originalScale = roomNode.scale
-                let roomName = room.name
-                
-                roomNode.simdWorldPosition = simd_float3(0, 0, 0)
-                roomNode.scale = originalScale
-                
-                if let rotoTraslationMatrix = floor.associationMatrix[roomName] {
-                    applyRotoTraslation(to: roomNode, with: rotoTraslationMatrix)
-                } else {
-                    print("No RotoTraslationMatrix found for room: \(roomName)")
-                }
-                
-                roomNode.name = roomName
-                let material = SCNMaterial()
-                material.diffuse.contents = floor.getRoomByName(roomName)?.color
-                roomNode.geometry?.materials = [material]
-                
-                floor.scene?.rootNode.addChildNode(roomNode)
-            } else {
-                print("Node 'Floor0' not found in scene: \(String(describing: roomScene))")
-            }
-        }
-        
-
-        /// Applica una rototraslazione a un nodo SCNNode.
-        /// - Parameters:
-        ///   - node: Il nodo da trasformare.
-        ///   - rotoTraslation: La matrice di rototraslazione contenente traslazione e rotazione.
-        ///   - baseTransform: (Opzionale) Una matrice di trasformazione base. Default: utilizza la trasformazione attuale del nodo.
-        @MainActor
-        func applyRotoTraslation(to node: SCNNode, with rotoTraslation: RotoTraslationMatrix) {
-            let combinedMatrix = rotoTraslation.translation * rotoTraslation.r_Y
-            node.simdWorldTransform = combinedMatrix * node.simdWorldTransform
-        }
-    }
-
     @MainActor func renameRoom(floor: Floor, room: Room, newName: String) throws {
         let fileManager = FileManager.default
         let oldRoomURL = room.roomURL
@@ -300,6 +220,85 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
         }
     }
     
+    func deleteRoom(room: Room) {
+       
+        _rooms.removeAll { $0.id == room.id }
+    
+        let roomURL = floorURL
+            .appendingPathComponent("Rooms")         // Directory "Rooms"
+            .appendingPathComponent(room.name)      // Sottocartella con nome stanza
+        
+        do {
+
+            if FileManager.default.fileExists(atPath: roomURL.path) {
+                try FileManager.default.removeItem(at: roomURL) // Elimina la cartella
+                print("Cartella \(room.name) eliminata con successo.")
+                try deleteRoomFromFloorJSON(nameRoom: room.name)
+            } else {
+                print("La cartella della stanza \(room.name) non esiste in \(roomURL.path).")
+            }
+        } catch {
+            print("Errore durante l'eliminazione della stanza \(room.name): \(error)")
+        }
+//        
+//        do{
+//            
+//        }
+//        catch{
+//            print(\(error))
+//        }
+//        
+    }
+    
+    func getRoomByName(_ name: String) -> Room? {
+        return rooms.first { $0.name == name }
+    }
+    
+    func getRoom(_ room: Room) -> Room? {
+        return rooms.first { $0.id == room.id}
+    }
+   
+//    @MainActor func processRooms(for floor: Floor) {
+//        for room in floor.rooms {
+//            let roomScene = room.scene
+//            
+//            if let roomNode = roomScene?.rootNode.childNode(withName: "Floor0", recursively: true) {
+//                let originalScale = roomNode.scale
+//                let roomName = room.name
+//                
+//                roomNode.simdWorldPosition = simd_float3(0, 0, 0)
+//                roomNode.scale = originalScale
+//                
+//                if let rotoTraslationMatrix = floor.associationMatrix[roomName] {
+//                    applyRotoTraslation(to: roomNode, with: rotoTraslationMatrix)
+//                } else {
+//                    print("No RotoTraslationMatrix found for room: \(roomName)")
+//                }
+//                
+//                roomNode.name = roomName
+//                let material = SCNMaterial()
+//                material.diffuse.contents = floor.getRoomByName(roomName)?.color
+//                roomNode.geometry?.materials = [material]
+//                
+//                floor.scene?.rootNode.addChildNode(roomNode)
+//            } else {
+//                print("Node 'Floor0' not found in scene: \(String(describing: roomScene))")
+//            }
+//        }
+//        
+//
+//        /// Applica una rototraslazione a un nodo SCNNode.
+//        /// - Parameters:
+//        ///   - node: Il nodo da trasformare.
+//        ///   - rotoTraslation: La matrice di rototraslazione contenente traslazione e rotazione.
+//        ///   - baseTransform: (Opzionale) Una matrice di trasformazione base. Default: utilizza la trasformazione attuale del nodo.
+//        @MainActor
+//        func applyRotoTraslation(to node: SCNNode, with rotoTraslation: RoomPositionMatrix) {
+//            let combinedMatrix = rotoTraslation.translation * rotoTraslation.r_Y
+//            node.simdWorldTransform = combinedMatrix * node.simdWorldTransform
+//        }
+//    }
+
     func updateRoomInFloorJSON(floor: Floor, oldRoomName: String, newRoomName: String) throws {
         _ = FileManager.default
         
@@ -333,7 +332,7 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
     }
     
     func deleteRoomFromFloorJSON(nameRoom: String) throws {
-        let fileManager = FileManager.default
+        _ = FileManager.default
         let jsonFileURL = self.floorURL.appendingPathComponent("\(self.name).json")
         
         do {
@@ -427,41 +426,40 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
         }
     }
     
-    func loadAssociationMatrixFromJSON(fileURL: URL) {
-        do {
-            let data = try Data(contentsOf: fileURL)
-            let jsonObject = try JSONSerialization.jsonObject(with: data, options: [])
-            guard let dictionary = jsonObject as? [String: [String: [[Double]]]] else {
-                print("Error: Cannot convert JSON data to dictionary")
-                return
-            }
-            
-            for (key, value) in dictionary {
-                guard let translationArray = value["translation"],
-                      let r_YArray = value["R_Y"] else {
-                    print("Error: Missing keys in dictionary")
-                    continue
-                }
-                
-                let translationMatrix = simd_float4x4(rows: translationArray.map { simd_float4($0.map { Float($0) }) })
-                let r_YMatrix = simd_float4x4(rows: r_YArray.map { simd_float4($0.map { Float($0) }) })
-                
-                let rotoTranslationMatrix = RotoTraslationMatrix(name: key, translation: translationMatrix, r_Y: r_YMatrix)
-                
-                self._associationMatrix[key] = rotoTranslationMatrix
-            }
-            
-        } catch {
-            print("Error loading JSON data: \(error)")
-        }
-    }
+//    func loadRoomPositionMatrixFromJSON(fileURL: URL) {
+//        do {
+//            let data = try Data(contentsOf: fileURL)
+//            let jsonObject = try JSONSerialization.jsonObject(with: data, options: [])
+//            guard let dictionary = jsonObject as? [String: [String: [[Double]]]] else {
+//                print("Error: Cannot convert JSON data to dictionary")
+//                return
+//            }
+//            
+//            for (key, value) in dictionary {
+//                guard let translationArray = value["translation"],
+//                      let r_YArray = value["R_Y"] else {
+//                    print("Error: Missing keys in dictionary")
+//                    continue
+//                }
+//                
+//                let translationMatrix = simd_float4x4(rows: translationArray.map { simd_float4($0.map { Float($0) }) })
+//                let r_YMatrix = simd_float4x4(rows: r_YArray.map { simd_float4($0.map { Float($0) }) })
+//                
+//                let rotoTranslationMatrix = RoomPositionMatrix(name: key, translation: translationMatrix, r_Y: r_YMatrix)
+//                
+//                self._associationMatrix[key] = rotoTranslationMatrix
+//            }
+//            
+//        } catch {
+//            print("Error loading JSON data: \(error)")
+//        }
+//    }
     
-    func saveAssociationMatrixToJSON(fileURL: URL) {
+    func saveRoomPositionMatrixToJSON(fileURL: URL) {
         do {
            
             var dictionary: [String: [String: [[Double]]]] = [:]
             
-            // Itera su tutte le chiavi e valori nell'association matrix
             for (key, value) in _associationMatrix {
                 // Converti la matrice translation in un array di array di Double
                 let translationArray: [[Double]] = (0..<4).map { index in
@@ -491,7 +489,7 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
         }
     }
     
-    func updateAssociationMatrixInJSON(for roomName: String, fileURL: URL) {
+    func updateRoomPositionMatrixInJSON(for roomName: String, fileURL: URL) {
         do {
             // Leggi il contenuto del file JSON
             var jsonData = try Data(contentsOf: fileURL)
