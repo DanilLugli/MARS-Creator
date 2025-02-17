@@ -93,10 +93,14 @@ struct ManualRoomPositionView: View {
                 Button(action: {
                     floor.updateRoomPositionMatrixInJSON(for: room.name, fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"))
                     
+//                    floor.saveOrUpdateAssociationMatrix(to: floor.floorURL.appendingPathComponent("\(floor.name).json"), for: self.floor, associationMatrix: floor.associationMatrix)
+                    
                     floor.planimetryRooms.handler.loadRoomsMaps(
                         floor: floor,
                         rooms: floor.rooms
                     )
+                    
+                    floor.getRoomByName(room.name)?.hasPosition = true
                     
                     showSaveMatrixToast = true
                     DispatchQueue.main.asyncAfter(deadline: .now() + 2) {

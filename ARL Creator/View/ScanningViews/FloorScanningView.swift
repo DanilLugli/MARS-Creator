@@ -249,6 +249,8 @@ struct FloorScanningView: View {
     @State var isScanningFloor = false
     @State var showScanningFloorCard = true
     
+    @State private var scanningError: String? = ""
+    
     @State var showCreateFloorPlanimetryToast = false
     @State var showDoneButton = false
     @State var showContinueScanButton = false
@@ -289,27 +291,28 @@ struct FloorScanningView: View {
                             .frame(width: 70, height: 70)
                             .foregroundColor(.gray)
                         Spacer()
-                    }
+                    }.padding()
                     VStack {
                         Text("""
                             • Scan **one room at a time** for better accuracy.
-                            • When you finish scanning a room, press **Done**.
-                            • To scan another room, press **Continue Scan**.
-                            • When all rooms are scanned, press **Create Floor** to generate the final planimetry.
+                            • To scan another room, press **Continue**.
+                            • When all rooms are scanned, press **Finish** to               generate the final planimetry.
                             """)
-                            .multilineTextAlignment(.leading)
-                            .padding()
-                            .foregroundColor(.gray)
-                            .font(.system(size: 16))
-                        Text("PRESS START TO SCAN \(floor.name)")
-                            .foregroundColor(.gray)
-                            .bold()
+                        .multilineTextAlignment(.leading)
+                        .padding()
+                        .foregroundColor(.gray)
+                        .font(.system(size: 16))
+//                        Text("PRESS START TO SCAN \(floor.name)")
+//                            .foregroundColor(.gray)
+//                            .bold()
                     }
                 }
                 
-                // Se showContinueScanButton è attivo, mostriamo un Picker segmentato in alto
+                // Se showContinueScanButton è attivo, mostriamo un Picker segmentato in alto,
+                // abbassato con un padding extra per non sovrapporsi all'overlay Create Floor.
                 if showContinueScanButton {
                     VStack {
+                        Spacer().frame(height: 10) // Aggiunge uno spazio extra in alto
                         Picker("Opzioni", selection: $selectedOption) {
                             Text("Last Room Scan").tag(1)
                             Text("Floor Planimetry").tag(2)
@@ -333,9 +336,43 @@ struct FloorScanningView: View {
                 VStack {
                     Spacer()
                     
-                    // Contenitore orizzontale con bordo verde che occupa tutta la larghezza
+                    // Contenitore orizzontale (basso) che occupa tutta la larghezza
                     HStack(alignment: .bottom) {
-                        VStack(alignment: .leading, spacing: 8) {
+                        // Gruppo sinistro: "Repeat" e freccia blu, allineati a sinistra
+                        HStack(spacing: 8) {
+                            VStack{
+                                if let scanningError = scanningError, !scanningError.isEmpty{
+
+                                        Text("An error occurred:")
+                                            .font(.headline)
+                                            .foregroundColor(.red)
+                                            .padding(.bottom, 5)
+                                        
+                                        Text(scanningError)
+                                            .font(.subheadline)
+                                            .multilineTextAlignment(.center)
+                                            .foregroundColor(.gray)
+                                            .padding(.horizontal, 20)
+                                    
+                                        Button(action: {
+                                            captureView?.continueCapture()
+                                            self.scanningError = ""
+                                        }) {
+                                            Text("Restart Scan")
+                                                .font(.system(size: 16, weight: .bold, design: .default))
+                                                .bold()
+                                                .padding()
+                                                .frame(maxWidth: .infinity)
+    //                                                    .background(Color.red)
+                                                .foregroundColor(.red)
+                                                .cornerRadius(30)
+                                        }
+                                        .padding(.horizontal, 20)
+                                    
+                                }
+                            }
+                            
+                            
                             if showContinueScanButton {
                                 Button(action: {
                                     captureView?.redoLastCapture()
@@ -344,15 +381,38 @@ struct FloorScanningView: View {
                                     showContinueScanButton = false
                                     showCreateFloorPlanimetryButton = false
                                     selectedOption = 1
+                                    print("DEBUG: Azione Repeat eseguita")
                                 }) {
-                                    Text("Redo Last Scan")
-                                        .font(.system(size: 16, weight: .bold))
-                                        .padding()
-                                        .background(Color.red)
-                                        .foregroundColor(.white)
-                                        .cornerRadius(30)
-                                        .frame(maxWidth: 200, alignment: .leading)
+                                    Text("Repeat")
+                                        .font(.system(size: 20, weight: .bold))
+                                        .foregroundColor(.red)
                                 }
+                                Spacer()
+                                if showCreateFloorPlanimetryButton {
+                                    
+                                    Spacer()
+                                    Button(action: {
+                                        captureView?.stopCapture(pauseARSession: true)
+                                        Task {
+                                            await captureView?.sessionDelegate.generateCapturedStructureAndExport(to: floor.floorURL)
+                                        }
+                                        _ = mapName.isEmpty ? "Map_\(Date().timeIntervalSince1970)" : mapName
+                                        showCreateFloorPlanimetryToast = true
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                            dismiss()
+                                        }
+                                        print("DEBUG: Azione Create Floor eseguita")
+                                    }) {
+                                        Text("Finish")
+                                            .font(.system(size: 18, weight: .bold))
+                                            .padding()
+                                            .foregroundColor(.green)
+                                    }
+                                    // Utilizza un RoundedRectangle per definire l'area interattiva
+                                    .contentShape(RoundedRectangle(cornerRadius: 10))
+                                    .padding(.trailing, 12)
+                                }
+                                Spacer()
                                 
                                 Button(action: {
                                     showPreview = false
@@ -363,18 +423,13 @@ struct FloorScanningView: View {
                                     showCreateFloorPlanimetryButton = false
                                     selectedOption = 1
                                 }) {
-                                    Text("Continue Scan")
-                                        .font(.system(size: 16, weight: .bold))
-                                        .padding()
-                                        .background(Color.orange)
-                                        .foregroundColor(.white)
-                                        .cornerRadius(30)
-                                        .frame(maxWidth: 150, alignment: .leading)
+                                    Text("Continue")
+                                        .font(.system(size: 18, weight: .bold))
+                                        .foregroundColor(.blue)
                                 }
                             }
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
-//                        .border(Color.red, width: 2)
                         
                         Spacer()
                         
@@ -385,47 +440,25 @@ struct FloorScanningView: View {
                                     showDoneButton = false
                                     showContinueScanButton = true
                                     showCreateFloorPlanimetryButton = true
+                                    selectedOption = 1
                                     if selectedOption == 2 {
                                         showPreview = true
                                     }
+                                    print("DEBUG: Azione Done eseguita")
                                 }) {
                                     Text("Done")
-                                        .font(.system(size: 16, weight: .bold))
+                                        .font(.system(size: 18, weight: .bold))
                                         .padding()
-                                        .background(Color.green)
                                         .foregroundColor(.white)
-                                        .cornerRadius(30)
                                         .frame(maxWidth: 100)
                                 }
                             }
-                            if showCreateFloorPlanimetryButton {
-                                Button(action: {
-                                    captureView?.stopCapture(pauseARSession: true)
-                                    Task {
-                                        await captureView?.sessionDelegate.generateCapturedStructureAndExport(to: floor.floorURL)
-                                    }
-                                    _ = mapName.isEmpty ? "Map_\(Date().timeIntervalSince1970)" : mapName
-                                    showCreateFloorPlanimetryToast = true
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                        dismiss()
-                                    }
-                                }) {
-                                    Text("Save Floor")
-                                        .font(.system(size: 16, weight: .bold))
-                                        .padding()
-                                        .background(Color.green)
-                                        .foregroundColor(.white)
-                                        .cornerRadius(30)
-                                }
-                            }
                         }
-//                        .border(Color.blue, width: 2)
                     }
-                    .frame(maxWidth: .infinity)  // Utilizza maxWidth: .infinity per occupare tutto lo spazio orizzontale
-//                    .border(Color.green, width: 2)
+                    .frame(maxWidth: .infinity)
                     .padding([.leading, .trailing, .bottom], 12)
                     
-                    // Pulsante "Start" (visualizzato se non si sta scansionando)
+                    // Pulsante "Start" (quando non si sta scansionando)
                     if !isScanningFloor {
                         Button(action: {
                             isScanningFloor = true
@@ -435,10 +468,10 @@ struct FloorScanningView: View {
                             showCreateFloorPlanimetryButton = false
                         }) {
                             Text("Start")
-                                .font(.system(size: 18, weight: .bold, design: .default))
+                                .font(.system(size: 20, weight: .bold, design: .default))
                                 .bold()
                                 .padding()
-                                .background(Color.green)
+//                                .background(Color.blue)
                                 .foregroundColor(.white)
                                 .cornerRadius(30)
                         }
@@ -446,14 +479,15 @@ struct FloorScanningView: View {
                     }
                 }
                 
-                // Preview della SCNScene (sovrapposta)
+                
+                // Preview della SCNScene (sovrapposta) spostata più in basso
                 if showPreview, let scene = floor.scene {
-//                if true {
-                    HStack() {
+                    //                if true{
+                    HStack {
                         SceneView(scene: scene, options: [.allowsCameraControl, .autoenablesDefaultLighting])
-                            .frame(width: .infinity, height: 500)
-                            .cornerRadius(10)
-                            .padding(.top, 30)
+                            .frame(maxWidth: .infinity, minHeight: 500, maxHeight: 570)
+                            .cornerRadius(8)
+                            .padding(.top, 10) // Aumentato il padding superiore per abbassare la preview
                             .onAppear {
                                 scene.rootNode.enumerateChildNodes { node, _ in
                                     if let nodeName = node.name?.lowercased(), nodeName.contains("floor") {
@@ -461,8 +495,9 @@ struct FloorScanningView: View {
                                     }
                                 }
                             }
-                    }.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                    .padding(.top, 30)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .padding(.top, 60)
                     .transition(.opacity)
                     .animation(.easeInOut, value: showPreview)
                 }
@@ -497,6 +532,14 @@ struct FloorScanningView: View {
             .onReceive(NotificationCenter.default.publisher(for: .genericMessage)) { notification in
                 if let message = notification.object as? String {
                     self.message = message
+                }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .genericMessage)) { notification in
+                if let message = notification.object as? String {
+                    if message == "World tracking failure" {
+                        self.scanningError = message
+                    }
+                    
                 }
             }
         }

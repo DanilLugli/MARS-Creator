@@ -80,7 +80,7 @@ struct FloorAltitudeTabView: View {
                     .font(.system(size: 16, weight: .bold, design: .default))
                     .bold()
                     .padding()
-                    .background(Color.green)
+//                    .background(Color.green)
                     .foregroundColor(.white)
                     .cornerRadius(30)
             }
@@ -112,7 +112,7 @@ struct FloorAltitudeTabView: View {
                             .font(.system(size: 16, weight: .bold, design: .default))
                             .bold()
                             .padding()
-                            .background(Color.green)
+//                            .background(Color.green)
                             .foregroundColor(.white)
                             .cornerRadius(30)
                             .frame(maxWidth: 150) // Larghezza massima del bottone

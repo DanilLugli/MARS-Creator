@@ -136,3 +136,48 @@ func doesMatrixExist(for roomName: String, in associationMatrix: [String: RoomPo
     return associationMatrix[roomName] != nil
 }
 
+func clearJSONFile(at fileURL: URL) {
+    let emptyDictionary: [String: Any] = [:]
+    do {
+        let jsonData = try JSONSerialization.data(withJSONObject: emptyDictionary, options: .prettyPrinted)
+        try jsonData.write(to: fileURL)
+        print("Il file JSON è stato cancellato e ora contiene: \(String(data: jsonData, encoding: .utf8) ?? "")")
+    } catch {
+        print("Errore durante la cancellazione del file JSON: \(error)")
+    }
+}
+
+func removeRoomPositionKeyJSON(from jsonFileURL: URL, roomName: String) {
+    let fileManager = FileManager.default
+    
+    // Verifica se il file esiste
+    guard fileManager.fileExists(atPath: jsonFileURL.path) else {
+        print("Il file JSON non esiste a: \(jsonFileURL.path)")
+        return
+    }
+    
+    do {
+        // Leggi i dati JSON dal file
+        let jsonData = try Data(contentsOf: jsonFileURL)
+        
+        // Deserializza in un dizionario
+        if var jsonDict = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any] {
+            
+            // Rimuovi la chiave corrispondente a roomName
+            jsonDict.removeValue(forKey: roomName)
+            
+            // Serializza nuovamente il dizionario in JSON
+            let updatedJsonData = try JSONSerialization.data(withJSONObject: jsonDict, options: .prettyPrinted)
+            
+            // Scrivi i dati aggiornati sul file
+            try updatedJsonData.write(to: jsonFileURL)
+            print("La chiave '\(roomName)' è stata rimossa correttamente.")
+        } else {
+            print("Il contenuto del file non è nel formato atteso ([String: Any]).")
+        }
+    } catch {
+        print("Errore durante la lettura o scrittura del file JSON: \(error.localizedDescription)")
+    }
+}
+
+

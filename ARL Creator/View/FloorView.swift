@@ -93,13 +93,18 @@ struct FloorView: View {
                             
                             Divider()
                             
-                            Button(action: {
-                                isOptionsSheetPresented = true
-                            }) {
-                                Label("Create Planimetry", systemImage: "plus")
+                            NavigationLink(destination: FloorScanningView(floor: floor)){
+                                Button(action: {
+                                    //                                isOptionsSheetPresented per aprire il confirmDialog
+                                    //                                isOptionsSheetPresented = true
+                                    //                                isScanningFloorPlanimetry per aprire direttamente l'AR'
+                                    self.isScanningFloorPlanimetry = true
+                                }) {
+                                    Label("Create Planimetry", systemImage: "plus")
+                                }
+                                .disabled(FileManager.default.fileExists(atPath: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz").path))
                             }
-                            .disabled(FileManager.default.fileExists(atPath: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz").path))
-
+                            
                             Button(action: {
                                 alertMessage = """
                                     Proceeding with this update will permanently delete:
@@ -166,32 +171,17 @@ struct FloorView: View {
             }
             
             
-            Button("Update From File") {
-                let fileManager = FileManager.default
-                let filePaths = [
-                    floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz"),
-                    floor.floorURL.appendingPathComponent("JsonParametric").appendingPathComponent("\(floor.name).json"),
-                    floor.floorURL.appendingPathComponent("PlistMetadata").appendingPathComponent("\(floor.name).plist")
-                ]
-
-                do {
-                    for filePath in filePaths {
-                        try fileManager.removeItem(at: filePath)
-                        print("File at \(filePath) eliminato correttamente")
-                    }
-                } catch {
-                    print("Errore durante l'eliminazione di un file: \(error)")
-                }
-                
-                self.isOptionsSheetPresented = false
-                
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                    self.isFloorPlanimetryUploadPicker = true
-                }
-            }
-            .font(.system(size: 20))
-            .bold()
+//            Button("Update From File") {
+//
+//                self.isOptionsSheetPresented = false
+//                
+//                
+//                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+//                    self.isFloorPlanimetryUploadPicker = true
+//                }
+//            }
+//            .font(.system(size: 20))
+//            .bold()
 
             Button("Cancel", role: .cancel) {
             }
@@ -238,8 +228,9 @@ struct FloorView: View {
                     }
 
                     floor.associationMatrix = [:]
+                    clearJSONFile(at: floor.floorURL.appendingPathComponent("\(floor.name).json"))
                     floor.planimetryRooms = SCNViewMapContainer()
-                    floor.scene = SCNScene()
+                    floor.scene = nil
                     floor.sceneObjects = []
                     
                     isOptionsSheetPresented = true
@@ -248,8 +239,7 @@ struct FloorView: View {
                 }
             )
         }
-        .alert("Rename Floor",
-               isPresented: $isRenameSheetPresented,
+        .alert("Rename Floor", isPresented: $isRenameSheetPresented,
                actions: {
             TextField("New Floor Name", text: $newFloorName)
                 .padding()
@@ -284,6 +274,7 @@ struct FloorView: View {
         .sheet(isPresented: $isFloorPlanimetryUploadPicker) {
             FilePickerView { url in
                 selectedFileURL = url
+                print("DEBUG: File selezionato: \(url.path)")
                 
                 let destinationURL = floor.floorURL
                     .appendingPathComponent("MapUsdz")
@@ -293,14 +284,13 @@ struct FloorView: View {
                 let mapUsdzDirectory = floor.floorURL.appendingPathComponent("MapUsdz")
                 
                 do {
-                    // Crea la directory se non esiste
                     if !fileManager.fileExists(atPath: mapUsdzDirectory.path) {
                         try fileManager.createDirectory(at: mapUsdzDirectory, withIntermediateDirectories: true, attributes: nil)
                     }
                     
-                    // Copia il file dal suo URL originale al nuovo percorso
                     try fileManager.copyItem(at: url, to: destinationURL)
                     print("File copied successfully to: \(destinationURL)")
+                    floor.scene = try SCNScene(url: destinationURL)
                     
                 } catch {
                     // In caso di errore, aggiorna lo stato e mostra l'alert
@@ -352,13 +342,14 @@ struct FloorView: View {
             Button(action: {
                 addNewRoom()
                 isRoomSheetPresented = false
+                newRoomName = ""
             }) {
                 Text("Create Room")
                     .font(.headline)
                     .bold()
                     .padding()
-                    .background(newRoomName.isEmpty ? Color.gray : Color.green)
-                    .foregroundColor(.white)
+//                    .background()
+                    .foregroundColor(newRoomName.isEmpty ? Color.gray : Color.green)
                     .cornerRadius(30)
             }
             .disabled(newRoomName.isEmpty)
@@ -394,7 +385,12 @@ struct FloorView: View {
         newRoom.validateRoom()
 
 //        // Add identity matrix for the new room
-//        floor._associationMatrix[newRoom.name] = RotoTraslationMatrix(name: newRoom.name, translation: matrix_identity_float4x4, r_Y: matrix_identity_float4x4)
+        floor._associationMatrix[newRoom.name] = RoomPositionMatrix(name: newRoom.name, translation: matrix_identity_float4x4, r_Y: matrix_identity_float4x4)
+        
+        floor._associationMatrix[newRoom.name]?.debugPrintRoomPositionMatrix(roomPositionMatrix: floor._associationMatrix[newRoom.name]!)
+        floor.saveOrUpdateAssociationMatrix(to: floor.floorURL.appendingPathComponent("\(floor.name).json"), for: self.floor, associationMatrix: floor.associationMatrix)
+        
+//        updateJSONFile([newRoom.name : floor._associationMatrix[newRoom.name]], floor.floorURL.appendingPathComponent("\(floor.name).json"), floor)
 //        //floor.saveAssociationMatrixToJSON(fileURL: floor.floorURL.appendingPathComponent("\(floor.floorURL.lastPathComponent).json"))
 //        floor.updateAssociationMatrixInJSON(for: newRoom.name, fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"))
     }

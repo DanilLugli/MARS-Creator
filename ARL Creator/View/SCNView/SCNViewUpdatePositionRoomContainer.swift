@@ -24,7 +24,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
 
     var zoomStep: CGFloat = 0.1
     var translationStep: CGFloat = 0.02
-    var translationStepPressable: CGFloat = 0.15
+    var translationStepPressable: CGFloat = 0.25
     var rotationStep: Float = .pi / 200
     
     private let color: UIColor = UIColor.green.withAlphaComponent(0.4)

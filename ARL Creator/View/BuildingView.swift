@@ -219,8 +219,8 @@ struct BuildingView: View {
                     .font(.headline)
                     .bold()
                     .padding()
-                    .background(newFloorName.isEmpty ? Color.gray : Color.green)
-                    .foregroundColor(.white)
+//                    .background()
+                    .foregroundColor(newFloorName.isEmpty ? Color.gray : Color.green)
                     .cornerRadius(30)
             }
             .disabled(newFloorName.isEmpty)

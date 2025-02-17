@@ -30,6 +30,34 @@ struct RoomPositionMatrix: Codable {
         try container.encode(SIMDMatrix4x4(matrix: r_Y), forKey: .r_Y)
     }
     
+    func debugPrintRoomPositionMatrix(roomPositionMatrix: RoomPositionMatrix) {
+        print("----- RoomPositionMatrix Debug -----")
+        print("Name: \(roomPositionMatrix.name)")
+        
+        print("\nTranslation Matrix:")
+        for i in 0..<4 {
+            var row = "["
+            for j in 0..<4 {
+                row += String(format: "%.2f", roomPositionMatrix.translation[i][j])
+                if j < 3 { row += ", " }
+            }
+            row += "]"
+            print(row)
+        }
+        
+        print("\nRotation Matrix (r_Y):")
+        for i in 0..<4 {
+            var row = "["
+            for j in 0..<4 {
+                row += String(format: "%.2f", roomPositionMatrix.r_Y[i][j])
+                if j < 3 { row += ", " }
+            }
+            row += "]"
+            print(row)
+        }
+        print("----- End Debug -----")
+    }
+    
 }
 
 struct SIMDMatrix4x4: Codable {

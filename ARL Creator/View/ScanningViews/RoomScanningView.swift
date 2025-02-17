@@ -85,7 +85,7 @@ struct RoomScanningView: View {
                                         .foregroundColor(.black)
                                         .padding()
                                         .background(Color.white)
-                                        .cornerRadius(10)
+                                        .cornerRadius(20)
                                         .shadow(radius: 5)
                                         .padding(.top, 60)
                                         .frame(maxWidth: .infinity)
@@ -94,7 +94,7 @@ struct RoomScanningView: View {
                             }
 
                             VStack{
-                                Spacer()
+                                
                                 VStack{
                                     
                                     if let scanningError = scanningError, !scanningError.isEmpty, viewError == true {
@@ -119,8 +119,8 @@ struct RoomScanningView: View {
                                                     .bold()
                                                     .padding()
                                                     .frame(maxWidth: .infinity)
-                                                    .background(Color.red)
-                                                    .foregroundColor(.white)
+//                                                    .background(Color.red)
+                                                    .foregroundColor(.red)
                                                     .cornerRadius(30)
                                             }
                                             .padding(.horizontal, 20)
@@ -130,34 +130,55 @@ struct RoomScanningView: View {
                                     
                                     Spacer()
                                     
-                                    Button(action: {
-                                        if showScanningRoomCard{
-                                            isScanningRoom = true
+                                    HStack{
+                                        Spacer()
+                                        if !showScanningRoomCard{
+                                            Button(action: {
+                                                showCreateRoomPlanimetryToast = true
+                                                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                                    dismiss()
+                                                }
+                                            }) {
+                                                Text("Finish")
+                                                    .font(.system(size: 18, weight: .bold, design: .default))
+                                                    .bold()
+                                                    .padding()
+                                                //                                                                                        .background(Color.green)
+                                                    .foregroundColor(Color.green)
+                                                    .cornerRadius(30)
+                                            }.padding(.trailing, 20)
                                             
-                                            captureView?.stopCapture()
-                                            showScanningRoomCard = false
-                                            _ = mapName.isEmpty ? "Map_\(Date().timeIntervalSince1970)" : mapName
                                         }
-                                        else{
-                                            showCreateRoomPlanimetryToast = true
-                                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                                dismiss()
-                                            }
+                                    }//.border(Color.green, width: 3)
+
+                                    HStack{
+                                        Spacer()
+                                        if showScanningRoomCard{
+                                            
+                                            Button(action: {
+                                                    isScanningRoom = true
+                                                    
+                                                    captureView?.stopCapture()
+                                                    showScanningRoomCard = false
+                                                    _ = mapName.isEmpty ? "Map_\(Date().timeIntervalSince1970)" : mapName
+                                            }) {
+                                                Text("Done")
+                                                    .font(.system(size: 18, weight: .bold, design: .default))
+                                                    .bold()
+                                                    .padding()
+                                                //                                            .background(Color.green)
+                                                    .foregroundColor(Color.white)                                            .cornerRadius(30)
+                                            }.padding(.trailing, 20)
                                         }
-                                    }) {
-                                        Text("Done")
-                                            .font(.system(size: 16, weight: .bold, design: .default))
-                                            .bold()
-                                            .padding()
-                                            .background(Color.green)
-                                            .foregroundColor(.white)
-                                            .cornerRadius(30)
-                                    }.padding(.trailing, 20)
+                                    }
+
+
                                     
                                 }
                                 .frame(maxWidth: .infinity)
                                
-                            }.frame(maxWidth: .infinity, maxHeight: .infinity)
+                            }//.border(Color.red, width: 2)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
                            
                         }
                         
@@ -176,7 +197,7 @@ struct RoomScanningView: View {
                                 .font(.system(size: 18, weight: .bold, design: .default))
                                 .bold()
                                 .padding()
-                                .background(Color.green)
+//                                .background(Color.blue)
                                 .foregroundColor(.white)
                                 .cornerRadius(30)
                         }

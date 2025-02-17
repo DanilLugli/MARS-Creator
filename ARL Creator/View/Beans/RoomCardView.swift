@@ -66,7 +66,7 @@ struct RoomCardView: View {
                             //.padding(.trailing)
                     }
                     
-                    if !room.hasValidScene() {
+                    if !room.hasValidScene(){
                         Image(systemName: "exclamationmark.triangle")
                             .foregroundColor(.red)
                             .font(.system(size: 35))
@@ -76,7 +76,6 @@ struct RoomCardView: View {
                                 activeAlert = .planimetry
                             }
                     }
-                    
                 }
             }
             .alert(isPresented: Binding<Bool>(

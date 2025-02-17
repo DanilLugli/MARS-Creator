@@ -171,24 +171,24 @@ struct MarkerDetailView: View {
                 }.padding(.bottom)
                 
                 VStack(alignment: .leading, spacing: 10) {
-                    HStack {
-                        Image(systemName: "characters.lowercase")
-                            .font(.headline)
-                            .bold()
-                            .foregroundColor(.customBackground)
-                        
-                        Text("Name:")
-                            .font(.headline)
-                            .bold()
-                            .foregroundColor(.customBackground)
-                        
-                    }
-                    
-                    TextField("Enter marker name", text: $newName)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .foregroundColor(self.oldName == "room_photo" ? .red : .customBackground)
-                        .bold()
-                        .padding(.bottom)
+//                    HStack {
+//                        Image(systemName: "characters.lowercase")
+//                            .font(.headline)
+//                            .bold()
+//                            .foregroundColor(.customBackground)
+//                        
+//                        Text("Name:")
+//                            .font(.headline)
+//                            .bold()
+//                            .foregroundColor(.customBackground)
+//                        
+//                    }
+//                    
+//                    TextField("Enter marker name", text: $newName)
+//                        .textFieldStyle(RoundedBorderTextFieldStyle())
+//                        .foregroundColor(self.oldName == "room_photo" ? .red : .customBackground)
+//                        .bold()
+//                        .padding(.bottom)
                     
                     HStack{
                         Image(systemName: "ruler")
@@ -219,8 +219,8 @@ struct MarkerDetailView: View {
                             .font(.headline)
                             .bold()
                             .padding()
-                            .background(Color.red)
-                            .foregroundColor(.white)
+//                            .background()
+                            .foregroundColor(Color.red)
                             .cornerRadius(30)
                     }
                     
@@ -234,8 +234,8 @@ struct MarkerDetailView: View {
                             .font(.headline)
                             .bold()
                             .padding()
-                            .background(Color.green)
-                            .foregroundColor(.white)
+//                            .background()
+                            .foregroundColor(Color.green)
                             .cornerRadius(30)
                     }
                     
@@ -265,7 +265,7 @@ struct MarkerDetailView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding()
         }
-        .presentationDetents(marker.physicalWidth == 0.0 ? [.height(355)] : [.height(355)])
+        .presentationDetents(marker.physicalWidth == 0.0 ? [.height(250)] : [.height(250)])
         .presentationDragIndicator(.visible)
         .alert(isPresented: $showAlert) {
             Alert(

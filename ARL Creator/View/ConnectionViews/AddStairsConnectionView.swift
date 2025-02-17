@@ -215,7 +215,7 @@ struct AddStairsConnectionView: View {
                         .font(.system(size: 16, weight: .bold, design: .default))
                         .frame(width: 160, height: 50)
                         .foregroundStyle(.white)
-                        .background(Color.blue.opacity(0.4))
+//                        .background(Color.blue.opacity(0.4))
                         .cornerRadius(30)
                         .bold()
                     }
@@ -230,7 +230,7 @@ struct AddStairsConnectionView: View {
                             .font(.system(size: 16, weight: .bold, design: .default))
                             .frame(width: 200, height: 50)
                             .foregroundStyle(.white)
-                            .background(Color.green)
+//                            .background(Color.green)
                             .cornerRadius(30)
                             .bold()
                     }

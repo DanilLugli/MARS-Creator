@@ -113,7 +113,7 @@ struct RoomView: View {
                 ]
                 
                 room.sceneObjects = []
-                room.scene = SCNScene()
+                room.scene = nil
 
                 do {
                     for filePath in filePaths {
@@ -127,8 +127,9 @@ struct RoomView: View {
                 } catch {
                     print("❌ Errore durante l'eliminazione: \(error.localizedDescription)")
                 }
+                
+                removeRoomPositionKeyJSON(from: floor.floorURL.appendingPathComponent("\(floor.name).json"), roomName: room.name)
 
-                // Assicura che la UI venga aggiornata correttamente
                 DispatchQueue.main.async {
                     isOptionsSheetPresented = true
                 }
@@ -216,6 +217,116 @@ struct RoomView: View {
                 }
             }
         }
+        .sheet(isPresented: $isRoomPlanimetryUploadPicker) {
+            FilePickerView { url in
+                // Salviamo l'URL selezionato
+                selectedFileURL = url
+                print("DEBUG: File selezionato: \(url.path)")
+                
+                let fileManager = FileManager.default
+                
+                // Estraiamo la directory del file selezionato e risaliamo al base directory
+                let selectedDirectory = url.deletingLastPathComponent()
+                print("DEBUG: selectedDirectory: \(selectedDirectory.path)")
+                
+                let sourceBaseDirectory = selectedDirectory.deletingLastPathComponent()
+                print("DEBUG: sourceBaseDirectory: \(sourceBaseDirectory.path)")
+                
+                let oldRoomName = url.deletingPathExtension().lastPathComponent
+                print("DEBUG: oldRoomName: \(oldRoomName)")
+                
+                let folderInfo: [String: String] = [
+                    "MapUsdz": "usdz",
+                    "JsonParametric": "json",
+                    "PlistMetadata": "plist",
+                    "Maps": "map",
+                    "JsonMaps": "" // Nessuna estensione
+                ]
+                
+                // Per ogni cartella, costruiamo i percorsi sorgente e di destinazione
+                for (folderName, fileExt) in folderInfo {
+                    let sourceFileName = oldRoomName + (fileExt.isEmpty ? "" : ".\(fileExt)")
+                    print("DEBUG: [\(folderName)] sourceFileName: \(sourceFileName)")
+                    
+                    let sourceURL = selectedDirectory
+//                        .appendingPathComponent(folderName)
+                        .appendingPathComponent(sourceFileName)
+                    print("DEBUG: [\(folderName)] sourceURL: \(sourceURL.path)")
+                    
+                    let destinationFileName = room.name + (fileExt.isEmpty ? "" : ".\(fileExt)")
+                    print("DEBUG: [\(folderName)] destinationFileName: \(destinationFileName)")
+                    
+                    let destinationDirectory = room.roomURL.appendingPathComponent(folderName)
+                    print("DEBUG: [\(folderName)] destinationDirectory: \(destinationDirectory.path)")
+                    
+                    let destinationURL = destinationDirectory.appendingPathComponent(destinationFileName)
+                    print("DEBUG: [\(folderName)] destinationURL: \(destinationURL.path)")
+                    
+                    // Crea la directory di destinazione se non esiste
+                    if !fileManager.fileExists(atPath: destinationDirectory.path) {
+                        do {
+                            print("DEBUG: [\(folderName)] La directory non esiste. Creazione di \(destinationDirectory.path)")
+                            try fileManager.createDirectory(at: destinationDirectory, withIntermediateDirectories: true, attributes: nil)
+                        } catch {
+                            print("DEBUG: [\(folderName)] Errore nella creazione della directory \(destinationDirectory.path): \(error)")
+                        }
+                    }
+                    
+                    do {
+                        if fileManager.fileExists(atPath: sourceURL.path) {
+                            print("DEBUG: [\(folderName)] Il file sorgente esiste: \(sourceURL.path)")
+                            if fileManager.fileExists(atPath: destinationURL.path) {
+                                print("DEBUG: [\(folderName)] Il file di destinazione esiste già, rimuovo \(destinationURL.path)")
+                                try fileManager.removeItem(at: destinationURL)
+                            }
+                            try fileManager.copyItem(at: sourceURL, to: destinationURL)
+                            print("DEBUG: [\(folderName)] File \(sourceFileName) copiato correttamente in \(destinationURL.path)")
+                        } else {
+                            print("DEBUG: [\(folderName)] File sorgente NON trovato: \(sourceURL.path)")
+                        }
+                    } catch {
+                        print("DEBUG: [\(folderName)] Errore durante la copia da \(sourceURL.path) a \(destinationURL.path): \(error)")
+                    }
+                }
+                
+                // Carichiamo la scena dal file .usdz di destinazione (dalla cartella MapUsdz)
+                let usdzDestination = room.roomURL
+                    .appendingPathComponent("MapUsdz")
+                    .appendingPathComponent("\(room.name).usdz")
+                print("DEBUG: usdzDestination: \(usdzDestination.path)")
+                do {
+                    var seenNodeNames = Set<String>()
+                    room.scene = try SCNScene(url: usdzDestination)
+                    room.planimetry.loadRoomPlanimetry(room: room, borders: true)
+                    room.sceneObjects = room.scene?.rootNode.childNodes(passingTest: { n, _ in
+                        if let nodeName = n.name {
+                            if seenNodeNames.contains(nodeName) {
+                                return false
+                            }
+                            guard n.geometry != nil else {
+                                return false
+                            }
+                            let isValidNode = nodeName != "Room" &&
+                                                nodeName != "Geom" &&
+                                                !nodeName.hasSuffix("_grp") &&
+                                                !nodeName.hasPrefix("unidentified") &&
+                                                !(nodeName.first?.isNumber ?? false) &&
+                                                !nodeName.hasPrefix("_")
+
+                            if isValidNode {
+                                seenNodeNames.insert(nodeName)
+                                return true
+                            }
+                        }
+                        return false
+                    }).sorted(by: { ($0.name ?? "").localizedCaseInsensitiveCompare($1.name ?? "") == .orderedAscending }) ?? []
+                    
+                    print("DEBUG: Scena caricata correttamente da: \(usdzDestination.path)")
+                } catch {
+                    print("DEBUG: Errore nel caricamento della scena: \(error)")
+                }
+            }
+        }
         .confirmationDialog("How do you want to create the \(room.name) planimetry?", isPresented: $isOptionsSheetPresented, titleVisibility: .visible) {
             
             NavigationLink(destination: RoomScanningView(room: room)){
@@ -227,34 +338,16 @@ struct RoomView: View {
                 .bold()
            }
             
-            Button("Update From File") {
-                
-                let fileManager = FileManager.default
-                let filePaths = [
-                    room.roomURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(room.name).usdz"),
-                    room.roomURL.appendingPathComponent("JsonParametric").appendingPathComponent("\(room.name).json"),
-                    room.roomURL.appendingPathComponent("PlistMetadata").appendingPathComponent("\(room.name).plist"),
-                    room.roomURL.appendingPathComponent("Maps").appendingPathComponent("\(room.name).map"),
-                    room.roomURL.appendingPathComponent("JsonMaps").appendingPathComponent("\(room.name)")
-                ]
-
-                do {
-                    for filePath in filePaths {
-                        try fileManager.removeItem(at: filePath)
-                        print("File at \(filePath) eliminato correttamente")
-                    }
-                } catch {
-                    print("Errore durante l'eliminazione di un file: \(error)")
-                }
-                
-                self.isOptionsSheetPresented = false
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                    self.isRoomPlanimetryUploadPicker = true
-                }
-            }
-            .font(.system(size: 20))
-            .bold()
+//            Button("Update From File") {
+//                
+//                self.isOptionsSheetPresented = false
+//                
+//                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+//                    self.isRoomPlanimetryUploadPicker = true
+//                }
+//            }
+//            .font(.system(size: 20))
+//            .bold()
             
             Button("Cancel", role: .cancel) {
                 
@@ -359,13 +452,24 @@ struct RoomView: View {
                     
                     Divider()
                     
-                    Button(action: { isOptionsSheetPresented = true }) {
-                        Label("Create Planimetry", systemImage: "plus")
+//                    Button(action: { isOptionsSheetPresented = true }) {
+//                        Label("Create Planimetry", systemImage: "plus")
+//                    }
+//                    .disabled(FileManager.default.fileExists(atPath: room.roomURL
+//                        .appendingPathComponent("MapUsdz")
+//                        .appendingPathComponent("\(room.name).usdz")
+//                        .path))
+                    
+                    //Questo button per aprire direttamente l'AR
+                    NavigationLink(destination: RoomScanningView(room: room)){
+                        Button(action: { self.isNavigationScanRoomActive = true }) {
+                            Label("Create Planimetry", systemImage: "plus")
+                        }
+                        .disabled(FileManager.default.fileExists(atPath: room.roomURL
+                            .appendingPathComponent("MapUsdz")
+                            .appendingPathComponent("\(room.name).usdz")
+                            .path))
                     }
-                    .disabled(FileManager.default.fileExists(atPath: room.roomURL
-                        .appendingPathComponent("MapUsdz")
-                        .appendingPathComponent("\(room.name).usdz")
-                        .path))
                     
                     Button(action: {
                         alertMessage = """

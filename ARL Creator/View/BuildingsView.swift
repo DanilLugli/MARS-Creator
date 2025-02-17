@@ -122,12 +122,12 @@ struct BuildingsView: View {
                 addNewBuilding()
                 isAddBuildingSheetPresented = false
             }) {
-                Text("Create Building")
+                Text("Create")
                     .font(.headline)
                     .bold()
                     .padding()
-                    .background(newBuildingName.isEmpty ? Color.gray : Color.green)
-                    .foregroundColor(.white)
+//                    .background()
+                    .foregroundColor(newBuildingName.isEmpty ? Color.gray : Color.green)
                     .cornerRadius(30)
             }
             .disabled(newBuildingName.isEmpty)

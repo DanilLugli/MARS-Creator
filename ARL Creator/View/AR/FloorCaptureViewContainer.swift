@@ -293,14 +293,13 @@ struct FloorCaptureViewContainer: UIViewRepresentable {
         
         // Quando la sessione termina una cattura di una room...
         func captureSession(_ session: RoomCaptureSession, didEndWith data: CapturedRoomData, error: Error?) {
-            guard error == nil else {
-                print("ERROR: \(String(describing: error))")
-                
-                DispatchQueue.main.async {
-                    self.capturedRoomError = true
+            if let error = error {
+                    print(error.localizedDescription)
+                    DispatchQueue.main.async {
+                        NotificationCenter.default.post(name: .genericMessage, object: error.localizedDescription)
+                    }
+                    return
                 }
-                return
-            }
 
             Task {
                 do {

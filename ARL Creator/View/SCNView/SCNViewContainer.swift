@@ -14,7 +14,7 @@ struct SCNViewContainer: UIViewRepresentable {
     var massCenter = SCNNode()
     var cameraNode = SCNNode()
     var dimension = SCNVector3()
-
+    
     var handler = HandleTap()
     
     var delegate = RenderDelegate()
@@ -57,12 +57,12 @@ struct SCNViewContainer: UIViewRepresentable {
     
     func createAxesNode(length: CGFloat = 1.0, radius: CGFloat = 0.02) {
         let axisNode = SCNNode()
-
+        
         let xAxis = SCNNode(geometry: SCNCylinder(radius: radius, height: length))
         xAxis.geometry?.firstMaterial?.diffuse.contents = UIColor.red
         xAxis.position = SCNVector3(length / 2, 0, 0) // Offset by half length
         xAxis.eulerAngles = SCNVector3(0, 0, Float.pi / 2) // Rotate cylinder along X-axis
-
+        
         let yAxis = SCNNode(geometry: SCNCylinder(radius: radius, height: length))
         yAxis.geometry?.firstMaterial?.diffuse.contents = UIColor.green
         yAxis.position = SCNVector3(0, length / 2, 0) // Offset by half length
@@ -81,53 +81,53 @@ struct SCNViewContainer: UIViewRepresentable {
         
     }
     
-//    func addDoorNodesBasedOnExistingDoors(room: Room) {
-//
-//        let transitionNodes = room.sceneObjects?.filter{ node in
-//            if let nodeName = node.name {
-//                return (nodeName.hasPrefix("Door") || nodeName.hasPrefix("Opening"))
-//            }
-//            return false
-//        } ?? []
-//
-//        for newTZNode in transitionNodes {
-//
-//            let doorWidth = newTZNode.width
-//            let doorHeight = newTZNode.height
-//            var doorDepth = newTZNode.length
-//            let depthExtension: CGFloat = 0.6
-//            doorDepth += depthExtension
-//            var newDoorGeometry = SCNBox()
-//
-//            newDoorGeometry = SCNBox(width: doorWidth, height: doorHeight, length: doorDepth, chamferRadius: 0.0)
-//
-//            let newDoorNode = SCNNode(geometry: newDoorGeometry)
-//
-//            newDoorNode.transform = newTZNode.transform
-//
-//            let doorDirection = newTZNode.simdWorldFront
-//            let inwardTranslation = SIMD3<Float>(doorDirection * Float(doorDepth / 2))
-//
-//            newDoorNode.simdPosition = newTZNode.simdPosition - inwardTranslation
-//
-//            let nodeName = newTZNode.name != nil ? "TransitionZone_\(newTZNode.name!)" : "TransitionZone_Door"
-//
-//            newDoorNode.name = nodeName
-//
-//            scnView.scene?.rootNode.addChildNode(newDoorNode)
-//
-//            let updateName = newDoorNode.name!.replacingOccurrences(of: "TransitionZone_", with: "")
-//
-//            if !room.transitionZones.contains(where: { $0.name == updateName }) {
-//                let transitionZones = TransitionZone(name: updateName, connection: [Connection(name: "")])
-//                room.addTransitionZone(transitionZone: transitionZones)
-//
-//            } else {
-//                print("Una TransitionZone con il nome \(nodeName) esiste già.")
-//            }
-//        }
-//    }
-        
+    //    func addDoorNodesBasedOnExistingDoors(room: Room) {
+    //
+    //        let transitionNodes = room.sceneObjects?.filter{ node in
+    //            if let nodeName = node.name {
+    //                return (nodeName.hasPrefix("Door") || nodeName.hasPrefix("Opening"))
+    //            }
+    //            return false
+    //        } ?? []
+    //
+    //        for newTZNode in transitionNodes {
+    //
+    //            let doorWidth = newTZNode.width
+    //            let doorHeight = newTZNode.height
+    //            var doorDepth = newTZNode.length
+    //            let depthExtension: CGFloat = 0.6
+    //            doorDepth += depthExtension
+    //            var newDoorGeometry = SCNBox()
+    //
+    //            newDoorGeometry = SCNBox(width: doorWidth, height: doorHeight, length: doorDepth, chamferRadius: 0.0)
+    //
+    //            let newDoorNode = SCNNode(geometry: newDoorGeometry)
+    //
+    //            newDoorNode.transform = newTZNode.transform
+    //
+    //            let doorDirection = newTZNode.simdWorldFront
+    //            let inwardTranslation = SIMD3<Float>(doorDirection * Float(doorDepth / 2))
+    //
+    //            newDoorNode.simdPosition = newTZNode.simdPosition - inwardTranslation
+    //
+    //            let nodeName = newTZNode.name != nil ? "TransitionZone_\(newTZNode.name!)" : "TransitionZone_Door"
+    //
+    //            newDoorNode.name = nodeName
+    //
+    //            scnView.scene?.rootNode.addChildNode(newDoorNode)
+    //
+    //            let updateName = newDoorNode.name!.replacingOccurrences(of: "TransitionZone_", with: "")
+    //
+    //            if !room.transitionZones.contains(where: { $0.name == updateName }) {
+    //                let transitionZones = TransitionZone(name: updateName, connection: [Connection(name: "")])
+    //                room.addTransitionZone(transitionZone: transitionZones)
+    //
+    //            } else {
+    //                print("Una TransitionZone con il nome \(nodeName) esiste già.")
+    //            }
+    //        }
+    //    }
+    
     func changeColorOfNode(nodeName: String, color: UIColor) {
         guard let scene = scnView.scene else {
             print("⚠️ Scene is nil.")
@@ -146,32 +146,32 @@ struct SCNViewContainer: UIViewRepresentable {
             print("❌ Node \(nodeName) not found.")
             return
         }
-
+        
         let clonedNode = originalNode.clone()
-
+        
         if let originalGeometry = originalNode.geometry {
             clonedNode.geometry = originalGeometry.copy() as? SCNGeometry
         }
-
+        
         clonedNode.name = "__selected__"
-
+        
         let material = SCNMaterial()
         material.diffuse.contents = color
         material.lightingModel = .physicallyBased
-
+        
         clonedNode.geometry?.materials = [material]
-
+        
         clonedNode.worldPosition.y += 4
-
+        
         if clonedNode.scale.x < 0.2 {
             clonedNode.scale.x += 0.1
         }
         if clonedNode.scale.z < 0.2 {
             clonedNode.scale.z += 0.1
         }
-
+        
         scnView.scene?.rootNode.addChildNode(clonedNode)
-
+        
         print("✅ Cloned node \(clonedNode.name ?? "Unnamed") added to scene!")
     }
     
@@ -189,16 +189,23 @@ struct SCNViewContainer: UIViewRepresentable {
     }
     
     func makeUIView(context: Context) -> SCNView {
-        
         handler.scnView = scnView
         
-        // Aggiunta del riconoscitore di pinch per lo zoom
+        // Riconoscitore di pinch per lo zoom
         let pinchGesture = UIPinchGestureRecognizer(target: context.coordinator, action: #selector(context.coordinator.handlePinch(_:)))
         scnView.addGestureRecognizer(pinchGesture)
         
-        // Aggiunta del riconoscitore di pan per lo spostamento
+        // Riconoscitore di pan per lo spostamento
         let panGesture = UIPanGestureRecognizer(target: context.coordinator, action: #selector(context.coordinator.handlePan(_:)))
         scnView.addGestureRecognizer(panGesture)
+        
+        // Riconoscitore di rotazione per ruotare la scena con due dita
+        let rotationGesture = UIRotationGestureRecognizer(target: context.coordinator, action: #selector(context.coordinator.handleRotation(_:)))
+        scnView.addGestureRecognizer(rotationGesture)
+        
+        // Riconoscitore di tap per selezionare un nodo
+//        let tapGesture = UITapGestureRecognizer(target: context.coordinator, action: #selector(context.coordinator.handleTap(_:)))
+//        scnView.addGestureRecognizer(tapGesture)
         
         // Configura lo sfondo della scena
         scnView.backgroundColor = UIColor.white
@@ -225,18 +232,36 @@ struct SCNViewContainer: UIViewRepresentable {
             
             if gesture.state == .changed {
                 let newScale = camera.orthographicScale / Double(gesture.scale)
-                camera.orthographicScale = max(1.0, min(newScale, 200.0)) 
+                camera.orthographicScale = max(1.0, min(newScale, 200.0))
                 gesture.scale = 1
             }
         }
         
+        // Gestione del pan per lo spostamento
         @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
             let translation = gesture.translation(in: parent.scnView)
-           
             parent.cameraNode.position.x -= Float(translation.x) * 0.04
             parent.cameraNode.position.z -= Float(translation.y) * 0.04
-            
             gesture.setTranslation(.zero, in: parent.scnView)
         }
+        
+        // Gestione della rotazione tramite due dita
+        @objc func handleRotation(_ gesture: UIRotationGestureRecognizer) {
+            // Ruota la camera attorno all'asse Y; se preferisci ruotare l'intera scena,
+            // puoi applicare la trasformazione sul nodo radice della scena.
+            if gesture.state == .changed {
+                parent.scnView.scene?.rootNode.eulerAngles.y -= Float(gesture.rotation)
+                gesture.rotation = 0
+            }
+        }
+//
+//        @objc func handleTap(_ gesture: UITapGestureRecognizer) {
+//            let location = gesture.location(in: parent.scnView)
+//            let hitResults = parent.scnView.hitTest(location, options: nil)
+//            if let hit = hitResults.first, let nodeName = hit.node.name {
+//                print("Nodo toccato: \(nodeName)")
+//                parent.changeColorOfNode(nodeName: nodeName, color: UIColor.green)
+//            }
+//        }
     }
 }
