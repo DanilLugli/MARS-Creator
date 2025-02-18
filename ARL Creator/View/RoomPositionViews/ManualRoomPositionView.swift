@@ -46,7 +46,6 @@ struct ManualRoomPositionView: View {
                 .padding()
                 .bold()
                 .onChange(of: showFornitures) { newValue in
-                    // Ricarichiamo la scena passando il flag aggiornato
                     mapPositionView.handler.loadRoomMapsPosition(
                         floor: floor,
                         room: room,
@@ -91,7 +90,7 @@ struct ManualRoomPositionView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button(action: {
-                    floor.updateRoomPositionMatrixInJSON(for: room.name, fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"))
+                    floor.updateAssociationMatrixInJSON(for: room.name, fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"))
                     
 //                    floor.saveOrUpdateAssociationMatrix(to: floor.floorURL.appendingPathComponent("\(floor.name).json"), for: self.floor, associationMatrix: floor.associationMatrix)
                     

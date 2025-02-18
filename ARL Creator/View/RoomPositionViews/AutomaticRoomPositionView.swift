@@ -717,76 +717,76 @@ struct AutomaticRoomPositionView: View {
                         .bold()
                     }
                     
-                    if matchingNodesForAPI.count >= 3 {
-                        Button("Calculate Position") {
-                            Task {
-                                showLoadingPositionToast = true
-
-                                do {
-                                    response = try await fetchAPIConversionLocalGlobal(localName: room.name, nodesList: matchingNodesForAPI)
-
-                                    if let httpResponse = response.0 {
-                                        let statusCode = httpResponse.statusCode
-                                        print("Status code: \(statusCode)")
-                                        
-                                        if statusCode >= 400 {
-                                            showLoadingPositionToast = false
-                                            showErrorHTTPResponseToast = true
-                                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                                                dismiss()
-                                            }
-                                            print("Error status code: \(statusCode)")
-                                            return
-                                        }
-                                        print("Response JSON: \(response.1)")
-                                    } else {
-                                        print("Error: \(response.1)")
-                                        showErrorHTTPResponseToast = true
-                                        return
-                                    }
-                                
-                                    print(floor.associationMatrix.keys)
-
-                                    responseFromServer = true
-
-                                    saveConversionGlobalLocal(response.1, floor.floorURL, floor)
-                                    
-                                    let fileManager = FileManager.default
-                                    let associationMatrixURL = floor.floorURL.appendingPathComponent("\(floor.floorURL.lastPathComponent).json")
-                                    if fileManager.fileExists(atPath: associationMatrixURL.path),
-                                       let loadedMatrix = loadRoomPositionMatrixFromJson(from: associationMatrixURL, for: floor) {
-                                        floor._associationMatrix = loadedMatrix
-                                    } else {
-                                        print("Failed to load RotoTraslationMatrix from JSON file for floor \(floor.floorURL.lastPathComponent)")
-                                    }
-
-                                    room.hasPosition = true
-                                    
-                                    floor.planimetryRooms.handler.loadRoomsMaps(
-                                        floor: floor,
-                                        rooms: floor.rooms
-                                    )
-                                    
-                                    print("Test aass. Matrix 2:")
-                                    print(floor.associationMatrix.keys)
-                                    
-                                    roomView.resetColorNode()
-                                    floorView.resetColorNode()
-
-                                    showLoadingPositionToast = false
-                                    showInfoPositionAlert = true
-                                    
-                                } catch {
-                                    showLoadingPositionToast = false
-                                }
-                            }
-                        }
-                        .font(.system(size: 16, weight: .bold, design: .default))
-                        .frame(width: 160, height: 50)
-                        .foregroundColor(Color(red: 62/255, green: 206/255, blue: 76/255))
-                        .cornerRadius(30)
-                        .bold()
-                    }
+//                    if matchingNodesForAPI.count >= 3 {
+//                        Button("Calculate Position") {
+//                            Task {
+//                                showLoadingPositionToast = true
+//
+//                                do {
+//                                    response = try await fetchAPIConversionLocalGlobal(localName: room.name, nodesList: matchingNodesForAPI)
+//
+//                                    if let httpResponse = response.0 {
+//                                        let statusCode = httpResponse.statusCode
+//                                        print("Status code: \(statusCode)")
+//                                        
+//                                        if statusCode >= 400 {
+//                                            showLoadingPositionToast = false
+//                                            showErrorHTTPResponseToast = true
+//                                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+//                                                dismiss()
+//                                            }
+//                                            print("Error status code: \(statusCode)")
+//                                            return
+//                                        }
+//                                        print("Response JSON: \(response.1)")
+//                                    } else {
+//                                        print("Error: \(response.1)")
+//                                        showErrorHTTPResponseToast = true
+//                                        return
+//                                    }
+//                                
+//                                    print(floor.associationMatrix.keys)
+//
+//                                    responseFromServer = true
+//
+//                                    saveConversionGlobalLocal(response.1, floor.floorURL, floor)
+//                                    
+//                                    let fileManager = FileManager.default
+//                                    let associationMatrixURL = floor.floorURL.appendingPathComponent("\(floor.floorURL.lastPathComponent).json")
+//                                    if fileManager.fileExists(atPath: associationMatrixURL.path),
+//                                       let loadedMatrix = loadRoomPositionMatrixFromJson(from: associationMatrixURL, for: floor) {
+//                                        floor._associationMatrix = loadedMatrix
+//                                    } else {
+//                                        print("Failed to load RotoTraslationMatrix from JSON file for floor \(floor.floorURL.lastPathComponent)")
+//                                    }
+//
+//                                    room.hasPosition = true
+//                                    
+//                                    floor.planimetryRooms.handler.loadRoomsMaps(
+//                                        floor: floor,
+//                                        rooms: floor.rooms
+//                                    )
+//                                    
+//                                    print("Test aass. Matrix 2:")
+//                                    print(floor.associationMatrix.keys)
+//                                    
+//                                    roomView.resetColorNode()
+//                                    floorView.resetColorNode()
+//
+//                                    showLoadingPositionToast = false
+//                                    showInfoPositionAlert = true
+//                                    
+//                                } catch {
+//                                    showLoadingPositionToast = false
+//                                }
+//                            }
+//                        }
+//                        .font(.system(size: 16, weight: .bold, design: .default))
+//                        .frame(width: 160, height: 50)
+//                        .foregroundColor(Color(red: 62/255, green: 206/255, blue: 76/255))
+//                        .cornerRadius(30)
+//                        .bold()
+//                    }
                 }
             }
             .onDisappear{

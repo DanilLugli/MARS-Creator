@@ -14,9 +14,7 @@ struct SCNViewContainer: UIViewRepresentable {
     var massCenter = SCNNode()
     var cameraNode = SCNNode()
     var dimension = SCNVector3()
-    
-    var handler = HandleTap()
-    
+        
     var delegate = RenderDelegate()
     
     var rotoTraslation: [RoomPositionMatrix] = []
@@ -189,7 +187,6 @@ struct SCNViewContainer: UIViewRepresentable {
     }
     
     func makeUIView(context: Context) -> SCNView {
-        handler.scnView = scnView
         
         // Riconoscitore di pinch per lo zoom
         let pinchGesture = UIPinchGestureRecognizer(target: context.coordinator, action: #selector(context.coordinator.handlePinch(_:)))

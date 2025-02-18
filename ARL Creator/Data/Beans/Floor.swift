@@ -228,6 +228,9 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
             .appendingPathComponent("Rooms")         // Directory "Rooms"
             .appendingPathComponent(room.name)      // Sottocartella con nome stanza
         
+        self._associationMatrix.removeValue(forKey: room.name)
+        
+        
         do {
 
             if FileManager.default.fileExists(atPath: roomURL.path) {
@@ -426,6 +429,62 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
         }
     }
     
+    func addIdentityMatrixToJSON(to directoryURL: URL, for floor: Floor, roomName: String) {
+        let fileManager = FileManager.default
+        var folderURL = directoryURL
+
+        if folderURL.pathExtension.lowercased() == "json" {
+            folderURL.deleteLastPathComponent()
+        }
+
+        if !fileManager.fileExists(atPath: folderURL.path) {
+            do {
+                try fileManager.createDirectory(at: folderURL, withIntermediateDirectories: true, attributes: nil)
+            } catch {
+                print("Errore creando la directory: \(error.localizedDescription)")
+                return
+            }
+        }
+
+        let fileURL = folderURL.appendingPathComponent("\(floor.name).json")
+
+        var jsonDict: [String: [String: [[Double]]]] = [:]
+
+        // ✅ Mantieni le chiavi esistenti nel JSON senza modificarle
+        if fileManager.fileExists(atPath: fileURL.path) {
+            do {
+                let data = try Data(contentsOf: fileURL)
+                if let existingDict = try JSONSerialization.jsonObject(with: data, options: []) as? [String: [String: [[Double]]]] {
+                    jsonDict = existingDict
+                }
+            } catch {
+                print("Errore nella lettura del file JSON: \(error.localizedDescription)")
+            }
+        }
+
+        // ✅ Definizione delle matrici identità 4x4
+        let identityMatrix: [[Double]] = [
+            [1.0, 0.0, 0.0, 0.0],
+            [0.0, 1.0, 0.0, 0.0],
+            [0.0, 0.0, 1.0, 0.0],
+            [0.0, 0.0, 0.0, 1.0]
+        ]
+
+        // ✅ Aggiungi la nuova chiave senza modificare le altre
+        jsonDict[roomName] = [
+            "translation": identityMatrix,
+            "R_Y": identityMatrix
+        ]
+
+        do {
+            let jsonData = try JSONSerialization.data(withJSONObject: jsonDict, options: .prettyPrinted)
+            try jsonData.write(to: fileURL)
+            print("Matrice identità aggiunta per '\(roomName)' in \(fileURL.path)")
+        } catch {
+            print("Errore nel salvataggio del JSON: \(error.localizedDescription)")
+        }
+    }
+    
 //    func loadRoomPositionMatrixFromJSON(fileURL: URL) {
 //        do {
 //            let data = try Data(contentsOf: fileURL)
@@ -489,7 +548,7 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
         }
     }
     
-    func updateRoomPositionMatrixInJSON(for roomName: String, fileURL: URL) {
+    func updateAssociationMatrixInJSON(for roomName: String, fileURL: URL) {
         do {
             // Leggi il contenuto del file JSON
             var jsonData = try Data(contentsOf: fileURL)
@@ -528,6 +587,38 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
             print("Error updating association matrix in JSON: \(error)")
         }
     }
+    
+//    func updateRoomPositionMatrixInJSON(for roomName: String, fileURL: URL) {
+//        do {
+//            var jsonData = try Data(contentsOf: fileURL)
+//            guard var jsonDict = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: [String: [[Double]]]] else {
+//                print("Error: Cannot convert JSON data to dictionary")
+//                return
+//            }
+//
+//            guard let value = _associationMatrix[roomName] else {
+//                print("Room name \(roomName) not found in the association matrix")
+//                return
+//            }
+//            
+//            // ✅ Mantiene le matrici salvate per righe
+//            let translationArray = (0..<4).map { row in
+//                (0..<4).map { col in Double(value.translation[row, col]) }
+//            }
+//
+//            let r_YArray = (0..<4).map { row in
+//                (0..<4).map { col in Double(value.r_Y[row, col]) }
+//            }
+//            
+//            jsonDict[roomName] = ["translation": translationArray, "R_Y": r_YArray]
+//
+//            jsonData = try JSONSerialization.data(withJSONObject: jsonDict, options: .prettyPrinted)
+//            try jsonData.write(to: fileURL)
+//
+//        } catch {
+//            print("Error updating association matrix in JSON: \(error)")
+//        }
+//    }
     
     func saveOrUpdateAssociationMatrix(to directoryURL: URL, for floor: Floor, associationMatrix: [String: RoomPositionMatrix]) {
         let fileManager = FileManager.default

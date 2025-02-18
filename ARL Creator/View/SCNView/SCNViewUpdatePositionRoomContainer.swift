@@ -3,8 +3,6 @@ import SceneKit
 
 class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
     
-
-    
     private let identityMatrix = matrix_identity_float4x4
 
     @Published var rotoTraslation: RoomPositionMatrix = RoomPositionMatrix(
@@ -13,6 +11,13 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         r_Y: matrix_identity_float4x4
     )
     
+    @MainActor
+    @Published var showFornitures: Bool = false {
+        didSet {
+            toggleFornituresVisibility(show: showFornitures)
+        }
+    }
+    
     @Published var scnView: SCNView
     var cameraNode: SCNNode
     var massCenter: SCNNode = SCNNode()
@@ -20,7 +25,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
     @Published var floor: Floor?
     var roomName: String?
     
-    @Published var showFornitures: Bool = false // 🔥 Toggle per mobili
+//    @Published var showFornitures: Bool = false // 🔥 Toggle per mobili
 
     var zoomStep: CGFloat = 0.1
     var translationStep: CGFloat = 0.02
@@ -36,6 +41,36 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         self.cameraNode = cameraNode
         self.massCenter.worldPosition = SCNVector3(0, 0, 0)
         self.origin.simdWorldTransform = simd_float4x4([1.0,0,0,0], [0,1.0,0,0], [0,0,1.0,0], [0,0,0,1.0])
+    }
+    
+    @MainActor
+    func toggleFornituresVisibility(show: Bool) {
+        guard let roomNode = roomNode else {
+            print("DEBUG: No roomNode found!")
+            return
+        }
+
+        let furniturePrefixes = ["table", "storage", "chair", "sofa", "shelf", "cabinet"]
+
+        func findFurnitureNodes(in node: SCNNode) -> [SCNNode] {
+            var foundNodes: [SCNNode] = []
+
+            for child in node.childNodes {
+                if let nodeName = child.name?.lowercased(),
+                   furniturePrefixes.contains(where: { nodeName.contains($0) }) {
+                    foundNodes.append(child)
+                }
+                foundNodes.append(contentsOf: findFurnitureNodes(in: child)) // Cerca ricorsivamente nei figli
+            }
+            return foundNodes
+        }
+
+        let furnitureNodes = findFurnitureNodes(in: roomNode)
+
+        // Imposta la visibilità
+        furnitureNodes.forEach { $0.isHidden = !show }
+        
+        print("DEBUG: \(show ? "Showing" : "Hiding") \(furnitureNodes.count) furniture nodes.")
     }
     
     @MainActor
@@ -97,52 +132,48 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
             } else {
                 print("DEBUG: SceneCenterMarker not found in the container for room \(room.name), pivot not modified.")
             }
-            
+            // Definisce i tipi di nodi da considerare
             var targetPrefixes = ["Window", "Opening", "Door"]
-            if self.showFornitures {
-                // Se il toggle è attivo, includi anche mobili come Table e Storage
-                targetPrefixes.append(contentsOf: ["Table", "Storage"])
-            }
-            
-            let matchingNodes = findNodesRecursively(in: room.sceneObjects!, matching: targetPrefixes)
-            
-            matchingNodes.forEach { node in
+            let furniturePrefixes = ["Table", "Storage"]
 
+            if self.showFornitures {
+                targetPrefixes.append(contentsOf: furniturePrefixes)
+            }
+
+            let matchingNodes = findNodesRecursively(in: room.sceneObjects!, matching: targetPrefixes)
+
+            matchingNodes.forEach { node in
                 let clonedNode = node.clone()
                 clonedNode.name = "clone_" + (node.name ?? "Unnamed")
                 clonedNode.scale = SCNVector3(1, 1, 1)
 
                 if let originalGeometry = clonedNode.geometry {
                     let clonedGeometry = originalGeometry.copy() as! SCNGeometry
-
                     let material = SCNMaterial()
                     material.lightingModel = .physicallyBased
-                    
+
+                    // Definizione del colore in base al tipo di nodo
                     if let nodeName = clonedNode.name?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() {
-                        let nodePrefix = String(nodeName.prefix(10))
-                        
-                        print("DEBUG: nodeName -> \(nodeName), nodePrefix -> \(nodePrefix)")
-                        
-                        switch nodePrefix {
-                        case "clone_open":
+                        switch true {
+                        case nodeName.hasPrefix("clone_open"):
                             material.diffuse.contents = UIColor.blue
-                            //clonedNode.position.y += 2
-                        case "clone_door":
+                        case nodeName.hasPrefix("clone_door"):
                             material.diffuse.contents = UIColor.yellow
-                            //clonedNode.position.y += 2
-                        case "clone_wind":
+                        case nodeName.hasPrefix("clone_wind"):
                             material.diffuse.contents = UIColor.red
-                           // clonedNode.position.y += 2
-                        case "clone_wall":
+                        case nodeName.hasPrefix("clone_wall"):
                             material.diffuse.contents = UIColor.black
                             clonedNode.scale.z *= 0.3
                         default:
-                            print("DEFA")
                             material.diffuse.contents = UIColor.black.withAlphaComponent(0.3)
                         }
                     }
-    
+
                     clonedNode.geometry?.firstMaterial = material
+
+                    if furniturePrefixes.contains(where: { clonedNode.name?.lowercased().contains($0.lowercased()) == true }) {
+                        clonedNode.isHidden = !self.showFornitures
+                    }
 
                     containerNode.addChildNode(clonedNode)
 
@@ -154,7 +185,6 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
             return containerNode
         }
         
-        /// 🔍 **Funzione per trovare nodi in modo ricorsivo**
         func findNodesRecursively(in nodes: [SCNNode], matching prefixes: [String]) -> [SCNNode] {
             var resultNodes: [SCNNode] = []
             var seenNodeNames = Set<String>()
@@ -215,7 +245,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         
         drawSceneObjects(scnView: self.scnView, borders: true, nodeOrientation: true)
         
-        setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: setMassCenter(scnView: self.scnView))
+        setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: setMassCenter(scnView: self.scnView, forNodeName: roomNode.name))
        // createAxesNode()
     }
     

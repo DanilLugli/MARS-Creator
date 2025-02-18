@@ -143,13 +143,12 @@ struct RoomScanningView: View {
                                                     .font(.system(size: 18, weight: .bold, design: .default))
                                                     .bold()
                                                     .padding()
-                                                //                                                                                        .background(Color.green)
                                                     .foregroundColor(Color.green)
                                                     .cornerRadius(30)
                                             }.padding(.trailing, 20)
                                             
                                         }
-                                    }//.border(Color.green, width: 3)
+                                    }
 
                                     HStack{
                                         Spacer()
@@ -166,8 +165,9 @@ struct RoomScanningView: View {
                                                     .font(.system(size: 18, weight: .bold, design: .default))
                                                     .bold()
                                                     .padding()
-                                                //                                            .background(Color.green)
-                                                    .foregroundColor(Color.white)                                            .cornerRadius(30)
+                                                    .foregroundColor(Color.white)
+                                                    .cornerRadius(30)
+                                                
                                             }.padding(.trailing, 20)
                                         }
                                     }

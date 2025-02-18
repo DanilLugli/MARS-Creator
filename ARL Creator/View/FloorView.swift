@@ -92,33 +92,33 @@ struct FloorView: View {
                             }
                             
                             Divider()
-                            
-                            NavigationLink(destination: FloorScanningView(floor: floor)){
+                            if FileManager.default.fileExists(atPath: floor.floorURL
+                                .appendingPathComponent("MapUsdz")
+                                .appendingPathComponent("\(floor.name).usdz")
+                                .path) {
+                                
+                                // ✅ Se il file esiste → Mostra "Update Planimetry"
                                 Button(action: {
-                                    //                                isOptionsSheetPresented per aprire il confirmDialog
-                                    //                                isOptionsSheetPresented = true
-                                    //                                isScanningFloorPlanimetry per aprire direttamente l'AR'
-                                    self.isScanningFloorPlanimetry = true
+                                    alertMessage = """
+                                        Proceeding with this update will permanently delete:
+
+                                        1. The current \(floor.name)'s planimetry
+                                        2. All room positions  
+
+                                        This action cannot be undone. Are you sure you want to continue?
+                                        """
+                                    showFloorUpdatePlanimetryAlert = true
                                 }) {
+                                    Label("Update Planimetry", systemImage: "arrow.clockwise")
+                                }
+                                
+                            } else {
+                                
+                                // ✅ Se il file NON esiste → Mostra "Create Planimetry" con NavigationLink
+                                NavigationLink(destination: FloorScanningView(floor: floor)) {
                                     Label("Create Planimetry", systemImage: "plus")
                                 }
-                                .disabled(FileManager.default.fileExists(atPath: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz").path))
                             }
-                            
-                            Button(action: {
-                                alertMessage = """
-                                    Proceeding with this update will permanently delete:
-
-                                    1. The current \(floor.name)'s planimetry
-                                    2. All room positions  
-
-                                    This action cannot be undone. Are you sure you want to continue?
-                                    """
-                                showFloorUpdatePlanimetryAlert = true
-                            }) {
-                                Label("Update Planimetry", systemImage: "arrow.clockwise")
-                            }
-                            .disabled(!FileManager.default.fileExists(atPath: floor.floorURL.appendingPathComponent("MapUsdz").appendingPathComponent("\(floor.name).usdz").path))
                             
                             Divider()
                             
@@ -387,8 +387,8 @@ struct FloorView: View {
 //        // Add identity matrix for the new room
         floor._associationMatrix[newRoom.name] = RoomPositionMatrix(name: newRoom.name, translation: matrix_identity_float4x4, r_Y: matrix_identity_float4x4)
         
-        floor._associationMatrix[newRoom.name]?.debugPrintRoomPositionMatrix(roomPositionMatrix: floor._associationMatrix[newRoom.name]!)
-        floor.saveOrUpdateAssociationMatrix(to: floor.floorURL.appendingPathComponent("\(floor.name).json"), for: self.floor, associationMatrix: floor.associationMatrix)
+//        floor._associationMatrix[newRoom.name]?.debugPrintRoomPositionMatrix(roomPositionMatrix: floor._associationMatrix[newRoom.name]!)
+        floor.addIdentityMatrixToJSON(to: floor.floorURL.appendingPathComponent("\(floor.name).json"), for: floor, roomName: newRoom.name)
         
 //        updateJSONFile([newRoom.name : floor._associationMatrix[newRoom.name]], floor.floorURL.appendingPathComponent("\(floor.name).json"), floor)
 //        //floor.saveAssociationMatrixToJSON(fileURL: floor.floorURL.appendingPathComponent("\(floor.floorURL.lastPathComponent).json"))

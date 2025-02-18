@@ -356,6 +356,12 @@ struct RoomView: View {
         .confirmationDialog("Are you sure to delete Room?", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
             Button("Yes", role: .destructive) {
                 floor.deleteRoom(room: room)
+                
+//                floor.planimetryRooms?.handler.loadRoomsMaps(
+//                    floor: floor,
+//                    rooms: floor.rooms
+//                )
+                
                 showDeleteRoomToast = true
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                     dismiss()
@@ -461,30 +467,30 @@ struct RoomView: View {
 //                        .path))
                     
                     //Questo button per aprire direttamente l'AR
-                    NavigationLink(destination: RoomScanningView(room: room)){
-                        Button(action: { self.isNavigationScanRoomActive = true }) {
-                            Label("Create Planimetry", systemImage: "plus")
-                        }
-                        .disabled(FileManager.default.fileExists(atPath: room.roomURL
-                            .appendingPathComponent("MapUsdz")
-                            .appendingPathComponent("\(room.name).usdz")
-                            .path))
-                    }
-                    
-                    Button(action: {
-                        alertMessage = """
-                        Proceeding with this update will permanently delete the current \(room.name)'s planimetry.
-
-                        This action cannot be undone. Are you sure you want to continue?
-                        """
-                        showRoomUpdatePlanimetryAlert = true
-                    }) {
-                        Label("Update Planimetry", systemImage: "arrow.clockwise")
-                    }
-                    .disabled(!FileManager.default.fileExists(atPath: room.roomURL
+                    if FileManager.default.fileExists(atPath: room.roomURL
                         .appendingPathComponent("MapUsdz")
                         .appendingPathComponent("\(room.name).usdz")
-                        .path))
+                        .path) {
+                        
+                        // ✅ Se il file esiste → Mostra "Update Planimetry"
+                        Button(action: {
+                            alertMessage = """
+                            Proceeding with this update will permanently delete the current \(room.name)'s planimetry.
+
+                            This action cannot be undone. Are you sure you want to continue?
+                            """
+                            showRoomUpdatePlanimetryAlert = true
+                        }) {
+                            Label("Update Planimetry", systemImage: "arrow.clockwise")
+                        }
+                        
+                    } else {
+                        
+                        // ✅ Se il file NON esiste → Mostra "Create Planimetry" con NavigationLink
+                        NavigationLink(destination: RoomScanningView(room: room)) {
+                            Label("Create Planimetry", systemImage: "plus")
+                        }
+                    }
                     
                     Divider()
                     
@@ -512,18 +518,19 @@ struct RoomView: View {
 //                    }
 //                    .disabled(true)
                     
-                    NavigationLink(destination: AutomaticRoomPositionView(floor: self.floor, room: self.room)) {
-                        Label("Create Room Position Association Mode", systemImage: "point.topleft.down.to.point.bottomright.filled.curvepath")
+                    NavigationLink(destination: ManualRoomPositionView(floor: self.floor, room: self.room)) {
+                        Label("Create Room Position", systemImage: "point.topleft.down.to.point.bottomright.filled.curvepath")
                     }
                     
 //                    Divider()
                     
-                    NavigationLink(destination: ManualRoomPositionView(floor: self.floor, room: self.room)) {
-                        Label("Correct Room Position", systemImage: "arrow.up.and.down.and.arrow.left.and.right")
-                    }
+//                    NavigationLink() {
+//                        Label("Correct Room Position", systemImage: "arrow.up.and.down.and.arrow.left.and.right")
+//                    }
                     //.disabled(!doesMatrixExist(for: room.name, in: floor.associationMatrix))
                     
                 } label: {
+                    
                     Image(systemName: "plus.circle.fill")
                         .font(.system(size: 22))
                         .symbolRenderingMode(.palette)
@@ -568,13 +575,7 @@ struct RoomView: View {
                         .font(.system(size: 22))
                         .foregroundStyle(.white, .blue, .blue)
                 }
-                
-            case 4:
-                NavigationLink(destination: AddTransitionZoneView(floor: floor, room: room)) {
-                    Image(systemName: "plus.circle.fill")
-                        .font(.system(size: 22))
-                        .foregroundStyle(.white, .blue, .blue)
-                }
+            
                 
             default:
                 EmptyView()

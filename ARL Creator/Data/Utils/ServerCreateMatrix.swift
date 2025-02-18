@@ -96,56 +96,56 @@ func printMatrix(matrix: [[Double]], decimal: Int) -> String {
     return roundedMatrix.map { $0.map { String(repeating: " ", count: maxLength - $0.count) + $0 }.joined(separator: " ") }.joined(separator: "\n")
 }
 
-func saveConversionGlobalLocal(_ conversions: [String: Any], _ URLFile: URL, _ floor: Floor) {
-    var filteredDict = conversions.filter { $0.key.contains("TRANSFORMATION.LOCALTOGLOBAL") }
-    filteredDict = Dictionary(uniqueKeysWithValues:filteredDict.map { key, value in
-        let kMOD = String(key.split(separator: "_TRANSFORMATION.LOCALTOGLOBAL").first!)
-        var vMOD = value as! [String: Any]
-        vMOD = vMOD.filter{$0.key.contains("R_Y") || $0.key.contains("translation")}
-        return (kMOD, vMOD)
-    })
-    
-    updateJSONFile(filteredDict, URLFile, floor)
-    
-}
+//func saveConversionGlobalLocal(_ conversions: [String: Any], _ URLFile: URL, _ floor: Floor) {
+//    var filteredDict = conversions.filter { $0.key.contains("TRANSFORMATION.LOCALTOGLOBAL") }
+//    filteredDict = Dictionary(uniqueKeysWithValues:filteredDict.map { key, value in
+//        let kMOD = String(key.split(separator: "_TRANSFORMATION.LOCALTOGLOBAL").first!)
+//        var vMOD = value as! [String: Any]
+//        vMOD = vMOD.filter{$0.key.contains("R_Y") || $0.key.contains("translation")}
+//        return (kMOD, vMOD)
+//    })
+//    
+//    updateJSONFile(filteredDict, URLFile, floor)
+//    
+//}
 
-func updateJSONFile(_ dict: [String: Any], _ URLFile: URL, _ floor: Floor) {
-    
-    let fileManager = FileManager.default
-    let fileURL = URLFile.appending(path: "\(floor.name).json")
-    
-    if fileManager.fileExists(atPath: fileURL.path) {
-        do {
-            var jsonData = try Data(contentsOf: fileURL)
-            var json = try JSONSerialization.jsonObject(with: jsonData, options: []) as! [String: Any]
-            for (key, value) in dict {
-                json[key] = value
-            }
-            jsonData = try JSONSerialization.data(withJSONObject: json, options: .prettyPrinted)
-            try jsonData.write(to: fileURL)
-           
-            if let updatedAssociationMatrix = loadRoomPositionMatrixFromJson(from: fileURL, for: floor) {
-                floor.associationMatrix = updatedAssociationMatrix
-            } else {
-                print("Failed to load associationMatrix from JSON.")
-            }
-        } catch {
-            print("Errore_1")
-            print(error.localizedDescription)
-        }
-    } else {
-        do {
-
-            let directory = fileURL.deletingLastPathComponent()
-            if !fileManager.fileExists(atPath: directory.path) {
-                try fileManager.createDirectory(at: directory, withIntermediateDirectories: true, attributes: nil)
-            }
-
-            let jsonData = try JSONSerialization.data(withJSONObject: dict, options: .prettyPrinted)
-            try jsonData.write(to: fileURL)
-        } catch {
-            print("Errore_2")
-            print(error.localizedDescription)
-        }
-    }
-}
+//func updateJSONFile(_ dict: [String: Any], _ URLFile: URL, _ floor: Floor) {
+//    
+//    let fileManager = FileManager.default
+//    let fileURL = URLFile.appending(path: "\(floor.name).json")
+//    
+//    if fileManager.fileExists(atPath: fileURL.path) {
+//        do {
+//            var jsonData = try Data(contentsOf: fileURL)
+//            var json = try JSONSerialization.jsonObject(with: jsonData, options: []) as! [String: Any]
+//            for (key, value) in dict {
+//                json[key] = value
+//            }
+//            jsonData = try JSONSerialization.data(withJSONObject: json, options: .prettyPrinted)
+//            try jsonData.write(to: fileURL)
+//           
+//            if let updatedAssociationMatrix = loadRoomPositionMatrixFromJson(from: fileURL) {
+//                floor.associationMatrix = updatedAssociationMatrix
+//            } else {
+//                print("Failed to load associationMatrix from JSON.")
+//            }
+//        } catch {
+//            print("Errore_1")
+//            print(error.localizedDescription)
+//        }
+//    } else {
+//        do {
+//
+//            let directory = fileURL.deletingLastPathComponent()
+//            if !fileManager.fileExists(atPath: directory.path) {
+//                try fileManager.createDirectory(at: directory, withIntermediateDirectories: true, attributes: nil)
+//            }
+//
+//            let jsonData = try JSONSerialization.data(withJSONObject: dict, options: .prettyPrinted)
+//            try jsonData.write(to: fileURL)
+//        } catch {
+//            print("Errore_2")
+//            print(error.localizedDescription)
+//        }
+//    }
+//}

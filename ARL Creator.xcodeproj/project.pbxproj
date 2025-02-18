@@ -10,7 +10,6 @@
 		AA0A80742C9472B600501EB4 /* MapControllerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0A80732C9472B600501EB4 /* MapControllerView.swift */; };
 		AA0A80762C9475DC00501EB4 /* MoveObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0A80752C9475DC00501EB4 /* MoveObject.swift */; };
 		AA0A80782C9477A300501EB4 /* MoveDimensionObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0A80772C9477A300501EB4 /* MoveDimensionObject.swift */; };
-		AA2289472C8CEB63008452D8 /* AddTransitionZoneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2289462C8CEB63008452D8 /* AddTransitionZoneView.swift */; };
 		AA2CA54C2C3D7ABA00C88C94 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA54B2C3D7ABA00C88C94 /* ContentView.swift */; };
 		AA2CA5512C3DB5F400C88C94 /* RoomCaptureViewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA5502C3DB5F400C88C94 /* RoomCaptureViewContainer.swift */; };
 		AA2CA5552C3DB61100C88C94 /* ExportRoomViewContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2CA5542C3DB61100C88C94 /* ExportRoomViewContainer.swift */; };
@@ -34,7 +33,6 @@
 		AA78F5EA2C33006F0044F825 /* BuildingModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA78F5E92C33006F0044F825 /* BuildingModel.swift */; };
 		AA78F5ED2C3303910044F825 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA78F5EC2C3303910044F825 /* Logger.swift */; };
 		AA78F5F32C3430C80044F825 /* ServerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA78F5F22C3430C80044F825 /* ServerManager.swift */; };
-		AA88EE832D552F26009E8014 /* FindMarkerPositionARSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA88EE822D552F26009E8014 /* FindMarkerPositionARSession.swift */; };
 		AA8E0A572C52BA6C0097BDCD /* ARSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA8E0A562C52BA6C0097BDCD /* ARSessionManager.swift */; };
 		AA8E0A5B2C52C69D0097BDCD /* NamedURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA8E0A5A2C52C69D0097BDCD /* NamedURL.swift */; };
 		AA8E0A5E2C57E4B20097BDCD /* ComplexModule in Frameworks */ = {isa = PBXBuildFile; productRef = AA8E0A5D2C57E4B20097BDCD /* ComplexModule */; };
@@ -63,7 +61,6 @@
 		AA0A80732C9472B600501EB4 /* MapControllerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapControllerView.swift; sourceTree = "<group>"; };
 		AA0A80752C9475DC00501EB4 /* MoveObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoveObject.swift; sourceTree = "<group>"; };
 		AA0A80772C9477A300501EB4 /* MoveDimensionObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoveDimensionObject.swift; sourceTree = "<group>"; };
-		AA2289462C8CEB63008452D8 /* AddTransitionZoneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddTransitionZoneView.swift; sourceTree = "<group>"; };
 		AA2CA54B2C3D7ABA00C88C94 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		AA2CA5502C3DB5F400C88C94 /* RoomCaptureViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomCaptureViewContainer.swift; sourceTree = "<group>"; };
 		AA2CA5542C3DB61100C88C94 /* ExportRoomViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportRoomViewContainer.swift; sourceTree = "<group>"; };
@@ -86,7 +83,6 @@
 		AA78F5E92C33006F0044F825 /* BuildingModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BuildingModel.swift; sourceTree = "<group>"; };
 		AA78F5EC2C3303910044F825 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
 		AA78F5F22C3430C80044F825 /* ServerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServerManager.swift; sourceTree = "<group>"; };
-		AA88EE822D552F26009E8014 /* FindMarkerPositionARSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FindMarkerPositionARSession.swift; sourceTree = "<group>"; };
 		AA8E0A562C52BA6C0097BDCD /* ARSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ARSessionManager.swift; sourceTree = "<group>"; };
 		AA8E0A5A2C52C69D0097BDCD /* NamedURL.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NamedURL.swift; sourceTree = "<group>"; };
 		AA8E0A632C57E50F0097BDCD /* VisualizeRoomViewContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualizeRoomViewContainer.swift; sourceTree = "<group>"; };
@@ -144,7 +140,6 @@
 				AAD778A82C528C600091181A /* FloorCaptureViewContainer.swift */,
 				AA8E0A632C57E50F0097BDCD /* VisualizeRoomViewContainer.swift */,
 				AA2CA5542C3DB61100C88C94 /* ExportRoomViewContainer.swift */,
-				AA88EE822D552F26009E8014 /* FindMarkerPositionARSession.swift */,
 			);
 			path = AR;
 			sourceTree = "<group>";
@@ -174,7 +169,6 @@
 				AAE57F9D2C3764FC00F0196F /* FloorView.swift */,
 				AA2CA55A2C3F07A500C88C94 /* RoomView.swift */,
 				AA31B8A52D350BAC0059C685 /* FloorAltitudeTabView.swift */,
-				AA2289462C8CEB63008452D8 /* AddTransitionZoneView.swift */,
 				AA8E0A6B2C5D02280097BDCD /* FilePickerView.swift */,
 				AAEE73822D3A66AF007505A3 /* RoomPositionViews */,
 				AAEE73812D3960BC007505A3 /* SCNView */,
@@ -381,7 +375,6 @@
 				AA6110112C621CF400B61D0B /* Utils.swift in Sources */,
 				AA78F5DD2C2DB51D0044F825 /* BuildingView.swift in Sources */,
 				AA8E0A572C52BA6C0097BDCD /* ARSessionManager.swift in Sources */,
-				AA88EE832D552F26009E8014 /* FindMarkerPositionARSession.swift in Sources */,
 				AA0A80782C9477A300501EB4 /* MoveDimensionObject.swift in Sources */,
 				AA4C4B902CF78B3D0033A4DF /* Extension.swift in Sources */,
 				AA64CC822C47FDA8005C883B /* RoomPositionMatrix.swift in Sources */,
@@ -397,7 +390,6 @@
 				AAE57F9E2C3764FC00F0196F /* FloorView.swift in Sources */,
 				AA78F5EA2C33006F0044F825 /* BuildingModel.swift in Sources */,
 				AA8E0A6C2C5D02280097BDCD /* FilePickerView.swift in Sources */,
-				AA2289472C8CEB63008452D8 /* AddTransitionZoneView.swift in Sources */,
 				AAA29E6A2C1711AA00CA267C /* AppDelegate.swift in Sources */,
 				AA0A80742C9472B600501EB4 /* MapControllerView.swift in Sources */,
 				AA8E0A6A2C5BA4D90097BDCD /* ServerCreateMatrix.swift in Sources */,

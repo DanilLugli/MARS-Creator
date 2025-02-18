@@ -10,16 +10,14 @@ struct RoomMarkerTabView: View {
     @State private var selectedMarker: ReferenceMarker? = nil
     
     @StateObject private var worldMapLoader: ARWorldMapLoader
-    
-    @State private var arViewContainer: FindMarkerPositionARSession
-    
+        
     @State private var showDeleteRMToast: Bool = false
     @State private var showUpdateRMToast: Bool = false
     
     init(room: Room) {
             self.room = room
             _worldMapLoader = StateObject(wrappedValue: ARWorldMapLoader(roomURL: room.roomURL, roomName: room.name))
-             arViewContainer = FindMarkerPositionARSession(worldMapURL: FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!.appendingPathComponent("MyARWorldMap.worldmap"), room: room)
+
         }
     
 //    let mapFileWithExtension = roomURL.appendingPathComponent("Maps").appendingPathComponent("\(room.name).map")

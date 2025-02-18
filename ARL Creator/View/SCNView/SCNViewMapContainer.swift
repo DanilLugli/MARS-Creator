@@ -178,11 +178,10 @@ class SCNViewMapHandler: ObservableObject {
     }
     
     func applyRotoTraslation(to node: SCNNode, with rotoTraslation: RoomPositionMatrix) {
-        print(" ViewMap PRE\n")
-        printMatrix(node.simdWorldTransform)
+        print("CHECK APPLY ROOM POSITION MATRIX TO \(String(describing: node.name))\n")
+        
         let combinedMatrix = rotoTraslation.translation * rotoTraslation.r_Y
-        print("CombinedMatrix\n")
-        printMatrix(combinedMatrix)
+        
         node.simdWorldTransform = combinedMatrix * node.simdWorldTransform
         print("POST\n")
         printMatrix(node.simdWorldTransform)

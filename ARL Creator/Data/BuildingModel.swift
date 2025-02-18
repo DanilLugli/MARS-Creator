@@ -130,24 +130,9 @@ class BuildingModel: ObservableObject {
                     
                     let associationMatrixURL = floorURL.appendingPathComponent("\(floorURL.lastPathComponent).json")
                     if fileManager.fileExists(atPath: associationMatrixURL.path),
-                       let loadedMatrix = loadRoomPositionMatrixFromJson(from: associationMatrixURL, for: floor) {
+                       let loadedMatrix = loadRoomPositionFromJson(from: associationMatrixURL, for: floor) {
                         floor._associationMatrix = loadedMatrix
 
-                        print("BUILDING: \(buildingURL.lastPathComponent)")
-                        print("Loaded Association Matrix for floor \(floorURL.lastPathComponent):")
-                        for (roomName, matrix) in floor._associationMatrix {
-                            print("Room: \(roomName)")
-                            print("Translation Matrix:")
-                            for i in 0..<4 {
-                                let row = "[\(matrix.translation[i,0]), \(matrix.translation[i,1]), \(matrix.translation[i,2]), \(matrix.translation[i,3])]"
-                                print(row)
-                            }
-                            print("R_Y Matrix:")
-                            for i in 0..<4 {
-                                let row = "[\(matrix.r_Y[i,0]), \(matrix.r_Y[i,1]), \(matrix.r_Y[i,2]), \(matrix.r_Y[i,3])]"
-                                print(row)
-                            }
-                        }
                     } else {
                         print("Failed to load RotoTraslationMatrix from JSON file for floor \(floorURL.lastPathComponent)")
                     }
@@ -285,7 +270,7 @@ class BuildingModel: ObservableObject {
                                 }
                             }
 
-                            // ✅ Salviamo i dati aggiornati nel JSON se ci sono stati cambiamenti
+
                             if updatedMarkersData != markersData {
                                 let updatedJsonData = try JSONEncoder().encode(updatedMarkersData)
                                 try updatedJsonData.write(to: markerDataURL)

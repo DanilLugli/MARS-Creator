@@ -52,12 +52,12 @@ func printMatrix(_ matrix: simd_float4x4, label: String = "Matrix") {
     print("\n")
 }
 
-func loadRoomPositionMatrixFromJson(from fileURL: URL, for floor: Floor) -> [String: RoomPositionMatrix]? {
+func loadRoomPositionFromJson(from fileURL: URL, for floor: Floor) -> [String: RoomPositionMatrix]? {
     do {
-        
+        // Leggi il contenuto del file JSON
         let data = try Data(contentsOf: fileURL)
         
-        
+        // Effettua il parsing del JSON in un dizionario
         let jsonObject = try JSONSerialization.jsonObject(with: data, options: [])
         guard let jsonDict = jsonObject as? [String: [String: [[Double]]]] else {
             print("Invalid JSON format")
@@ -111,10 +111,11 @@ func getRow(from matrix: simd_float4x4, row: Int) -> simd_float4 {
 /// Prima di restituire il risultato, stampa il contenuto di ogni voce (nome, translation e r_Y).
 func doesMatrixExist(for roomName: String, in associationMatrix: [String: RoomPositionMatrix]) -> Bool {
     print("Contenuto di associationMatrix:")
+    
     for (_, matrixStruct) in associationMatrix {
         print("Room Name: \(matrixStruct.name)")
         
-        // Stampa la matrice di traslazione
+        // 🔹 Stampa la matrice di traslazione
         print("Translation Matrix:")
         for i in 0..<4 {
             let row = getRow(from: matrixStruct.translation, row: i)
@@ -122,7 +123,6 @@ func doesMatrixExist(for roomName: String, in associationMatrix: [String: RoomPo
             print(rowString)
         }
         
-        // Stampa la matrice di rotazione (r_Y)
         print("Rotation Y Matrix:")
         for i in 0..<4 {
             let row = getRow(from: matrixStruct.r_Y, row: i)
@@ -132,8 +132,26 @@ func doesMatrixExist(for roomName: String, in associationMatrix: [String: RoomPo
         print("-----")
     }
     
-    print("RESULT: \(associationMatrix[roomName] != nil)")
-    return associationMatrix[roomName] != nil
+    guard let matrixStruct = associationMatrix[roomName] else {
+        print("RESULT: false (la matrice non esiste)")
+        return false
+    }
+    
+    let isTranslationIdentity = isIdentityMatrix(matrixStruct.translation)
+    let isRotationIdentity = isIdentityMatrix(matrixStruct.r_Y)
+    
+    if isTranslationIdentity && isRotationIdentity {
+        print("RESULT: false (la matrice esiste, ma entrambe sono matrici identità)")
+        return false
+    }
+    
+    print("RESULT: true (la matrice esiste ed è valida)")
+    return true
+}
+
+func isIdentityMatrix(_ matrix: simd_float4x4) -> Bool {
+    let identity = matrix_identity_float4x4
+    return matrix == identity
 }
 
 func clearJSONFile(at fileURL: URL) {
