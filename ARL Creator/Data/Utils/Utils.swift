@@ -87,7 +87,7 @@ func loadRoomPositionFromJson(from fileURL: URL, for floor: Floor) -> [String: R
             
             // Aggiungi l'oggetto al dizionario
             associationMatrix[roomName] = rotoTraslationMatrix
-            floor.getRoomByName(roomName)?.hasPosition = true
+            floor.getRoomByName(roomName)?.hasPosition = doesMatrixExist(for: roomName, in: associationMatrix)
         }
         
         return associationMatrix

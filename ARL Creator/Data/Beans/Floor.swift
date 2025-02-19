@@ -243,14 +243,12 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
         } catch {
             print("Errore durante l'eliminazione della stanza \(room.name): \(error)")
         }
-//        
-//        do{
-//            
-//        }
-//        catch{
-//            print(\(error))
-//        }
-//        
+            
+        self.planimetryRooms.handler.loadRoomsMaps(
+            floor: self,
+            rooms: self.rooms
+        )
+        
     }
     
     func getRoomByName(_ name: String) -> Room? {

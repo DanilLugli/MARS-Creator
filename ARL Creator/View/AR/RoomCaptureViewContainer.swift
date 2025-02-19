@@ -7,14 +7,14 @@ struct RoomCaptureViewContainer: UIViewRepresentable {
     typealias UIViewType = RoomCaptureView
     
     var arSession = ARSession()
-    var sessionDelegate: SessionDelegate
+    @ObservedObject var sessionDelegate: SessionDelegate
     let configuration: RoomCaptureSession.Configuration = RoomCaptureSession.Configuration()
 
     let roomCaptureView: RoomCaptureView
     
-    init(room: Room) {
+    init(room: Room, sessionDelegate: SessionDelegate) {
         
-        sessionDelegate = SessionDelegate(room: room)
+        self.sessionDelegate = sessionDelegate
         
         if #available(iOS 17.0, *) {
             roomCaptureView = RoomCaptureView(frame: .zero, arSession: arSession)
@@ -61,7 +61,7 @@ struct RoomCaptureViewContainer: UIViewRepresentable {
         arSession.pause()
     }
     
-    class SessionDelegate: UIViewController, RoomCaptureSessionDelegate, RoomCaptureViewDelegate, ARSessionDelegate {
+    class SessionDelegate: UIViewController, RoomCaptureSessionDelegate, RoomCaptureViewDelegate, ARSessionDelegate, ObservableObject {
         
         var currentMapName: String?
         var finalResults: CapturedRoom?
@@ -72,6 +72,21 @@ struct RoomCaptureViewContainer: UIViewRepresentable {
         var r: RoomCaptureViewContainer?
         @State var room: Room
         var previewVisualizer: VisualizeRoomViewContainer!
+        
+        @Published var detectedObjects: Int = 0 {
+            didSet {
+                objectWillChange.send()
+            }
+        }
+
+        @Published var userDistance: CGFloat = 0.0 {
+            didSet {
+                objectWillChange.send()
+            }
+        }
+        
+        private var initialPosition: simd_float4x4?
+        
         
         init(room: Room) {
             self.room = room
@@ -88,6 +103,20 @@ struct RoomCaptureViewContainer: UIViewRepresentable {
         }
         
         func captureSession(_ session: RoomCaptureSession, didUpdate room: CapturedRoom) {
+            DispatchQueue.main.async {
+                self.detectedObjects = room.objects.count
+                print("DEBUG: Oggetti rilevati: \(self.detectedObjects)")
+                if let frame = session.arSession.currentFrame {
+                    if self.initialPosition == nil {
+                        self.initialPosition = frame.camera.transform
+                    }
+
+                    if let start = self.initialPosition {
+                        self.userDistance = self.calculateDistance(from: start, to: frame.camera.transform)
+                        print("DEBUG: Distanza attuale: \(self.userDistance) metri")
+                    }
+                }
+            }
             
             session.arSession.getCurrentWorldMap { worldMap, error in
                 guard let worldMap = worldMap else {
@@ -108,6 +137,16 @@ struct RoomCaptureViewContainer: UIViewRepresentable {
                 
             }
         }
+        
+        func captureSession(_ session: RoomCaptureSession, didStartWith configuration: RoomCaptureSession.Configuration) {}
+
+        private func calculateDistance(from start: simd_float4x4, to current: simd_float4x4) -> CGFloat {
+            let startPosition = SIMD3<Float>(start.columns.3.x, start.columns.3.y, start.columns.3.z)
+            let currentPosition = SIMD3<Float>(current.columns.3.x, current.columns.3.y, current.columns.3.z)
+            
+            return CGFloat(simd_distance(startPosition, currentPosition))
+        }
+        
 
         func captureSession(_ session: RoomCaptureSession, didEndWith data: CapturedRoomData, error: Error?) {
             
@@ -188,7 +227,6 @@ struct RoomCaptureViewContainer: UIViewRepresentable {
         }
         
         func captureSession(_ session: RoomCaptureSession, didProvide instruction: RoomCaptureSession.Instruction) {}
-        func captureSession(_ session: RoomCaptureSession, didStartWith configuration: RoomCaptureSession.Configuration) {}
         func captureSession(_ session: RoomCaptureSession, didAdd room: CapturedRoom) {}
         func captureSession(_ session: RoomCaptureSession, didChange room: CapturedRoom) {}
         func captureSession(_ session: RoomCaptureSession, didRemove room: CapturedRoom) {}

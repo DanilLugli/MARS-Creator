@@ -47,7 +47,7 @@ struct SCNViewContainer: UIViewRepresentable {
         
         self.scnView.scene = scene
         drawSceneObjects(scnView: self.scnView, borders: borders, nodeOrientation: false)
-        
+        createAxesNode()
         setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: setMassCenter(scnView: self.scnView))
         floor.isPlanimetryLoaded = true
     }

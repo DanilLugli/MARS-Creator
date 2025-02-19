@@ -21,11 +21,6 @@ struct FloorPlanimetryView: View {
                         .font(.headline)
                     Image(systemName: "plus.circle")
                         .foregroundColor(.gray)
-                    Text("icon inside")
-                        .foregroundColor(.gray)
-                        .font(.headline)
-                    Image(systemName: "ellipsis.circle")
-                        .foregroundColor(.gray)
                 }
             } else {
                 VStack {

@@ -18,8 +18,14 @@ struct RoomScanningView: View {
     
     @State var showCreateRoomPlanimetryToast = false
     @State var showRestartButton = false
+    @State var showProgressView = false
+    
+    @State private var scannedDistance: CGFloat = 0.0
+    @State private var featuresPoint: Int = 0
+    @State private var detectedObjects: Int = 0
     
     @State var captureView: RoomCaptureViewContainer?
+    @StateObject var sessionDelegate: RoomCaptureViewContainer.SessionDelegate
     
     @State private var dimensions: [String] = []
     @State var message = ""
@@ -31,6 +37,7 @@ struct RoomScanningView: View {
     
     init(room: Room) {
         self._room = State(initialValue: room)
+        _sessionDelegate = StateObject(wrappedValue: RoomCaptureViewContainer.SessionDelegate(room: room))
     }
     
     var body: some View {
@@ -38,9 +45,17 @@ struct RoomScanningView: View {
             ZStack {
                 Color.customBackground.ignoresSafeArea()
                 if isScanningRoom, let captureView = captureView {
-                    captureView
-                        .edgesIgnoringSafeArea(.all)
-                        .toolbarBackground(.hidden, for: .navigationBar)
+                    ZStack(alignment: .top) {
+                        captureView
+                            .edgesIgnoringSafeArea(.all)
+                            .toolbarBackground(.hidden, for: .navigationBar)
+                        
+                        if showProgressView{
+                            RoomScanProgressView(scannedDistance: sessionDelegate.userDistance, detectedObjects: sessionDelegate.detectedObjects, featuresPoint: worldMapNewFeatures)
+                                .padding(.top, 20)
+                        }
+
+                    }
                 }
                 else {
                     
@@ -90,7 +105,7 @@ struct RoomScanningView: View {
                                         .padding(.top, 60)
                                         .frame(maxWidth: .infinity)
                                     
-                                }
+                                }.padding(.top,28)
                             }
 
                             VStack{
@@ -112,6 +127,7 @@ struct RoomScanningView: View {
                                         
                                             Button(action: {
                                                 captureView?.restartCapture()
+                                                showProgressView = true
                                                 viewError = false
                                             }) {
                                                 Text("Restart Scan")
@@ -135,6 +151,7 @@ struct RoomScanningView: View {
                                         if !showScanningRoomCard{
                                             Button(action: {
                                                 showCreateRoomPlanimetryToast = true
+                                                showProgressView = false
                                                 DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                                                     dismiss()
                                                 }
@@ -155,11 +172,11 @@ struct RoomScanningView: View {
                                         if showScanningRoomCard{
                                             
                                             Button(action: {
-                                                    isScanningRoom = true
-                                                    
-                                                    captureView?.stopCapture()
-                                                    showScanningRoomCard = false
-                                                    _ = mapName.isEmpty ? "Map_\(Date().timeIntervalSince1970)" : mapName
+                                                isScanningRoom = true
+                                                showProgressView = false
+                                                captureView?.stopCapture()
+                                                showScanningRoomCard = false
+                                                _ = mapName.isEmpty ? "Map_\(Date().timeIntervalSince1970)" : mapName
                                             }) {
                                                 Text("Done")
                                                     .font(.system(size: 18, weight: .bold, design: .default))
@@ -191,7 +208,9 @@ struct RoomScanningView: View {
                     if !isScanningRoom {
                         Button(action: {
                             isScanningRoom = true
-                            captureView = RoomCaptureViewContainer(room: room)
+                            captureView = RoomCaptureViewContainer(room: room, sessionDelegate: sessionDelegate)
+                            showProgressView = true
+                            
                         }) {
                             Text("Start")
                                 .font(.system(size: 18, weight: .bold, design: .default))
@@ -220,6 +239,11 @@ struct RoomScanningView: View {
                     if let newFeatures = notification.object as? Int {
                         self.worldMapNewFeatures = newFeatures
                     }
+                }.onReceive(sessionDelegate.$userDistance) { newValue in
+                    print("DEBUG: userDistance aggiornato in RoomScanningView -> \(newValue) metri")
+                }
+                .onReceive(sessionDelegate.$detectedObjects) { newValue in
+                    print("DEBUG: detectedObjects aggiornato in RoomScanningView -> \(newValue)")
                 }
             }
             .onReceive(NotificationCenter.default.publisher(for: .genericMessage)) { notification in
