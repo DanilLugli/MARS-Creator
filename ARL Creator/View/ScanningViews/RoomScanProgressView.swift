@@ -12,7 +12,7 @@ struct RoomScanProgressView: View {
     
     let maxDistance: CGFloat = 21.0
     let maxObjects: Int = 35
-    let maxFeatures: Int = 8500
+    let maxFeatures: Int = 9000
     
     var scannedDistance: CGFloat
     var detectedObjects: Int
