@@ -54,22 +54,17 @@ func printMatrix(_ matrix: simd_float4x4, label: String = "Matrix") {
 
 func loadRoomPositionFromJson(from fileURL: URL, for floor: Floor) -> [String: RoomPositionMatrix]? {
     do {
-        // Leggi il contenuto del file JSON
         let data = try Data(contentsOf: fileURL)
         
-        // Effettua il parsing del JSON in un dizionario
         let jsonObject = try JSONSerialization.jsonObject(with: data, options: [])
         guard let jsonDict = jsonObject as? [String: [String: [[Double]]]] else {
             print("Invalid JSON format")
             return nil
         }
         
-        // Dizionario per memorizzare i risultati
         var associationMatrix: [String: RoomPositionMatrix] = [:]
         
-        // Cicla attraverso ogni voce del dizionario
         for (roomName, matrices) in jsonDict {
-            // Estrai le matrici di rotazione e traslazione
             guard let translationMatrix = matrices["translation"],
                   let r_YMatrix = matrices["R_Y"],
                   translationMatrix.count == 4,
@@ -78,14 +73,11 @@ func loadRoomPositionFromJson(from fileURL: URL, for floor: Floor) -> [String: R
                 continue
             }
             
-            // Converti i valori in matrici `simd_float4x4`
             let translation = simd_float4x4(rows: translationMatrix.map { simd_float4($0.map { Float($0) }) })
             let r_Y = simd_float4x4(rows: r_YMatrix.map { simd_float4($0.map { Float($0) }) })
             
-            // Crea un oggetto `RotoTraslationMatrix`
             let rotoTraslationMatrix = RoomPositionMatrix(name: roomName, translation: translation, r_Y: r_Y)
             
-            // Aggiungi l'oggetto al dizionario
             associationMatrix[roomName] = rotoTraslationMatrix
             floor.getRoomByName(roomName)?.hasPosition = doesMatrixExist(for: roomName, in: associationMatrix)
         }
