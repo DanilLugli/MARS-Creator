@@ -179,7 +179,7 @@ struct RoomScanningView: View {
                                             }.padding(.trailing, 20)
                                             
                                         }
-                                    }.border(Color.green, width: 3)
+                                    }
 
                                     HStack{
                                         Spacer()
@@ -190,6 +190,8 @@ struct RoomScanningView: View {
                                                 showProgressView = false
                                                 captureView?.stopCapture()
                                                 showScanningRoomCard = false
+                                                sessionDelegate.userDistance = 0
+                                                sessionDelegate.detectedObjects = 0
                                                 _ = mapName.isEmpty ? "Map_\(Date().timeIntervalSince1970)" : mapName
                                             }) {
                                                 Text("Done")

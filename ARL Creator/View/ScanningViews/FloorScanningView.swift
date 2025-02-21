@@ -226,6 +226,8 @@ struct FloorScanningView: View {
                                     showCreateFloorPlanimetryButton = true
                                     selectedOption = 1
                                     showProgressView = false
+                                    sessionDelegate.userDistance = 0
+                                    sessionDelegate.detectedObjects = 0
                                     if selectedOption == 2 {
                                         showPreview = true
                                     }
