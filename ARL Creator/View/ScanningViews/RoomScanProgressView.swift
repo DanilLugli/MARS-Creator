@@ -10,8 +10,8 @@ import SwiftUI
 struct RoomScanProgressView: View {
     @State private var progress: CGFloat = 0.0  
     
-    let maxDistance: CGFloat = 21.0
-    let maxObjects: Int = 35
+    let maxDistance: CGFloat = 22.0
+    let maxObjects: Int = 45
     let maxFeatures: Int = 9000
     
     var scannedDistance: CGFloat
