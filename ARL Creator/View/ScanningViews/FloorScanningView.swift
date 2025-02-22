@@ -17,7 +17,6 @@ struct FloorScanningView: View {
     @State var isScanningFloor = false
     @State var showScanningFloorCard = true
     @State var showProgressView = false
-
     
     @State private var scanningError: String? = ""
     
@@ -32,7 +31,6 @@ struct FloorScanningView: View {
     @State var message = ""
     @State private var mapName: String = ""
     
-    // Variabile per mostrare la preview della SCNScene
     @State private var showPreview: Bool = false
     @State private var scannedDistance: CGFloat = 0.0
 
@@ -228,10 +226,10 @@ struct FloorScanningView: View {
                                     showProgressView = false
                                     sessionDelegate.userDistance = 0
                                     sessionDelegate.detectedObjects = 0
+                                    
                                     if selectedOption == 2 {
                                         showPreview = true
                                     }
-                                    print("DEBUG: Azione Done eseguita")
                                 }) {
                                     Text("Done")
                                         .font(.system(size: 18, weight: .bold))

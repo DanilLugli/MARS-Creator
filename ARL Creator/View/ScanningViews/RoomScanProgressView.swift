@@ -47,9 +47,9 @@ struct RoomScanProgressView: View {
         .onChange(of: featuresPoint) { _, _ in updateProgress() }
     }
     
-    @State private var maxDistanceProgress: CGFloat = 0.0
-    @State private var maxObjectsProgress: CGFloat = 0.0
-    @State private var maxFeaturesProgress: CGFloat = 0.0
+    @State var maxDistanceProgress: CGFloat = 0.0
+    @State var maxObjectsProgress: CGFloat = 0.0
+    @State var maxFeaturesProgress: CGFloat = 0.0
     
     private func updateProgress() {
         let currentDistanceProgress = min(scannedDistance / maxDistance, 1.0)

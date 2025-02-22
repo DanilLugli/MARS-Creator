@@ -119,13 +119,13 @@ struct RoomView: View {
                     for filePath in filePaths {
                         if fileManager.fileExists(atPath: filePath.path) {
                             try fileManager.removeItem(at: filePath)
-                            print("✅ File at \(filePath) eliminato correttamente")
+                            print("File at \(filePath) eliminato correttamente")
                         } else {
-                            print("⚠️ File at \(filePath) non esiste")
+                            print("File at \(filePath) non esiste")
                         }
                     }
                 } catch {
-                    print("❌ Errore durante l'eliminazione: \(error.localizedDescription)")
+                    print("Errore durante l'eliminazione: \(error.localizedDescription)")
                 }
                 
                 removeRoomPositionKeyJSON(from: floor.floorURL.appendingPathComponent("\(floor.name).json"), roomName: room.name)
@@ -472,7 +472,6 @@ struct RoomView: View {
                         .appendingPathComponent("\(room.name).usdz")
                         .path) {
                         
-                        // ✅ Se il file esiste → Mostra "Update Planimetry"
                         Button(action: {
                             alertMessage = """
                             Proceeding with this update will permanently delete the current \(room.name)'s planimetry.
@@ -486,7 +485,6 @@ struct RoomView: View {
                         
                     } else {
                         
-                        // ✅ Se il file NON esiste → Mostra "Create Planimetry" con NavigationLink
                         NavigationLink(destination: RoomScanningView(room: room)) {
                             Label("Create Planimetry", systemImage: "plus")
                         }

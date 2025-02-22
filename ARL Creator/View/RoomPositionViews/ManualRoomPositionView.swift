@@ -82,6 +82,9 @@ struct ManualRoomPositionView: View {
                         room: room,
                         fornitures: false
                     )
+                
+                floor._associationMatrix[room.name] = RoomPositionMatrix(name: room.name, translation: matrix_identity_float4x4, r_Y: matrix_identity_float4x4)
+                floor.addIdentityMatrixToJSON(to: floor.floorURL.appendingPathComponent("\(floor.name).json"), for: floor, roomName: room.name)
                 }
         }
         .background(Color.customBackground)
@@ -90,10 +93,15 @@ struct ManualRoomPositionView: View {
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
                 Button(action: {
+                    
+                    if !floor.isRoomPositionMatrixInJSON(fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"), roomName: room.name){
+                        
+                        floor.addIdentityMatrixToJSON(to: floor.floorURL.appendingPathComponent("\(floor.name).json"), for: floor, roomName: room.name)
+                        
+                    }
+                    
                     floor.updateAssociationMatrixInJSON(for: room.name, fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"))
-                    
-//                    floor.saveOrUpdateAssociationMatrix(to: floor.floorURL.appendingPathComponent("\(floor.name).json"), for: self.floor, associationMatrix: floor.associationMatrix)
-                    
+
                     floor.planimetryRooms.handler.loadRoomsMaps(
                         floor: floor,
                         rooms: floor.rooms
