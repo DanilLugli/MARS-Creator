@@ -25,7 +25,6 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Hash
     private var _lastUpdate: Date
     weak var parentFloor: Floor?
 
-    
     init(_id: UUID = UUID(), _name: String, _lastUpdate: Date, _planimetry: SCNViewContainer? = nil, _referenceMarkers: [ReferenceMarker], _transitionZones: [TransitionZone], _scene: SCNScene? = SCNScene(), _sceneObjects: [SCNNode]? = nil, _roomURL: URL, parentFloor: Floor? = nil) {
         self._name = _name
         self._lastUpdate = _lastUpdate
@@ -50,13 +49,10 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Hash
     static func ==(lhs: Room, rhs: Room) -> Bool {
         return lhs.id == rhs.id
     }
-    
-
 
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
-    
     
     var id: UUID {
         get {
@@ -422,7 +418,6 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Hash
             print("Connessione inversa \(inverseConnectionName) non trovata nella stanza \(targetRoom.name).")
         }
     }
-    
     
     func validateRoom() {
         print("Validating Room: \(self.name)")

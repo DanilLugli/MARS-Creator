@@ -27,36 +27,6 @@ struct ManualRoomPositionView: View {
     
     var body: some View{
         VStack{
-            
-//            ZStack {
-//                RoundedRectangle(cornerRadius: 10)
-//                    .fill(Color.white)
-//                    .shadow(color: Color.gray.opacity(0.5), radius: 5, x: 0, y: 2)
-//                Toggle(isOn: $showFornitures){
-//                    HStack {
-//                        Image(systemName: "table.furniture")
-//                            .font(.system(size: 20))
-//                            .foregroundColor(Color.customBackground)
-//                        Text("Show Fornitures")
-//                            .font(.system(size: 20))
-//                            .bold()
-//                            .foregroundColor(Color.customBackground)
-//                    }
-//                }
-//                .padding()
-//                .bold()
-//                .onChange(of: showFornitures) { newValue in
-//                    mapPositionView.handler.loadRoomMapsPosition(
-//                        floor: floor,
-//                        room: room,
-//                        fornitures: newValue
-//                    )
-//                }
-//            }
-//            .frame(maxWidth: .infinity, maxHeight: 40)
-//            .padding()
-            
-            
             ZStack{
                 mapPositionView
                     .border(Color.white)
@@ -82,10 +52,7 @@ struct ManualRoomPositionView: View {
                         room: room,
                         fornitures: false
                     )
-                
-//                floor._associationMatrix[room.name] = RoomPositionMatrix(name: room.name, translation: matrix_identity_float4x4, r_Y: matrix_identity_float4x4)
-//                floor.addIdentityMatrixToJSON(to: floor.floorURL.appendingPathComponent("\(floor.name).json"), for: floor, roomName: room.name)
-                }
+            }
         }
         .background(Color.customBackground)
         .foregroundColor(.white)
@@ -95,9 +62,7 @@ struct ManualRoomPositionView: View {
                 Button(action: {
                     
                     if !floor.isRoomPositionMatrixInJSON(fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"), roomName: room.name){
-                        
                         floor.addIdentityMatrixToJSON(to: floor.floorURL.appendingPathComponent("\(floor.name).json"), for: floor, roomName: room.name)
-                        
                     }
                     
                     floor.updateAssociationMatrixInJSON(for: room.name, fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"))
