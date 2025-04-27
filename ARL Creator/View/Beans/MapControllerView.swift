@@ -72,6 +72,11 @@ struct MapControllerView: View {
                 )
             }
             .padding()
+            
+            pressableButton(
+                action: { continuous in moveObject.autoPosition(continuous: continuous) },
+                imageName: "location.fill"
+            )
         }
     }
 

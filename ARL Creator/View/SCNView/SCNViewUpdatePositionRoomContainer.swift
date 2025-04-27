@@ -1,5 +1,7 @@
 import SwiftUI
 import SceneKit
+import simd
+import Accelerate
 
 class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
     
@@ -280,7 +282,6 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
     }
 
     func rotateCounterClockwise() {
-        
         self.rotateLeft()
     }
 
@@ -304,80 +305,248 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         let step: CGFloat = continuous ? translationStepPressable : translationStep
         moveRoomPositionRight(step: step)
     }
-
-//    func moveRoomPositionUp() {
-//        guard let roomNode = roomNode else {
-//            return
+    
+   func findMaxAverageDistanceToCentroid(nodes: [SCNNode]) -> (node1: SCNNode, node2: SCNNode, node3: SCNNode, average: Float)? {
+       guard nodes.count >= 3 else {
+           print("Errore: Sono necessari almeno 3 nodi per formare un triangolo.")
+           return nil
+       }
+       
+       let points = nodes.simd
+       var maxAverage: Float = 0
+       var bestNodes: (SCNNode, SCNNode, SCNNode) = (nodes[0], nodes[1], nodes[2])
+       
+       // Considera tutte le combinazioni possibili di tre nodi
+       for i in 0..<nodes.count {
+           for j in (i+1)..<nodes.count {
+               for k in (j+1)..<nodes.count {
+                   let p0 = points[i]
+                   let p1 = points[j]
+                   let p2 = points[k]
+                   let c = SCNViewAutoUpdatePositionRoomUtility.calculateCentroid(points: [p0, p1, p2])
+                   
+                   let currAverage = (distance(p0, c) + distance(p1, c) + distance(p2, c)) / 3
+                   
+                   if currAverage > maxAverage {
+                       maxAverage = currAverage
+                       bestNodes = (nodes[i], nodes[j], nodes[k])
+                   }
+               }
+           }
+       }
+       
+       return (bestNodes.0, bestNodes.1, bestNodes.2, maxAverage)
+   }
+    
+    func autoPosition(continuous: Bool) {
+        resetRoomPosition()
+        
+        guard let roomNode else {
+            return
+        }
+        
+        guard let floor else {
+            return
+        }
+        
+        let roomNodes = roomNode.childNodes
+        guard let floorNodes = floor.sceneObjects else {
+            return
+        }
+        
+        let targetPrefixes = ["Window", "Opening", "Door"]
+        
+        let filteredRoomNodes = roomNodes.filter { node in targetPrefixes.contains { prefix in node.name?.contains(prefix) ?? false }}
+        let filteredFloorNodes = floorNodes.filter { node in targetPrefixes.contains { prefix in node.name?.contains(prefix) ?? false }}
+        
+        print()
+        print("----------ROOM----------")
+        for (i, roomNode) in roomNodes.enumerated() {
+            print("[\(i)] Node name: \(roomNode.name ?? "Null"))")
+        }
+        print()
+        
+        print()
+        print("----------FLOOR----------")
+        for (i, floorNode) in filteredFloorNodes.enumerated() {
+            print("[\(i)] Node name: \(floorNode.name ?? "Null"))")
+        }
+        print()
+        
+//        DispatchQueue.global(qos: .userInitiated).async {
+//            print(candidateNodes(for: roomNodes, in: floorNodes))
 //        }
-//        roomNode.worldPosition.z += Float(translationStep)
-//        floor?.associationMatrix[roomName!]?.translation[3][2] += Float(translationStep)
-//    }
-
+//        
+//        return
+//        
+//        let (roomNode0, roomNode1, roomNode2, _) = findMaxAverageDistanceToCentroid(nodes: roomNodes)!
+        
+//        let roomNode0 = SCNNode()
+//        roomNode0.simdWorldPosition = simd_float3(0, 0, 1)
+//        let roomNode1 = SCNNode()
+//        roomNode1.simdWorldPosition = simd_float3(1, 0, 1)
+//        let roomNode2 = SCNNode()
+//        roomNode2.simdWorldPosition = simd_float3(1, 0, 0)
+//        
+//        let floorNode0 = SCNNode()
+//        floorNode0.simdWorldPosition = simd_float3(1, 0, 1)
+//        
+//        let floorNode1 = SCNNode()
+//        floorNode1.simdWorldPosition = simd_float3(1, 0, 0)
+//        
+//        let floorNode2 = SCNNode()
+//        floorNode2.simdWorldPosition = simd_float3(0, 0, 0)
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+//            let candidateFloorNodes = candidateNodes(for: filteredRoomNodes, in: filteredFloorNodes)
+//            print("GHJGJHGHJHGHGJHGJGHHGJGHJ")
+//            print(filteredRoomNodes)
+//            print("GHJGJHGHJHGHGJHGJGHHGJGHJ")
+//            print("GHJGJHGHJHGHGJHGJGHHGJGHJ")
+//            print(candidateFloorNodes)
+//            print("GHJGJHGHJHGHGJHGJGHHGJGHJ")
+            let (rotationAngle, translation) = SCNViewAutoUpdatePositionRoomUtility.findBestAlignment(
+                nodesA: roomNodes, // [roomNode0, roomNode1, roomNode2],
+                nodesB: floorNodes, // [floorNode0, floorNode1, floorNode2],
+                maxCombinations: 1000
+            )
+//            print("GHJGJHGHJHGHGJHGJGHHGJGHJ")
+//            print(rotationAngle)
+//            print("GHJGJHGHJHGHGJHGJGHHGJGHJ")
+//            print("GHJGJHGHJHGHGJHGJGHHGJGHJ")
+//            print(translation)
+//            print("GHJGJHGHJHGHGJHGJGHHGJGHJ")
+            
+            self.rotate(angle: rotationAngle)
+            self.moveRoom(horizontal: CGFloat(translation.x), vertical: CGFloat(translation.z))
+            
+            // Costruisci matrice di rotazione + traslazione in world space
+//            let cosTheta = cos(rotationAngle)
+//            let sinTheta = sin(rotationAngle)
+//
+//            var transform = matrix_identity_float4x4
+//            transform.columns.0 = simd_float4( cosTheta, 0, sinTheta, 0)
+//            transform.columns.1 = simd_float4(       0, 1,      0, 0)
+//            transform.columns.2 = simd_float4(-sinTheta, 0, cosTheta, 0)
+//            transform.columns.3 = simd_float4(translation.x, 0, translation.z, 1)
+//
+//            // Converti in sistema locale del parentNode
+//            if let parentTransform = roomNode.parent?.simdTransform {
+//                let localTransform = simd_inverse(parentTransform) * transform
+//                roomNode.simdTransform = localTransform
+//            } else {
+//                // Se non ha parent, sei già nello spazio globale
+//                roomNode.simdTransform = transform
+//            }
+        }
+    }
+        
+    /**
+     * Sposta il roomNode secondo le coordinate specificate.
+     * - Parameters:
+     *   - horizontal: Quanto spostare il nodo sull'asse x (positivo = destra, negativo = sinistra)
+     *   - vertical: Quanto spostare il nodo sull'asse z (positivo = su, negativo = giù)
+     */
+    func moveRoom(horizontal: CGFloat, vertical: CGFloat) {
+        guard let roomNode = roomNode, let roomName = roomName else {
+            print("DEBUG: No roomNode or roomName found!")
+            return
+        }
+        
+        // Aggiorna la posizione del nodo
+        roomNode.worldPosition.x += Float(horizontal)
+        roomNode.worldPosition.z += Float(vertical)
+        
+        // Aggiorna la matrice di associazione
+        floor?.associationMatrix[roomName]?.translation[3][0] += Float(horizontal)
+        floor?.associationMatrix[roomName]?.translation[3][2] += Float(vertical)
+        
+        print("DEBUG: Room moved by (\(horizontal), \(vertical))")
+    }
+    
+    // Le funzioni esistenti possono essere semplificate utilizzando moveRoom
     func moveRoomPositionDown(step: CGFloat) {
-        guard let roomNode = roomNode else { return }
-        roomNode.worldPosition.z -= Float(step)
-        floor?.associationMatrix[roomName!]?.translation[3][2] -= Float(step)
+        moveRoom(horizontal: 0, vertical: -step)
     }
 
     func moveRoomPositionUp(step: CGFloat) {
-        guard let roomNode = roomNode else { return }
-        roomNode.worldPosition.z += Float(step)
-        floor?.associationMatrix[roomName!]?.translation[3][2] += Float(step)
+        moveRoom(horizontal: 0, vertical: step)
     }
 
     func moveRoomPositionLeft(step: CGFloat) {
-        guard let roomNode = roomNode else { return }
-        roomNode.worldPosition.x -= Float(step)
-        floor?.associationMatrix[roomName!]?.translation[3][0] -= Float(step)
+        moveRoom(horizontal: -step, vertical: 0)
     }
 
     func moveRoomPositionRight(step: CGFloat) {
-        guard let roomNode = roomNode else { return }
-        roomNode.worldPosition.x += Float(step)
-        floor?.associationMatrix[roomName!]?.translation[3][0] += Float(step)
-        print(floor?.associationMatrix[roomName!]?.translation[3][0] ?? 0)
+        moveRoom(horizontal: step, vertical: 0)
     }
-
-    func rotateRight() {
+    
+    func moveRoomPosition(by t: simd_float3) {
+        guard let roomNode = roomNode else { return }
+        
+        // Trasla il nodo della stanza
+        roomNode.worldPosition.x += t.x
+        roomNode.worldPosition.y += t.y
+        roomNode.worldPosition.z += t.z
+        
+        // Aggiorna la matrice di associazione
+        floor?.associationMatrix[roomName!]?.translation[3][0] += t.x
+        floor?.associationMatrix[roomName!]?.translation[3][1] += t.y
+        floor?.associationMatrix[roomName!]?.translation[3][2] += t.z
+    }
+    
+    func rotate(angle: Float) {
         guard let roomNode = roomNode else {
             print("DEBUG: No roomNode found!")
             return
         }
         
-        // Debug: Stato corrente prima della rotazione
-        print("DEBUG: Current eulerAngles.y before rotation (Right): \(roomNode.eulerAngles.y)")
+        print("DEBUG: Current eulerAngles.y before rotation: \(roomNode.eulerAngles.y)")
         
-        // Crea una matrice di rotazione per il passo definito
-        let rotationMatrix = simd_float4x4(SCNMatrix4MakeRotation(-rotationStep, 0, 1, 0)) // Rotazione a destra (orario)
-
-        // Combina la matrice di trasformazione corrente con quella di rotazione
+        // Crea la matrice di rotazione con l'angolo passato come parametro
+        let rotationMatrix = simd_float4x4(SCNMatrix4MakeRotation(angle, 0, 1, 0))
+        
+        // Applica la rotazione al nodo
         roomNode.simdTransform = matrix_multiply(roomNode.simdTransform, rotationMatrix)
         
-        // Aggiorna la matrice di rotazione associata (r_Y)
+        // Aggiorna la matrice di associazione
         let previousMatrix = floor?.associationMatrix[roomName ?? ""]?.r_Y ?? matrix_identity_float4x4
         let updatedMatrix = matrix_multiply(previousMatrix, rotationMatrix)
         floor?.associationMatrix[roomName ?? ""]?.r_Y = updatedMatrix
         
-        // Debug: Stato dopo la rotazione
-        print("DEBUG: Updated simdTransform matrix: \(roomNode.simdTransform)")
-        print("DEBUG: Updated r_Y matrix: \(updatedMatrix)")
+        print("DEBUG: Applied rotation with angle: \(angle) radians")
+    }
+    
+    func rotateRight() {
+        rotate(angle: -rotationStep) // Rotazione a destra (orario)
     }
     
     func rotateLeft() {
+        rotate(angle: rotationStep) // Rotazione a sinistra (antiorario)
+    }
+    
+    // Funzione per ruotare con un angolo specifico
+    func rotateToAngle(angle: Float) {
+        // Calcola l'angolo desiderato
+        guard let roomNode = roomNode else { return }
+        
+        // Ottieni l'angolo corrente
+        let currentAngle = roomNode.eulerAngles.y
+        
+        // Calcola la differenza di angolo necessaria
+        let angleDiff = angle - currentAngle
+        
+        // Applica la rotazione
+        rotate(angle: angleDiff)
+    }
+    
+    func resetRoomPosition() {
         guard let roomNode = roomNode else {
             print("DEBUG: No roomNode found!")
             return
         }
         
-        print("DEBUG: Current eulerAngles.y before rotation (Left): \(roomNode.eulerAngles.y)")
-        
-        let rotationMatrix = simd_float4x4(SCNMatrix4MakeRotation(rotationStep, 0, 1, 0)) // Rotazione a sinistra (antiorario)
-        
-        roomNode.simdTransform = matrix_multiply(roomNode.simdTransform, rotationMatrix)
-        
-        let previousMatrix = floor?.associationMatrix[roomName ?? ""]?.r_Y ?? matrix_identity_float4x4
-        let updatedMatrix = matrix_multiply(previousMatrix, rotationMatrix)
-        floor?.associationMatrix[roomName ?? ""]?.r_Y = updatedMatrix
+        moveRoom(horizontal: CGFloat(-roomNode.worldPosition.x), vertical: CGFloat(-roomNode.worldPosition.z))
     }
     
     func handlePinch(_ gesture: UIPinchGestureRecognizer) {
@@ -474,5 +643,439 @@ struct SCNViewUpdatePositionRoomContainer: UIViewRepresentable {
 struct SCNViewUpdatePositionRoomContainer_Previews: PreviewProvider {
     static var previews: some View {
         SCNViewUpdatePositionRoomContainer()
+    }
+}
+
+struct SCNViewAutoUpdatePositionRoomUtility {
+    // Lista di prefissi target con ordine di preferenza
+    static let targetPrefixes = ["Door", "Opening", "Window"] //, "Table", "Storage"]
+    
+    // Funzione per calcolare il centroide di un array di punti
+    static func calculateCentroid(points: [simd_float3]) -> simd_float3 {
+        var sum = simd_float3(0, 0, 0)
+        for point in points {
+            sum += point
+        }
+        return sum / Float(points.count)
+    }
+    
+    // Funzione per calcolare la rotazione attorno all'asse y e la traslazione x,z
+    static func computeTransformation(from sourcePoints: [simd_float3], to targetPoints: [simd_float3]) -> (rotationAngle: Float, translation: simd_float3) {
+        guard sourcePoints.count == targetPoints.count, sourcePoints.count >= 3 else {
+            fatalError("Sono necessari almeno 3 punti corrispondenti")
+        }
+        
+        // 1. Calcola i centroidi
+        let sourceCentroid = calculateCentroid(points: sourcePoints)
+        let targetCentroid = calculateCentroid(points: targetPoints)
+        
+        // 2. Sottrai i centroidi dai punti
+        let centeredSourcePoints = sourcePoints.map { $0 - sourceCentroid }
+        let centeredTargetPoints = targetPoints.map { $0 - targetCentroid }
+        
+        // 3. Trova l'angolo di rotazione ottimale attorno all'asse y
+        var numerator: Float = 0
+        var denominator: Float = 0
+        
+        for i in 0..<sourcePoints.count {
+            let source = centeredSourcePoints[i]
+            let target = centeredTargetPoints[i]
+            
+            // Per rotazione attorno all'asse y: x' = x*cos(θ) + z*sin(θ), z' = -x*sin(θ) + z*cos(θ)
+            numerator += source.z * target.x - source.x * target.z
+            denominator += source.x * target.x + source.z * target.z
+        }
+        
+        let rotationAngle = atan2(numerator, denominator)
+        
+        // 4. Calcola la matrice di rotazione
+        let cosTheta = cos(rotationAngle)
+        let sinTheta = sin(rotationAngle)
+        
+        let rotationMatrix = simd_float3x3(
+            simd_float3(cosTheta, 0, sinTheta),
+            simd_float3(0, 1, 0),
+            simd_float3(-sinTheta, 0, cosTheta)
+        )
+        
+        // 5. Ruota i punti centrati e calcola la traslazione
+        let rotatedSourcePoints = sourcePoints.map { rotationMatrix.transpose * $0 }
+        
+        // La traslazione è la differenza tra il centroide del target e il centroide del source ruotato
+        let rotatedSourceCentroid = calculateCentroid(points: rotatedSourcePoints)
+        let translation = targetCentroid - rotatedSourceCentroid
+        
+        return (rotationAngle, translation)
+    }
+    
+    // Funzione per applicare la trasformazione a un punto
+    static func transformPoint(point: simd_float3, rotationAngle: Float, translation: simd_float3) -> simd_float3 {
+        let cosTheta = cos(rotationAngle)
+        let sinTheta = sin(rotationAngle)
+        
+        // Matrice di rotazione attorno all'asse y
+        let rotationMatrix = simd_float3x3(
+            simd_float3(cosTheta, 0, sinTheta),
+            simd_float3(0, 1, 0),
+            simd_float3(-sinTheta, 0, cosTheta)
+        )
+        
+        // Applica rotazione e poi traslazione
+        let rotated = rotationMatrix.transpose * point
+        return rotated + translation
+    }
+    
+    // Funzione per calcolare l'errore di allineamento
+    static func computeError(for A: [simd_float3], rotationAngle: Float, translation: simd_float3, comparedTo B: [simd_float3]) -> Float {
+        precondition(A.count == B.count, "Input point sets must have the same number of points")
+        
+        return A.enumerated().reduce(0.0) { (totalError, element) in
+            let transformedPoint = transformPoint(point: A[element.offset], rotationAngle: rotationAngle, translation: translation)
+            let error = simd_length(transformedPoint - B[element.offset])
+            print("A: \(A[element.offset])")
+            print("transformedPoint: \(transformedPoint)")
+            print("B: \(B[element.offset])")
+            print()
+            return totalError + error * error
+        }
+    }
+    
+    static func findBestAlignment(
+        nodesA: [SCNNode],
+        nodesB: [SCNNode],
+        maxCombinations: Int
+    ) -> (rotationAngle: Float, translation: simd_float3) {
+        let filteredNodesA = nodesA.filter { node in targetPrefixes.contains { prefix in node.name?.contains(prefix) ?? false }}
+        let filteredNodesB = nodesB.filter { node in targetPrefixes.contains { prefix in node.name?.contains(prefix) ?? false }}
+        
+        let triplets = findCompatibleTriplets(from: filteredNodesA, and: filteredNodesB, maxPairs: maxCombinations)
+        
+        var minError = Float(-1);
+        var bestRotationAngle: Float = 0.0;
+        var bestTranslation: simd_float3 = simd_float3(0, 0, 0);
+        
+        // Itera su tutte le combinazioni
+        for (nodeSetA, nodeSetB) in triplets {
+            let pointSetA = nodeSetA.simd;
+            let pointSetB = nodeSetB.simd;
+            
+            let (rotationAngle, translation) = computeTransformation(from: pointSetA, to: pointSetB)
+            
+            // Calcola l'errore
+            let error = computeError(for: pointSetA, rotationAngle: rotationAngle, translation: translation, comparedTo: pointSetB)
+            
+            if (error < minError || minError == Float(-1)) {
+                minError = error
+                
+                bestRotationAngle = rotationAngle;
+                bestTranslation = translation;
+            }
+            
+            print("Error: \(error)")
+            print("Min error: \(minError)")
+            print()
+            print("rotationAngle: \(rotationAngle) (\(rotationAngle * 180 / .pi)°)")
+            print("translation: \(translation)")
+            print()
+        }
+        
+        return (bestRotationAngle, bestTranslation)
+    }
+
+    // Funzione helper per generare tutte le possibili triple da una lista di nodi
+    static func generateTriplets(from nodes: [SCNNode]) -> [NodeTriplet] {
+        var triplets: [NodeTriplet] = []
+        
+        let n = nodes.count
+        // Utilizzo un approccio con indici per ottimizzazione
+        for i in 0..<(n-2) {
+            for j in (i+1)..<(n-1) {
+                for k in (j+1)..<n {
+                    triplets.append(NodeTriplet(nodes: [nodes[i], nodes[j], nodes[k]]))
+                }
+            }
+        }
+        
+        return triplets
+    }
+
+    // Funzione principale per trovare le coppie di triple compatibili
+    static func findCompatibleTriplets(from firstList: [SCNNode], and secondList: [SCNNode], maxPairs: Int = 1000) -> [([SCNNode], [SCNNode])] {
+        // Controllo che ci siano abbastanza nodi
+        guard firstList.count >= 3 && secondList.count >= 3 else {
+            return []
+        }
+        
+        // Genero tutte le possibili triple dalla prima lista
+        let firstTriplets = generateTriplets(from: firstList)
+        
+        // Genero tutte le possibili triple dalla seconda lista
+        let secondTriplets = generateTriplets(from: secondList)
+        
+        print("firstTriplets: \(firstTriplets.count)")
+        print("secondTriplets: \(secondTriplets.count)")
+        
+        // Array per memorizzare i risultati (triplet1, triplet2, score)
+        var compatibilityScores: [(NodeTriplet, NodeTriplet, Float)] = []
+        
+        // Limito il numero di triplet da confrontare per ottimizzazione
+        let maxFirstTriplets = min(1000, firstTriplets.count)
+        let sampledFirstTriplets = Array(firstTriplets.shuffled().prefix(maxFirstTriplets))
+        
+        // Limito il numero di triplet da confrontare per ottimizzazione
+        let maxSecondTriplets = min(10000, secondTriplets.count)
+        let sampledsecondTriplets = Array(secondTriplets.shuffled().prefix(maxSecondTriplets))
+        
+        // Calcolo i punteggi di compatibilità
+        for triplet1 in sampledFirstTriplets {
+            for triplet2 in sampledsecondTriplets {
+                let score = triplet1.compatibilityScore(with: triplet2)
+                compatibilityScores.append((triplet1, triplet2, score))
+            }
+        }
+        
+        // Ordino in base al punteggio (più basso = più compatibile)
+        compatibilityScores.sort { $0.2 < $1.2 }
+        
+        // Prendo le migliori coppie
+        let bestPairs = compatibilityScores.prefix(maxPairs)
+        
+        // Converto nel formato richiesto
+        return bestPairs.map { ($0.0.nodes, $0.1.nodes) }
+    }
+}
+
+struct NodeTriplet {
+    let centroid: simd_float3
+    let nodes: [SCNNode]
+    let distanceMatrix: [[Float]]
+    let relativeHeights: [Float]
+    
+    init(nodes: [SCNNode]) {
+        guard nodes.count == 3 else {
+            fatalError("Sono necessari 3 punti nodi")
+        }
+        
+        let centroid = SCNViewAutoUpdatePositionRoomUtility.calculateCentroid(points: nodes.simd)
+        self.nodes = nodes.sorted { distance($0.worldPosition.simd, centroid) < distance($1.worldPosition.simd, centroid) }
+        self.centroid = centroid
+        
+        // Calcolo distanze
+        self.distanceMatrix = NodeTriplet.generateDistanceMatrix(points: self.nodes.simd + [self.centroid])
+        
+        // Calcolo altezze relative
+        let minY = self.nodes.map { $0.worldPosition.y }.min()!
+        self.relativeHeights = self.nodes.map { $0.worldPosition.y - minY }
+    }
+    
+    // Calcola quanto sono compatibili due triple di nodi
+    func compatibilityScore(with other: NodeTriplet) -> Float {
+        // Differenza tra le distanze dei punti
+        let d01 = abs(self.distanceMatrix[0][1] - other.distanceMatrix[0][1])
+        let d02 = abs(self.distanceMatrix[0][2] - other.distanceMatrix[0][2])
+        let d12 = abs(self.distanceMatrix[1][2] - other.distanceMatrix[1][2])
+        
+        // Differenza tra le distanze dei punti con il centroide
+        let d0c = abs(self.distanceMatrix[0][3] - other.distanceMatrix[0][3])
+        let d1c = abs(self.distanceMatrix[1][3] - other.distanceMatrix[1][3])
+        let d2c = abs(self.distanceMatrix[2][3] - other.distanceMatrix[2][3])
+        
+        // Differenze nelle altezze relative
+        let h0 = abs(self.relativeHeights[0] - other.relativeHeights[0])
+        let h1 = abs(self.relativeHeights[1] - other.relativeHeights[1])
+        let h2 = abs(self.relativeHeights[2] - other.relativeHeights[2])
+        
+        // Pesi per i diversi fattori
+        let pointDistanceWeight: Float = 1.0
+        let centroidDistanceWeight: Float = 1.0
+        let heightWeight: Float = 1.0
+        
+        // Score totale (più basso = più compatibile)
+        return pointDistanceWeight * (d01 + d02 + d12) + centroidDistanceWeight * (d0c + d1c + d2c) + heightWeight * (h0 + h1 + h2)
+    }
+    
+    private static func generateDistanceMatrix(points: [simd_float3]) -> [[Float]] {
+        var distanceMatrix: [[Float]] = Array(
+            repeating: Array(repeating: 0.0, count: points.count),
+            count: points.count
+        )
+        
+        for (i, row) in distanceMatrix.enumerated() {
+            for (j, _) in row.enumerated() where j > i {
+                distanceMatrix[i][j] = distance(points[i], points[j])
+                distanceMatrix[j][i] = distance(points[j], points[i])
+            }
+        }
+        
+        return distanceMatrix
+    }
+}
+
+func combinations<T>(of elements: [T], taking k: Int) -> [[T]] {
+    guard k > 0 else { return [[]] }
+    guard k <= elements.count else { return [] }
+
+    if k == elements.count {
+        return [elements]
+    }
+
+    if k == 1 {
+        return elements.map { [$0] }
+    }
+
+    var result: [[T]] = []
+
+    for (i, element) in elements.enumerated() {
+        let remaining = Array(elements[(i + 1)...])
+        let subcombinations = combinations(of: remaining, taking: k - 1)
+        result += subcombinations.map { [element] + $0 }
+    }
+
+    return result
+}
+
+
+// Funzione per calcolare il centroide di un array di punti
+func calculateCentroid(points: [simd_float3]) -> simd_float3 {
+    var sum = simd_float3(0, 0, 0)
+    for point in points {
+        sum += point
+    }
+    return sum / Float(points.count)
+}
+
+func generateDistanceMatrix(points: [simd_float3]) -> [[Float]] {
+    var distanceMatrix: [[Float]] = Array(
+        repeating: Array(repeating: 0.0, count: points.count),
+        count: points.count
+    )
+    
+    for (i, row) in distanceMatrix.enumerated() {
+        for (j, _) in row.enumerated() where j > i {
+            distanceMatrix[i][j] = distance(points[i], points[j])
+            distanceMatrix[j][i] = distance(points[j], points[i])
+        }
+    }
+    
+    return distanceMatrix
+}
+
+func mse(distMatrix1: [[Float]], distMatrix2: [[Float]], uncertainty: Float = 0.1) -> Float {
+    guard distMatrix1.count > 0 && distMatrix1[0].count > 0 && distMatrix1.count == distMatrix1.count && distMatrix1[0].count == distMatrix1[0].count else {
+        fatalError("Le due matrici devono avere le stesse dimensioni non nulle")
+    }
+
+    var mse: Float = 0.0
+    
+    for (i, row) in distMatrix1.enumerated() {
+        for (j, _) in row.enumerated() where j > i {
+            let d1 = distMatrix1[i][j]
+            let d2 = distMatrix2[i][j]
+            
+            let diff = abs(d1 - d2)
+            mse += diff < uncertainty ? 0 : pow(diff, 2)
+        }
+    }
+
+    return mse
+}
+
+func candidateNodes(for roomNodes: [SCNNode], in floorNodes: [SCNNode]) -> [SCNNode] {
+    let roomPoints = roomNodes.simd
+    let floorPoints = Array(floorNodes.simd.shuffled().prefix(10))
+    
+    var size = roomPoints.count
+
+    while size > 0 {
+        print("Start roomCombinations")
+        let roomCombinations = combinations(of: roomPoints, taking: size)
+        print("End roomCombinations")
+        print()
+        
+        print("Start floorCombinations")
+        let floorCombinations = combinations(of: floorPoints, taking: size)
+        print("End floorCombinations")
+        print()
+        
+        for (i, roomCombination) in roomCombinations.enumerated() {
+            let roomCombCentroid = calculateCentroid(points: roomCombination)
+            let orderedRoomCombination = roomCombination.sorted { distance($0, roomCombCentroid) < distance($1, roomCombCentroid) }
+            let roomCombDistMatrix = generateDistanceMatrix(points: orderedRoomCombination + [roomCombCentroid])
+            
+            for (j, floorCombination) in floorCombinations.enumerated() {
+                let floorCombCentroid = calculateCentroid(points: floorCombination)
+                let orderedFloorCombination = floorCombination.sorted { distance($0, floorCombCentroid) < distance($1, floorCombCentroid) }
+                let floorCombDistMatrix = generateDistanceMatrix(points: orderedFloorCombination + [floorCombCentroid])
+                let error = mse(distMatrix1: roomCombDistMatrix, distMatrix2: floorCombDistMatrix, uncertainty: 5.0)
+                print("mse: \(error)")
+                
+                if (error == 0) {
+                    print()
+                    print("[Size: \(size)][\(i)] Room Combination: \(roomCombination)")
+                    print("[Size: \(size)][\(j)] Floor Combination: \(floorCombination)")
+                    print("mse: \(error)")
+                    return floorNodes.filter { node in floorCombination.contains { point in point == node.worldPosition.simd } }
+                }
+            }
+        }
+        
+        print()
+        
+        size /= 2
+    }
+    
+    return []
+}
+
+extension SCNVector3 {
+    var simd: simd_float3 {
+        return simd_float3(x: self.x, y: self.y, z: self.z)
+    }
+}
+
+extension Array where Element == SCNVector3 {
+    var simd: [simd_float3] {
+        return self.map { $0.simd }
+    }
+}
+
+extension Array where Element == SCNNode {
+    var simd: [simd_float3] {
+        return self.map { $0.simdWorldPosition }
+    }
+}
+
+extension Array {
+    func permutations() -> [[Element]] {
+        guard count > 0 else { return [[]] }
+        
+        return indices.flatMap { i -> [[Element]] in
+            var rest = self
+            let element = rest.remove(at: i)
+            return rest.permutations().map { [element] + $0 }
+        }
+    }
+    
+    func combinations(taking k: Int) -> [[Element]] {
+        guard k > 0 else { return [[]] }
+        guard k <= self.count else { return [] }
+
+        if k == self.count {
+            return [self]
+        }
+
+        if k == 1 {
+            return self.map { [$0] }
+        }
+
+        var result: [[Element]] = []
+
+        for (i, element) in self.enumerated() {
+            let remaining = Array(self[(i + 1)...])
+            let subcombinations = remaining.combinations(taking: k - 1)
+            result += subcombinations.map { [element] + $0 }
+        }
+
+        return result
     }
 }
