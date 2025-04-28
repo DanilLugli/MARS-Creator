@@ -322,10 +322,10 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         }
         
         DispatchQueue.global(qos: .userInitiated).async {
-            let (rotationAngle, translation) = AutoPositionUtility.findBestAlignment(
-                nodesA: roomNodes,
-                nodesB: floorNodes,
-                maxCombinations: 1000
+            let (rotationAngle, translation, _) = AutoPositionUtility.findBestAlignment(
+                from: roomNodes,
+                to: floorNodes,
+                maxPairs: 1000
             )
             
             self.rotate(angle: rotationAngle)
@@ -352,8 +352,6 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         // Aggiorna la matrice di associazione
         floor?.associationMatrix[roomName]?.translation[3][0] += Float(horizontal)
         floor?.associationMatrix[roomName]?.translation[3][2] += Float(vertical)
-        
-        print("DEBUG: Room moved by (\(horizontal), \(vertical))")
     }
     
     // Le funzioni esistenti possono essere semplificate utilizzando moveRoom
@@ -379,8 +377,6 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
             return
         }
         
-        print("DEBUG: Current eulerAngles.y before rotation: \(roomNode.eulerAngles.y)")
-        
         // Crea la matrice di rotazione con l'angolo passato come parametro
         let rotationMatrix = simd_float4x4(SCNMatrix4MakeRotation(angle, 0, 1, 0))
         
@@ -391,8 +387,6 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         let previousMatrix = floor?.associationMatrix[roomName ?? ""]?.r_Y ?? matrix_identity_float4x4
         let updatedMatrix = matrix_multiply(previousMatrix, rotationMatrix)
         floor?.associationMatrix[roomName ?? ""]?.r_Y = updatedMatrix
-        
-        print("DEBUG: Applied rotation with angle: \(angle) radians")
     }
     
     func rotateRight() {
@@ -525,18 +519,130 @@ struct SCNViewUpdatePositionRoomContainer_Previews: PreviewProvider {
 }
 
 struct AutoPositionUtility {
-    // Lista di prefissi target con ordine di preferenza
-    static let targetPrefixes = ["Door", "Opening", "Window"] //, "Table", "Storage"]
+    // Lista dei tipi di nodo da mantenere
+    static let targetTypes = ["Door", "Opening", "Window"]
     
-    // Funzione per calcolare la rotazione attorno all'asse y e la traslazione x,z
-    static func computeTransformation(from sourcePoints: [simd_float3], to targetPoints: [simd_float3]) -> (rotationAngle: Float, translation: simd_float3) {
-        guard sourcePoints.count == targetPoints.count, sourcePoints.count >= 3 else {
-            fatalError("Sono necessari almeno 3 punti corrispondenti")
+    static func findBestAlignment(
+        from sourceNodes: [SCNNode],
+        to targetNodes: [SCNNode],
+        maxPairs: Int = 1000,
+        clusterSize: Int = 3
+    ) -> (rotationAngle: Float, translation: simd_float3, error: Float) {
+        let filteredSourceNodes = filterNodesByType(nodes: sourceNodes)
+        let filteredTargetNodes = filterNodesByType(nodes: targetNodes)
+        
+        let clusters = findCompatibleClusters(
+            from: filteredSourceNodes,
+            and: filteredTargetNodes,
+            clusterSize: clusterSize,
+            maxPairs: maxPairs
+        )
+        
+        var minError = Float(-1);
+        var bestRotationAngle: Float = 0.0;
+        var bestTranslation: simd_float3 = simd_float3(0, 0, 0);
+        
+        // Itera su tutte le combinazioni
+        for (sourceCluster, targetCluster, compatibilityError) in clusters {
+            let (rotationAngle, translation) = computeTransformation(from: sourceCluster, to: targetCluster)
+            
+            // Calcola l'errore di trasformazione
+            let transformationError = computeTransformationError(
+                for: sourceCluster,
+                rotationAngle: rotationAngle,
+                translation: translation,
+                comparedTo: targetCluster
+            )
+            
+            // Calcola l'errore totale
+            let error = compatibilityError + transformationError
+            
+            if (error < minError || minError == Float(-1)) {
+                minError = error
+                
+                bestRotationAngle = rotationAngle;
+                bestTranslation = translation;
+            }
+            
+            print("Error: \(error)")
+            print("Min error: \(minError)")
+            print()
+            print("rotationAngle: \(rotationAngle) (\(rotationAngle * 180 / .pi)°)")
+            print("translation: \(translation)")
+            print()
         }
         
-        // 1. Calcola i centroidi
-        let sourceCentroid = sourcePoints.getCentroid()
-        let targetCentroid = targetPoints.getCentroid()
+        return (bestRotationAngle, bestTranslation, minError)
+    }
+    
+    private static func filterNodesByType(nodes: [SCNNode]) -> [SCNNode] {
+        return nodes.filter { node in targetTypes.contains { targetType in node.type == targetType }}
+    }
+    
+    // Funzione principale per trovare le coppie di cluster compatibili
+    private static func findCompatibleClusters(
+        from firstList: [SCNNode],
+        and secondList: [SCNNode],
+        clusterSize: Int = 3,
+        maxPairs: Int = 1000
+    ) -> [(NodeCluster, NodeCluster, Float)] {
+        // Controllo che ci siano abbastanza nodi
+        guard
+            firstList.count >= clusterSize,
+            secondList.count >= clusterSize
+        else {
+            return []
+        }
+        
+        // Genero tutti i possibili cluster dalla prima lista
+        let firstClusters = firstList.combinations(taking: clusterSize).map { NodeCluster(nodes: $0) }
+        
+        // Genero tutti i possibili cluster dalla seconda lista
+        let secondClusters = secondList.combinations(taking: clusterSize).map { NodeCluster(nodes: $0) }
+        
+        // Array per memorizzare i risultati (cluster1, cluster2, error)
+        var compatibilityErrors: [(NodeCluster, NodeCluster, Float)] = []
+        
+        // Limito il numero di cluster da confrontare per ottimizzazione
+        let maxFirstClusters = min(1000, firstClusters.count)
+        let sampledFirstClusters = Array(firstClusters.shuffled().prefix(maxFirstClusters))
+        
+        // Limito il numero di cluster da confrontare per ottimizzazione
+        let maxSecondClusters = min(10000, secondClusters.count)
+        let sampledSecondClusters = Array(secondClusters.shuffled().prefix(maxSecondClusters))
+        
+        // Calcolo i punteggi di compatibilità
+        for cluster1 in sampledFirstClusters {
+            for cluster2 in sampledSecondClusters {
+                let error = cluster1.computeCompatibilityError(with: cluster2)
+                compatibilityErrors.append((cluster1, cluster2, error))
+            }
+        }
+        
+        // Ordino in base al punteggio (più basso = più compatibile)
+        compatibilityErrors.sort { $0.2 < $1.2 }
+        
+        // Prendo le migliori coppie
+        let bestPairs = Array(compatibilityErrors.prefix(maxPairs))
+        
+        return bestPairs
+    }
+    
+    // Funzione per calcolare la rotazione attorno all'asse y e la traslazione x,z
+    private static func computeTransformation(
+        from sourceCluster: NodeCluster,
+        to targetCluster: NodeCluster
+    ) -> (rotationAngle: Float, translation: simd_float3) {
+        guard sourceCluster.size == targetCluster.size, sourceCluster.size >= 3 else {
+            fatalError("Sono necessari cluster di almeno 3 nodi")
+        }
+        
+        // 1. Recupera punti e centroidi
+        let sourcePoints = sourceCluster.points
+        let targetPoints = targetCluster.points
+        
+        let sourceCentroid = sourceCluster.centroid
+        let targetCentroid = targetCluster.centroid
         
         // 2. Sottrai i centroidi dai punti
         let centeredSourcePoints = sourcePoints.map { $0 - sourceCentroid }
@@ -578,116 +684,42 @@ struct AutoPositionUtility {
     }
     
     // Funzione per calcolare l'errore di allineamento
-    static func computeError(for A: [simd_float3], rotationAngle: Float, translation: simd_float3, comparedTo B: [simd_float3]) -> Float {
-        guard A.count == B.count else {
-            fatalError("Input point sets must have the same number of points")
+    private static func computeTransformationError(
+        for sourceCluster: NodeCluster,
+        rotationAngle: Float,
+        translation: simd_float3,
+        comparedTo targetCluster: NodeCluster
+    ) -> Float {
+        guard sourceCluster.size == targetCluster.size else {
+            fatalError("Clusters must have the same number of nodes")
         }
         
-        return A.enumerated().reduce(0.0) { (totalError, element) in
-            let transformedPoint = A[element.offset].transformXZ(rotationAngle: rotationAngle, translation: translation)
-            let error = simd_length(transformedPoint - B[element.offset])
-            print("A: \(A[element.offset])")
+        let sourcePoints = sourceCluster.points
+        let targetPoints = targetCluster.points
+        
+        return sourcePoints.enumerated().reduce(0.0) { (totalError, element) in
+            let i = element.offset
+            let transformedPoint = sourcePoints[i].transformXZ(rotationAngle: rotationAngle, translation: translation)
+            let error = simd_length(transformedPoint - targetPoints[i])
+            
+            print("A: \(sourcePoints[i])")
             print("transformedPoint: \(transformedPoint)")
-            print("B: \(B[element.offset])")
+            print("B: \(targetPoints[i])")
             print()
-            return totalError + error * error
-        }
-    }
-    
-    static func findBestAlignment(
-        nodesA: [SCNNode],
-        nodesB: [SCNNode],
-        maxCombinations: Int
-    ) -> (rotationAngle: Float, translation: simd_float3) {
-        let filteredNodesA = nodesA.filter { node in targetPrefixes.contains { prefix in node.name?.contains(prefix) ?? false }}
-        let filteredNodesB = nodesB.filter { node in targetPrefixes.contains { prefix in node.name?.contains(prefix) ?? false }}
-        
-        let clusters = findCompatibleClusters(from: filteredNodesA, and: filteredNodesB, maxPairs: maxCombinations)
-        
-        var minError = Float(-1);
-        var bestRotationAngle: Float = 0.0;
-        var bestTranslation: simd_float3 = simd_float3(0, 0, 0);
-        
-        // Itera su tutte le combinazioni
-        for (nodeSetA, nodeSetB) in clusters {
-            let pointSetA = nodeSetA.simdWorldPositions;
-            let pointSetB = nodeSetB.simdWorldPositions;
             
-            let (rotationAngle, translation) = computeTransformation(from: pointSetA, to: pointSetB)
-            
-            // Calcola l'errore
-            let error = computeError(for: pointSetA, rotationAngle: rotationAngle, translation: translation, comparedTo: pointSetB)
-            
-            if (error < minError || minError == Float(-1)) {
-                minError = error
-                
-                bestRotationAngle = rotationAngle;
-                bestTranslation = translation;
-            }
-            
-            print("Error: \(error)")
-            print("Min error: \(minError)")
-            print()
-            print("rotationAngle: \(rotationAngle) (\(rotationAngle * 180 / .pi)°)")
-            print("translation: \(translation)")
-            print()
+            return totalError + pow(error, 2)
         }
-        
-        return (bestRotationAngle, bestTranslation)
-    }
-
-    // Funzione principale per trovare le coppie di cluster compatibili
-    static func findCompatibleClusters(from firstList: [SCNNode], and secondList: [SCNNode], maxPairs: Int = 1000) -> [([SCNNode], [SCNNode])] {
-        // Controllo che ci siano abbastanza nodi
-        guard firstList.count >= 3 && secondList.count >= 3 else {
-            return []
-        }
-        
-        // Genero tutti i possibili cluster dalla prima lista
-        let firstClusters = firstList.combinations(taking: 3).map { NodeCluster(nodes: $0) }
-        
-        // Genero tutti i possibili cluster dalla seconda lista
-        let secondClusters = secondList.combinations(taking: 3).map { NodeCluster(nodes: $0) }
-        
-        print("firstClusters: \(firstClusters.count)")
-        print("secondClusters: \(secondClusters.count)")
-        
-        // Array per memorizzare i risultati (cluster1, cluster2, score)
-        var compatibilityScores: [(NodeCluster, NodeCluster, Float)] = []
-        
-        // Limito il numero di cluster da confrontare per ottimizzazione
-        let maxFirstClusters = min(1000, firstClusters.count)
-        let sampledFirstClusters = Array(firstClusters.shuffled().prefix(maxFirstClusters))
-        
-        // Limito il numero di cluster da confrontare per ottimizzazione
-        let maxSecondClusters = min(10000, secondClusters.count)
-        let sampledSecondClusters = Array(secondClusters.shuffled().prefix(maxSecondClusters))
-        
-        // Calcolo i punteggi di compatibilità
-        for cluster1 in sampledFirstClusters {
-            for cluster2 in sampledSecondClusters {
-                let score = cluster1.computeMSE(with: cluster2)
-                compatibilityScores.append((cluster1, cluster2, score))
-            }
-        }
-        
-        // Ordino in base al punteggio (più basso = più compatibile)
-        compatibilityScores.sort { $0.2 < $1.2 }
-        
-        // Prendo le migliori coppie
-        let bestPairs = compatibilityScores.prefix(maxPairs)
-        
-        // Converto nel formato richiesto
-        return bestPairs.map { ($0.0.nodes, $0.1.nodes) }
     }
 }
 
 struct NodeCluster {
     let nodes: [SCNNode]
+    let points: [simd_float3]
     let centroid: simd_float3
     let distanceMatrix: [[Float]]
     let relativeHeights: [Float]
     let dimensions: [(width: Float, height: Float, depth: Float)]
+    let types: [String?]
     
     var size: Int {
         return self.nodes.count
@@ -704,6 +736,9 @@ struct NodeCluster {
         // Ordinamento nodi
         let sortedNodes = nodes.sorted { distance($0.simdWorldPosition, centroid) < distance($1.simdWorldPosition, centroid) }
         
+        // Calcolo punti
+        let points = sortedNodes.simdWorldPositions
+        
         // Calcolo distanze
         let distanceMatrix = (sortedNodes.simdWorldPositions + [centroid]).getDistanceMatrix()
         
@@ -713,29 +748,49 @@ struct NodeCluster {
         // Calcolo dimensioni
         let dimensions = sortedNodes.map { $0.boundingBoxDim }
         
+        // Calcolo tipi
+        let types = sortedNodes.map { $0.type }
+        
         self.nodes = sortedNodes
         self.centroid = centroid
+        self.points = points
         self.distanceMatrix = distanceMatrix
         self.relativeHeights = relativeHeights
         self.dimensions = dimensions
+        self.types = types
     }
     
-    func computeMSE(
+    func computeCompatibilityError(
         with other: NodeCluster,
         threshold: Float = 0.1,
         distanceWeight: Float = 1.0,
         relativeHeightWeight: Float = 1.0,
-        dimensionWeight: Float = 1.0
+        dimensionWeight: Float = 1.0,
+        typeWeight: Float = 1.0,
+        diversityWeight: Float = 1.0
     ) -> Float {
         let distanceMSE = self.computeDistanceMSE(with: other, threshold: threshold)
         let relativeHeightMSE = self.computeRelativeHeightMSE(with: other, threshold: threshold)
         let dimensionMSE = self.computeDimensionMSE(with: other, threshold: threshold)
+        let typeMSE = self.computeTypeMSE(with: other, threshold: threshold)
+        let diversityMSE = self.computeDiversityMSE(with: other, threshold: threshold)
         
-        return distanceWeight * distanceMSE + relativeHeightWeight * relativeHeightMSE + dimensionWeight * dimensionMSE
+        return (
+            distanceWeight * distanceMSE +
+            relativeHeightWeight * relativeHeightMSE +
+            dimensionWeight * dimensionMSE +
+            typeWeight * typeMSE +
+            diversityWeight * diversityMSE
+        )
     }
     
     func computeDistanceMSE(with other: NodeCluster, threshold: Float = 0.1) -> Float {
-        guard self.distanceMatrix.count > 0 && self.distanceMatrix[0].count > 0 && self.distanceMatrix.count == other.distanceMatrix.count && self.distanceMatrix[0].count == other.distanceMatrix[0].count else {
+        guard
+            self.distanceMatrix.count > 0,
+            self.distanceMatrix[0].count > 0,
+            self.distanceMatrix.count == other.distanceMatrix.count,
+            self.distanceMatrix[0].count == other.distanceMatrix[0].count
+        else {
             fatalError("The two distance matrices must have the same non-zero dimensions.")
         }
 
@@ -755,7 +810,10 @@ struct NodeCluster {
     }
     
     func computeRelativeHeightMSE(with other: NodeCluster, threshold: Float = 0.1) -> Float {
-        guard self.relativeHeights.count > 0 && self.relativeHeights.count == other.relativeHeights.count else {
+        guard
+            self.relativeHeights.count > 0,
+            self.relativeHeights.count == other.relativeHeights.count
+        else {
             fatalError("The two relative height arrays must have the same non-zero dimension.")
         }
 
@@ -773,7 +831,10 @@ struct NodeCluster {
     }
     
     func computeDimensionMSE(with other: NodeCluster, threshold: Float = 0.1) -> Float {
-        guard self.dimensions.count > 0 && self.dimensions.count == other.dimensions.count else {
+        guard
+            self.dimensions.count > 0,
+            self.dimensions.count == other.dimensions.count
+        else {
             fatalError("The two dimension arrays must have the same non-zero dimension.")
         }
 
@@ -795,9 +856,85 @@ struct NodeCluster {
 
         return mse
     }
+    
+    func computeTypeMSE(with other: NodeCluster, threshold: Float = 0.1) -> Float {
+        guard
+            self.types.count > 0,
+            self.types.count == other.types.count
+        else {
+            fatalError("The two type arrays must have the same non-zero dimension.")
+        }
+        
+        var totalError: Float = 0.0
+        
+        for (i, _) in self.types.enumerated() {
+            let selfType = self.types[i] ?? ""
+            let otherType = other.types[i] ?? ""
+            
+            // Calcola un errore binario: 0 se i tipi sono uguali, 1 se sono diversi
+            let typeError: Float = (selfType == otherType) ? 0.0 : 1.0
+            
+            totalError += typeError
+        }
+        
+        // Calcola la media degli errori
+        let mse = self.size > 0 ? totalError / Float(self.size) : 1.0
+        
+        // Applica la soglia, se necessario
+        return mse < threshold ? 0.0 : mse
+    }
+    
+    func computeDiversityMSE(with other: NodeCluster, threshold: Float = 0.1) -> Float {
+        guard
+            self.types.count > 0,
+            self.types.count == other.types.count
+        else {
+            fatalError("The two type arrays must have the same non-zero dimension.")
+        }
+        
+        // Raccoglie tutti i tipi unici nei due cluster
+        let selfTypes = Set<String?>(self.types)
+        let otherTypes = Set<String?>(other.types)
+        
+        // Calcola l'unione dei tipi unici tra i due cluster
+        let unionTypes = selfTypes.union(otherTypes)
+        
+        // Se non ci sono tipi, restituisci un valore neutro
+        if unionTypes.isEmpty {
+            return 0.0
+        }
+        
+        // Calcola quanti tipi diversi ci sono in totale tra i due cluster
+        let totalUniqueTypes = Float(unionTypes.count)
+        
+        // Calcola il punteggio di diversità normalizzato (0-1)
+        // Più alto è il valore, maggiore è la diversità
+        let diversityScore = totalUniqueTypes / max(Float(selfTypes.count + otherTypes.count), 1.0)
+        
+        // Invertiamo il punteggio per trasformarlo in un "errore"
+        // 1.0 - diversityScore fa sì che alta diversità = basso errore
+        let mse = 1.0 - diversityScore
+        
+        // Applica la soglia, se necessario
+        return mse < threshold ? 0.0 : mse
+    }
 }
 
 extension SCNNode {
+    var type: String? {
+        guard let name = self.name else {
+            return nil
+        }
+        
+        let pattern = "(?:^clone_)+|\\d+$"
+        guard let regex = try? NSRegularExpression(pattern: pattern) else {
+            return nil
+        }
+        
+        let range = NSRange(name.startIndex..<name.endIndex, in: name)
+        return regex.stringByReplacingMatches(in: name, options: [], range: range, withTemplate: "")
+    }
+    
     var boundingBoxDim: (width: Float, height: Float, depth: Float) {
         // Ottieni il boundingBox del nodo
         let (min, max) = self.boundingBox
