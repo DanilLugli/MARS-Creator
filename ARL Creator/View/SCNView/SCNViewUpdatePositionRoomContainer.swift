@@ -603,10 +603,10 @@ struct AutoPositionUtility {
         let sampledNodes2 = maxNodes2 >= nodes2.count ? nodes2 : Array(nodes2.shuffled().prefix(maxNodes2))
         
         // Genero tutti i possibili cluster dalla prima lista
-        let clusters1 = nodes1.combinations(taking: clusterSize).map { NodeCluster(nodes: $0) }
+        let clusters1 = sampledNodes1.combinations(taking: clusterSize).map { NodeCluster(nodes: $0) }
         
         // Genero tutti i possibili cluster dalla seconda lista
-        let clusters2 = nodes2.combinations(taking: clusterSize).map { NodeCluster(nodes: $0) }
+        let clusters2 = sampledNodes2.combinations(taking: clusterSize).map { NodeCluster(nodes: $0) }
         
         // Array per memorizzare i risultati (cluster1, cluster2, error)
         var compatibilityErrors: [(NodeCluster, NodeCluster, Float)] = []
