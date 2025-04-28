@@ -149,7 +149,6 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
                 clonedNode.scale = SCNVector3(1, 1, 1)
 
                 if let originalGeometry = clonedNode.geometry {
-                    let clonedGeometry = originalGeometry.copy() as! SCNGeometry
                     let material = SCNMaterial()
                     material.lightingModel = .physicallyBased
 
@@ -191,8 +190,6 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
             var seenNodeNames = Set<String>()
 
             func search(in node: SCNNode) {
-                let nodeName = node.name?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "Senza nome"
-
                 if let name = node.name?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() {
                     let prefixMatch = prefixes.contains(where: { name.hasPrefix($0.lowercased()) })
                     let hasGrpSuffix = name.hasSuffix("grp")
@@ -766,21 +763,21 @@ struct NodeCluster {
         distanceWeight: Float = 1.0,
         relativeHeightWeight: Float = 1.0,
         dimensionWeight: Float = 1.0,
-        typeWeight: Float = 1.0,
-        diversityWeight: Float = 1.0
+        typeMismatchWeight: Float = 1.0,
+        typeDiversityWeight: Float = 1.0
     ) -> Float {
         let distanceMSE = self.computeDistanceMSE(with: other, threshold: threshold)
         let relativeHeightMSE = self.computeRelativeHeightMSE(with: other, threshold: threshold)
         let dimensionMSE = self.computeDimensionMSE(with: other, threshold: threshold)
-        let typeMSE = self.computeTypeMSE(with: other, threshold: threshold)
-        let diversityMSE = self.computeDiversityMSE(with: other, threshold: threshold)
+        let typeMismatchMSE = self.computeTypeMismatchMSE(with: other, threshold: threshold)
+        let typeDiversityMSE = self.computeTypeDiversityMSE(with: other, threshold: threshold)
         
         return (
             distanceWeight * distanceMSE +
             relativeHeightWeight * relativeHeightMSE +
             dimensionWeight * dimensionMSE +
-            typeWeight * typeMSE +
-            diversityWeight * diversityMSE
+            typeMismatchWeight * typeMismatchMSE +
+            typeDiversityWeight * typeDiversityMSE
         )
     }
     
@@ -857,7 +854,7 @@ struct NodeCluster {
         return mse
     }
     
-    func computeTypeMSE(with other: NodeCluster, threshold: Float = 0.1) -> Float {
+    func computeTypeMismatchMSE(with other: NodeCluster, threshold: Float = 0.1) -> Float {
         guard
             self.types.count > 0,
             self.types.count == other.types.count
@@ -884,7 +881,7 @@ struct NodeCluster {
         return mse < threshold ? 0.0 : mse
     }
     
-    func computeDiversityMSE(with other: NodeCluster, threshold: Float = 0.1) -> Float {
+    func computeTypeDiversityMSE(with other: NodeCluster, threshold: Float = 0.1) -> Float {
         guard
             self.types.count > 0,
             self.types.count == other.types.count
