@@ -148,7 +148,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
                 clonedNode.name = "clone_" + (node.name ?? "Unnamed")
                 clonedNode.scale = SCNVector3(1, 1, 1)
 
-                if let originalGeometry = clonedNode.geometry {
+                if clonedNode.geometry != nil {
                     let material = SCNMaterial()
                     material.lightingModel = .physicallyBased
 
@@ -322,6 +322,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
             let (rotationAngle, translation, _) = AutoPositionUtility.findBestAlignment(
                 from: roomNodes,
                 to: floorNodes,
+                clusterSize: 3,
                 maxPairs: 1000
             )
             
@@ -522,8 +523,8 @@ struct AutoPositionUtility {
     static func findBestAlignment(
         from sourceNodes: [SCNNode],
         to targetNodes: [SCNNode],
-        maxPairs: Int = 1000,
-        clusterSize: Int = 3
+        clusterSize: Int = 3,
+        maxPairs: Int = 1000
     ) -> (rotationAngle: Float, translation: simd_float3, error: Float) {
         let filteredSourceNodes = filterNodesByType(nodes: sourceNodes)
         let filteredTargetNodes = filterNodesByType(nodes: targetNodes)
@@ -578,39 +579,47 @@ struct AutoPositionUtility {
     
     // Funzione principale per trovare le coppie di cluster compatibili
     private static func findCompatibleClusters(
-        from firstList: [SCNNode],
-        and secondList: [SCNNode],
+        from nodes1: [SCNNode],
+        and nodes2: [SCNNode],
         clusterSize: Int = 3,
-        maxPairs: Int = 1000
+        maxPairs: Int = 1000,
+        maxNodes1: Int = 20,
+        maxNodes2: Int = 40,
+        maxClusters1: Int = 1000,
+        maxClusters2: Int = 10000
     ) -> [(NodeCluster, NodeCluster, Float)] {
         // Controllo che ci siano abbastanza nodi
         guard
-            firstList.count >= clusterSize,
-            secondList.count >= clusterSize
+            nodes1.count >= clusterSize,
+            nodes2.count >= clusterSize
         else {
             return []
         }
         
+        // Limito il numero di nodi da combinare per ottimizzazione
+        let sampledNodes1 = maxNodes1 >= nodes1.count ? nodes1 : Array(nodes1.shuffled().prefix(maxNodes1))
+        
+        // Limito il numero di nodi da combinare per ottimizzazione
+        let sampledNodes2 = maxNodes2 >= nodes2.count ? nodes2 : Array(nodes2.shuffled().prefix(maxNodes2))
+        
         // Genero tutti i possibili cluster dalla prima lista
-        let firstClusters = firstList.combinations(taking: clusterSize).map { NodeCluster(nodes: $0) }
+        let clusters1 = nodes1.combinations(taking: clusterSize).map { NodeCluster(nodes: $0) }
         
         // Genero tutti i possibili cluster dalla seconda lista
-        let secondClusters = secondList.combinations(taking: clusterSize).map { NodeCluster(nodes: $0) }
+        let clusters2 = nodes2.combinations(taking: clusterSize).map { NodeCluster(nodes: $0) }
         
         // Array per memorizzare i risultati (cluster1, cluster2, error)
         var compatibilityErrors: [(NodeCluster, NodeCluster, Float)] = []
         
         // Limito il numero di cluster da confrontare per ottimizzazione
-        let maxFirstClusters = min(1000, firstClusters.count)
-        let sampledFirstClusters = Array(firstClusters.shuffled().prefix(maxFirstClusters))
+        let sampledClusters1 = maxClusters1 >= clusters1.count ? clusters1 : Array(clusters1.shuffled().prefix(maxClusters1))
         
         // Limito il numero di cluster da confrontare per ottimizzazione
-        let maxSecondClusters = min(10000, secondClusters.count)
-        let sampledSecondClusters = Array(secondClusters.shuffled().prefix(maxSecondClusters))
+        let sampledClusters2 = maxClusters2 >= clusters2.count ? clusters2 : Array(clusters2.shuffled().prefix(maxClusters2))
         
         // Calcolo i punteggi di compatibilità
-        for cluster1 in sampledFirstClusters {
-            for cluster2 in sampledSecondClusters {
+        for cluster1 in sampledClusters1 {
+            for cluster2 in sampledClusters2 {
                 let error = cluster1.computeCompatibilityError(with: cluster2)
                 compatibilityErrors.append((cluster1, cluster2, error))
             }
