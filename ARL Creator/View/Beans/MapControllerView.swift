@@ -5,45 +5,57 @@ struct MapControllerView: View {
     @State private var scaleWidth: Double = 0
     @State private var timer: Timer? = nil // Timer per la pressione continua
     @State private var isPressed = false  // Stato per controllare il rilascio
+    @State private var isAutoPositioning = false  // Stato per tracciare se autoPosition è in corso
+    
+    @State private var showAlert = false
 
     var moveObject: MoveObject
+    var needsAutoPositioning = false
     
     var body: some View {
         HStack {
-            
             VStack {
-                Text("Rotate Anticlockwise:").foregroundColor(Color.customBackground)
+                Text("Rotate Anticlockwise")
+                    .multilineTextAlignment(TextAlignment.center)
+                    .foregroundColor(Color.customBackground)
                 pressableButton(
                     action: { continuous in moveObject.rotateCounterClockwise() },
                     imageName: "arrow.counterclockwise"
                 )
                 
-                Text("Rotate Clockwise:").foregroundColor(Color.customBackground)
+                Spacer().frame(height: 20)
+                
+                Text("Rotate Clockwise")
+                    .multilineTextAlignment(TextAlignment.center)
+                    .foregroundColor(Color.customBackground)
                 pressableButton(
                     action: { continuous in moveObject.rotateClockwise() },
                     imageName: "arrow.clockwise"
                 )
             }
+            .frame(maxWidth: .infinity)
             
-            if moveObject is MoveDimensionObject {
-                VStack {
-                    Slider(value: $scaleWidth, in: 0...1, step: 0.01) {
-                        Text("Width")
-                    }
-                    .onChange(of: scaleWidth) { _, _ in
-                        if let moveDimensionObject = moveObject as? MoveDimensionObject {
-                            moveDimensionObject.incrementWidht(by: Int(scaleWidth * 100))
-                        }
-                    }
-                    .padding()
-                }
-            } else {
-                Spacer()
-            }
+//            if moveObject is MoveDimensionObject {
+//                VStack {
+//                    Slider(value: $scaleWidth, in: 0...1, step: 0.01) {
+//                        Text("Width")
+//                    }
+//                    .onChange(of: scaleWidth) { _, _ in
+//                        if let moveDimensionObject = moveObject as? MoveDimensionObject {
+//                            moveDimensionObject.incrementWidht(by: Int(scaleWidth * 100))
+//                        }
+//                    }
+//                    .padding()
+//                }
+//            } else {
+//                Spacer()
+//            }
             
             // Movimenti
             VStack {
-                Text("Move along 4 axes: ").foregroundColor(Color.customBackground)
+                Text("Move along 4 axes")
+                    .multilineTextAlignment(TextAlignment.center)
+                    .foregroundColor(Color.customBackground)
                 
                 // Bottone per muovere in alto (up)
                 pressableButton(
@@ -72,11 +84,54 @@ struct MapControllerView: View {
                 )
             }
             .padding()
+            .frame(maxWidth: .infinity)
             
-            pressableButton(
-                action: { continuous in moveObject.autoPosition(continuous: continuous) },
-                imageName: "location.fill"
-            )
+            // Posizionamento automatico
+            VStack {
+                Text("Auto Align")
+                    .multilineTextAlignment(TextAlignment.center)
+                    .foregroundColor(Color.customBackground)
+                pressableButton(
+                    action: { _ in applyAutoPositioning() },
+                    imageName: "scope"
+                )
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .opacity(isAutoPositioning ? 0 : 1)
+        .overlay {
+            if isAutoPositioning {
+                VStack {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .black))
+                        .scaleEffect(1.5)
+                    
+                    Text("Auto-positioning in progress...")
+                        .foregroundColor(.black)
+                        .padding(.top, 10)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+        }
+        .onAppear {
+            if needsAutoPositioning {
+                applyAutoPositioning()
+            }
+        }
+        .alert("Auto-Positioning Failed", isPresented: $showAlert) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("Unable to perform auto-positioning, manual positioning will be required to proceed.")
+        }
+    }
+
+    private func applyAutoPositioning() {
+        Task {
+            self.isAutoPositioning = true
+            if !(await moveObject.applyAutoPositioning()) {
+                self.showAlert = true
+            }
+            self.isAutoPositioning = false
         }
     }
 

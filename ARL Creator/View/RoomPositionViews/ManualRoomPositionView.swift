@@ -67,7 +67,10 @@ struct ManualRoomPositionView: View {
                 VStack {
                     Spacer()
                     
-                    MapControllerView(moveObject: mapPositionView.handler)
+                    MapControllerView(
+                        moveObject: mapPositionView.handler,
+                        needsAutoPositioning: !doesMatrixExist(for: room.name, in: floor.associationMatrix)
+                    )
                         .padding()
                         .background(
                             Color.white.opacity(0.8)

@@ -302,33 +302,29 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         moveRoomPositionRight(step: step)
     }
     
-    func autoPosition(continuous: Bool) {
+    func applyAutoPositioning() async -> Bool {
         resetRoomPosition()
         
-        guard let roomNode else {
-            return
-        }
-        
-        guard let floor else {
-            return
-        }
+        guard let roomNode else { return false }
+        guard let floor else { return false }
         
         let roomNodes = roomNode.childNodes
-        guard let floorNodes = floor.sceneObjects else {
-            return
-        }
+        guard let floorNodes = floor.sceneObjects else { return false }
         
-        DispatchQueue.global(qos: .userInitiated).async {
-            let (rotationAngle, translation, _) = AutoPositionUtility.findBestAlignment(
+        // Esegue il calcolo in background
+        let (rotationAngle, translation, error) = await Task.detached(priority: .userInitiated) {
+            return AutoPositionUtility.findBestAlignment(
                 from: roomNodes,
                 to: floorNodes,
                 clusterSize: 3,
                 maxPairs: 1000
             )
-            
-            self.rotate(angle: rotationAngle)
-            self.moveRoom(horizontal: CGFloat(translation.x), vertical: CGFloat(translation.z))
-        }
+        }.value
+        
+        self.rotate(angle: rotationAngle)
+        self.moveRoom(horizontal: CGFloat(translation.x), vertical: CGFloat(translation.z))
+        
+        return error >= 0
     }
         
     /**
