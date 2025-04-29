@@ -103,11 +103,11 @@ struct MapControllerView: View {
             if isAutoPositioning {
                 VStack {
                     ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: .black))
+                        .progressViewStyle(CircularProgressViewStyle(tint: Color.customBackground))
                         .scaleEffect(1.5)
                     
                     Text("Auto-positioning in progress...")
-                        .foregroundColor(.black)
+                        .foregroundColor(Color.customBackground)
                         .padding(.top, 10)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
