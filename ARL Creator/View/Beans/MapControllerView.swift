@@ -5,9 +5,8 @@ struct MapControllerView: View {
     @State private var scaleWidth: Double = 0
     @State private var timer: Timer? = nil // Timer per la pressione continua
     @State private var isPressed = false  // Stato per controllare il rilascio
-    @State private var isAutoPositioning = false  // Stato per tracciare se autoPosition è in corso
-    
-    @State private var showAlert = false
+    @State private var isAutoPositioning = false  // Stato per tracciare se il posizionamento automatico è in corso
+    @State private var showAlert = false // Stato per mostrate un alert nel caso il posizionamento automatico fallisca
 
     var moveObject: MoveObject
     var needsAutoPositioning = false
