@@ -303,16 +303,21 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
     }
     
     func applyAutoPositioning() async -> Bool {
-        resetRoomPosition()
-        
         guard let roomNode else { return false }
         guard let floor else { return false }
         
         let roomNodes = roomNode.childNodes
         guard let floorNodes = floor.sceneObjects else { return false }
         
-        // Esegue il calcolo in background
+        // Salva la posizione iniziale del nodo stanza
+        let initialPosition = roomNode.worldPosition
+        
+        // Sposta temporaneamente la stanza all'origine per facilitare il calcolo dell’allineamento
+        moveRoom(horizontal: CGFloat(-initialPosition.x), vertical: CGFloat(-initialPosition.z))
+        
+        // Esegue il calcolo dell’allineamento in background con priorità utente
         let (rotationAngle, translation, error) = await Task.detached(priority: .userInitiated) {
+            // Trova il miglior allineamento tra i nodi della stanza e gli oggetti del pavimento
             return AutoPositionUtility.findBestAlignment(
                 from: roomNodes,
                 to: floorNodes,
@@ -321,10 +326,19 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
             )
         }.value
         
-        self.rotate(angle: rotationAngle)
-        self.moveRoom(horizontal: CGFloat(translation.x), vertical: CGFloat(translation.z))
+        // Se il calcolo ha restituito un errore negativo, ripristina la posizione iniziale e termina
+        if error < 0 {
+            moveRoom(horizontal: CGFloat(initialPosition.x), vertical: CGFloat(initialPosition.z))
+            return false
+        }
         
-        return error >= 0
+        // Applica la rotazione trovata
+        rotate(angle: rotationAngle)
+        
+        // Applica la traslazione calcolata
+        moveRoom(horizontal: CGFloat(translation.x), vertical: CGFloat(translation.z))
+        
+        return true
     }
         
     /**
@@ -404,15 +418,6 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         
         // Applica la rotazione
         rotate(angle: angleDiff)
-    }
-    
-    func resetRoomPosition() {
-        guard let roomNode = roomNode else {
-            print("DEBUG: No roomNode found!")
-            return
-        }
-        
-        moveRoom(horizontal: CGFloat(-roomNode.worldPosition.x), vertical: CGFloat(-roomNode.worldPosition.z))
     }
     
     func handlePinch(_ gesture: UIPinchGestureRecognizer) {
