@@ -309,6 +309,9 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         let roomNodes = roomNode.childNodes
         guard let floorNodes = floor.sceneObjects else { return false }
         
+        // Nascondi il nodo stanza
+        roomNode.isHidden = true
+        
         // Salva la posizione iniziale del nodo stanza
         let initialPosition = roomNode.worldPosition
         
@@ -329,6 +332,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         // Se il calcolo ha restituito un errore negativo, ripristina la posizione iniziale e termina
         if error < 0 {
             moveRoom(horizontal: CGFloat(initialPosition.x), vertical: CGFloat(initialPosition.z))
+            roomNode.isHidden = false
             return false
         }
         
@@ -337,6 +341,9 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         
         // Applica la traslazione calcolata
         moveRoom(horizontal: CGFloat(translation.x), vertical: CGFloat(translation.z))
+        
+        // Mostra il nodo stanza
+        roomNode.isHidden = false
         
         return true
     }
