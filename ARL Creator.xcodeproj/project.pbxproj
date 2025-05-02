@@ -55,6 +55,8 @@
 		AAE57FB12C385D2B00F0196F /* ConnectedDotsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAE57FB02C385D2B00F0196F /* ConnectedDotsView.swift */; };
 		AAFB3A022C4DB73400DBC593 /* SaveFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAFB3A012C4DB73400DBC593 /* SaveFile.swift */; };
 		AAFB3A062C4DCFAB00DBC593 /* ScanningCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAFB3A052C4DCFAB00DBC593 /* ScanningCardView.swift */; };
+		FC6E17B72DC52CFD00176CEE /* AutoPositionUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC6E17B62DC52CFD00176CEE /* AutoPositionUtility.swift */; };
+		FC6E17B92DC52D2200176CEE /* NodeCluster.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC6E17B82DC52D2200176CEE /* NodeCluster.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -105,6 +107,8 @@
 		AAE57FB02C385D2B00F0196F /* ConnectedDotsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectedDotsView.swift; sourceTree = "<group>"; };
 		AAFB3A012C4DB73400DBC593 /* SaveFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveFile.swift; sourceTree = "<group>"; };
 		AAFB3A052C4DCFAB00DBC593 /* ScanningCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScanningCardView.swift; sourceTree = "<group>"; };
+		FC6E17B62DC52CFD00176CEE /* AutoPositionUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoPositionUtility.swift; sourceTree = "<group>"; };
+		FC6E17B82DC52D2200176CEE /* NodeCluster.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeCluster.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -195,6 +199,7 @@
 				AA64CC852C495D73005C883B /* Rectangle.swift */,
 				AA64CC872C495F51005C883B /* Coordinates.swift */,
 				AAEE737B2D37FDDF007505A3 /* Connection 2 */,
+				FC6E17B82DC52D2200176CEE /* NodeCluster.swift */,
 			);
 			path = Beans;
 			sourceTree = "<group>";
@@ -210,6 +215,7 @@
 				AA8E0A692C5BA4D90097BDCD /* ServerCreateMatrix.swift */,
 				AA0A80752C9475DC00501EB4 /* MoveObject.swift */,
 				AA0A80772C9477A300501EB4 /* MoveDimensionObject.swift */,
+				FC6E17B62DC52CFD00176CEE /* AutoPositionUtility.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -362,6 +368,7 @@
 				AA78F5D62C2C6BAC0044F825 /* Room.swift in Sources */,
 				AAE57FAB2C384E6400F0196F /* DefaultCardView.swift in Sources */,
 				AA2CA55B2C3F07A500C88C94 /* RoomView.swift in Sources */,
+				FC6E17B72DC52CFD00176CEE /* AutoPositionUtility.swift in Sources */,
 				AA8E0A642C57E50F0097BDCD /* VisualizeRoomViewContainer.swift in Sources */,
 				AAE57FB12C385D2B00F0196F /* ConnectedDotsView.swift in Sources */,
 				AA2CA5512C3DB5F400C88C94 /* RoomCaptureViewContainer.swift in Sources */,
@@ -370,6 +377,7 @@
 				AA8E0A662C5944D70097BDCD /* MatrixCardView.swift in Sources */,
 				AAD778A92C528C600091181A /* FloorCaptureViewContainer.swift in Sources */,
 				AAA29E6C2C1711AA00CA267C /* Shaders.metal in Sources */,
+				FC6E17B92DC52D2200176CEE /* NodeCluster.swift in Sources */,
 				AA78F5D42C2C6B570044F825 /* Floor.swift in Sources */,
 				AAA29E6F2C1711AA00CA267C /* Renderer.swift in Sources */,
 				AA6110112C621CF400B61D0B /* Utils.swift in Sources */,
