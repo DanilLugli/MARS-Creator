@@ -10,10 +10,28 @@ import SwiftUI
 import SceneKit
 import simd
 
+/**
+ * Fornisce una serie di funzioni utili per allineare automaticamente due gruppi di nodi `SCNNode` in uno spazio 3D.
+ */
 struct AutoPositionUtility {
     // Lista dei tipi di nodo da mantenere
     static let targetTypes = ["Door", "Opening", "Window"]
     
+    /**
+     * Trova la miglior allineamento tra due set di nodi `SCNNode` attraverso la rotazione e la traslazione, minimizzando l'errore di compatibilità e di trasformazione.
+     * La funzione filtra i nodi per tipo, trova i cluster compatibili, quindi calcola la rotazione e la traslazione ottimali che minimizzano l'errore complessivo.
+     *
+     * - Parameters:
+     *   - sourceNodes: Il primo array di nodi `SCNNode` da allineare.
+     *   - targetNodes: Il secondo array di nodi `SCNNode` da allineare.
+     *   - clusterSize: Numero di nodi per ciascun cluster. Il valore predefinito è 3.
+     *   - maxPairs: Numero massimo di coppie di cluster da confrontare. Il valore predefinito è 1000.
+     *
+     * - Returns: Una tupla contenente:
+     *   - `rotationAngle`: L'angolo di rotazione ottimale (in radianti) per l'allineamento.
+     *   - `translation`: La traslazione ottimale come `simd_float3` per l'allineamento.
+     *   - `error`: L'errore totale di compatibilità e trasformazione per il miglior allineamento trovato.
+     */
     static func findBestAlignment(
         from sourceNodes: [SCNNode],
         to targetNodes: [SCNNode],
@@ -67,11 +85,39 @@ struct AutoPositionUtility {
         return (bestRotationAngle, bestTranslation, minError)
     }
     
+    /**
+     * Filtra i nodi da un array, restituendo solo quelli che appartengono ai tipi specificati in `targetTypes`.
+     *
+     * La funzione confronta il tipo di ogni nodo nell'array con i tipi presenti nella lista `targetTypes` e restituisce solo i nodi che corrispondono a uno di questi tipi.
+     *
+     * - Parameters:
+     *   - nodes: L'array di nodi `SCNNode` da filtrare.
+     *
+     * - Returns: Un array di nodi `SCNNode` che appartengono ai tipi specificati in `targetTypes`.
+     */
     private static func filterNodesByType(nodes: [SCNNode]) -> [SCNNode] {
         return nodes.filter { node in targetTypes.contains { targetType in node.type == targetType }}
     }
     
-    // Funzione principale per trovare le coppie di cluster compatibili
+    /**
+     * Trova le coppie di cluster più compatibili tra due gruppi di nodi `SCNNode`, calcolando un errore di compatibilità per ciascuna combinazione di cluster.
+     * La funzione genera tutte le combinazioni possibili di cluster dalle due liste di nodi, calcola il punteggio di compatibilità per ciascuna coppia di cluster
+     * e restituisce le migliori coppie ordinate in base all'errore (più basso = più compatibile).
+     * Sono previsti vari limiti per ottimizzare il processo, riducendo il numero di nodi e cluster da combinare e confrontare.
+     *
+     * - Parameters:
+     *   - nodes1: Primo array di nodi `SCNNode` da usare per formare il primo gruppo di cluster.
+     *   - nodes2: Secondo array di nodi `SCNNode` da usare per formare il secondo gruppo di cluster.
+     *   - clusterSize: Numero di nodi per ciascun cluster. Il valore predefinito è 3.
+     *   - maxPairs: Numero massimo di coppie di cluster da restituire. Il valore predefinito è 1000.
+     *   - maxNodes1: Numero massimo di nodi da prendere dalla prima lista per la generazione dei cluster. Il valore predefinito è 20.
+     *   - maxNodes2: Numero massimo di nodi da prendere dalla seconda lista per la generazione dei cluster. Il valore predefinito è 40.
+     *   - maxClusters1: Numero massimo di cluster da generare dalla prima lista di nodi. Il valore predefinito è 1000.
+     *   - maxClusters2: Numero massimo di cluster da generare dalla seconda lista di nodi. Il valore predefinito è 10000.
+     *
+     * - Returns: Una lista di tuple contenenti le coppie di cluster più compatibili e il rispettivo errore di compatibilità (cluster1, cluster2, errore).
+     *           Le coppie sono ordinate in base all'errore di compatibilità, con le migliori coppie in testa.
+     */
     private static func findCompatibleClusters(
         from nodes1: [SCNNode],
         and nodes2: [SCNNode],
@@ -128,7 +174,21 @@ struct AutoPositionUtility {
         return bestPairs
     }
     
-    // Funzione per calcolare la rotazione attorno all'asse y e la traslazione x,z
+    /**
+     * Calcola la trasformazione (rotazione e traslazione) che allinea il cluster di nodi di origine a quello di destinazione.
+     * La trasformazione consiste in una rotazione attorno all'asse Y e una traslazione che porta il centroide del cluster di origine
+     * a sovrapporsi con il centroide del cluster di destinazione.
+     *
+     * - Parameters:
+     *   - sourceCluster: Il cluster di nodi di origine da trasformare.
+     *   - targetCluster: Il cluster di nodi di destinazione a cui allineare il cluster di origine.
+     *
+     * - Returns: Una tupla contenente due valori:
+     *   - `rotationAngle`: L'angolo di rotazione (in radianti) attorno all'asse Y necessario per allineare il cluster di origine al cluster di destinazione.
+     *   - `translation`: Il vettore di traslazione necessario per allineare il centroide del cluster di origine con quello del cluster di destinazione.
+     *
+     * La funzione presuppone che entrambi i cluster abbiano almeno 3 nodi e che abbiano lo stesso numero di nodi.
+     */
     private static func computeTransformation(
         from sourceCluster: NodeCluster,
         to targetCluster: NodeCluster
@@ -183,7 +243,21 @@ struct AutoPositionUtility {
         return (rotationAngle, translation)
     }
     
-    // Funzione per calcolare l'errore di allineamento
+    /**
+     * Calcola l'errore di trasformazione tra due cluster di nodi, applicando una rotazione e una traslazione al cluster di origine
+     * e confrontando i punti risultanti con quelli del cluster di destinazione.
+     *
+     * La funzione assume che i due cluster abbiano lo stesso numero di nodi, altrimenti verrà sollevato un errore.
+     *
+     * - Parameters:
+     *   - sourceCluster: Il cluster di nodi di origine su cui applicare la trasformazione.
+     *   - rotationAngle: Angolo di rotazione da applicare ai nodi del cluster di origine.
+     *   - translation: Vettore di traslazione da applicare ai nodi del cluster di origine.
+     *   - targetCluster: Il cluster di nodi di destinazione con cui confrontare i punti trasformati.
+     *
+     * - Returns: Un valore `Float` che rappresenta la somma degli errori quadratici tra i punti trasformati del cluster di origine
+     *            e i punti del cluster di destinazione. Maggiore è il valore, maggiore è la differenza tra i due cluster.
+     */
     private static func computeTransformationError(
         for sourceCluster: NodeCluster,
         rotationAngle: Float,

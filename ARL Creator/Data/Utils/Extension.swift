@@ -119,6 +119,7 @@ extension SCNNode {
     var halfHeight: Float { Float(height / 2.0) }
     var halfScaledHeight: Float { halfHeight * self.scale.y  }
     
+    // Proprietà che calcola il tipo di nodo a partire dal suo nome
     var type: String? {
         guard let name = self.name else {
             return nil
@@ -133,6 +134,7 @@ extension SCNNode {
         return regex.stringByReplacingMatches(in: name, options: [], range: range, withTemplate: "")
     }
     
+    // Proprietà che restituisce le dimensioni (larghezza, altezza e profondità) del nodo basandosi sul suo `boundingBox`
     var dimension: (width: Float, height: Float, depth: Float) {
         // Ottieni il boundingBox del nodo
         let (min, max) = self.boundingBox
@@ -148,7 +150,7 @@ extension SCNNode {
 
 extension simd_float3 {
     
-    // Funzione per applicare la trasformazione a un punto
+    // Metodo per applicare la trasformazione a un punto
     func transformXZ(rotationAngle: Float = 0, translation: simd_float3 = simd_float3(0, 0, 0)) -> simd_float3 {
         let cosTheta = cos(rotationAngle)
         let sinTheta = sin(rotationAngle)
@@ -167,6 +169,10 @@ extension simd_float3 {
 }
 
 extension Array where Element == SCNNode {
+    
+    // Metodo che converte un array di nodi in un array di `simd_float3`,
+    // ognuno dei quali rappresenta la posizione mondiale (world position)
+    // del nodo corrispondente, utilizzando la proprietà `simdWorldPosition`.
     var simdWorldPositions: [simd_float3] {
         return self.map { $0.simdWorldPosition }
     }
@@ -174,7 +180,7 @@ extension Array where Element == SCNNode {
 
 extension Array where Element == simd_float3 {
     
-    // Funzione per calcolare il centroide di un array di punti
+    // Metodo per calcolare il centroide di un array di punti
     func getCentroid() -> simd_float3 {
         var sum = simd_float3(0, 0, 0)
         for point in self {
@@ -208,6 +214,8 @@ extension Array where Element == simd_float3 {
 }
 
 extension Array {
+    
+    // Metodo per calcolare le permutazioni a un array
     func permutations() -> [[Element]] {
         guard count > 0 else { return [[]] }
         
@@ -218,6 +226,7 @@ extension Array {
         }
     }
     
+    // Metodo per calcolare le combinazioni di grandezza k di un array
     func combinations(taking k: Int) -> [[Element]] {
         guard k > 0 else { return [[]] }
         guard k <= self.count else { return [] }

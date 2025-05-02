@@ -10,6 +10,9 @@ import SwiftUI
 import SceneKit
 import simd
 
+/**
+ * Rappresenta un cluster di nodi 3D e fornisce metodi per calcolare l'errore di compatibilità tra due cluster.
+ */
 struct NodeCluster {
     let nodes: [SCNNode]
     let points: [simd_float3]
@@ -23,6 +26,24 @@ struct NodeCluster {
         return self.nodes.count
     }
     
+    /**
+     * Inizializza un cluster di nodi a partire da una lista di `SCNNode`, calcolando automaticamente le proprietà geometriche e semantiche.
+     * I nodi vengono ordinati in base alla distanza dal centroide, per garantire coerenza nella rappresentazione interna.
+     * In questo modo non è necessario dover calcolare l'errore di compatibilità su tutte le permutazioni di nodi.
+     *
+     * - Parameters:
+     *   - nodes: Array di nodi `SCNNode` da includere nel cluster.
+     *
+     * Le seguenti proprietà vengono calcolate:
+     * - `centroid`: il punto medio dei nodi nello spazio 3D.
+     * - `nodes`: i nodi ordinati per distanza crescente dal centroide.
+     * - `points`: posizioni dei nodi nello spazio.
+     * - `distanceMatrix`: matrice delle distanze tra i nodi e il centroide.
+     * - `relativeHeights`: altezza relativa di ciascun nodo rispetto agli altri.
+     * - `dimensions`: dimensioni spaziali di ogni nodo (larghezza, altezza, profondità).
+     * - `types`: tipo associato a ciascun nodo, se presente.
+     */
+
     init(nodes: [SCNNode]) {
         // Calcolo centroide
         let centroid = nodes.simdWorldPositions.getCentroid()
@@ -54,6 +75,22 @@ struct NodeCluster {
         self.types = types
     }
     
+    /**
+     * Calcola un errore complessivo di compatibilità tra due cluster di nodi,
+     * combinando diverse metriche (distanza, altezza relativa, dimensioni, tipo) con pesi configurabili.
+     *
+     * - Parameters:
+     *   - other: Il cluster di nodi con cui confrontare il cluster corrente.
+     *   - threshold: Soglia comune sotto la quale le differenze vengono considerate trascurabili (default: 0.1).
+     *   - distanceWeight: Peso assegnato all'errore sulle distanze tra coppie di nodi (default: 1.0).
+     *   - relativeHeightWeight: Peso assegnato all'errore sulle altezze relative (default: 1.0).
+     *   - dimensionWeight: Peso assegnato all'errore sulle dimensioni (default: 1.0).
+     *   - typeMismatchWeight: Peso assegnato all'errore da disallineamento di tipo (default: 1.0).
+     *   - typeDiversityWeight: Peso assegnato all'errore da diversità di tipo complessiva (default: 1.0).
+     *
+     * - Returns: Un valore `Float` che rappresenta l'errore totale di compatibilità, calcolato come somma pesata delle varie metriche.
+     *            Un valore più basso indica maggiore compatibilità tra i due cluster.
+     */
     func computeCompatibilityError(
         with other: NodeCluster,
         threshold: Float = 0.1,
@@ -78,6 +115,17 @@ struct NodeCluster {
         )
     }
     
+    /**
+     * Calcola l'errore quadratico medio (MSE) tra le distanze tra coppie di nodi nei due cluster.
+     * Le differenze inferiori alla soglia specificata vengono ignorate.
+     *
+     * - Parameters:
+     *   - other: Il cluster di nodi con cui confrontare la matrice delle distanze del cluster corrente.
+     *   - threshold: Soglia al di sotto della quale le differenze tra distanze sono considerate trascurabili (default: 0.1).
+     *
+     * - Returns: Un valore `Float` che rappresenta la somma degli errori quadratici tra le distanze corrispondenti.
+     *            Vengono considerate solo le distanze tra le coppie di nodi (parte superiore della matrice, senza la diagonale).
+     */
     func computeDistanceMSE(with other: NodeCluster, threshold: Float = 0.1) -> Float {
         guard
             self.distanceMatrix.count > 0,
@@ -103,6 +151,17 @@ struct NodeCluster {
         return mse
     }
     
+    /**
+     * Calcola l'errore quadratico medio (MSE) tra le altezze relative dei nodi di due cluster.
+     * Le differenze minime sotto una soglia specificata vengono ignorate.
+     *
+     * - Parameters:
+     *   - other: Il cluster di nodi con cui confrontare il cluster corrente.
+     *   - threshold: Soglia al di sotto della quale le differenze tra altezze sono considerate trascurabili (default: 0.1).
+     *
+     * - Returns: Un valore `Float` che rappresenta la somma degli errori quadratici tra le altezze relative dei nodi.
+     *            Un valore più alto indica maggiore disallineamento verticale relativo tra i due cluster.
+     */
     func computeRelativeHeightMSE(with other: NodeCluster, threshold: Float = 0.1) -> Float {
         guard
             self.relativeHeights.count > 0,
@@ -124,6 +183,17 @@ struct NodeCluster {
         return mse
     }
     
+    /**
+     * Calcola l'errore quadratico medio (MSE) tra le dimensioni spaziali (larghezza, altezza, profondità) dei nodi di due cluster.
+     * Le differenze inferiori alla soglia vengono ignorate.
+     *
+     * - Parameters:
+     *   - other: Il cluster di nodi con cui confrontare il cluster corrente.
+     *   - threshold: Soglia al di sotto della quale le differenze tra dimensioni sono considerate trascurabili (default: 0.1).
+     *
+     * - Returns: Un valore `Float` che rappresenta la somma degli errori quadratici tra le dimensioni dei nodi dei due cluster.
+     *            Maggiore è il valore, più i cluster differiscono nelle dimensioni.
+     */
     func computeDimensionMSE(with other: NodeCluster, threshold: Float = 0.1) -> Float {
         guard
             self.dimensions.count > 0,
@@ -151,6 +221,17 @@ struct NodeCluster {
         return mse
     }
     
+    /**
+     * Calcola l'errore quadratico medio (MSE) tra i tipi dei nodi di due cluster, posizione per posizione.
+     * Ogni disallineamento tra tipi è considerato un errore binario (1.0), mentre una corrispondenza vale 0.0.
+     *
+     * - Parameters:
+     *   - other: Il cluster di nodi con cui confrontare il cluster corrente.
+     *   - threshold: Soglia al di sotto della quale l'errore viene considerato trascurabile (default: 0.1).
+     *
+     * - Returns: Un valore `Float` tra 0.0 e 1.0 che rappresenta la percentuale media di tipi disallineati.
+     *            Un valore basso indica una buona corrispondenza tra i tipi, mentre uno alto indica molte discrepanze.
+     */
     func computeTypeMismatchMSE(with other: NodeCluster, threshold: Float = 0.1) -> Float {
         guard
             self.types.count > 0,
@@ -178,6 +259,17 @@ struct NodeCluster {
         return mse < threshold ? 0.0 : mse
     }
     
+    /**
+     * Calcola una metrica di errore (MSE) che rappresenta la diversità tra i tipi di due cluster di nodi.
+     * Più simili sono i tipi, minore sarà il valore restituito.
+     *
+     * - Parameters:
+     *   - other: Un altro cluster di nodi con cui confrontare il cluster corrente.
+     *   - threshold: Soglia al di sotto della quale l'errore viene considerato trascurabile (default: 0.1).
+     *
+     * - Returns: Un valore `Float` tra 0.0 e 1.0 che rappresenta la diversità tra i tipi dei due cluster.
+     *            Un valore vicino a 0 indica alta similarità, mentre un valore vicino a 1 indica alta diversità.
+     */
     func computeTypeDiversityMSE(with other: NodeCluster, threshold: Float = 0.1) -> Float {
         guard
             self.types.count > 0,
