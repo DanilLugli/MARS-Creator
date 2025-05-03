@@ -369,7 +369,6 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         floor?.associationMatrix[roomName]?.translation[3][2] += Float(vertical)
     }
     
-    // Le funzioni esistenti possono essere semplificate utilizzando moveRoom
     func moveRoomPositionDown(step: CGFloat) {
         moveRoom(horizontal: 0, vertical: -step)
     }
