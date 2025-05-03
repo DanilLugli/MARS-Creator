@@ -15,7 +15,7 @@ struct MapControllerView: View {
     var body: some View {
         HStack {
             VStack {
-                Text("Rotate Anticlockwise")
+                Text("Rotate Left")
                     .multilineTextAlignment(TextAlignment.center)
                     .foregroundColor(Color.customBackground)
                 pressableButton(
@@ -25,7 +25,7 @@ struct MapControllerView: View {
                 
                 Spacer().frame(height: 20)
                 
-                Text("Rotate Clockwise")
+                Text("Rotate Right")
                     .multilineTextAlignment(TextAlignment.center)
                     .foregroundColor(Color.customBackground)
                 pressableButton(
