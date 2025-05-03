@@ -274,34 +274,38 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
     }
 
     func rotateClockwise() {
-        self.rotateRight()
+        rotateRoomRight()
     }
 
     func rotateCounterClockwise() {
-        self.rotateLeft()
+        rotateRoomLeft()
     }
 
     func moveUp(continuous: Bool) {
         let step: CGFloat = continuous ? translationStepPressable : translationStep
-        moveRoomPositionDown(step: step)
+        moveRoomDown(step: step)
     }
 
     func moveDown(continuous: Bool) {
         let step: CGFloat = continuous ? translationStepPressable : translationStep
         // Per il movimento "down" chiamiamo moveRoomPositionUp, come nell'originale
-        moveRoomPositionUp(step: step)
+        moveRoomUp(step: step)
     }
 
     func moveLeft(continuous: Bool) {
         let step: CGFloat = continuous ? translationStepPressable : translationStep
-        moveRoomPositionLeft(step: step)
+        moveRoomLeft(step: step)
     }
 
     func moveRight(continuous: Bool) {
         let step: CGFloat = continuous ? translationStepPressable : translationStep
-        moveRoomPositionRight(step: step)
+        moveRoomRight(step: step)
     }
     
+    /**
+     * Calcola e applica automaticamente il posizionamento di un nodo stanza rispetto agli oggetti del pavimento.
+     * - Returns: Un valore booleano che indica se il posizionamento è stato eseguito correttamente.
+     */
     func applyAutoPositioning() async -> Bool {
         guard let roomNode else { return false }
         guard let floor else { return false }
@@ -337,7 +341,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         }
         
         // Applica la rotazione trovata
-        rotate(angle: rotationAngle)
+        rotateRoom(angle: rotationAngle)
         
         // Applica la traslazione calcolata
         moveRoom(horizontal: CGFloat(translation.x), vertical: CGFloat(translation.z))
@@ -369,23 +373,12 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         floor?.associationMatrix[roomName]?.translation[3][2] += Float(vertical)
     }
     
-    func moveRoomPositionDown(step: CGFloat) {
-        moveRoom(horizontal: 0, vertical: -step)
-    }
-
-    func moveRoomPositionUp(step: CGFloat) {
-        moveRoom(horizontal: 0, vertical: step)
-    }
-
-    func moveRoomPositionLeft(step: CGFloat) {
-        moveRoom(horizontal: -step, vertical: 0)
-    }
-
-    func moveRoomPositionRight(step: CGFloat) {
-        moveRoom(horizontal: step, vertical: 0)
-    }
-    
-    func rotate(angle: Float) {
+    /**
+     * Ruota la stanza di un angolo specificato attorno all'asse Y.
+     * - Parameters:
+     *   - angle: L'angolo di rotazione in radianti da applicare al nodo stanza.
+     */
+    func rotateRoom(angle: Float) {
         guard let roomNode = roomNode else {
             print("DEBUG: No roomNode found!")
             return
@@ -403,27 +396,28 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
         floor?.associationMatrix[roomName ?? ""]?.r_Y = updatedMatrix
     }
     
-    func rotateRight() {
-        rotate(angle: -rotationStep) // Rotazione a destra (orario)
+    func moveRoomDown(step: CGFloat) {
+        moveRoom(horizontal: 0, vertical: -step)
+    }
+
+    func moveRoomUp(step: CGFloat) {
+        moveRoom(horizontal: 0, vertical: step)
+    }
+
+    func moveRoomLeft(step: CGFloat) {
+        moveRoom(horizontal: -step, vertical: 0)
+    }
+
+    func moveRoomRight(step: CGFloat) {
+        moveRoom(horizontal: step, vertical: 0)
     }
     
-    func rotateLeft() {
-        rotate(angle: rotationStep) // Rotazione a sinistra (antiorario)
+    func rotateRoomRight() {
+        rotateRoom(angle: -rotationStep) // Rotazione a destra (orario)
     }
     
-    // Funzione per ruotare con un angolo specifico
-    func rotateToAngle(angle: Float) {
-        // Calcola l'angolo desiderato
-        guard let roomNode = roomNode else { return }
-        
-        // Ottieni l'angolo corrente
-        let currentAngle = roomNode.eulerAngles.y
-        
-        // Calcola la differenza di angolo necessaria
-        let angleDiff = angle - currentAngle
-        
-        // Applica la rotazione
-        rotate(angle: angleDiff)
+    func rotateRoomLeft() {
+        rotateRoom(angle: rotationStep) // Rotazione a sinistra (antiorario)
     }
     
     func handlePinch(_ gesture: UIPinchGestureRecognizer) {

@@ -125,6 +125,7 @@ struct MapControllerView: View {
         }
     }
 
+    // Applica il posizionamento automatico della stanza nel piano e mostra un alert in caso di fallimento.
     private func applyAutoPositioning() {
         Task {
             self.isAutoPositioning = true
