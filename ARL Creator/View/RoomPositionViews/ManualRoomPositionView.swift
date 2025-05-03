@@ -21,6 +21,8 @@ struct ManualRoomPositionView: View {
     
     @State private var showSaveMatrixToast = false
     
+    @State private var isAutoPositioning = false
+    
     @State var mapPositionView = SCNViewUpdatePositionRoomContainer()
     
     @Environment(\.dismiss) private var dismiss
@@ -43,6 +45,7 @@ struct ManualRoomPositionView: View {
                             .foregroundColor(Color.customBackground)
                     }
                 }
+                .disabled(isAutoPositioning)
                 .padding()
                 .bold()
                 .onChange(of: showFornitures) { newValue in
@@ -69,7 +72,8 @@ struct ManualRoomPositionView: View {
                     
                     MapControllerView(
                         moveObject: mapPositionView.handler,
-                        needsAutoPositioning: !doesMatrixExist(for: room.name, in: floor.associationMatrix)
+                        needsAutoPositioning: !doesMatrixExist(for: room.name, in: floor.associationMatrix),
+                        isAutoPositioning: $isAutoPositioning
                     )
                         .padding()
                         .background(
@@ -90,31 +94,35 @@ struct ManualRoomPositionView: View {
         .background(Color.customBackground)
         .foregroundColor(.white)
         .navigationTitle("Positioning \(room.name)")
+        .navigationBarBackButtonHidden(isAutoPositioning)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button(action: {
-                    floor.updateAssociationMatrixInJSON(for: room.name, fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"))
-                    
-//                    floor.saveOrUpdateAssociationMatrix(to: floor.floorURL.appendingPathComponent("\(floor.name).json"), for: self.floor, associationMatrix: floor.associationMatrix)
-                    
-                    floor.planimetryRooms.handler.loadRoomsMaps(
-                        floor: floor,
-                        rooms: floor.rooms
-                    )
-                    
-                    floor.getRoomByName(room.name)?.hasPosition = true
-                    
-                    showSaveMatrixToast = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                        dismiss()
+            if !isAutoPositioning {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: {
+                        floor.updateAssociationMatrixInJSON(for: room.name, fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"))
+                        
+    //                    floor.saveOrUpdateAssociationMatrix(to: floor.floorURL.appendingPathComponent("\(floor.name).json"), for: self.floor, associationMatrix: floor.associationMatrix)
+                        
+                        floor.planimetryRooms.handler.loadRoomsMaps(
+                            floor: floor,
+                            rooms: floor.rooms
+                        )
+                        
+                        floor.getRoomByName(room.name)?.hasPosition = true
+                        
+                        showSaveMatrixToast = true
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                            dismiss()
+                        }
+                    }) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 24))
+                            .foregroundStyle(.white, .green, .green)
                     }
-                }) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 24))  
-                        .foregroundStyle(.white, .green, .green)
                 }
             }
-        }.toast(isPresenting: $showSaveMatrixToast){
+        }
+        .toast(isPresenting: $showSaveMatrixToast){
             AlertToast(type: .complete(Color.green), title: "Room position saved successfully ")
         }
     }
