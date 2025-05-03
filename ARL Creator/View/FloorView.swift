@@ -384,11 +384,15 @@ struct FloorView: View {
         showAddRoomToast = true
         newRoom.validateRoom()
 
-
+//        // Add identity matrix for the new room
         floor._associationMatrix[newRoom.name] = RoomPositionMatrix(name: newRoom.name, translation: matrix_identity_float4x4, r_Y: matrix_identity_float4x4)
         
+//        floor._associationMatrix[newRoom.name]?.debugPrintRoomPositionMatrix(roomPositionMatrix: floor._associationMatrix[newRoom.name]!)
         floor.addIdentityMatrixToJSON(to: floor.floorURL.appendingPathComponent("\(floor.name).json"), for: floor, roomName: newRoom.name)
         
+//        updateJSONFile([newRoom.name : floor._associationMatrix[newRoom.name]], floor.floorURL.appendingPathComponent("\(floor.name).json"), floor)
+//        //floor.saveAssociationMatrixToJSON(fileURL: floor.floorURL.appendingPathComponent("\(floor.floorURL.lastPathComponent).json"))
+//        floor.updateAssociationMatrixInJSON(for: newRoom.name, fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"))
     }
     
     var filteredRooms: [Room] {

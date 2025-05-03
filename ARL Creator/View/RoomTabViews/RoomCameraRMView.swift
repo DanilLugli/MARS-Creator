@@ -49,8 +49,10 @@ struct RoomCameraRMView: UIViewControllerRepresentable {
 
     func saveImageToFileSystem(image: UIImage) {
         let fileManager = FileManager.default
+        // Ottieni la directory di ReferenceMarker
         let referenceMarkerDir = room.roomURL.appendingPathComponent("ReferenceMarker")
         
+        // Crea la directory se non esiste
         if !fileManager.fileExists(atPath: referenceMarkerDir.path) {
             do {
                 try fileManager.createDirectory(at: referenceMarkerDir, withIntermediateDirectories: true, attributes: nil)
@@ -60,10 +62,12 @@ struct RoomCameraRMView: UIViewControllerRepresentable {
             }
         }
         
+        // Calcola il numero progressivo in base al numero di marker già aggiunti
         let newIndex = room.referenceMarkers.count + 1
         let newFileName = "\(room.name)_\(newIndex).jpg"
         let fileURL = referenceMarkerDir.appendingPathComponent(newFileName)
         
+        // Converti l'immagine in Data
         guard let data = image.jpegData(compressionQuality: 0.8) else { return }
         
         do {
@@ -80,6 +84,7 @@ struct RoomCameraRMView: UIViewControllerRepresentable {
             
             room.referenceMarkers.append(newMarker)
             
+            // Salva i dati del marker (per esempio in un file JSON)
             let markerDataURL = referenceMarkerDir.appendingPathComponent("Marker Data.json")
             newMarker.saveMarkerData(
                 to: markerDataURL,
@@ -89,6 +94,7 @@ struct RoomCameraRMView: UIViewControllerRepresentable {
                 newCoordinates: newMarker.coordinates
             )
             
+            // Chiudi la vista dopo 2 secondi
             DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                 dismiss()
             }

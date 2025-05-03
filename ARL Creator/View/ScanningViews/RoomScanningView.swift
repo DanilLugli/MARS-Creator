@@ -107,7 +107,9 @@ struct RoomScanningView: View {
                                     
                                 }.padding(.top,28)
                             }
+
                             VStack{
+                                
                                 VStack{
                                     
                                     if let scanningError = scanningError, !scanningError.isEmpty, viewError == true {
@@ -140,29 +142,12 @@ struct RoomScanningView: View {
                                             .padding(.horizontal, 20)
                                         
                                     }
+                                        
                                     
                                     Spacer()
                                     
                                     HStack{
-                                        if !showScanningRoomCard{
-                                            
-                                                Button(action: {
-                                                    captureView?.restartCapture()
-                                                    showProgressView = true
-                                                    viewError = false
-                                                    showScanningRoomCard = true
-                                                }) {
-                                                    Text("Restart Scan")
-                                                        .font(.system(size: 18, weight: .bold, design: .default))
-                                                        .bold()
-                                                        .padding()
-                                                        .foregroundColor(.red)
-                                                }
-                                            
-                                        }
-                                        
                                         Spacer()
-                                        
                                         if !showScanningRoomCard{
                                             Button(action: {
                                                 showCreateRoomPlanimetryToast = true
@@ -176,6 +161,7 @@ struct RoomScanningView: View {
                                                     .bold()
                                                     .padding()
                                                     .foregroundColor(Color.green)
+                                                    .cornerRadius(30)
                                             }.padding(.trailing, 20)
                                             
                                         }
@@ -190,8 +176,6 @@ struct RoomScanningView: View {
                                                 showProgressView = false
                                                 captureView?.stopCapture()
                                                 showScanningRoomCard = false
-                                                sessionDelegate.userDistance = 0
-                                                sessionDelegate.detectedObjects = 0
                                                 _ = mapName.isEmpty ? "Map_\(Date().timeIntervalSince1970)" : mapName
                                             }) {
                                                 Text("Done")
@@ -204,11 +188,17 @@ struct RoomScanningView: View {
                                             }.padding(.trailing, 20)
                                         }
                                     }
+
+
+                                    
                                 }
                                 .frame(maxWidth: .infinity)
-                            }
+                               
+                            }//.border(Color.red, width: 2)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
+                           
                         }
+                        
                         Spacer()
                     }
                     .padding(.top)

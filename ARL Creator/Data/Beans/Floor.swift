@@ -483,32 +483,6 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
         }
     }
     
-    func isRoomPositionMatrixInJSON(fileURL: URL, roomName: String) -> Bool {
-        let fileManager = FileManager.default
-
-        guard fileManager.fileExists(atPath: fileURL.path) else {
-            print("Il file JSON non esiste: \(fileURL.path)")
-            return false
-        }
-
-        do {
-            // Leggi i dati dal file JSON
-            let data = try Data(contentsOf: fileURL)
-            
-            // Decodifica il JSON in un dizionario
-            if let jsonDict = try JSONSerialization.jsonObject(with: data, options: []) as? [String: [String: [[Double]]]] {
-                // Controlla se la chiave esiste nel dizionario
-                return jsonDict[roomName] != nil
-            } else {
-                print("Errore: Il formato del JSON non è valido.")
-                return false
-            }
-        } catch {
-            print("Errore nella lettura del file JSON: \(error.localizedDescription)")
-            return false
-        }
-    }
-    
 //    func loadRoomPositionMatrixFromJSON(fileURL: URL) {
 //        do {
 //            let data = try Data(contentsOf: fileURL)
@@ -574,30 +548,37 @@ class Floor: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Has
     
     func updateAssociationMatrixInJSON(for roomName: String, fileURL: URL) {
         do {
+            // Leggi il contenuto del file JSON
             var jsonData = try Data(contentsOf: fileURL)
             guard var jsonDict = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: [String: [[Double]]]] else {
                 print("Error: Cannot convert JSON data to dictionary")
                 return
             }
             
+            // Assicurati che la chiave esista nel dizionario JSON
             guard let value = _associationMatrix[roomName] else {
                 print("Room name \(roomName) not found in the association matrix")
                 return
             }
             
+            // Converti la matrice translation in un array di array di Double
             let translationArray = (0..<4).map { index in
                 [Double(value.translation[0, index]), Double(value.translation[1, index]), Double(value.translation[2, index]), Double(value.translation[3, index])]
             }
             
+            // Converti la matrice r_Y in un array di array di Double
             let r_YArray = (0..<4).map { index in
                 [Double(value.r_Y[0, index]), Double(value.r_Y[1, index]), Double(value.r_Y[2, index]), Double(value.r_Y[3, index])]
             }
             
+            // Aggiorna le matrici nel dizionario JSON per la chiave specificata
             jsonDict[roomName]?["translation"] = translationArray
             jsonDict[roomName]?["R_Y"] = r_YArray
             
+            // Converti il dizionario aggiornato in JSON
             jsonData = try JSONSerialization.data(withJSONObject: jsonDict, options: .prettyPrinted)
             
+            // Scrivi i dati JSON nel file
             try jsonData.write(to: fileURL)
             
         } catch {

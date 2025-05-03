@@ -31,11 +31,12 @@ struct SCNViewContainer: UIViewRepresentable {
     func loadRoomPlanimetry(room: Room, borders: Bool) {
         let scene = room.scene
         
+        
         self.scnView.scene = scene
         drawSceneObjects(scnView: self.scnView, borders: borders, nodeOrientation: false)
         
         setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: setMassCenter(scnView: self.scnView))
-//        createAxesNode()
+        createAxesNode()
         
     }
     
@@ -46,7 +47,7 @@ struct SCNViewContainer: UIViewRepresentable {
         
         self.scnView.scene = scene
         drawSceneObjects(scnView: self.scnView, borders: borders, nodeOrientation: false)
-//        createAxesNode()
+        createAxesNode()
         setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: setMassCenter(scnView: self.scnView))
         floor.isPlanimetryLoaded = true
     }
@@ -77,6 +78,53 @@ struct SCNViewContainer: UIViewRepresentable {
         self.scnView.scene?.rootNode.addChildNode(axisNode)
         
     }
+    
+    //    func addDoorNodesBasedOnExistingDoors(room: Room) {
+    //
+    //        let transitionNodes = room.sceneObjects?.filter{ node in
+    //            if let nodeName = node.name {
+    //                return (nodeName.hasPrefix("Door") || nodeName.hasPrefix("Opening"))
+    //            }
+    //            return false
+    //        } ?? []
+    //
+    //        for newTZNode in transitionNodes {
+    //
+    //            let doorWidth = newTZNode.width
+    //            let doorHeight = newTZNode.height
+    //            var doorDepth = newTZNode.length
+    //            let depthExtension: CGFloat = 0.6
+    //            doorDepth += depthExtension
+    //            var newDoorGeometry = SCNBox()
+    //
+    //            newDoorGeometry = SCNBox(width: doorWidth, height: doorHeight, length: doorDepth, chamferRadius: 0.0)
+    //
+    //            let newDoorNode = SCNNode(geometry: newDoorGeometry)
+    //
+    //            newDoorNode.transform = newTZNode.transform
+    //
+    //            let doorDirection = newTZNode.simdWorldFront
+    //            let inwardTranslation = SIMD3<Float>(doorDirection * Float(doorDepth / 2))
+    //
+    //            newDoorNode.simdPosition = newTZNode.simdPosition - inwardTranslation
+    //
+    //            let nodeName = newTZNode.name != nil ? "TransitionZone_\(newTZNode.name!)" : "TransitionZone_Door"
+    //
+    //            newDoorNode.name = nodeName
+    //
+    //            scnView.scene?.rootNode.addChildNode(newDoorNode)
+    //
+    //            let updateName = newDoorNode.name!.replacingOccurrences(of: "TransitionZone_", with: "")
+    //
+    //            if !room.transitionZones.contains(where: { $0.name == updateName }) {
+    //                let transitionZones = TransitionZone(name: updateName, connection: [Connection(name: "")])
+    //                room.addTransitionZone(transitionZone: transitionZones)
+    //
+    //            } else {
+    //                print("Una TransitionZone con il nome \(nodeName) esiste già.")
+    //            }
+    //        }
+    //    }
     
     func changeColorOfNode(nodeName: String, color: UIColor) {
         guard let scene = scnView.scene else {
