@@ -113,11 +113,16 @@ extension SCNNode {
     
     var height: CGFloat { CGFloat(self.boundingBox.max.y - self.boundingBox.min.y) }
     var width: CGFloat { CGFloat(self.boundingBox.max.x - self.boundingBox.min.x) }
-    var length: CGFloat { CGFloat(self.boundingBox.max.z - self.boundingBox.min.z) }
+    var depth: CGFloat { CGFloat(self.boundingBox.max.z - self.boundingBox.min.z) }
     
     var halfCGHeight: CGFloat { height / 2.0 }
     var halfHeight: Float { Float(height / 2.0) }
     var halfScaledHeight: Float { halfHeight * self.scale.y  }
+    
+    // Proprietà che restituisce il volume del nodo basandosi sul suo `boundingBox`
+    var volume: CGFloat {
+        return self.height * self.width * self.depth
+    }
     
     // Proprietà che calcola il tipo di nodo a partire dal suo nome
     var type: String? {
@@ -132,19 +137,6 @@ extension SCNNode {
         
         let range = NSRange(name.startIndex..<name.endIndex, in: name)
         return regex.stringByReplacingMatches(in: name, options: [], range: range, withTemplate: "")
-    }
-    
-    // Proprietà che restituisce le dimensioni (larghezza, altezza e profondità) del nodo basandosi sul suo `boundingBox`
-    var dimension: (width: Float, height: Float, depth: Float) {
-        // Ottieni il boundingBox del nodo
-        let (min, max) = self.boundingBox
-        
-        // Calcola la differenza tra i valori max e min per ottenere la dimensione
-        let width = max.x - min.x
-        let height = max.y - min.y
-        let depth = max.z - min.z
-        
-        return (width, height, depth)
     }
 }
 

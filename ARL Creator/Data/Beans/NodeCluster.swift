@@ -19,7 +19,7 @@ struct NodeCluster {
     let centroid: simd_float3
     let distanceMatrix: [[Float]]
     let relativeHeights: [Float]
-    let dimensions: [(width: Float, height: Float, depth: Float)]
+    let volumes: [Float]
     let types: [String?]
 
     var size: Int {
@@ -40,7 +40,7 @@ struct NodeCluster {
      * - `points`: posizioni dei nodi nello spazio.
      * - `distanceMatrix`: matrice delle distanze tra i nodi e il centroide.
      * - `relativeHeights`: altezza relativa di ciascun nodo rispetto agli altri.
-     * - `dimensions`: dimensioni spaziali di ogni nodo (larghezza, altezza, profondità).
+     * - `volumes`: volumi di ogni nodo.
      * - `types`: tipo associato a ciascun nodo, se presente.
      */
 
@@ -60,8 +60,8 @@ struct NodeCluster {
         // Calcolo altezze relative
         let relativeHeights = sortedNodes.simdWorldPositions.getRelativeHeights()
         
-        // Calcolo dimensioni
-        let dimensions = sortedNodes.map { $0.dimension }
+        // Calcolo volumi
+        let volumes = sortedNodes.map { Float($0.volume) }
         
         // Calcolo tipi
         let types = sortedNodes.map { $0.type }
@@ -71,20 +71,20 @@ struct NodeCluster {
         self.points = points
         self.distanceMatrix = distanceMatrix
         self.relativeHeights = relativeHeights
-        self.dimensions = dimensions
+        self.volumes = volumes
         self.types = types
     }
     
     /**
      * Calcola un errore complessivo di compatibilità tra due cluster di nodi,
-     * combinando diverse metriche (distanza, altezza relativa, dimensioni, tipo) con pesi configurabili.
+     * combinando diverse metriche (distanza, altezza relativa, volumi, tipo) con pesi configurabili.
      *
      * - Parameters:
      *   - other: Il cluster di nodi con cui confrontare il cluster corrente.
      *   - threshold: Soglia comune sotto la quale le differenze vengono considerate trascurabili (default: 0.1).
      *   - distanceWeight: Peso assegnato all'errore sulle distanze tra coppie di nodi (default: 1.0).
      *   - relativeHeightWeight: Peso assegnato all'errore sulle altezze relative (default: 1.0).
-     *   - dimensionWeight: Peso assegnato all'errore sulle dimensioni (default: 1.0).
+     *   - volumeWeight: Peso assegnato all'errore sui volumi (default: 1.0).
      *   - typeMismatchWeight: Peso assegnato all'errore da disallineamento di tipo (default: 1.0).
      *   - typeDiversityWeight: Peso assegnato all'errore da diversità di tipo complessiva (default: 1.0).
      *
@@ -96,20 +96,20 @@ struct NodeCluster {
         threshold: Float = 0.1,
         distanceWeight: Float = 1.0,
         relativeHeightWeight: Float = 1.0,
-        dimensionWeight: Float = 1.0,
+        volumeWeight: Float = 1.0,
         typeMismatchWeight: Float = 1.0,
         typeDiversityWeight: Float = 1.0
     ) -> Float {
         let distanceMSE = self.computeDistanceMSE(with: other, threshold: threshold)
         let relativeHeightMSE = self.computeRelativeHeightMSE(with: other, threshold: threshold)
-        let dimensionMSE = self.computeDimensionMSE(with: other, threshold: threshold)
+        let volumeMSE = self.computeVolumeMSE(with: other, threshold: threshold)
         let typeMismatchMSE = self.computeTypeMismatchMSE(with: other, threshold: threshold)
         let typeDiversityMSE = self.computeTypeDiversityMSE(with: other, threshold: threshold)
         
         return (
             distanceWeight * distanceMSE +
             relativeHeightWeight * relativeHeightMSE +
-            dimensionWeight * dimensionMSE +
+            volumeWeight * volumeMSE +
             typeMismatchWeight * typeMismatchMSE +
             typeDiversityWeight * typeDiversityMSE
         )
@@ -184,38 +184,32 @@ struct NodeCluster {
     }
     
     /**
-     * Calcola l'errore quadratico medio (MSE) tra le dimensioni spaziali (larghezza, altezza, profondità) dei nodi di due cluster.
+     * Calcola l'errore quadratico medio (MSE) tra i volumi dei nodi di due cluster.
      * Le differenze inferiori alla soglia vengono ignorate.
      *
      * - Parameters:
      *   - other: Il cluster di nodi con cui confrontare il cluster corrente.
-     *   - threshold: Soglia al di sotto della quale le differenze tra dimensioni sono considerate trascurabili (default: 0.1).
+     *   - threshold: Soglia al di sotto della quale le differenze tra volumi sono considerate trascurabili (default: 0.1).
      *
-     * - Returns: Un valore `Float` che rappresenta la somma degli errori quadratici tra le dimensioni dei nodi dei due cluster.
-     *            Maggiore è il valore, più i cluster differiscono nelle dimensioni.
+     * - Returns: Un valore `Float` che rappresenta la somma degli errori quadratici tra i volumi dei nodi dei due cluster.
+     *            Maggiore è il valore, più i cluster differiscono nei volumi.
      */
-    func computeDimensionMSE(with other: NodeCluster, threshold: Float = 0.1) -> Float {
+    func computeVolumeMSE(with other: NodeCluster, threshold: Float = 0.1) -> Float {
         guard
-            self.dimensions.count > 0,
-            self.dimensions.count == other.dimensions.count
+            self.volumes.count > 0,
+            self.volumes.count == other.volumes.count
         else {
-            fatalError("The two dimension arrays must have the same non-zero dimension.")
+            fatalError("The two volume arrays must have the same non-zero dimension.")
         }
 
         var mse: Float = 0.0
         
-        for (i, _) in self.dimensions.enumerated() {
-            let (w1, h1, d1) = self.dimensions[i]
-            let (w2, h2, d2) = other.dimensions[i]
+        for (i, _) in self.volumes.enumerated() {
+            let v1 = self.volumes[i]
+            let v2 = other.volumes[i]
             
-            let wDiff = abs(w1 - w2)
-            mse += wDiff < threshold ? 0 : pow(wDiff, 2)
-            
-            let hDiff = abs(h1 - h2)
-            mse += hDiff < threshold ? 0 : pow(hDiff, 2)
-            
-            let dDiff = abs(d1 - d2)
-            mse += dDiff < threshold ? 0 : pow(dDiff, 2)
+            let diff = abs(v1 - v2)
+            mse += diff < threshold ? 0 : pow(diff, 2)
         }
 
         return mse

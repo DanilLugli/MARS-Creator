@@ -92,7 +92,7 @@ struct SCNViewContainer: UIViewRepresentable {
     //
     //            let doorWidth = newTZNode.width
     //            let doorHeight = newTZNode.height
-    //            var doorDepth = newTZNode.length
+    //            var doorDepth = newTZNode.depth
     //            let depthExtension: CGFloat = 0.6
     //            doorDepth += depthExtension
     //            var newDoorGeometry = SCNBox()
