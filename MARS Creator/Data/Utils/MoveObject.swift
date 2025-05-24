@@ -15,6 +15,7 @@ protocol MoveObject {
     func moveDown(continuous: Bool)
     func moveLeft(continuous: Bool)
     func moveRight(continuous: Bool)
+    func applyAutoPositioning() async -> Bool
     
     // Anche la rotazione può essere gestita in modo analogo, se necessario.
     // Se non serve differenziare il comportamento, puoi anche mantenere le versioni senza parametro.
