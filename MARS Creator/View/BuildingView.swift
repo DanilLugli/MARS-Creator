@@ -33,6 +33,7 @@ struct BuildingView: View {
                     }
                     .font(.system(size: 14))
                     .fontWeight(.heavy)
+                    .foregroundColor(.black)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading)
                     
@@ -53,7 +54,7 @@ struct BuildingView: View {
                             .padding()
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color.customBackground)
+                        .background(Color.appBackground)
                     } else {
                         
                         TextField("Search", text: $searchText)
@@ -76,7 +77,7 @@ struct BuildingView: View {
                     }
                 }
             }
-            .background(Color.customBackground)
+            .background(Color.appBackground)
             .foregroundColor(.white)
         }
         .navigationTitle("\(building.name)")
@@ -200,13 +201,13 @@ struct BuildingView: View {
                 
                 Text("New Floor")
                     .font(.title)
-                    .foregroundColor(.customBackground)
+                    .foregroundColor(.appBackground)
                     .bold()
             }
             
             TextField("Floor Name", text: $newFloorName)
                 .padding()
-                .foregroundColor(.customBackground)
+                .foregroundColor(.appBackground)
                 .background(Color(.systemGray6))
                 .cornerRadius(8)
                 .padding(.horizontal)

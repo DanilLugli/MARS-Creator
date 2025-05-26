@@ -10,14 +10,18 @@ import SwiftUI
 import SceneKit
 import ComplexModule
 
+
+
 extension Color {
-    static let customBackground = Color(red: 0x1A / 255, green: 0x37 / 255, blue: 0x61 / 255)
+    static let appBackground = Color(red: 242/255, green: 242/255, blue: 247/255)
+    static let primaryText = Color(red: 28/255, green: 28/255, blue: 30/255)
+    static let secondaryText = Color(red: 142/255, green: 142/255, blue: 147/255)
+    static let accentBlue = Color(red: 0/255, green: 122/255, blue: 255/255)
     func toUIColor() -> UIColor {
         let uiColor = UIColor(self)
         return uiColor
     }
 }
-
 
 extension Notification.Name {
     static var genericMessage: Notification.Name {

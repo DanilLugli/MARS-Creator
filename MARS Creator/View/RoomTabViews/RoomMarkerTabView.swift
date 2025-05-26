@@ -63,7 +63,7 @@ struct RoomMarkerTabView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.customBackground)
+        .background(Color.appBackground)
         .sheet(item: $selectedMarker) { marker in
             MarkerDetailView(
                 marker: marker,
@@ -132,7 +132,7 @@ struct MarkerDetailView: View {
                     
                     Text("Marker Details")
                         .font(.title)
-                        .foregroundColor(.customBackground)
+                        .foregroundColor(.appBackground)
                         .bold()
                 }.padding(.bottom)
                 
@@ -140,18 +140,18 @@ struct MarkerDetailView: View {
                     
                     HStack{
                         Image(systemName: "ruler")
-                            .foregroundColor(.customBackground)
+                            .foregroundColor(.appBackground)
                         
                         Text("Width (cm):")
                             .font(.headline)
                             .bold()
-                            .foregroundColor(.customBackground)
+                            .foregroundColor(.appBackground)
                     }
                     
                     TextField("Enter marker size", text: $newSize)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .keyboardType(.decimalPad)
-                        .foregroundColor(marker.physicalWidth == 0.0 ? .red: .customBackground)
+                        .foregroundColor(marker.physicalWidth == 0.0 ? .red: .appBackground)
                         .bold()
                         .padding(.bottom)
                 }

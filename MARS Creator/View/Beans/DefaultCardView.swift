@@ -25,7 +25,7 @@ struct DefaultCardView: View {
                     VStack(alignment: .leading) {
                         Text(name)
                             .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.customBackground)
+                            .foregroundColor(Color.primaryText)
                             
                         
                         Text("Last modified: \(dateFormatter.string(from: date))")

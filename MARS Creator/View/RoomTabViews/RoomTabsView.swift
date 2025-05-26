@@ -35,7 +35,7 @@ struct RoomTabsView: View {
 
             RoomMarkerTabView(room: room, onMarkerUpdated: onMarkerUpdated) // 🔹 Passiamo la funzione
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color.customBackground)
+                .background(Color.appBackground)
                 .tabItem {
                     Label("Marker", systemImage: "photo")
                 }
@@ -44,7 +44,7 @@ struct RoomTabsView: View {
 
             RoomConnectionsTabView(building: building, room: room, floor: floor)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(Color.customBackground)
+                .background(Color.appBackground)
                 .tabItem {
                     Label("Connections", systemImage: "arrow.up.arrow.down")
                 }

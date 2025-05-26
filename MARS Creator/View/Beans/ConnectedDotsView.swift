@@ -23,7 +23,7 @@ struct ConnectedDotsView: View {
                                 .frame(width: dotSize, height: dotSize)
                                 .background(
                                     Circle()
-                                        .fill(index + 1 <= self.progress ? Color.white : Color.customBackground)
+                                        .fill(index + 1 <= self.progress ? Color.white : Color.primaryText)
                                 )
                             
                             Text(label)
@@ -37,7 +37,7 @@ struct ConnectedDotsView: View {
                                 Image(systemName: "arrow.right")
                                     .font(.system(size: 16))
                                     .bold()
-                                    .foregroundColor(.white)
+                                    .foregroundColor(.primaryText)
                                     .padding(.top,3) // Per distanziare la freccia dal cerchio
                                 Spacer()
                             }.frame(height: 34)                        }
@@ -48,7 +48,7 @@ struct ConnectedDotsView: View {
         }
         .padding([.leading, .trailing], 10)
         .frame(maxWidth: .infinity)
-        .background(Color.customBackground.ignoresSafeArea())
+        .background(Color.primaryText.ignoresSafeArea())
     }
 }
 

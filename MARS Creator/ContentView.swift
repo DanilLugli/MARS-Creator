@@ -10,7 +10,7 @@ import SwiftUI
 
 struct ContentView: View {
     init() {
-        UITabBar.appearance().backgroundColor = UIColor(red: 1.0, green: 1.0, blue:1.0, alpha: 0.7)
+        UITabBar.appearance().backgroundColor = UIColor(red: 242/255.0, green: 242/255.0, blue: 247/255.0, alpha: 1.0)
         UITabBar.appearance().unselectedItemTintColor = .darkGray
         UITabBar.appearance().tintColor = .systemBlue
         
@@ -18,16 +18,16 @@ struct ContentView: View {
                 appearance.configureWithOpaqueBackground()
                 
                 // Imposta il colore di sfondo specifico
-                appearance.backgroundColor = UIColor(red: 0x1A/255, green: 0x37/255, blue: 0x61/255, alpha: 1.0)
-
+                appearance.backgroundColor = UIColor(red: 242/255.0, green: 242/255.0, blue: 247/255.0, alpha: 1.0)
+                appearance.shadowColor = .clear // <-- questa rimuove la linea sotto la NavigationBar
                 // Imposta il colore del testo del titolo
-                appearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white]
-                appearance.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.white]
+                appearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.black]
+                appearance.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.black]
 
                 // Configura l'aspetto degli elementi della barra di navigazione, incluso il bottone "Back"
                 let buttonAppearance = UIBarButtonItemAppearance()
-                buttonAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.white]
-                buttonAppearance.highlighted.titleTextAttributes = [.foregroundColor: UIColor.white]
+                buttonAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.systemBlue]
+                buttonAppearance.highlighted.titleTextAttributes = [.foregroundColor: UIColor.systemBlue]
 
                 // Configura l'aspetto degli elementi della barra di navigazione
                 appearance.backButtonAppearance = buttonAppearance
@@ -44,14 +44,14 @@ struct ContentView: View {
 
                 // Configura anche UIBarButtonItem appearance proxy
                 let barButtonItemAppearance = UIBarButtonItem.appearance()
-                barButtonItemAppearance.setTitleTextAttributes([NSAttributedString.Key.foregroundColor: UIColor.white], for: .normal)
-                barButtonItemAppearance.setTitleTextAttributes([NSAttributedString.Key.foregroundColor: UIColor.white], for: .highlighted)
-                barButtonItemAppearance.tintColor = UIColor.white
+                barButtonItemAppearance.setTitleTextAttributes([NSAttributedString.Key.foregroundColor: UIColor.systemBlue], for: .normal)
+                barButtonItemAppearance.setTitleTextAttributes([NSAttributedString.Key.foregroundColor: UIColor.systemBlue], for: .highlighted)
+                barButtonItemAppearance.tintColor = UIColor.systemBlue
     }
     
     var body: some View {
         
-        BuildingsView().frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/, maxHeight: .infinity).edgesIgnoringSafeArea(.all).background(Color.customBackground)
+        BuildingsView().frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/, maxHeight: .infinity).edgesIgnoringSafeArea(.all).background(Color.appBackground)
     }
 }
 

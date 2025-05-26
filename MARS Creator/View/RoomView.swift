@@ -74,7 +74,7 @@ struct RoomView: View {
                     }
                 )
             }
-            .background(Color.customBackground)
+            .background(Color.appBackground)
             .foregroundColor(.white)
         }
         .navigationTitle("Room")
@@ -419,7 +419,7 @@ struct RoomView: View {
     
     private var changeRoomColor: some View {
         ZStack{
-            Color.customBackground // Imposta il colore di sfondo personalizzato
+            Color.appBackground // Imposta il colore di sfondo personalizzato
                         .ignoresSafeArea()
             VStack(spacing: 16) {
                 HStack {
@@ -455,7 +455,7 @@ struct RoomView: View {
             .presentationDetents([.height(160)])
             .presentationDragIndicator(.visible)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.customBackground)
+            .background(Color.appBackground)
             .cornerRadius(16)
         }
     }

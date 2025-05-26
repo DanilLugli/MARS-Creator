@@ -45,7 +45,7 @@ struct RoomScanningView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                Color.customBackground.ignoresSafeArea()
+                Color.appBackground.ignoresSafeArea()
                 if isScanningRoom, let captureView = captureView {
                     ZStack(alignment: .top) {
                         captureView

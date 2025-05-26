@@ -121,7 +121,7 @@ struct FloorAltitudeTabView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.customBackground)
+        .background(Color.appBackground)
     }
 }
 

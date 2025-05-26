@@ -173,7 +173,7 @@ struct AddStairsConnectionView: View {
                             
                             Text(String(format: "Altitude Difference: %.2f", altitude != 0 ? altitude : 10.0))
                                 .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(Color.customBackground)
+                                .foregroundColor(Color.appBackground)
                                 .padding()
                                 .background(Color.white)
                                 .cornerRadius(10)
@@ -249,11 +249,11 @@ struct AddStairsConnectionView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            .background(Color.customBackground)
+            .background(Color.appBackground)
             .foregroundColor(.white)
         }
         .navigationTitle("New Connection")
-        .background(Color.customBackground.ignoresSafeArea())
+        .background(Color.appBackground.ignoresSafeArea())
         .toast(isPresenting: $showConnectionCreateToast) {
             AlertToast(type: .complete(Color.green), title: "Connection created")
         }

@@ -17,7 +17,7 @@ struct MapControllerView: View {
             VStack {
                 Text("Rotate Left")
                     .multilineTextAlignment(TextAlignment.center)
-                    .foregroundColor(Color.customBackground)
+                    .foregroundColor(Color.appBackground)
                 pressableButton(
                     action: { continuous in moveObject.rotateCounterClockwise() },
                     imageName: "arrow.counterclockwise"
@@ -27,7 +27,7 @@ struct MapControllerView: View {
                 
                 Text("Rotate Right")
                     .multilineTextAlignment(TextAlignment.center)
-                    .foregroundColor(Color.customBackground)
+                    .foregroundColor(Color.appBackground)
                 pressableButton(
                     action: { continuous in moveObject.rotateClockwise() },
                     imageName: "arrow.clockwise"
@@ -55,7 +55,7 @@ struct MapControllerView: View {
             VStack {
                 Text("Move along 4 axes")
                     .multilineTextAlignment(TextAlignment.center)
-                    .foregroundColor(Color.customBackground)
+                    .foregroundColor(Color.appBackground)
                 
                 // Bottone per muovere in alto (up)
                 pressableButton(
@@ -90,7 +90,7 @@ struct MapControllerView: View {
             VStack {
                 Text("Auto Align")
                     .multilineTextAlignment(TextAlignment.center)
-                    .foregroundColor(Color.customBackground)
+                    .foregroundColor(Color.appBackground)
                 pressableButton(
                     action: { _ in applyAutoPositioning() },
                     imageName: "scope"
@@ -103,11 +103,11 @@ struct MapControllerView: View {
             if isAutoPositioning {
                 VStack {
                     ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: Color.customBackground))
+                        .progressViewStyle(CircularProgressViewStyle(tint: Color.appBackground))
                         .scaleEffect(1.5)
                     
                     Text("Auto-positioning in progress...")
-                        .foregroundColor(Color.customBackground)
+                        .foregroundColor(Color.appBackground)
                         .padding(.top, 10)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)

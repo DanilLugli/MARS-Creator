@@ -71,7 +71,7 @@ struct AutomaticRoomPositionView: View {
                             RoundedRectangle(cornerRadius: 10)
                                 .fill(Color.white)
                                 .shadow(color: Color.gray.opacity(0.5), radius: 5, x: 0, y: 2)
-                            Text("Room: \(room.name)").bold().font(.title3).foregroundColor(Color.customBackground)
+                            Text("Room: \(room.name)").bold().font(.title3).foregroundColor(Color.appBackground)
                         }
                         .frame(maxWidth: .infinity, maxHeight: 40)
                         .padding(.horizontal, 20)
@@ -155,7 +155,7 @@ struct AutomaticRoomPositionView: View {
                             Text("Floor: \(floor.name)")
                                 .bold()
                                 .font(.title3)
-                                .foregroundColor(Color.customBackground)
+                                .foregroundColor(Color.appBackground)
                         }
                         .padding(.horizontal, 20)
                         .frame(maxWidth: .infinity, maxHeight: 40)
@@ -316,7 +316,7 @@ struct AutomaticRoomPositionView: View {
                 floorView.resetColorNode()
                 roomView.resetColorNode()
             }
-            .background(Color.customBackground)
+            .background(Color.appBackground)
             .navigationTitle("Create Room Position")
             .alert(isPresented: $showInfoPositionAlert) {
                 Alert(

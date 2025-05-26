@@ -31,7 +31,7 @@ struct RoomCardView: View {
                     VStack(alignment: .leading) {
                         Text(room.name)
                             .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.customBackground)
+                            .foregroundColor(Color.primaryText)
 
                         Text("Last modified \(dateFormatter.string(from: room.lastUpdate))")
                             .font(.system(size: 14))

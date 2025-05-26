@@ -54,6 +54,7 @@ struct FloorView: View {
                     Text(floor.name)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .foregroundColor(.black)
                 .padding(.leading)
                 .font(.system(size: 14))
                 .fontWeight(.heavy)
@@ -61,7 +62,7 @@ struct FloorView: View {
                 TabView(selection: $selectedTab) {
                     FloorPlanimetryView(floor: floor, showFloorMap: $showFloorMap)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color.customBackground)
+                        .background(Color.appBackground)
                         .tabItem {
                             Label("Floor Planimetry", systemImage: "map.fill")
                         }
@@ -69,14 +70,14 @@ struct FloorView: View {
 
                     RoomsListView(floor: floor, building: building, searchText: $searchText)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .background(Color.customBackground)
+                        .background(Color.appBackground)
                         .tabItem {
                             Label("Rooms", systemImage: "list.dash")
                         }
                         .tag(1)
                 }
             }
-            .background(Color.customBackground)
+            .background(Color.appBackground)
             .foregroundColor(.white)
         }
         .navigationTitle("Floor")
@@ -170,18 +171,6 @@ struct FloorView: View {
                 .bold()
             }
             
-            
-//            Button("Update From File") {
-//
-//                self.isOptionsSheetPresented = false
-//                
-//                
-//                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-//                    self.isFloorPlanimetryUploadPicker = true
-//                }
-//            }
-//            .font(.system(size: 20))
-//            .bold()
 
             Button("Cancel", role: .cancel) {
             }
@@ -328,13 +317,13 @@ struct FloorView: View {
                 
                 Text("New Room")
                     .font(.title)
-                    .foregroundColor(.customBackground)
+                    .foregroundColor(.appBackground)
                     .bold()
             }
             
             TextField("Room Name", text: $newRoomName)
                 .padding()
-                .foregroundColor(.customBackground)
+                .foregroundColor(.appBackground)
                 .background(Color(.systemGray6))
                 .cornerRadius(8)
                 .padding(.horizontal)

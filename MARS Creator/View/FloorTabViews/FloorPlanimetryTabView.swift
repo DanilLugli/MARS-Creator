@@ -36,11 +36,11 @@ struct FloorPlanimetryView: View {
                                     HStack {
                                         Image(systemName: "map.fill")
                                             .font(.system(size: 20))
-                                            .foregroundColor(Color.customBackground)
+                                            .foregroundColor(Color.appBackground)
                                         Text("Show rooms positions")
                                             .font(.system(size: 20))
                                             .bold()
-                                            .foregroundColor(Color.customBackground)
+                                            .foregroundColor(Color.appBackground)
                                     }
                                 }
                                 .toggleStyle(SwitchToggleStyle())

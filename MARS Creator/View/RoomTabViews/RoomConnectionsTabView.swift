@@ -77,7 +77,7 @@ struct RoomConnectionsTabView: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.customBackground)
+        .background(Color.appBackground)
         .searchable(text: $searchText, placement: .navigationBarDrawer(displayMode: .always))
         .navigationTitle("Connections")
         .confirmationDialog(

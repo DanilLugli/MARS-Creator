@@ -34,7 +34,7 @@ struct ManualRoomPositionView: View {
                     .border(Color.white)
                     .cornerRadius(10)
                     .padding()
-                    .shadow(color: Color.gray, radius: 3)
+                    .shadow(color: Color.gray, radius: 3) 
                 
                 VStack {
                     Spacer()
@@ -60,7 +60,7 @@ struct ManualRoomPositionView: View {
                     )
             }
         }
-        .background(Color.customBackground)
+        .background(Color.appBackground)
         .foregroundColor(.white)
         .navigationTitle("Positioning \(room.name)")
         .navigationBarBackButtonHidden(isAutoPositioning)

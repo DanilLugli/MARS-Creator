@@ -36,7 +36,7 @@ struct BuildingsView: View {
                     }
                     .foregroundColor(.white)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .background(Color.customBackground.ignoresSafeArea())
+                    .background(Color.appBackground.ignoresSafeArea())
                 }
                 else {
                     VStack {
@@ -62,7 +62,7 @@ struct BuildingsView: View {
                 }
             }
             .foregroundColor(.white)
-            .background(Color.customBackground.ignoresSafeArea())
+            .background(Color.appBackground.ignoresSafeArea())
             .navigationTitle("Buildings")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -107,14 +107,14 @@ struct BuildingsView: View {
                 
                 Text("New Building")
                     .font(.title)
-                    .foregroundColor(.customBackground)
+                    .foregroundColor(.appBackground)
                     .bold()
             }
             
             TextField("Building Name", text: $newBuildingName)
                 .padding()
                 .background(Color(.systemGray6))
-                .foregroundColor(.customBackground)
+                .foregroundColor(.appBackground)
                 .cornerRadius(8)
                 .padding(.horizontal)
             

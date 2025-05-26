@@ -45,6 +45,6 @@ struct RoomPlanimetryTabView: View {
             roomPlanimetry.loadRoomPlanimetry(room: room, borders: false)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.customBackground)
+        .background(Color.appBackground)
     }
 }

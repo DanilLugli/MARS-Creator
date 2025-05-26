@@ -299,7 +299,7 @@ struct FloorScanningView: View {
                     .animation(.easeInOut, value: showPreview)
                 }
             }
-            .background(Color.customBackground.ignoresSafeArea())
+            .background(Color.appBackground.ignoresSafeArea())
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .principal) {
