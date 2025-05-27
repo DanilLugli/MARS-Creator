@@ -31,22 +31,22 @@ struct FloorPlanimetryView: View {
                             ZStack {
                                 RoundedRectangle(cornerRadius: 10)
                                     .fill(Color.white)
-                                    .shadow(color: Color.gray.opacity(0.5), radius: 5, x: 0, y: 2)
+//                                    .shadow(color: Color.gray.opacity(0.5), radius: 5, x: 0, y: 2)
                                 Toggle(isOn: $showFloorMap) {
                                     HStack {
                                         Image(systemName: "map.fill")
                                             .font(.system(size: 20))
-                                            .foregroundColor(Color.appBackground)
+                                            .foregroundColor(Color.primaryText)
                                         Text("Show rooms positions")
                                             .font(.system(size: 20))
                                             .bold()
-                                            .foregroundColor(Color.appBackground)
+                                            .foregroundColor(Color.primaryText)
                                     }
                                 }
                                 .toggleStyle(SwitchToggleStyle())
                                 .padding()
                             }
-                            .frame(maxWidth: .infinity, maxHeight: 40)
+                            .frame(maxWidth: .infinity, maxHeight: 30)
                             .padding()
 
                             ZStack {

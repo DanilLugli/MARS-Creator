@@ -26,7 +26,7 @@ struct ConnectionCardView: View {
                 
                 Text(name)
                     .font(.system(size: 14, weight: .bold))
-                    .foregroundColor(.black)
+                    .foregroundColor(Color.primaryText)
                     .padding(.top, 2)
                 
                 if let date = date {
@@ -40,7 +40,7 @@ struct ConnectionCardView: View {
         }
         .frame(width: 90, height: 80)  // Dimensione fissa per evitare lo schiacciamento
         .cornerRadius(10)
-        .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 2)
+        //.shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 2)
     }
 }
 

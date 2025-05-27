@@ -107,7 +107,7 @@ struct RoomScanningView: View {
                                 VStack {
                                     Text(String(format: "Features Point: %d", worldMapNewFeatures))
                                         .font(.system(size: 18, weight: .bold, design: .default))
-                                        .foregroundColor(.black)
+                                        .foregroundColor(Color.primaryText)
                                         .padding()
                                         .background(Color.white)
                                         .cornerRadius(20)
@@ -237,7 +237,7 @@ struct RoomScanningView: View {
                                 .bold()
                                 .padding()
 //                                .background(Color.blue)
-                                .foregroundColor(.white)
+                                .foregroundColor(.green)
                                 .cornerRadius(30)
                         }
                         .padding()

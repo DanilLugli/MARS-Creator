@@ -54,7 +54,7 @@ struct FloorView: View {
                     Text(floor.name)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .foregroundColor(.black)
+                .foregroundColor(Color.primaryText)
                 .padding(.leading)
                 .font(.system(size: 14))
                 .fontWeight(.heavy)
@@ -98,7 +98,6 @@ struct FloorView: View {
                                 .appendingPathComponent("\(floor.name).usdz")
                                 .path) {
                                 
-                                // ✅ Se il file esiste → Mostra "Update Planimetry"
                                 Button(action: {
                                     alertMessage = """
                                         Proceeding with this update will permanently delete:
@@ -115,7 +114,6 @@ struct FloorView: View {
                                 
                             } else {
                                 
-                                // ✅ Se il file NON esiste → Mostra "Create Planimetry" con NavigationLink
                                 NavigationLink(destination: FloorScanningView(floor: floor)) {
                                     Label("Create Planimetry", systemImage: "plus")
                                 }
@@ -317,7 +315,7 @@ struct FloorView: View {
                 
                 Text("New Room")
                     .font(.title)
-                    .foregroundColor(.appBackground)
+                    .foregroundColor(.primaryText)
                     .bold()
             }
             

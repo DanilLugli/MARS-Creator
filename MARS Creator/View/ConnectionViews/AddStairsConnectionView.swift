@@ -56,6 +56,7 @@ struct AddStairsConnectionView: View {
                             Text("Floor")
                                 .font(.system(size: 22))
                                 .fontWeight(.heavy)
+                                .foregroundColor(.primaryText)
                             
                             HStack {
                                 ConnectionCardView(
@@ -82,6 +83,7 @@ struct AddStairsConnectionView: View {
                             Text("Room")
                                 .font(.system(size: 22))
                                 .fontWeight(.heavy)
+                                .foregroundColor(.primaryText)
                             
                             HStack {
                                 ConnectionCardView(
@@ -151,6 +153,7 @@ struct AddStairsConnectionView: View {
                                 VStack {
                                     Text("From Room")
                                         .font(.system(size: 16, weight: .bold))
+                                        .foregroundColor(.primaryText)
                                     mapViewFromRoom
                                         .border(Color.white)
                                         .frame(width: 160, height: 160)
@@ -162,6 +165,7 @@ struct AddStairsConnectionView: View {
                                 VStack {
                                     Text("To Room")
                                         .font(.system(size: 16, weight: .bold))
+                                        .foregroundColor(.primaryText)
                                     mapViewToRoom
                                         .border(Color.white)
                                         .frame(width: 160, height: 160)
@@ -173,7 +177,7 @@ struct AddStairsConnectionView: View {
                             
                             Text(String(format: "Altitude Difference: %.2f", altitude != 0 ? altitude : 10.0))
                                 .font(.system(size: 16, weight: .bold))
-                                .foregroundColor(Color.appBackground)
+                                .foregroundColor(Color.primaryText)
                                 .padding()
                                 .background(Color.white)
                                 .cornerRadius(10)
@@ -214,7 +218,7 @@ struct AddStairsConnectionView: View {
                         }
                         .font(.system(size: 16, weight: .bold, design: .default))
                         .frame(width: 160, height: 50)
-                        .foregroundStyle(.white)
+                        .foregroundColor(Color.primaryText)
 //                        .background(Color.blue.opacity(0.4))
                         .cornerRadius(30)
                         .bold()
@@ -229,7 +233,7 @@ struct AddStairsConnectionView: View {
                         Text("Confirm Connection")
                             .font(.system(size: 16, weight: .bold, design: .default))
                             .frame(width: 200, height: 50)
-                            .foregroundStyle(.white)
+                            .foregroundStyle(.green)
 //                            .background(Color.green)
                             .cornerRadius(30)
                             .bold()

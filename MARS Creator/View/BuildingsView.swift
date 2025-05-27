@@ -42,7 +42,8 @@ struct BuildingsView: View {
                     VStack {
                         TextField("Search", text: $searchText)
                             .padding(7)
-                            .background(Color(.systemGray6))
+                            .background(Color.white)
+                            .foregroundColor(Color.primaryText)
                             .cornerRadius(8)
                             .padding(.horizontal, 13)
                             .frame(maxWidth: .infinity)
@@ -107,7 +108,7 @@ struct BuildingsView: View {
                 
                 Text("New Building")
                     .font(.title)
-                    .foregroundColor(.appBackground)
+                    .foregroundColor(.primaryText)
                     .bold()
             }
             

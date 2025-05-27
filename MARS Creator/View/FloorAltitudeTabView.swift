@@ -63,7 +63,7 @@ struct FloorAltitudeTabView: View {
             
             Text(String(format: "Altitude: %.2f", floor.altitude))
                 .font(.system(size: 18, weight: .bold, design: .default))
-                .foregroundColor(.black)
+                .foregroundColor(Color.primaryText)
                 .padding()
                 .background(Color.white)
                 .cornerRadius(10)
@@ -81,7 +81,7 @@ struct FloorAltitudeTabView: View {
                     .bold()
                     .padding()
 //                    .background(Color.green)
-                    .foregroundColor(.white)
+                    .foregroundColor(.primaryText)
                     .cornerRadius(30)
             }
             .padding(.bottom, 20)
@@ -98,7 +98,7 @@ struct FloorAltitudeTabView: View {
                     Spacer()
                     Text(String(format: "Altitude: %.2f", altitudeY))
                         .font(.system(size: 18, weight: .bold, design: .default))
-                        .foregroundColor(.black)
+                        .foregroundColor(Color.primaryText)
                         .padding()
                         .background(Color.white)
                         .cornerRadius(10)

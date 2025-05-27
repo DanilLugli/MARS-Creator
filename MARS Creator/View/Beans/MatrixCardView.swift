@@ -35,7 +35,7 @@ struct MatrixCardView: View {
                     HStack{
                         Text("Position of \(room)")
                             .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.black)
+                            .foregroundColor(Color.primaryText)
                         
                     }
                     HStack{
@@ -58,7 +58,7 @@ struct MatrixCardView: View {
             }
             .frame(width: geometry.size.width / CGFloat(rowSize), height: 80)
             .cornerRadius(10)
-            .shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 2)
+            //.shadow(color: Color.black.opacity(0.2), radius: 5, x: 0, y: 2)
             
         }
     }

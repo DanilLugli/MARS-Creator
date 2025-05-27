@@ -33,7 +33,7 @@ struct BuildingView: View {
                     }
                     .font(.system(size: 14))
                     .fontWeight(.heavy)
-                    .foregroundColor(.black)
+                    .foregroundColor(Color.primaryText)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.leading)
                     
@@ -59,7 +59,8 @@ struct BuildingView: View {
                         
                         TextField("Search", text: $searchText)
                             .padding(7)
-                            .background(Color(.systemGray6))
+                            .background(Color.white)
+                            .foregroundColor(Color.primaryText)
                             .cornerRadius(8)
                             .padding(.horizontal, 13)
                             .frame(maxWidth: .infinity)
@@ -201,7 +202,7 @@ struct BuildingView: View {
                 
                 Text("New Floor")
                     .font(.title)
-                    .foregroundColor(.appBackground)
+                    .foregroundColor(.primaryText)
                     .bold()
             }
             

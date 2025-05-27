@@ -33,7 +33,7 @@ struct ListConnectionCardView: View {
                         
                         Text(Image(systemName: "arrow.right"))
                             .font(.system(size: 15, weight: .bold))
-                            .foregroundColor(.black)
+                            .foregroundColor(Color.primaryText)
                         
                         ConnectionCardView(name: room, isSelected: false, isFloor: false)
                     }
@@ -49,7 +49,7 @@ struct ListConnectionCardView: View {
                         
                         Text(Image(systemName: "arrow.right"))
                             .font(.system(size: 15, weight: .bold))
-                            .foregroundColor(.black)
+                            .foregroundColor(Color.primaryText)
                         
                         ConnectionCardView(name: targetRoom, isSelected: false, isFloor: false)
                     }
@@ -58,7 +58,7 @@ struct ListConnectionCardView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text(String(format: "Altitude Difference: %.2f", altitudeDifference))
                             .font(.system(size: 16, weight: .bold))
-                            .foregroundColor(.black)
+                            .foregroundColor(Color.primaryText)
                     }
                     .padding(.top)
                 }

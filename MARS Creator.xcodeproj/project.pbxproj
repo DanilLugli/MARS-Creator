@@ -21,6 +21,9 @@
 		AA4C4B902CF78B3D0033A4DF /* Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4C4B8F2CF78B3D0033A4DF /* Extension.swift */; };
 		AA4D2CDB2C7358EE000312A7 /* RoomCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA4D2CDA2C7358EE000312A7 /* RoomCardView.swift */; };
 		AA6110112C621CF400B61D0B /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA6110102C621CF400B61D0B /* Utils.swift */; };
+		AA6317822DE60F1D009008F1 /* Connection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA63177F2DE60F1D009008F1 /* Connection.swift */; };
+		AA6317832DE60F1D009008F1 /* ElevatorConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA6317802DE60F1D009008F1 /* ElevatorConnection.swift */; };
+		AA6317842DE60F1D009008F1 /* AdjacentFloorsConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA63177E2DE60F1D009008F1 /* AdjacentFloorsConnection.swift */; };
 		AA64CC822C47FDA8005C883B /* RoomPositionMatrix.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA64CC812C47FDA8005C883B /* RoomPositionMatrix.swift */; };
 		AA64CC862C495D73005C883B /* Rectangle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA64CC852C495D73005C883B /* Rectangle.swift */; };
 		AA64CC882C495F51005C883B /* Coordinates.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA64CC872C495F51005C883B /* Coordinates.swift */; };
@@ -74,6 +77,9 @@
 		AA4C4B8F2CF78B3D0033A4DF /* Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extension.swift; sourceTree = "<group>"; };
 		AA4D2CDA2C7358EE000312A7 /* RoomCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomCardView.swift; sourceTree = "<group>"; };
 		AA6110102C621CF400B61D0B /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
+		AA63177E2DE60F1D009008F1 /* AdjacentFloorsConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdjacentFloorsConnection.swift; sourceTree = "<group>"; };
+		AA63177F2DE60F1D009008F1 /* Connection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Connection.swift; sourceTree = "<group>"; };
+		AA6317802DE60F1D009008F1 /* ElevatorConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElevatorConnection.swift; sourceTree = "<group>"; };
 		AA64CC812C47FDA8005C883B /* RoomPositionMatrix.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomPositionMatrix.swift; sourceTree = "<group>"; };
 		AA64CC852C495D73005C883B /* Rectangle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rectangle.swift; sourceTree = "<group>"; };
 		AA64CC872C495F51005C883B /* Coordinates.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Coordinates.swift; sourceTree = "<group>"; };
@@ -116,7 +122,6 @@
 		AAEE73732D37FC28007505A3 /* FloorTabViews */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = FloorTabViews; sourceTree = "<group>"; };
 		AAEE73742D37FC4C007505A3 /* ConnectionViews */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = ConnectionViews; sourceTree = "<group>"; };
 		AAEE73752D37FC63007505A3 /* ScanningViews */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = ScanningViews; sourceTree = "<group>"; };
-		AAEE737B2D37FDDF007505A3 /* Connection 2 */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "Connection 2"; sourceTree = "<group>"; };
 		AAEE73812D3960BC007505A3 /* SCNView */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = SCNView; sourceTree = "<group>"; };
 		AAEE73822D3A66AF007505A3 /* RoomPositionViews */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = RoomPositionViews; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -153,6 +158,16 @@
 			children = (
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		AA6317812DE60F1D009008F1 /* Connection */ = {
+			isa = PBXGroup;
+			children = (
+				AA63177E2DE60F1D009008F1 /* AdjacentFloorsConnection.swift */,
+				AA63177F2DE60F1D009008F1 /* Connection.swift */,
+				AA6317802DE60F1D009008F1 /* ElevatorConnection.swift */,
+			);
+			path = Connection;
 			sourceTree = "<group>";
 		};
 		AA78F5D72C2C77060044F825 /* Data */ = {
@@ -198,8 +213,8 @@
 				AA8E0A5A2C52C69D0097BDCD /* NamedURL.swift */,
 				AA64CC852C495D73005C883B /* Rectangle.swift */,
 				AA64CC872C495F51005C883B /* Coordinates.swift */,
-				AAEE737B2D37FDDF007505A3 /* Connection 2 */,
 				FC6E17B82DC52D2200176CEE /* NodeCluster.swift */,
+				AA6317812DE60F1D009008F1 /* Connection */,
 			);
 			path = Beans;
 			sourceTree = "<group>";
@@ -290,7 +305,6 @@
 				AAEE73732D37FC28007505A3 /* FloorTabViews */,
 				AAEE73742D37FC4C007505A3 /* ConnectionViews */,
 				AAEE73752D37FC63007505A3 /* ScanningViews */,
-				AAEE737B2D37FDDF007505A3 /* Connection 2 */,
 				AAEE73812D3960BC007505A3 /* SCNView */,
 				AAEE73822D3A66AF007505A3 /* RoomPositionViews */,
 			);
@@ -396,6 +410,9 @@
 				AA78F5ED2C3303910044F825 /* Logger.swift in Sources */,
 				AA0A80762C9475DC00501EB4 /* MoveObject.swift in Sources */,
 				AAE57F9E2C3764FC00F0196F /* FloorView.swift in Sources */,
+				AA6317822DE60F1D009008F1 /* Connection.swift in Sources */,
+				AA6317832DE60F1D009008F1 /* ElevatorConnection.swift in Sources */,
+				AA6317842DE60F1D009008F1 /* AdjacentFloorsConnection.swift in Sources */,
 				AA78F5EA2C33006F0044F825 /* BuildingModel.swift in Sources */,
 				AA8E0A6C2C5D02280097BDCD /* FilePickerView.swift in Sources */,
 				AAA29E6A2C1711AA00CA267C /* AppDelegate.swift in Sources */,
@@ -539,7 +556,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = HJU37MM8HX;
+				DEVELOPMENT_TEAM = D8V8DB2CZM;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "App will use Camera";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -558,7 +575,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "EveryLAB-Tesi.ARL-Creator";
+				PRODUCT_BUNDLE_IDENTIFIER = "EveryLAB-Tesi.MARS-Creator";
 				PRODUCT_NAME = "MARS Creator";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -577,7 +594,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = HJU37MM8HX;
+				DEVELOPMENT_TEAM = D8V8DB2CZM;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "App will use Camera";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -596,7 +613,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "EveryLAB-Tesi.ARL-Creator";
+				PRODUCT_BUNDLE_IDENTIFIER = "EveryLAB-Tesi.MARS-Creator";
 				PRODUCT_NAME = "MARS Creator";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;

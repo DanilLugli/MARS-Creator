@@ -80,20 +80,14 @@ struct SCNViewContainer: UIViewRepresentable {
     
     func changeColorOfNode(nodeName: String, color: UIColor) {
         guard let scene = scnView.scene else {
-            print("⚠️ Scene is nil.")
             return
         }
         
         // Stampa tutti i nodi disponibili nella scena
         let allNodes = scene.rootNode.childNodes { _, _ in true } // Closure valida
-        print("🌲 Available nodes in scene:")
-        for node in allNodes {
-            print("- \(node.name ?? "Unnamed")")
-        }
         
         
         guard let originalNode = scnView.scene?.rootNode.childNode(withName: nodeName, recursively: true) else {
-            print("❌ Node \(nodeName) not found.")
             return
         }
         
@@ -122,7 +116,6 @@ struct SCNViewContainer: UIViewRepresentable {
         
         scnView.scene?.rootNode.addChildNode(clonedNode)
         
-        print("✅ Cloned node \(clonedNode.name ?? "Unnamed") added to scene!")
     }
     
     func resetColorNode() {
@@ -130,7 +123,6 @@ struct SCNViewContainer: UIViewRepresentable {
             n.name?.hasPrefix("__selected__") ?? false
         }) {
             for node in nodes {
-                print("Nodo \(node.name ?? "PINO") eliminato!!")
                 node.removeFromParentNode()
             }
         } else {
@@ -203,14 +195,5 @@ struct SCNViewContainer: UIViewRepresentable {
                 gesture.rotation = 0
             }
         }
-//
-//        @objc func handleTap(_ gesture: UITapGestureRecognizer) {
-//            let location = gesture.location(in: parent.scnView)
-//            let hitResults = parent.scnView.hitTest(location, options: nil)
-//            if let hit = hitResults.first, let nodeName = hit.node.name {
-//                print("Nodo toccato: \(nodeName)")
-//                parent.changeColorOfNode(nodeName: nodeName, color: UIColor.green)
-//            }
-//        }
     }
 }

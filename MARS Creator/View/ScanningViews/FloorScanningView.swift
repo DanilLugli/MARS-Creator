@@ -269,7 +269,7 @@ struct FloorScanningView: View {
                                 .bold()
                                 .padding()
                             //                                .background(Color.blue)
-                                .foregroundColor(.white)
+                                .foregroundColor(.green)
                                 .cornerRadius(30)
                         }
                         .padding()

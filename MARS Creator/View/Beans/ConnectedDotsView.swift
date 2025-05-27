@@ -19,15 +19,15 @@ struct ConnectedDotsView: View {
                     HStack {
                         VStack {
                             Circle()
-                                .stroke(Color.white, lineWidth: 1)
+                                .stroke(Color.appBackground, lineWidth: 1)
                                 .frame(width: dotSize, height: dotSize)
                                 .background(
                                     Circle()
-                                        .fill(index + 1 <= self.progress ? Color.white : Color.primaryText)
+                                        .fill(index + 1 <= self.progress ? Color.green : Color.white)
                                 )
                             
                             Text(label)
-                                .foregroundColor(.white)
+                                .foregroundColor(.primaryText)
                                 .font(.system(size: 10))
                                 .bold()
                         }.frame(height: 34)
@@ -40,7 +40,8 @@ struct ConnectedDotsView: View {
                                     .foregroundColor(.primaryText)
                                     .padding(.top,3) // Per distanziare la freccia dal cerchio
                                 Spacer()
-                            }.frame(height: 34)                        }
+                            }.frame(height: 34)
+                        }
                     }
                 }
             }
@@ -48,7 +49,7 @@ struct ConnectedDotsView: View {
         }
         .padding([.leading, .trailing], 10)
         .frame(maxWidth: .infinity)
-        .background(Color.primaryText.ignoresSafeArea())
+        .background(Color.appBackground.ignoresSafeArea())
     }
 }
 

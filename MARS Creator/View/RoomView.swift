@@ -385,6 +385,7 @@ struct RoomView: View {
             Text(room.name)
         }
         .font(.system(size: 14))
+        .foregroundColor(Color.primaryText)
         .fontWeight(.heavy)
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.leading)
@@ -427,17 +428,17 @@ struct RoomView: View {
                         .resizable()
                         .scaledToFit()
                         .frame(width: 24, height: 24)
-                        .foregroundColor(.blue)
+                        .foregroundColor(.primaryText)
                     
                     Text("Change Room color")
                         .font(.title)
-                        .foregroundColor(.white)
+                        .foregroundColor(.primaryText)
                         .bold()
                 }
                 
                 ColorPicker("Choose a color", selection: $selectedColor)
                     .padding()
-                    .foregroundColor(.white)
+                    .foregroundColor(.primaryText)
                     .bold()
                     .onChange(of: selectedColor) {
                         
