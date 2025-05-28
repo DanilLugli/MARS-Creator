@@ -9,6 +9,7 @@ class SCNViewMapHandler: ObservableObject {
     var massCenter: SCNNode = SCNNode()
     var origin: SCNNode = SCNNode()
     
+    var gestureCoordinator: SCNViewGestureCoordinator?
     var roomNode: String = ""
     
     init(scnView: SCNView, cameraNode: SCNNode, massCenter: SCNNode) {
@@ -204,53 +205,28 @@ struct SCNViewMapContainer: UIViewRepresentable {
     }
     
     func makeUIView(context: Context) -> SCNView {
-        
-        let pinchGesture = UIPinchGestureRecognizer(target: context.coordinator, action: #selector(context.coordinator.handlePinch(_:)))
-        handler.scnView.addGestureRecognizer(pinchGesture)
-        
-        let panGesture = UIPanGestureRecognizer(target: context.coordinator, action: #selector(context.coordinator.handlePan(_:)))
-        handler.scnView.addGestureRecognizer(panGesture)
-        
-        handler.scnView.backgroundColor = UIColor.white
-        
+        let coordinator = SCNViewGestureCoordinator(scnView: handler.scnView, cameraNode: handler.cameraNode)
+
+        handler.gestureCoordinator = coordinator // 👈 Salvalo se necessario
+
+        let pinch = UIPinchGestureRecognizer(target: coordinator, action: #selector(coordinator.handlePinch(_:)))
+        pinch.delegate = coordinator
+        handler.scnView.addGestureRecognizer(pinch)
+
+        let pan = UIPanGestureRecognizer(target: coordinator, action: #selector(coordinator.handlePan(_:)))
+        pan.delegate = coordinator
+        handler.scnView.addGestureRecognizer(pan)
+
+        let rotate = UIRotationGestureRecognizer(target: coordinator, action: #selector(coordinator.handleRotation(_:)))
+        rotate.delegate = coordinator
+        handler.scnView.addGestureRecognizer(rotate)
+
+        handler.scnView.backgroundColor = .white
         return handler.scnView
     }
     
     func updateUIView(_ uiView: SCNView, context: Context) {}
-    
-    class Coordinator: NSObject {
-        var parent: SCNViewMapContainer
-        
-        init(_ parent: SCNViewMapContainer) {
-            self.parent = parent
-        }
-        
-        @objc func handlePinch(_ gesture: UIPinchGestureRecognizer) {
-            guard let camera = parent.handler.cameraNode.camera else { return }
-            
-            if gesture.state == .changed {
-                let newScale = camera.orthographicScale / Double(gesture.scale)
-                camera.orthographicScale = max(1.0, min(newScale, 200.0)) // Limita lo zoom tra 5x e 50x
-                gesture.scale = 1
-            }
-        }
-        
-        // Gestione dello spostamento tramite pan
-        @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
-            let translation = gesture.translation(in: parent.handler.scnView)
-            
-            // Regola la posizione della camera in base alla direzione del pan
-            parent.handler.cameraNode.position.x -= Float(translation.x) * 0.04 // Spostamento orizzontale
-            parent.handler.cameraNode.position.z -= Float(translation.y) * 0.04 // Spostamento verticale
-            
-            // Resetta la traduzione dopo ogni movimento
-            gesture.setTranslation(.zero, in: parent.handler.scnView)
-        }
-    }
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
+
 }
 
 extension SCNVector3: @retroactive Equatable {

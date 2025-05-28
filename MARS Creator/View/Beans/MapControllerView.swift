@@ -34,22 +34,7 @@ struct MapControllerView: View {
                 )
             }
             .frame(maxWidth: .infinity)
-            
-//            if moveObject is MoveDimensionObject {
-//                VStack {
-//                    Slider(value: $scaleWidth, in: 0...1, step: 0.01) {
-//                        Text("Width")
-//                    }
-//                    .onChange(of: scaleWidth) { _, _ in
-//                        if let moveDimensionObject = moveObject as? MoveDimensionObject {
-//                            moveDimensionObject.incrementWidht(by: Int(scaleWidth * 100))
-//                        }
-//                    }
-//                    .padding()
-//                }
-//            } else {
-//                Spacer()
-//            }
+
             
             // Movimenti
             VStack {

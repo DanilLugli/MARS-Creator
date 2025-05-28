@@ -31,6 +31,7 @@ struct BuildingView: View {
                             .font(.system(size: 12))
                         Text("Floors")
                     }
+                    .fontDesign(.rounded)
                     .font(.system(size: 14))
                     .fontWeight(.heavy)
                     .foregroundColor(Color.primaryText)

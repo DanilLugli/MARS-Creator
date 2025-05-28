@@ -23,6 +23,7 @@ struct ContentView: View {
                 // Imposta il colore del testo del titolo
                 appearance.titleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.black]
                 appearance.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.black]
+        
 
                 // Configura l'aspetto degli elementi della barra di navigazione, incluso il bottone "Back"
                 let buttonAppearance = UIBarButtonItemAppearance()
@@ -51,7 +52,11 @@ struct ContentView: View {
     
     var body: some View {
         
-        BuildingsView().frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/, maxHeight: .infinity).edgesIgnoringSafeArea(.all).background(Color.appBackground)
+        BuildingsView()
+            .environment(\.font, .system(size: 17, weight: .regular, design: .rounded))
+            .frame(maxWidth: /*@START_MENU_TOKEN@*/.infinity/*@END_MENU_TOKEN@*/, maxHeight: .infinity)
+            .edgesIgnoringSafeArea(.all)
+            .background(Color.appBackground)
     }
 }
 

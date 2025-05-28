@@ -254,3 +254,61 @@ func drawSceneObjects(scnView: SCNView, borders: Bool, nodeOrientation: Bool) {
 }
 
 
+class SCNViewGestureCoordinator: NSObject, UIGestureRecognizerDelegate {
+    let scnView: SCNView
+    let cameraNode: SCNNode
+
+    init(scnView: SCNView, cameraNode: SCNNode) {
+        self.scnView = scnView
+        self.cameraNode = cameraNode
+    }
+
+    @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
+        guard let view = gesture.view as? SCNView,
+              let cameraNode = view.pointOfView else { return }
+
+        let translation = gesture.translation(in: view)
+        
+        // Sensibilità movimento
+        let panSpeed: Float = 0.05
+
+        // Movimento lungo x e z in base alla traslazione del dito
+        let dx = Float(translation.x) * panSpeed
+        let dz = Float(translation.y) * panSpeed
+
+        // Calcola direzione basata sulla rotazione della camera attorno all'asse Y
+        let angleY = cameraNode.eulerAngles.y
+
+        let directionX = cos(angleY) * dx + sin(angleY) * dz
+        let directionZ = -sin(angleY) * dx + cos(angleY) * dz
+
+        // Muove la camera nel mondo
+        cameraNode.position.x -= directionX
+        cameraNode.position.z -= directionZ
+
+        // Resetta la gesture
+        gesture.setTranslation(.zero, in: view)
+    }
+    
+    @objc func handlePinch(_ gesture: UIPinchGestureRecognizer) {
+        guard let camera = cameraNode.camera else { return }
+
+        if gesture.state == .changed {
+            let newScale = camera.orthographicScale / Double(gesture.scale)
+            camera.orthographicScale = max(1.0, min(newScale, 200.0))
+            gesture.scale = 1
+        }
+    }
+
+    @objc func handleRotation(_ gesture: UIRotationGestureRecognizer) {
+        if gesture.state == .changed {
+            cameraNode.eulerAngles.y += Float(gesture.rotation)
+            gesture.rotation = 0
+        }
+    }
+
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
+                           shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return true
+    }
+}

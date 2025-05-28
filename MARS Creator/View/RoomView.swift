@@ -389,6 +389,7 @@ struct RoomView: View {
         .fontWeight(.heavy)
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.leading)
+        .fontDesign(.rounded)
     }
     
     func checkRoomPosition() {

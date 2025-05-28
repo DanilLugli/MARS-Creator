@@ -34,6 +34,7 @@ struct FloorAltitudeTabView: View {
                         .foregroundColor(.gray)
                         .font(.headline)
                         .padding()
+                        .fontDesign(.rounded)
                 }
                 
                 HStack{

@@ -4,6 +4,8 @@ import simd
 
 class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
     
+    var gestureCoordinator: SCNViewGestureCoordinator?
+
     private let identityMatrix = matrix_identity_float4x4
 
     @Published var rotoTraslation: RoomPositionMatrix = RoomPositionMatrix(
@@ -474,39 +476,29 @@ struct SCNViewUpdatePositionRoomContainer: UIViewRepresentable {
     }
     
     func makeUIView(context: Context) -> SCNView {
-        
-        let pinchGesture = UIPinchGestureRecognizer(target: context.coordinator, action: #selector(context.coordinator.handlePinch(_:)))
-        handler.scnView.addGestureRecognizer(pinchGesture)
-        
-        let panGesture = UIPanGestureRecognizer(target: context.coordinator, action: #selector(context.coordinator.handlePan(_:)))
-        handler.scnView.addGestureRecognizer(panGesture)
-        
+        let coordinator = SCNViewGestureCoordinator(scnView: handler.scnView, cameraNode: handler.cameraNode)
+
+        handler.gestureCoordinator = coordinator // 👈 Salvalo se necessario
+
+        let pinch = UIPinchGestureRecognizer(target: coordinator, action: #selector(coordinator.handlePinch(_:)))
+        pinch.delegate = coordinator
+        handler.scnView.addGestureRecognizer(pinch)
+
+        let pan = UIPanGestureRecognizer(target: coordinator, action: #selector(coordinator.handlePan(_:)))
+        pan.delegate = coordinator
+        handler.scnView.addGestureRecognizer(pan)
+
+        let rotate = UIRotationGestureRecognizer(target: coordinator, action: #selector(coordinator.handleRotation(_:)))
+        rotate.delegate = coordinator
+        handler.scnView.addGestureRecognizer(rotate)
+
+        handler.scnView.backgroundColor = .white
         return handler.scnView
     }
     
     func updateUIView(_ uiView: SCNView, context: Context) {}
 
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
     
-    class Coordinator: NSObject {
-        var parent: SCNViewUpdatePositionRoomContainer
-        
-        init(_ parent: SCNViewUpdatePositionRoomContainer) {
-            self.parent = parent
-        }
-        
-        // Gestore del pinch (zoom)
-        @objc func handlePinch(_ gesture: UIPinchGestureRecognizer) {
-            parent.handler.handlePinch(gesture)
-        }
-
-        // Gestore del pan (spostamento)
-        @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
-            parent.handler.handlePan(gesture)
-        }
-    }
 }
 
 @available(iOS 17.0, *)

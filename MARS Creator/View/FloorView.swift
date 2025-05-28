@@ -58,6 +58,7 @@ struct FloorView: View {
                 .padding(.leading)
                 .font(.system(size: 14))
                 .fontWeight(.heavy)
+                .fontDesign(.rounded)
                 
                 TabView(selection: $selectedTab) {
                     FloorPlanimetryView(floor: floor, showFloorMap: $showFloorMap)

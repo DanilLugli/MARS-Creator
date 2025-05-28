@@ -26,9 +26,11 @@ struct DefaultCardView: View {
                         Text(name)
                             .font(.system(size: 20, weight: .bold))
                             .foregroundColor(Color.primaryText)
+                            .fontDesign(.rounded)
                             
                         
                         Text("Last modified: \(dateFormatter.string(from: date))")
+                            .fontDesign(.rounded)
                             .font(.system(size: 14))
                             .foregroundColor(.gray)
                         

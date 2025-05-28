@@ -15,7 +15,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var window: UIWindow?
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        let contentView = ContentView().edgesIgnoringSafeArea(.all)
+        let contentView = ContentView()
+                   .environment(\.font, .system(size: 17, weight: .regular, design: .rounded))
+                   .edgesIgnoringSafeArea(.all)
         
         // Use a UIHostingController as window root view controller.
         let window = UIWindow()

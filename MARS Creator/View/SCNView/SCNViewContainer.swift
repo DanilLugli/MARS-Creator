@@ -7,6 +7,7 @@ import ComplexModule
 
 struct SCNViewContainer: UIViewRepresentable {
     
+    
     typealias UIViewType = SCNView
     
     var scnView = SCNView(frame: .zero)
@@ -14,7 +15,7 @@ struct SCNViewContainer: UIViewRepresentable {
     var massCenter = SCNNode()
     var cameraNode = SCNNode()
     var dimension = SCNVector3()
-        
+    
     var delegate = RenderDelegate()
     
     var rotoTraslation: [RoomPositionMatrix] = []
@@ -35,7 +36,7 @@ struct SCNViewContainer: UIViewRepresentable {
         drawSceneObjects(scnView: self.scnView, borders: borders, nodeOrientation: false)
         
         setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: setMassCenter(scnView: self.scnView))
-//        createAxesNode()
+        //        createAxesNode()
         
     }
     
@@ -46,7 +47,7 @@ struct SCNViewContainer: UIViewRepresentable {
         
         self.scnView.scene = scene
         drawSceneObjects(scnView: self.scnView, borders: borders, nodeOrientation: false)
-//        createAxesNode()
+        //        createAxesNode()
         setCamera(scnView: self.scnView, cameraNode: self.cameraNode, massCenter: setMassCenter(scnView: self.scnView))
         floor.isPlanimetryLoaded = true
     }
@@ -83,7 +84,6 @@ struct SCNViewContainer: UIViewRepresentable {
             return
         }
         
-        // Stampa tutti i nodi disponibili nella scena
         let allNodes = scene.rootNode.childNodes { _, _ in true } // Closure valida
         
         
@@ -130,70 +130,28 @@ struct SCNViewContainer: UIViewRepresentable {
         }
     }
     
+    func makeCoordinator() -> SCNViewGestureCoordinator {
+        SCNViewGestureCoordinator(scnView: scnView, cameraNode: cameraNode)
+    }
+    
     func makeUIView(context: Context) -> SCNView {
-        
-        // Riconoscitore di pinch per lo zoom
-        let pinchGesture = UIPinchGestureRecognizer(target: context.coordinator, action: #selector(context.coordinator.handlePinch(_:)))
-        scnView.addGestureRecognizer(pinchGesture)
-        
-        // Riconoscitore di pan per lo spostamento
-        let panGesture = UIPanGestureRecognizer(target: context.coordinator, action: #selector(context.coordinator.handlePan(_:)))
-        scnView.addGestureRecognizer(panGesture)
-        
-        // Riconoscitore di rotazione per ruotare la scena con due dita
-        let rotationGesture = UIRotationGestureRecognizer(target: context.coordinator, action: #selector(context.coordinator.handleRotation(_:)))
-        scnView.addGestureRecognizer(rotationGesture)
-        
-        // Riconoscitore di tap per selezionare un nodo
-//        let tapGesture = UITapGestureRecognizer(target: context.coordinator, action: #selector(context.coordinator.handleTap(_:)))
-//        scnView.addGestureRecognizer(tapGesture)
-        
-        // Configura lo sfondo della scena
-        scnView.backgroundColor = UIColor.white
-        
+        let coordinator = context.coordinator
+
+        let pinch = UIPinchGestureRecognizer(target: coordinator, action: #selector(coordinator.handlePinch(_:)))
+        pinch.delegate = coordinator
+        scnView.addGestureRecognizer(pinch)
+
+        let pan = UIPanGestureRecognizer(target: coordinator, action: #selector(coordinator.handlePan(_:)))
+        pan.delegate = coordinator
+        scnView.addGestureRecognizer(pan)
+
+        let rotate = UIRotationGestureRecognizer(target: coordinator, action: #selector(coordinator.handleRotation(_:)))
+        rotate.delegate = coordinator
+        scnView.addGestureRecognizer(rotate)
+
+        scnView.backgroundColor = .white
         return scnView
     }
     
     func updateUIView(_ uiView: SCNView, context: Context) {}
-    
-    func makeCoordinator() -> SCNViewContainerCoordinator {
-        SCNViewContainerCoordinator(self)
-    }
-    
-    class SCNViewContainerCoordinator: NSObject {
-        var parent: SCNViewContainer
-        
-        init(_ parent: SCNViewContainer) {
-            self.parent = parent
-        }
-        
-        // Gestione dello zoom tramite pinch
-        @objc func handlePinch(_ gesture: UIPinchGestureRecognizer) {
-            guard let camera = parent.cameraNode.camera else { return }
-            
-            if gesture.state == .changed {
-                let newScale = camera.orthographicScale / Double(gesture.scale)
-                camera.orthographicScale = max(1.0, min(newScale, 200.0))
-                gesture.scale = 1
-            }
-        }
-        
-        // Gestione del pan per lo spostamento
-        @objc func handlePan(_ gesture: UIPanGestureRecognizer) {
-            let translation = gesture.translation(in: parent.scnView)
-            parent.cameraNode.position.x -= Float(translation.x) * 0.04
-            parent.cameraNode.position.z -= Float(translation.y) * 0.04
-            gesture.setTranslation(.zero, in: parent.scnView)
-        }
-        
-        // Gestione della rotazione tramite due dita
-        @objc func handleRotation(_ gesture: UIRotationGestureRecognizer) {
-            // Ruota la camera attorno all'asse Y; se preferisci ruotare l'intera scena,
-            // puoi applicare la trasformazione sul nodo radice della scena.
-            if gesture.state == .changed {
-                parent.scnView.scene?.rootNode.eulerAngles.y -= Float(gesture.rotation)
-                gesture.rotation = 0
-            }
-        }
-    }
 }

@@ -32,10 +32,12 @@ struct RoomCardView: View {
                         Text(room.name)
                             .font(.system(size: 20, weight: .bold))
                             .foregroundColor(Color.primaryText)
+                            .fontDesign(.rounded)
 
                         Text("Last modified \(dateFormatter.string(from: room.lastUpdate))")
                             .font(.system(size: 14))
                             .foregroundColor(.gray)
+                            .fontDesign(.rounded)
                     }
                     Spacer()
                 }
