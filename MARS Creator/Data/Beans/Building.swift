@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import SwiftUICore
+import SwiftUI
 
 class Building: Encodable, ObservableObject, Hashable {
     private var _id = UUID()
