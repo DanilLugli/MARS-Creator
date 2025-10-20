@@ -113,11 +113,132 @@ extension SCNNode {
     
     var height: CGFloat { CGFloat(self.boundingBox.max.y - self.boundingBox.min.y) }
     var width: CGFloat { CGFloat(self.boundingBox.max.x - self.boundingBox.min.x) }
-    var length: CGFloat { CGFloat(self.boundingBox.max.z - self.boundingBox.min.z) }
+    var depth: CGFloat { CGFloat(self.boundingBox.max.z - self.boundingBox.min.z) }
     
     var halfCGHeight: CGFloat { height / 2.0 }
     var halfHeight: Float { Float(height / 2.0) }
     var halfScaledHeight: Float { halfHeight * self.scale.y  }
+    
+    // Proprietà che restituisce il volume del nodo basandosi sul suo `boundingBox`
+    var volume: CGFloat {
+        return self.height * self.width * self.depth
+    }
+    
+    // Proprietà che calcola il tipo di nodo a partire dal suo nome
+    var type: String? {
+        guard let name = self.name else {
+            return nil
+        }
+        
+        let pattern = "(?:^clone_)+|\\d+$"
+        guard let regex = try? NSRegularExpression(pattern: pattern) else {
+            return nil
+        }
+        
+        let range = NSRange(name.startIndex..<name.endIndex, in: name)
+        return regex.stringByReplacingMatches(in: name, options: [], range: range, withTemplate: "")
+    }
 }
 
+extension simd_float3 {
+    
+    // Metodo per applicare la trasformazione a un punto
+    func transformXZ(rotationAngle: Float = 0, translation: simd_float3 = simd_float3(0, 0, 0)) -> simd_float3 {
+        let cosTheta = cos(rotationAngle)
+        let sinTheta = sin(rotationAngle)
+        
+        // Matrice di rotazione attorno all'asse y
+        let rotationMatrix = simd_float3x3(
+            simd_float3(cosTheta, 0, sinTheta),
+            simd_float3(0, 1, 0),
+            simd_float3(-sinTheta, 0, cosTheta)
+        )
+        
+        // Applica rotazione e poi traslazione
+        let rotated = rotationMatrix.transpose * self
+        return rotated + translation
+    }
+}
 
+extension Array where Element == SCNNode {
+    
+    // Metodo che converte un array di nodi in un array di `simd_float3`,
+    // ognuno dei quali rappresenta la posizione mondiale (world position)
+    // del nodo corrispondente, utilizzando la proprietà `simdWorldPosition`.
+    var simdWorldPositions: [simd_float3] {
+        return self.map { $0.simdWorldPosition }
+    }
+}
+
+extension Array where Element == simd_float3 {
+    
+    // Metodo per calcolare il centroide di un array di punti
+    func getCentroid() -> simd_float3 {
+        var sum = simd_float3(0, 0, 0)
+        for point in self {
+            sum += point
+        }
+        return sum / Float(self.count)
+    }
+    
+    // Metodo per calcolare la matrice delle distanze
+    func getDistanceMatrix() -> [[Float]] {
+        var distanceMatrix: [[Float]] = Array<[Float]>(
+            repeating: Array<Float>(repeating: 0.0, count: self.count),
+            count: self.count
+        )
+        
+        for (i, row) in distanceMatrix.enumerated() {
+            for (j, _) in row.enumerated() where j > i {
+                distanceMatrix[i][j] = simd.distance(self[i], self[j])
+                distanceMatrix[j][i] = distanceMatrix[i][j]
+            }
+        }
+        
+        return distanceMatrix
+    }
+    
+    // Metodo per calcolare le altezze relative
+    func getRelativeHeights() -> [Float] {
+        let minY = self.map { $0.y }.min()!
+        return self.map { $0.y - minY }
+    }
+}
+
+extension Array {
+    
+    // Metodo per calcolare le permutazioni a un array
+    func permutations() -> [[Element]] {
+        guard count > 0 else { return [[]] }
+        
+        return indices.flatMap { i -> [[Element]] in
+            var rest = self
+            let element = rest.remove(at: i)
+            return rest.permutations().map { [element] + $0 }
+        }
+    }
+    
+    // Metodo per calcolare le combinazioni di grandezza k di un array
+    func combinations(taking k: Int) -> [[Element]] {
+        guard k > 0 else { return [[]] }
+        guard k <= self.count else { return [] }
+
+        if k == self.count {
+            return [self]
+        }
+
+        if k == 1 {
+            return self.map { [$0] }
+        }
+
+        var result: [[Element]] = []
+
+        for (i, element) in self.enumerated() {
+            let remaining = Array(self[(i + 1)...])
+            let subcombinations = remaining.combinations(taking: k - 1)
+            result += subcombinations.map { [element] + $0 }
+        }
+
+        return result
+    }
+}

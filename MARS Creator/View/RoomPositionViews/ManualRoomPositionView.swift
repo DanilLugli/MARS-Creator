@@ -21,6 +21,8 @@ struct ManualRoomPositionView: View {
     
     @State private var showSaveMatrixToast = false
     
+    @State private var isAutoPositioning = false
+    
     @State var mapPositionView = SCNViewUpdatePositionRoomContainer()
     
     @Environment(\.dismiss) private var dismiss
@@ -37,7 +39,11 @@ struct ManualRoomPositionView: View {
                 VStack {
                     Spacer()
                     
-                    MapControllerView(moveObject: mapPositionView.handler)
+                    MapControllerView(
+                        moveObject: mapPositionView.handler,
+                        needsAutoPositioning: !doesMatrixExist(for: room.name, in: floor.associationMatrix),
+                        isAutoPositioning: $isAutoPositioning
+                    )
                         .padding()
                         .background(
                             Color.white.opacity(0.8)
@@ -57,34 +63,38 @@ struct ManualRoomPositionView: View {
         .background(Color.customBackground)
         .foregroundColor(.white)
         .navigationTitle("Positioning \(room.name)")
+        .navigationBarBackButtonHidden(isAutoPositioning)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button(action: {
-                    
-                    if !floor.isRoomPositionMatrixInJSON(fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"), roomName: room.name){
-                        floor.addIdentityMatrixToJSON(to: floor.floorURL.appendingPathComponent("\(floor.name).json"), for: floor, roomName: room.name)
-                    }
-                    
-                    floor.updateAssociationMatrixInJSON(for: room.name, fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"))
+            if !isAutoPositioning {
+							ToolbarItem(placement: .topBarTrailing) {
+									Button(action: {
+											
+											if !floor.isRoomPositionMatrixInJSON(fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"), roomName: room.name){
+													floor.addIdentityMatrixToJSON(to: floor.floorURL.appendingPathComponent("\(floor.name).json"), for: floor, roomName: room.name)
+											}
+											
+											floor.updateAssociationMatrixInJSON(for: room.name, fileURL: floor.floorURL.appendingPathComponent("\(floor.name).json"))
 
-                    floor.planimetryRooms.handler.loadRoomsMaps(
-                        floor: floor,
-                        rooms: floor.rooms
-                    )
-                    
-                    floor.getRoomByName(room.name)?.hasPosition = true
-                    
-                    showSaveMatrixToast = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                        dismiss()
-                    }
-                }) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 24))  
-                        .foregroundStyle(.white, .green, .green)
-                }
+											floor.planimetryRooms.handler.loadRoomsMaps(
+													floor: floor,
+													rooms: floor.rooms
+											)
+											
+											floor.getRoomByName(room.name)?.hasPosition = true
+											
+											showSaveMatrixToast = true
+											DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+													dismiss()
+											}
+									}) {
+											Image(systemName: "checkmark.circle.fill")
+													.font(.system(size: 24))  
+													.foregroundStyle(.white, .green, .green)
+									}
+							}
             }
-        }.toast(isPresenting: $showSaveMatrixToast){
+        }
+        .toast(isPresenting: $showSaveMatrixToast){
             AlertToast(type: .complete(Color.green), title: "Room position saved successfully ")
         }
     }

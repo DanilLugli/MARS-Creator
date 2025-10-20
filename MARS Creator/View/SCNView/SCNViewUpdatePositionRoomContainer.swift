@@ -1,5 +1,6 @@
 import SwiftUI
 import SceneKit
+import simd
 
 class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
     
@@ -147,8 +148,7 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
                 clonedNode.name = "clone_" + (node.name ?? "Unnamed")
                 clonedNode.scale = SCNVector3(1, 1, 1)
 
-                if let originalGeometry = clonedNode.geometry {
-                    let clonedGeometry = originalGeometry.copy() as! SCNGeometry
+                if clonedNode.geometry != nil {
                     let material = SCNMaterial()
                     material.lightingModel = .physicallyBased
 
@@ -189,8 +189,6 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
             var seenNodeNames = Set<String>()
 
             func search(in node: SCNNode) {
-                let nodeName = node.name?.trimmingCharacters(in: .whitespacesAndNewlines) ?? "Senza nome"
-
                 if let name = node.name?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() {
                     let prefixMatch = prefixes.contains(where: { name.hasPrefix($0.lowercased()) })
                     let hasGrpSuffix = name.hasSuffix("grp")
@@ -275,108 +273,150 @@ class SCNViewUpdatePositionRoomHandler: ObservableObject, MoveObject {
     }
 
     func rotateClockwise() {
-        self.rotateRight()
+        rotateRoomRight()
     }
 
     func rotateCounterClockwise() {
-        
-        self.rotateLeft()
+        rotateRoomLeft()
     }
 
     func moveUp(continuous: Bool) {
         let step: CGFloat = continuous ? translationStepPressable : translationStep
-        moveRoomPositionDown(step: step)
+        moveRoomDown(step: step)
     }
 
     func moveDown(continuous: Bool) {
         let step: CGFloat = continuous ? translationStepPressable : translationStep
         // Per il movimento "down" chiamiamo moveRoomPositionUp, come nell'originale
-        moveRoomPositionUp(step: step)
+        moveRoomUp(step: step)
     }
 
     func moveLeft(continuous: Bool) {
         let step: CGFloat = continuous ? translationStepPressable : translationStep
-        moveRoomPositionLeft(step: step)
+        moveRoomLeft(step: step)
     }
 
     func moveRight(continuous: Bool) {
         let step: CGFloat = continuous ? translationStepPressable : translationStep
-        moveRoomPositionRight(step: step)
-    }
-
-//    func moveRoomPositionUp() {
-//        guard let roomNode = roomNode else {
-//            return
-//        }
-//        roomNode.worldPosition.z += Float(translationStep)
-//        floor?.associationMatrix[roomName!]?.translation[3][2] += Float(translationStep)
-//    }
-
-    func moveRoomPositionDown(step: CGFloat) {
-        guard let roomNode = roomNode else { return }
-        roomNode.worldPosition.z -= Float(step)
-        floor?.associationMatrix[roomName!]?.translation[3][2] -= Float(step)
-    }
-
-    func moveRoomPositionUp(step: CGFloat) {
-        guard let roomNode = roomNode else { return }
-        roomNode.worldPosition.z += Float(step)
-        floor?.associationMatrix[roomName!]?.translation[3][2] += Float(step)
-    }
-
-    func moveRoomPositionLeft(step: CGFloat) {
-        guard let roomNode = roomNode else { return }
-        roomNode.worldPosition.x -= Float(step)
-        floor?.associationMatrix[roomName!]?.translation[3][0] -= Float(step)
-    }
-
-    func moveRoomPositionRight(step: CGFloat) {
-        guard let roomNode = roomNode else { return }
-        roomNode.worldPosition.x += Float(step)
-        floor?.associationMatrix[roomName!]?.translation[3][0] += Float(step)
-        print(floor?.associationMatrix[roomName!]?.translation[3][0] ?? 0)
-    }
-
-    func rotateRight() {
-        guard let roomNode = roomNode else {
-            print("DEBUG: No roomNode found!")
-            return
-        }
-        
-        // Debug: Stato corrente prima della rotazione
-        print("DEBUG: Current eulerAngles.y before rotation (Right): \(roomNode.eulerAngles.y)")
-        
-        // Crea una matrice di rotazione per il passo definito
-        let rotationMatrix = simd_float4x4(SCNMatrix4MakeRotation(-rotationStep, 0, 1, 0)) // Rotazione a destra (orario)
-
-        // Combina la matrice di trasformazione corrente con quella di rotazione
-        roomNode.simdTransform = matrix_multiply(roomNode.simdTransform, rotationMatrix)
-        
-        // Aggiorna la matrice di rotazione associata (r_Y)
-        let previousMatrix = floor?.associationMatrix[roomName ?? ""]?.r_Y ?? matrix_identity_float4x4
-        let updatedMatrix = matrix_multiply(previousMatrix, rotationMatrix)
-        floor?.associationMatrix[roomName ?? ""]?.r_Y = updatedMatrix
-        
-        // Debug: Stato dopo la rotazione
-        print("DEBUG: Updated simdTransform matrix: \(roomNode.simdTransform)")
-        print("DEBUG: Updated r_Y matrix: \(updatedMatrix)")
+        moveRoomRight(step: step)
     }
     
-    func rotateLeft() {
+    /**
+     * Calcola e applica automaticamente il posizionamento di un nodo stanza rispetto agli oggetti del pavimento.
+     * - Returns: Un valore booleano che indica se il posizionamento è stato eseguito correttamente.
+     */
+    func applyAutoPositioning() async -> Bool {
+        guard let roomNode else { return false }
+        guard let floor else { return false }
+        
+        let roomNodes = roomNode.childNodes
+        guard let floorNodes = floor.sceneObjects else { return false }
+        
+        // Nascondi il nodo stanza
+        roomNode.isHidden = true
+        
+        // Salva la posizione iniziale del nodo stanza
+        let initialPosition = roomNode.worldPosition
+        
+        // Sposta temporaneamente la stanza all'origine per facilitare il calcolo dell’allineamento
+        moveRoom(horizontal: CGFloat(-initialPosition.x), vertical: CGFloat(-initialPosition.z))
+        
+        // Esegue il calcolo dell’allineamento in background con priorità utente
+        let (rotationAngle, translation, error) = await Task.detached(priority: .userInitiated) {
+            // Trova il miglior allineamento tra i nodi della stanza e gli oggetti del pavimento
+            return AutoPositionUtility.findBestAlignment(
+                from: roomNodes,
+                to: floorNodes,
+                clusterSize: 3,
+                maxPairs: 1000
+            )
+        }.value
+        
+        // Se il calcolo ha restituito un errore negativo, ripristina la posizione iniziale e termina
+        if error < 0 {
+            moveRoom(horizontal: CGFloat(initialPosition.x), vertical: CGFloat(initialPosition.z))
+            roomNode.isHidden = false
+            return false
+        }
+        
+        // Applica la rotazione trovata
+        rotateRoom(angle: rotationAngle)
+        
+        // Applica la traslazione calcolata
+        moveRoom(horizontal: CGFloat(translation.x), vertical: CGFloat(translation.z))
+        
+        // Mostra il nodo stanza
+        roomNode.isHidden = false
+        
+        return true
+    }
+        
+    /**
+     * Sposta il roomNode secondo le coordinate specificate.
+     * - Parameters:
+     *   - horizontal: Quanto spostare il nodo sull'asse x (positivo = destra, negativo = sinistra)
+     *   - vertical: Quanto spostare il nodo sull'asse z (positivo = su, negativo = giù)
+     */
+    func moveRoom(horizontal: CGFloat, vertical: CGFloat) {
+        guard let roomNode = roomNode, let roomName = roomName else {
+            print("DEBUG: No roomNode or roomName found!")
+            return
+        }
+        
+        // Aggiorna la posizione del nodo
+        roomNode.worldPosition.x += Float(horizontal)
+        roomNode.worldPosition.z += Float(vertical)
+        
+        // Aggiorna la matrice di associazione
+        floor?.associationMatrix[roomName]?.translation[3][0] += Float(horizontal)
+        floor?.associationMatrix[roomName]?.translation[3][2] += Float(vertical)
+    }
+    
+    /**
+     * Ruota la stanza di un angolo specificato attorno all'asse Y.
+     * - Parameters:
+     *   - angle: L'angolo di rotazione in radianti da applicare al nodo stanza.
+     */
+    func rotateRoom(angle: Float) {
         guard let roomNode = roomNode else {
             print("DEBUG: No roomNode found!")
             return
         }
         
-        print("DEBUG: Current eulerAngles.y before rotation (Left): \(roomNode.eulerAngles.y)")
+        // Crea la matrice di rotazione con l'angolo passato come parametro
+        let rotationMatrix = simd_float4x4(SCNMatrix4MakeRotation(angle, 0, 1, 0))
         
-        let rotationMatrix = simd_float4x4(SCNMatrix4MakeRotation(rotationStep, 0, 1, 0)) // Rotazione a sinistra (antiorario)
-        
+        // Applica la rotazione al nodo
         roomNode.simdTransform = matrix_multiply(roomNode.simdTransform, rotationMatrix)
         
+        // Aggiorna la matrice di associazione
         let previousMatrix = floor?.associationMatrix[roomName ?? ""]?.r_Y ?? matrix_identity_float4x4
         let updatedMatrix = matrix_multiply(previousMatrix, rotationMatrix)
         floor?.associationMatrix[roomName ?? ""]?.r_Y = updatedMatrix
+    }
+    
+    func moveRoomDown(step: CGFloat) {
+        moveRoom(horizontal: 0, vertical: -step)
+    }
+
+    func moveRoomUp(step: CGFloat) {
+        moveRoom(horizontal: 0, vertical: step)
+    }
+
+    func moveRoomLeft(step: CGFloat) {
+        moveRoom(horizontal: -step, vertical: 0)
+    }
+
+    func moveRoomRight(step: CGFloat) {
+        moveRoom(horizontal: step, vertical: 0)
+    }
+    
+    func rotateRoomRight() {
+        rotateRoom(angle: -rotationStep) // Rotazione a destra (orario)
+    }
+    
+    func rotateRoomLeft() {
+        rotateRoom(angle: rotationStep) // Rotazione a sinistra (antiorario)
     }
     
     func handlePinch(_ gesture: UIPinchGestureRecognizer) {
