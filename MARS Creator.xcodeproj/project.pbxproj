@@ -116,7 +116,7 @@
 		AAEE73732D37FC28007505A3 /* FloorTabViews */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = FloorTabViews; sourceTree = "<group>"; };
 		AAEE73742D37FC4C007505A3 /* ConnectionViews */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = ConnectionViews; sourceTree = "<group>"; };
 		AAEE73752D37FC63007505A3 /* ScanningViews */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = ScanningViews; sourceTree = "<group>"; };
-		AAEE737B2D37FDDF007505A3 /* Connection 2 */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = "Connection 2"; sourceTree = "<group>"; };
+		AAEE737B2D37FDDF007505A3 /* Connection */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Connection; sourceTree = "<group>"; };
 		AAEE73812D3960BC007505A3 /* SCNView */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = SCNView; sourceTree = "<group>"; };
 		AAEE73822D3A66AF007505A3 /* RoomPositionViews */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = RoomPositionViews; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -290,7 +290,7 @@
 				AAEE73732D37FC28007505A3 /* FloorTabViews */,
 				AAEE73742D37FC4C007505A3 /* ConnectionViews */,
 				AAEE73752D37FC63007505A3 /* ScanningViews */,
-				AAEE737B2D37FDDF007505A3 /* Connection 2 */,
+				AAEE737B2D37FDDF007505A3 /* Connection */,
 				AAEE73812D3960BC007505A3 /* SCNView */,
 				AAEE73822D3A66AF007505A3 /* RoomPositionViews */,
 			);
