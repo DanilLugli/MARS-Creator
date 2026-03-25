@@ -8,7 +8,14 @@
       "Bash(git push:*)",
       "Bash(ls /Users/danillugli/Developer/MARS-Creator/*.xcodeproj)",
       "Bash(ls /Users/danillugli/Developer/MARS-Creator/*.xcworkspace)",
-      "Bash(find /Users/danillugli/Developer/MARS-Creator -maxdepth 2 -name *.xcodeproj -o -name *.xcworkspace)"
+      "Bash(find /Users/danillugli/Developer/MARS-Creator -maxdepth 2 -name *.xcodeproj -o -name *.xcworkspace)",
+      "Bash(sed -i '' 's/AAA29E652C1711AA00CA267C \\\\/\\\\* ScanBuild \\\\*\\\\//AAA29E652C1711AA00CA267C \\\\/* MARS Creator *\\\\//g' \"/Users/danillugli/Developer/MARS-Creator/MARS Creator.xcodeproj/project.pbxproj\")",
+      "Bash(sed -i '' 's/PBXNativeTarget \"\"ScanBuild\"\"/PBXNativeTarget \"\"MARS Creator\"\"/g' \"/Users/danillugli/Developer/MARS-Creator/MARS Creator.xcodeproj/project.pbxproj\")",
+      "Bash(sed -i '' 's/name = ScanBuild;/name = \"\"MARS Creator\"\";/' \"/Users/danillugli/Developer/MARS-Creator/MARS Creator.xcodeproj/project.pbxproj\")",
+      "Bash(sed -i '' 's/productName = ScanBuild;/productName = \"\"MARS Creator\"\";/' \"/Users/danillugli/Developer/MARS-Creator/MARS Creator.xcodeproj/project.pbxproj\")",
+      "mcp__xcode__XcodeListWindows",
+      "mcp__xcode__BuildProject",
+      "mcp__xcode__GetBuildLog"
     ]
   }
 }

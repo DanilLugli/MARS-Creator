@@ -88,7 +88,6 @@ struct RoomConnectionsTabView: View {
             Button("Yes, delete", role: .destructive) {
                 if let connection = selectedConnection {
                    
-                    let buildingModel = BuildingModel.getInstance()
                     room.deleteConnection(from: room, connectionName: connection.name, within: building)
                     showConnectionDeletedToast = true
                 }

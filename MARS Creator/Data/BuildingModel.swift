@@ -101,7 +101,7 @@ class BuildingModel: ObservableObject {
                     let sceneObjects: [SCNNode] = []
                     let scene: SCNScene? = nil
 
-                    var associationMatrix: [String : RoomPositionMatrix]?
+                    let associationMatrix: [String : RoomPositionMatrix]? = nil
                     let planimetry: SCNViewContainer = SCNViewContainer()
                     let planimetryRooms: SCNViewMapContainer = SCNViewMapContainer()
                     

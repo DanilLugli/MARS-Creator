@@ -168,9 +168,7 @@ class Building: Encodable, ObservableObject, Hashable {
             room.roomURL = floor.floorURL.appendingPathComponent(BuildingModel.FLOOR_ROOMS_FOLDER).appendingPathComponent("\(room.name)")
         }
         
-        DispatchQueue.main.async {
-            self.objectWillChange.send()
-        }
+        objectWillChange.send()
 
         do {
             try renameFilesInFloorDirectoriesAndJSON(floor: floor, newName: newName)

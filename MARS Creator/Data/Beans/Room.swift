@@ -159,7 +159,7 @@ class Room: NamedURL, Encodable, Identifiable, ObservableObject, Equatable, Hash
     
     private static func loadColor(for roomName: String) -> UIColor? {
         guard let data = UserDefaults.standard.data(forKey: "RoomColor_\(roomName)"),
-              let color = try? NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? UIColor else {
+              let color = try? NSKeyedUnarchiver.unarchivedObject(ofClass: UIColor.self, from: data) else {
             return nil
         }
         print("Color loaded for room \(roomName)")

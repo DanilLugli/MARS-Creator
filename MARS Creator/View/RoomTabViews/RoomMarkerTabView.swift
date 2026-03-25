@@ -297,10 +297,6 @@ struct MarkerDetailView: View {
         let referenceMarkerURL = room.roomURL.appendingPathComponent("ReferenceMarker")
 
         let oldNameWithoutExtension = URL(fileURLWithPath: oldName).deletingPathExtension().lastPathComponent
-        let newNameWithoutExtension = URL(fileURLWithPath: newName).deletingPathExtension().lastPathComponent
-
-        let fileMarkerDataURL = referenceMarkerURL.appendingPathComponent("Marker Data.json")
-        
         let directoryURL = referenceMarkerURL
         let fileNameWithoutExtension = oldNameWithoutExtension
         var exteImage = ""

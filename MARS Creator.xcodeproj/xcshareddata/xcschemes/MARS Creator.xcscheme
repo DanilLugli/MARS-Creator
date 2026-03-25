@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
-   LastUpgradeVersion = "1540"
+   LastUpgradeVersion = "2630"
    version = "1.7">
    <BuildAction
       parallelizeBuildables = "YES"
@@ -17,7 +17,7 @@
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "AAA29E652C1711AA00CA267C"
                BuildableName = "MARS Creator.app"
-               BlueprintName = "ScanBuild"
+               BlueprintName = "MARS Creator"
                ReferencedContainer = "container:MARS Creator.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -59,7 +59,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "AAA29E652C1711AA00CA267C"
             BuildableName = "MARS Creator.app"
-            BlueprintName = "ScanBuild"
+            BlueprintName = "MARS Creator"
             ReferencedContainer = "container:MARS Creator.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
@@ -93,7 +93,7 @@
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "AAA29E652C1711AA00CA267C"
             BuildableName = "MARS Creator.app"
-            BlueprintName = "ScanBuild"
+            BlueprintName = "MARS Creator"
             ReferencedContainer = "container:MARS Creator.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>

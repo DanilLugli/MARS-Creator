@@ -109,7 +109,7 @@ struct FloorScanningView: View {
                         }
                         .pickerStyle(.segmented)
                         .padding(.horizontal)
-                        .onChange(of: selectedOption) { newValue in
+                        .onChange(of: selectedOption) { _, newValue in
                             if newValue == 1 {
                                 showPreview = false
                             } else if newValue == 2 {

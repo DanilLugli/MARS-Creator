@@ -155,7 +155,7 @@ struct MapControllerView: View {
                     startTimer(action: action)
                 }
         )
-        .onChange(of: isPressed) { newValue in
+        .onChange(of: isPressed) { _, newValue in
             if !newValue {
                 stopTimer()
             }

@@ -177,7 +177,9 @@ struct RoomCaptureViewContainer: UIViewRepresentable {
                                     var seenNodeNames = Set<String>()
                                     
                                     room.scene = try SCNScene(url: usdzURL)
-                                    room.planimetry.loadRoomPlanimetry(room: room, borders: true)
+                                    Task { @MainActor in
+                                        room.planimetry.loadRoomPlanimetry(room: room, borders: true)
+                                    }
                                     room.sceneObjects = room.scene?.rootNode.childNodes(passingTest: { n, _ in
                                         if let nodeName = n.name {
                                             if seenNodeNames.contains(nodeName) {
