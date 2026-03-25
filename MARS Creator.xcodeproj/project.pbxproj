@@ -273,9 +273,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		AAA29E652C1711AA00CA267C /* ScanBuild */ = {
+		AAA29E652C1711AA00CA267C /* MARS Creator */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = AAA29E7A2C1711AC00CA267C /* Build configuration list for PBXNativeTarget "ScanBuild" */;
+			buildConfigurationList = AAA29E7A2C1711AC00CA267C /* Build configuration list for PBXNativeTarget "MARS Creator" */;
 			buildPhases = (
 				AAA29E622C1711AA00CA267C /* Sources */,
 				AAA29E632C1711AA00CA267C /* Frameworks */,
@@ -294,14 +294,14 @@
 				AAEE73812D3960BC007505A3 /* SCNView */,
 				AAEE73822D3A66AF007505A3 /* RoomPositionViews */,
 			);
-			name = ScanBuild;
+			name = "MARS Creator";
 			packageProductDependencies = (
 				AA8E0A5D2C57E4B20097BDCD /* ComplexModule */,
 				AA8E0A5F2C57E4B20097BDCD /* Numerics */,
 				AA8E0A612C57E4B20097BDCD /* RealModule */,
 				AA6AE5592D32DDAE00595591 /* AlertToast */,
 			);
-			productName = ScanBuild;
+			productName = "MARS Creator";
 			productReference = AAA29E662C1711AA00CA267C /* MARS Creator.app */;
 			productType = "com.apple.product-type.application";
 		};
@@ -337,7 +337,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				AAA29E652C1711AA00CA267C /* ScanBuild */,
+				AAA29E652C1711AA00CA267C /* MARS Creator */,
 			);
 		};
 /* End PBXProject section */
@@ -618,7 +618,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		AAA29E7A2C1711AC00CA267C /* Build configuration list for PBXNativeTarget "ScanBuild" */ = {
+		AAA29E7A2C1711AC00CA267C /* Build configuration list for PBXNativeTarget "MARS Creator" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				AAA29E7B2C1711AC00CA267C /* Debug */,
