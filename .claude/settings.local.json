@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc -l /Users/danillugli/Developer/MARS-Creator/MARS Creator/**/*.swift)",
+      "Bash(find \"/Users/danillugli/Developer/MARS-Creator/MARS Creator\" -type f -name \"*.swift\" -exec wc -l {} +)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(ls /Users/danillugli/Developer/MARS-Creator/*.xcodeproj)",
+      "Bash(ls /Users/danillugli/Developer/MARS-Creator/*.xcworkspace)",
+      "Bash(find /Users/danillugli/Developer/MARS-Creator -maxdepth 2 -name *.xcodeproj -o -name *.xcworkspace)"
+    ]
+  }
+}

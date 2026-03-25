@@ -198,7 +198,7 @@
 				AA8E0A5A2C52C69D0097BDCD /* NamedURL.swift */,
 				AA64CC852C495D73005C883B /* Rectangle.swift */,
 				AA64CC872C495F51005C883B /* Coordinates.swift */,
-				AAEE737B2D37FDDF007505A3 /* Connection 2 */,
+				AAEE737B2D37FDDF007505A3 /* Connection */,
 				FC6E17B82DC52D2200176CEE /* NodeCluster.swift */,
 			);
 			path = Beans;
@@ -539,7 +539,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = HJU37MM8HX;
+				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "App will use Camera";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -577,7 +577,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = HJU37MM8HX;
+				DEVELOPMENT_TEAM = "";
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "App will use Camera";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
